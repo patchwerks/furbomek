@@ -1,79 +1,53 @@
-# PROJECT KNOWLEDGE BASE
+# Furb-o-Mek agent guide
 
-**Generated:** 2026-05-16 11:12:02 MDT
-**Commit:** 26676af
-**Branch:** refactor/app.vue
+## Repository purpose
 
-## OVERVIEW
-Current repo reality: browser-only Nuxt 3 app for BIPCI/FurboMek conversation + TTS orchestration, plus a small Express proxy for TTS vendors.
-Not current repo reality: robot control, Furby hardware control, webcam/streaming control, autonomous trading, firmware, or actuator/sensor orchestration.
+This repository is the source of truth for Furb-o-Mek: an offboard Hermes-controlled, autonomous streaming robot built around a modified Freenove-style hexapod and Furby head.
 
-## CURRENT SOURCE OF TRUTH
-- Canonical working tree: `/Users/thales/dev/FurboMek`
-- Nested duplicate snapshot: `/Users/thales/dev/FurboMek/furbomek-code`
-- Dependency authority: `/Users/thales/dev/FurboMek/package.json`, `/Users/thales/dev/FurboMek/package-lock.json`
-- Nuxt config: `/Users/thales/dev/FurboMek/nuxt.config.ts`
-- Runtime starts from root package scripts, not from the nested copy.
+Current reality is much smaller than the target architecture. The checked-in application is a client-only Nuxt 3 conversation/TTS prototype plus a standalone Express TTS proxy. There is no robot firmware, gateway, OBS worker, perception service, social adapter, or deployment stack yet. Read `PLAN.md` before introducing those systems.
 
-## STRUCTURE
+## Current map
+
 ```text
-/Users/thales/dev/FurboMek/
-├── app.vue                  # main UI/runtime orchestration hotspot
-├── src/                     # client-side domain code
-│   ├── chat/                # OpenAI assistant runtime
-│   ├── tts/                 # ElevenLabs + PlayHT streaming logic
-│   ├── types/               # shared TS interfaces
-│   ├── settings.ts          # settings schema/defaults
-│   └── settings.vue         # settings modal UI
-├── server/                  # standalone Express TTS proxy package
-├── public/                  # static assets only
-├── furbomek-code/           # nested duplicate repo snapshot; ignore/quarantine
-└── *.docx / swap / DS_Store # non-source artifacts
+.
+├── app.vue                  # main UI and browser orchestration hotspot
+├── src/
+│   ├── chat/                # current OpenAI Assistants client
+│   ├── tts/                 # ElevenLabs and PlayHT streaming clients
+│   ├── types/               # shared browser-side interfaces
+│   ├── settings.ts          # settings schema and safe blank defaults
+│   └── settings.vue         # settings UI
+├── server/                  # separately launched CommonJS Express proxy
+├── public/                  # static assets
+├── package.json             # root scripts and dependency authority
+├── PLAN.md                  # architecture, evidence, milestones and gates
+└── AGENTS.md                # this file
 ```
 
-## WHERE TO LOOK
-| Task | Location | Notes |
-|---|---|---|
-| Runtime boot | `/Users/thales/dev/FurboMek/package.json` | `start` runs Nuxt + proxy concurrently |
-| Main UI flow | `/Users/thales/dev/FurboMek/app.vue` | 882-line orchestration file |
-| App config | `/Users/thales/dev/FurboMek/nuxt.config.ts` | `ssr: false`, BootstrapVueNext, Nuxt ESLint |
-| Client settings model | `/Users/thales/dev/FurboMek/src/settings.ts` | high-risk defaults / hardcoded keys |
-| Assistant integration | `/Users/thales/dev/FurboMek/src/chat/openai-assistant.ts` | browser OpenAI client |
-| TTS providers | `/Users/thales/dev/FurboMek/src/tts/` | audio streaming + proxy coupling |
-| Proxy backend | `/Users/thales/dev/FurboMek/server/tts-proxy.js` | port `3500`, ElevenLabs/PlayHT forwarding |
-| Type config | `/Users/thales/dev/FurboMek/tsconfig.json` | relaxed strictness despite Nuxt strict flag |
+Directory-specific guidance exists in `server/AGENTS.md`, `src/AGENTS.md`, `src/chat/AGENTS.md`, and `src/tts/AGENTS.md`.
 
-## CODE MAP
-| Symbol/Area | Type | Location | Role |
-|---|---|---|---|
-| `app.vue` | root component | `/Users/thales/dev/FurboMek/app.vue` | owns chat/audio/device lifecycle |
-| `Settings` | type/defaults | `/Users/thales/dev/FurboMek/src/settings.ts` | provider config schema |
-| `OpenAIAssistantChat` | class | `/Users/thales/dev/FurboMek/src/chat/openai-assistant.ts` | OpenAI assistants client |
-| `PlayHtTTS` / `PlayHtTTSStream` | classes | `/Users/thales/dev/FurboMek/src/tts/playht.ts` | PlayHT streaming via local proxy |
-| `ElevenLabsTTS` / `ElevenLabsTTSStream` | classes | `/Users/thales/dev/FurboMek/src/tts/elevenlabs.ts` | ElevenLabs websocket streaming |
-| `tts-proxy.js` | backend entrypoint | `/Users/thales/dev/FurboMek/server/tts-proxy.js` | credential-forwarding proxy |
+## Source of truth and evidence rules
 
-## CONVENTIONS
-- npm is the only evidenced package manager.
-- Root app is ESM (`"type": "module"`), but proxy code is CommonJS.
-- Nuxt config says `typescript.strict: true` and `typeCheck: true`; root `tsconfig.json` then relaxes several strict checks.
-- Source imports commonly use `~/src/...` aliasing.
-- `src/` is domain-oriented, not standard Nuxt pages/components/composables/stores layout.
-- Provider configuration currently persists through local settings/UI rather than a clean env-only flow.
+- Use current code over the generic Nuxt `README.md` when they conflict.
+- Treat hardware identifications in `PLAN.md` as inferred until confirmed in `docs/hardware/` by model/board markings, measurements, or firmware.
+- Preserve the distinction between current implementation and planned architecture.
+- Prefer repo-relative paths in documentation so clones remain portable.
+- Cite primary vendor/project documentation for hardware, protocols, platform APIs, and deployment claims.
+- Do not copy third-party firmware until its license is reviewed. Freenove's upstream FNK0031 resources are non-commercial CC BY-NC-SA 3.0.
 
-## ANTI-PATTERNS (THIS PROJECT)
-- Do not treat `/Users/thales/dev/FurboMek/furbomek-code` as a second active workspace.
-- Do not describe this repo as already containing robot-control or autonomy systems.
-- Do not trust `README.md` as current operational truth; it is still the generic Nuxt starter.
-- Do not copy or expose credentials from `/Users/thales/dev/FurboMek/src/settings.ts` into docs, commits, or logs.
-- Do not assume “strict TypeScript” from Nuxt config means the repo is actually strict.
+## Security and physical-safety invariants
 
-## UNIQUE STYLES
-- `app.vue` contains many local composable-style functions inline instead of distributing them into `composables/`.
-- TTS code mixes browser audio APIs, queueing, fetch/WebSocket flows, and local proxy assumptions.
-- Chat behavior is constrained by the BIPCI prompt defaults in `src/settings.ts`.
+- Never commit credentials, tokens, stream keys, wallet secrets, device identifiers, or private endpoints.
+- Never restore the previously removed default provider credentials in `src/settings.ts`.
+- Never expose arbitrary serial, GPIO, shell, OBS, or wallet access to Hermes.
+- Public/community/on-chain input may request behavior but cannot directly actuate hardware.
+- Every motion command must be bounded by TTL, allowlist, rate, mode, and local watchdog.
+- `STOP` must be local, unconditional, idempotent, and higher priority than all other actions.
+- Do not connect the Furby head controller to MCU pins until voltages and signal behavior are measured.
+- Hardware tests require physical support for the robot and an independent actuator power cut.
 
-## COMMANDS
+## Current commands
+
 ```bash
 npm install
 npm run build
@@ -82,12 +56,39 @@ npm run preview
 npm run start
 ```
 
-Operational notes:
-- `npm install` triggers `postinstall`, which runs `nuxt prepare`, `nuxt build`, and `cd server && npm install`.
-- There is no root `dev`, `lint`, `test`, or `typecheck` script.
-- `server/` proxy listens on `localhost:3500`.
+Notes:
 
-## NOTES
-- `furbomek-code/` is now gitignored as a nested duplicate snapshot.
-- Current tree contains editor/OS artifacts (`.app.vue.swp`, `.DS_Store`) and a binary doc artifact (`ai prompt bipci.docx`).
-- Use code over docs when they conflict.
+- `npm install` invokes `postinstall`, which builds Nuxt and installs `server/` dependencies.
+- There is no root `dev`, `test`, or dedicated `typecheck` script.
+- `npm run start` launches the proxy and Nuxt concurrently.
+- The proxy listens on localhost port 3500.
+
+## Conventions
+
+- npm/package-lock is the evidenced package-manager path.
+- Root code is ESM; `server/tts-proxy.js` is CommonJS.
+- Existing imports commonly use `~/src/...`.
+- The present `src/` layout is domain-oriented rather than standard Nuxt pages/components/composables.
+- New services must not be hidden inside `app.vue`; follow the target monorepo boundaries in `PLAN.md`.
+- Add contract tests before connecting new commands to physical hardware.
+
+## High-risk hotspots
+
+| Area | Why it matters |
+|---|---|
+| `app.vue` | Large browser orchestration hotspot owning chat/audio/device lifecycle |
+| `src/settings.ts` | Provider schema, personality prompt, and historic credential risk |
+| `src/chat/openai-assistant.ts` | Uses `dangerouslyAllowBrowser`; not a privileged backend boundary |
+| `src/tts/` | Browser audio timing and provider-specific streaming behavior |
+| `server/tts-proxy.js` | Forwards auth-bearing headers and returns raw upstream errors |
+
+## Change checklist
+
+Before committing:
+
+1. Confirm the change matches the current milestone in `PLAN.md`.
+2. Check for secrets and generated/binary artifacts.
+3. Run the relevant build/type/test commands that exist for the changed area.
+4. For protocol changes, test simulator and hardware adapters against the same schema.
+5. For hardware changes, document measured voltage, pin, firmware version, and safe failure behavior.
+6. Update the nearest `AGENTS.md` when a directory's role or conventions materially change.

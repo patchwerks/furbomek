@@ -1,47 +1,34 @@
-# SERVER KNOWLEDGE BASE
+# Server agent guide
 
-## OVERVIEW
-`/Users/thales/dev/FurboMek/server` is a tiny but real backend boundary: a standalone Express proxy package used at runtime by the root app.
+## Scope
 
-## STRUCTURE
+`server/` is a standalone CommonJS Express proxy package launched by the root `npm run start`. It is not a Nuxt/Nitro `server/api` directory.
+
+## Files and behavior
+
 | File | Role |
 |---|---|
-| `/Users/thales/dev/FurboMek/server/package.json` | package manifest |
-| `/Users/thales/dev/FurboMek/server/package-lock.json` | server dependency lock |
-| `/Users/thales/dev/FurboMek/server/tsconfig.json` | TS config stub extending Nuxt server tsconfig |
-| `/Users/thales/dev/FurboMek/server/tts-proxy.js` | actual runtime proxy |
+| `server/package.json` | package manifest |
+| `server/package-lock.json` | dependency lock |
+| `server/tsconfig.json` | TypeScript configuration stub |
+| `server/tts-proxy.js` | runtime proxy on port 3500 |
 
-## RUNTIME ROLE
-- Started by root `npm run start`.
-- Listens on port `3500`.
-- Proxies ElevenLabs and PlayHT API requests.
-- Exists because the client app expects localhost proxy endpoints.
+Routes:
 
-## ROUTES
 - `GET /proxy/elevenlabs/voices`
 - `GET /proxy/elevenlabs/subscription`
 - `POST /proxy/playht/stream`
 - `GET /proxy/playht/voices`
 - `GET /proxy/playht/cloned-voices`
 
-## CONVENTIONS
-- CommonJS in a repo whose root package is ESM.
-- Minimal Express + CORS package; no larger framework structure.
-- Request headers are forwarded to upstream providers.
+## Constraints
 
-## ANTI-PATTERNS
-- Do not assume this is a Nuxt/Nitro `server/api` directory. It is a separately launched Express process.
-- Do not move routes into Nuxt server conventions without explicitly redesigning runtime startup.
-- Do not expose auth-bearing headers or raw upstream errors in new logs.
+- Do not silently move this code into Nitro; root startup and client callers depend on the standalone process.
+- Do not log auth-bearing headers, credentials, full request bodies, or unredacted provider responses.
+- The current broad CORS policy, raw upstream errors, hardcoded port, and client-supplied credentials are prototype behavior—not a production security model.
+- Do not add robot, OBS, wallet, or platform privileges to this proxy. New privileged services belong behind the boundaries in `PLAN.md`.
+- Keep root and server lockfiles consistent when dependencies change.
 
-## KNOWN HAZARDS
-- Port `3500` is hardcoded.
-- Upstream error messages are returned directly in failure cases.
-- There is no meaningful server test setup; `npm test` is just the default placeholder.
-- Root install/start scripts are tightly coupled to this folder.
+## Verification
 
-## WHERE TO LOOK
-| Task | Location | Notes |
-|---|---|---|
-| Proxy behavior | `/Users/thales/dev/FurboMek/server/tts-proxy.js` | main backend logic |
-| Runtime coupling | `/Users/thales/dev/FurboMek/package.json` | starts this process concurrently |
+There is no meaningful server test suite yet; `npm test` is a placeholder. At minimum, syntax-check changed JavaScript and exercise affected routes with stubbed upstreams. Add tests before expanding this boundary.

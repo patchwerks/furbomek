@@ -1,39 +1,29 @@
-# TTS KNOWLEDGE BASE
+# TTS agent guide
 
-## OVERVIEW
-`/Users/thales/dev/FurboMek/src/tts` is the most specialized client code: audio playback, streaming, provider auth headers, and local proxy coupling.
+## Scope
 
-## FILE MAP
+`src/tts/` contains the specialized browser audio providers, stream queues, output-device routing, and current proxy coupling.
+
 | File | Role |
 |---|---|
-| `/Users/thales/dev/FurboMek/src/tts/interfaces.ts` | provider/stream contracts |
-| `/Users/thales/dev/FurboMek/src/tts/elevenlabs.ts` | websocket streaming TTS |
-| `/Users/thales/dev/FurboMek/src/tts/playht.ts` | fetch/stream proxy-based TTS |
+| `interfaces.ts` | provider and stream contracts |
+| `elevenlabs.ts` | ElevenLabs WebSocket/audio path |
+| `playht.ts` | PlayHT proxy/fetch stream and queue |
 
-## CONVENTIONS
-- Providers implement `TTSInterface`.
-- Stream classes extend `EventTarget`.
-- Browser `AudioContext` scheduling is handled manually.
-- Audio output switching uses `setSinkId` typing from `/Users/thales/dev/FurboMek/src/types/audio-context.interface.ts`.
+## Preserve when editing
 
-## MUST VERIFY BEFORE EDITING
-- Whether a provider uses direct upstream WebSocket/fetch or the local proxy.
-- Whether changes affect event names: `first`, `last`, `send`, `outOfCredits`.
-- Whether local playback timing depends on queued audio chunk ordering.
+- Provider event semantics, including `first`, `last`, `send`, and `outOfCredits`.
+- Audio chunk order and interruption behavior.
+- `AudioContext` scheduling and output selection via `setSinkId` typing in `src/types/audio-context.interface.ts`.
+- The distinction between the direct WebSocket-heavy ElevenLabs flow and proxy/fetch-heavy PlayHT flow.
 
-## ANTI-PATTERNS
-- Do not remove the localhost proxy assumption casually; root runtime depends on `server/tts-proxy.js` at port `3500`.
-- Do not treat ElevenLabs and PlayHT flows as interchangeable; one is direct websocket-heavy, one is proxy/fetch-heavy.
-- Do not add more debug logging with request/auth detail.
+## Constraints
 
-## KNOWN HAZARDS
-- `playht.ts` uses `any`, non-null assertions, and manual queue/reader state.
-- `elevenlabs.ts` contains browser-side provider key usage and manual PCM decoding.
-- Both implementations assume browser audio APIs and may break outside a client-only runtime.
+- Do not log keys, auth headers, raw credentials, or sensitive provider responses.
+- Do not assume the localhost proxy can be removed without updating root startup and all callers.
+- Do not add actuator calls here. Emit time-aligned speech/viseme/energy events for a separate character-state service.
+- Manual `any`, non-null assertions, and queue state in `playht.ts` are known hazards; add focused tests before refactoring.
 
-## WHERE TO LOOK
-| Task | Location | Notes |
-|---|---|---|
-| Shared provider contract | `/Users/thales/dev/FurboMek/src/tts/interfaces.ts` | start here for API changes |
-| ElevenLabs logic | `/Users/thales/dev/FurboMek/src/tts/elevenlabs.ts` | WebSocket + AudioContext |
-| PlayHT logic | `/Users/thales/dev/FurboMek/src/tts/playht.ts` | localhost proxy + stream queue |
+## Verification
+
+Test first audio, chunk ordering, forced flush, normal end, interruption, provider disconnect, output-device changes, and cleanup. Run `npm run build` after changes.
