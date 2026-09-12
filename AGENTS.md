@@ -19,6 +19,7 @@ Current reality is much smaller than the target architecture. The checked-in app
 │   └── settings.vue         # settings UI
 ├── server/                  # separately launched CommonJS Express proxy
 ├── public/                  # static assets
+├── .schematics/             # photo-derived labelled blueprint sheets
 ├── package.json             # root scripts and dependency authority
 ├── PLAN.md                  # architecture, evidence, milestones and gates
 └── AGENTS.md                # this file
@@ -30,6 +31,7 @@ Directory-specific guidance exists in `server/AGENTS.md`, `src/AGENTS.md`, `src/
 
 - Use current code over the generic Nuxt `README.md` when they conflict.
 - Treat hardware identifications in `PLAN.md` as inferred until confirmed in `docs/hardware/` by model/board markings, measurements, or firmware.
+- Treat `.schematics/` as navigation and planning aids, never as verified fabrication or wiring drawings.
 - Preserve the distinction between current implementation and planned architecture.
 - Prefer repo-relative paths in documentation so clones remain portable.
 - Cite primary vendor/project documentation for hardware, protocols, platform APIs, and deployment claims.
