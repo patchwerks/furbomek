@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1000" role="img" aria-labelledby="title desc">
+  <title id="title">Furb-o-Mek camera integration options blueprint</title>
+  <desc id="desc">Patent-style comparison of the current external OBS camera, proposed reversible forehead or eye camera insert, and later one-to-three-mile video link research, with evidence and feasibility gates.</desc>
+  <defs>
+    <style>
+      .bg{fill:#071116}.panel{fill:#0b171d;stroke:#87a7b2;stroke-width:2}.cyan{stroke:#2de2e6}.white{stroke:#d9edf2}.muted{stroke:#71909b}.dash{stroke-dasharray:10 8}.line{fill:none;stroke-width:2.5}.thin{fill:none;stroke-width:1.5}.node{fill:#0d1c22;stroke:#d9edf2;stroke-width:2}.nodeC{fill:#0b2024;stroke:#2de2e6;stroke-width:2.5}.unknown{fill:#111b20;stroke:#71909b;stroke-width:2;stroke-dasharray:8 6}.txt{fill:#d9edf2;font-family:"Berkeley Mono","Ioskeley Mono",Hermit,"Caskaydia Cove",ui-monospace,SFMono-Regular,Menlo,monospace;font-size:18px}.small{font-size:15px}.tiny{font-size:13px}.head{font-size:30px;font-weight:700;letter-spacing:2px}.sub{font-size:20px;font-weight:700;letter-spacing:1px}.ref{fill:#2de2e6;font-size:15px;font-weight:700}.note{fill:#9bb3bb;font-size:14px}.arrow{marker-end:url(#arrow)}.arrowW{marker-end:url(#arrowW)}
+    </style>
+    <marker id="arrow" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto"><path d="M0,0 L10,4 L0,8 Z" fill="#2de2e6"/></marker>
+    <marker id="arrowW" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto"><path d="M0,0 L10,4 L0,8 Z" fill="#d9edf2"/></marker>
+    <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse"><path d="M40 0H0V40" fill="none" stroke="#16313a" stroke-width="1"/></pattern>
+  </defs>
+  <rect class="bg" width="1600" height="1000"/>
+  <rect width="1600" height="1000" fill="url(#grid)" opacity="0.55"/>
+  <text class="txt head" x="60" y="62">SHEET 06 — VISION INTEGRATION OPTIONS</text>
+  <text class="txt note" x="60" y="91">CURRENT BASELINE • REVERSIBLE INSERT CANDIDATE • 1–3 MILE RESEARCH GATE • 2026-09-21</text>
+
+  <rect class="panel" x="45" y="120" width="465" height="560" rx="6"/>
+  <text class="txt sub" x="70" y="157">A — EXTERNAL OBS CAMERA</text>
+  <text class="txt note" x="70" y="181">CURRENT / NEAR-TERM VISION SOURCE</text>
+  <rect class="node" x="95" y="225" width="250" height="155" rx="8"/>
+  <rect class="line white" x="130" y="260" width="125" height="82" rx="5"/>
+  <circle class="line white" cx="192" cy="301" r="27"/><circle class="line white" cx="192" cy="301" r="10"/>
+  <path class="line white" d="M255 278l55-28v102l-55-28z"/>
+  <text class="txt ref" x="312" y="372">[201]</text>
+  <path class="line white arrowW" d="M220 380V440"/>
+  <rect class="node" x="105" y="440" width="340" height="90" rx="4"/>
+  <text class="txt small" x="132" y="474">OBS / PERCEPTION HOST</text><text class="txt small" x="132" y="501">stream • overlays • recording</text><text class="txt ref" x="407" y="522">[202]</text>
+  <text class="txt small" x="75" y="575">+ no destructive head work</text>
+  <text class="txt small" x="75" y="604">+ easiest cooling / service</text>
+  <text class="txt small" x="75" y="633">− not robot point-of-view</text>
+  <text class="txt small" x="75" y="660">− robot can leave frame</text>
+
+  <rect class="panel" x="535" y="120" width="520" height="560" rx="6"/>
+  <text class="txt sub" x="560" y="157">B — REVERSIBLE HEAD INSERT</text>
+  <text class="txt note" x="560" y="181">PROPOSED • NO CAMERA PROVEN TO FIT</text>
+  <path class="line cyan" d="M650 260q145-105 290 0v180q-145 100-290 0z"/>
+  <path class="line muted" d="M690 305q65-45 115 0q50-45 115 0"/>
+  <ellipse class="line cyan" cx="735" cy="330" rx="46" ry="28"/><ellipse class="line cyan" cx="865" cy="330" rx="46" ry="28"/>
+  <circle class="line cyan" cx="735" cy="330" r="14"/><path class="line muted dash" d="M735 316V255"/>
+  <rect class="nodeC" x="690" y="205" width="90" height="48" rx="3"/><text class="txt tiny" x="700" y="235">FOREHEAD</text><text class="txt ref" x="770" y="250">[211]</text>
+  <text class="txt ref" x="790" y="280">[212]</text>
+  <path class="line muted dash" d="M690 390q115 70 230 0"/><text class="txt tiny" x="714" y="380">eyelid / eye-bar sweep TBD</text>
+  <text class="txt tiny" x="950" y="440">[213]</text>
+  <text class="txt tiny" x="950" y="457">DUAL/STEREO</text>
+  <text class="txt tiny" x="950" y="474">DEFERRED</text>
+  <rect class="unknown" x="585" y="480" width="420" height="145" rx="4"/>
+  <text class="txt small" x="610" y="514">MEASURE BEFORE CUTTING:</text>
+  <text class="txt small" x="610" y="543">aperture • depth • sweep • focus</text>
+  <text class="txt small" x="610" y="572">ribbon path • heat • balance • glare</text>
+  <text class="txt small" x="610" y="601">25 × 24 × 11.5 mm CM3 board ≠ fit</text>
+  <text class="txt ref" x="967" y="618">[214]</text>
+
+  <rect class="panel" x="1080" y="120" width="475" height="560" rx="6"/>
+  <text class="txt sub" x="1105" y="157">C — 1–3 MILE LINK GOAL</text>
+  <text class="txt note" x="1105" y="181">LATER • SITE / REGULATORY FEASIBILITY TBD</text>
+  <path class="line white" d="M1150 410V255M1115 410h70M1128 330h44M1138 255h24"/>
+  <path class="thin muted dash" d="M1162 275q105-85 210 0M1162 315q105-52 210 0M1162 355q105-22 210 0"/>
+  <path class="line white" d="M1385 410V255M1350 410h70M1363 330h44M1373 255h24"/>
+  <text class="txt ref" x="1410" y="430">[221]</text>
+  <rect class="unknown" x="1115" y="465" width="405" height="160" rx="4"/>
+  <text class="txt small" x="1140" y="500">GATE:</text>
+  <text class="txt small" x="1140" y="529">jurisdiction • spectrum / DFS</text>
+  <text class="txt small" x="1140" y="558">LOS / Fresnel • terrain • antennas</text>
+  <text class="txt small" x="1140" y="587">latency / loss • weather • recovery</text>
+  <text class="txt ref" x="1482" y="618">[222]</text>
+
+  <rect class="panel" x="45" y="710" width="1510" height="170" rx="6"/>
+  <text class="txt sub" x="70" y="747">CONTROL / VIDEO SEPARATION</text>
+  <rect class="nodeC" x="75" y="780" width="350" height="65" rx="4"/><text class="txt small" x="100" y="810">ROBOT GATEWAY: TTL + WATCHDOG</text><text class="txt ref" x="387" y="838">[231]</text>
+  <rect class="nodeC" x="555" y="780" width="330" height="65" rx="4"/><text class="txt small" x="580" y="810">LINK LOSS → LOCAL STOP</text><text class="txt ref" x="847" y="838">[233]</text>
+  <path class="line cyan arrow" d="M425 813H555"/>
+  <rect class="node" x="1040" y="780" width="465" height="65" rx="4"/><text class="txt small" x="1065" y="810">VIDEO: TIMESTAMP + DROP STALE (INDEPENDENT)</text><text class="txt ref" x="1467" y="838">[232]</text>
+  <text class="txt note" x="70" y="870">Video loss is never the motion-stop transport; local command expiry remains authoritative.</text>
+
+  <rect class="panel" x="45" y="905" width="1510" height="60" rx="4"/>
+  <text class="txt small" x="70" y="941">LEGEND:</text>
+  <line class="line white" x1="165" y1="935" x2="225" y2="935"/><text class="txt small" x="240" y="941">CURRENT / OBSERVED</text>
+  <line class="line cyan" x1="490" y1="935" x2="550" y2="935"/><text class="txt small" x="565" y="941">PROPOSED SYSTEM</text>
+  <line class="line muted dash" x1="825" y1="935" x2="885" y2="935"/><text class="txt small" x="900" y="941">FIT / FEASIBILITY TBD</text>
+</svg>
