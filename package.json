@@ -4,11 +4,11 @@
   "type": "module",
   "scripts": {
     "build": "nuxt build",
-    "install-packages": "npm install",
+    "install-packages": "npm ci",
     "start": "concurrently \"node server/tts-proxy.js\" \"nuxt start\"",
     "generate": "nuxt generate",
     "preview": "nuxt preview",
-    "postinstall": "nuxt prepare && nuxt build && cd server && npm install"
+    "postinstall": "nuxt prepare && nuxt build && npm ci --prefix server"
   },
   "main": "index.js",
   "dependencies": {
