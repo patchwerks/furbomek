@@ -2,7 +2,7 @@
 
 ## Repository purpose
 
-This repository is the source of truth for Furb-o-Mek: an offboard Hermes-controlled, autonomous streaming robot built around a modified Freenove-style hexapod and Furby head.
+This repository is the source of truth for Furb-o-Mek: an offboard Hermes-controlled, fully autonomous streaming robot built around a modified Freenove-style hexapod and Furby-like head mechanism.
 
 Current reality is much smaller than the target architecture. The checked-in application is a client-only Nuxt 3 conversation/TTS prototype plus a standalone Express TTS proxy. There is no robot firmware, gateway, OBS worker, perception service, social adapter, or deployment stack yet. Read `PLAN.md` before introducing those systems.
 
@@ -20,6 +20,8 @@ Current reality is much smaller than the target architecture. The checked-in app
 ├── server/                  # separately launched CommonJS Express proxy
 ├── public/                  # static assets
 ├── .schematics/             # photo-derived labelled blueprint sheets
+├── docs/research/           # dated source-backed architecture research and pins
+├── FUNDING.md               # public-safe, dated bench-tool baskets and measurement gates
 ├── package.json             # root scripts and dependency authority
 ├── PLAN.md                  # architecture, evidence, milestones and gates
 └── AGENTS.md                # this file
@@ -32,10 +34,33 @@ Directory-specific guidance exists in `server/AGENTS.md`, `src/AGENTS.md`, `src/
 - Use current code over the generic Nuxt `README.md` when they conflict.
 - Treat hardware identifications in `PLAN.md` as inferred until confirmed in `docs/hardware/` by model/board markings, measurements, or firmware.
 - Treat `.schematics/` as navigation and planning aids, never as verified fabrication or wiring drawings.
+- Read `.schematics/README.md` and the paired sheet note before changing a hardware, audio, camera, or control-path claim.
 - Preserve the distinction between current implementation and planned architecture.
 - Prefer repo-relative paths in documentation so clones remain portable.
 - Cite primary vendor/project documentation for hardware, protocols, platform APIs, and deployment claims.
 - Do not copy third-party firmware until its license is reviewed. Freenove's upstream FNK0031 resources are non-commercial CC BY-NC-SA 3.0.
+- Use explicit evidence labels: **observed**, **measured**, **reference/inferred**, **patent-described**, **proposed**, or **TBD**. Do not promote an inferred chipset, Furby generation, speaker rating, camera fit, or radio range to fact.
+- Keep generation-specific evidence separate: a 1998 patent, 2005 mechanism, 2012 teardown, or Connect teardown applies only to the generation it documents.
+- Funding prices require access dates, price/stock/tax/shipping caveats, and a PII scan.
+
+## Autonomous runtime topology
+
+- Normal operation is untethered from both the handheld movement remote and the yellow facial-control box. Neither retains external cable or runtime authority.
+- No person operates a legacy button or speed knob during runtime. Legacy inputs may be characterized and then emulated electrically.
+- The yellow box may be removed after reverse-engineering. A useful PCB may remain only if mounted inside the robot and driven through a measured, protected interface.
+- “Isolated microcontroller gateway” means a **physical robot-mounted** MCU, robot-side radio, independent watchdog, power conditioning, and isolation/level/driver board.
+- The robot-mounted gateway is distinct from the offboard Linux embodiment-gateway service. The offboard service applies semantic policy; the robot-mounted MCU owns final TTL expiry, interlocks, and stop behavior.
+- The current external OBS camera is the near-term vision source. Embedded eye/forehead cameras and 1–3 mile links are gated proposals, not established capabilities.
+- Factory-speaker reuse is TBD until its label, conductors, DC resistance/impedance, rating, and drive topology are measured.
+
+## Runtime UI, avatar, and OS boundaries
+
+- Read `docs/research/runtime-ui-stack-2026-09-21.md` before changing A2UI, AIRI/avatar, OBS, OpenGolem/swarm, Hermes-adapter, or Omarchy decisions.
+- Hermes is the sole character/planning authority. A project-owned broker owns character/HUD state; browser sources and avatar renderers never receive Hermes keys or tools.
+- A2UI is a constrained presentation format, not an OBS controller or action surface. Keep protocol and package versions as separate pins and default to a read-only reduced catalog.
+- Avatar implementations are adapters behind one project contract. AIRI is a renderer consumer in this architecture, not a second agent runtime.
+- Omarchy is a full Arch/Hyprland OS. Run it as a full VM or bare-metal profile, never describe it as an Ubuntu container layer.
+- OpenGolem-style workers are advisory task-plane producers only. Exclude anti-detection, account-concealment/purchasing, proxy-rotation, synthetic-human timing, and engagement-manipulation material.
 
 ## Security and physical-safety invariants
 
@@ -45,8 +70,11 @@ Directory-specific guidance exists in `server/AGENTS.md`, `src/AGENTS.md`, `src/
 - Public/community/on-chain input may request behavior but cannot directly actuate hardware.
 - Every motion command must be bounded by TTL, allowlist, rate, mode, and local watchdog.
 - `STOP` must be local, unconditional, idempotent, and higher priority than all other actions.
+- Radio/process/interface/heartbeat loss must stop gait and release both head directions locally.
+- Head forward/reverse commands require electrical and firmware interlocks; boot/reset defaults are inactive.
 - Do not connect the Furby head controller to MCU pins until voltages and signal behavior are measured.
 - Hardware tests require physical support for the robot and an independent actuator power cut.
+- Never select final head driver, fuse, battery, speaker amplifier, or camera mount before the dependent measurements are recorded.
 
 ## Current commands
 
@@ -94,3 +122,4 @@ Before committing:
 4. For protocol changes, test simulator and hardware adapters against the same schema.
 5. For hardware changes, document measured voltage, pin, firmware version, and safe failure behavior.
 6. Update the nearest `AGENTS.md` when a directory's role or conventions materially change.
+7. For documentation changes, validate relative links and SVG XML/rendering, then scan staged public text for secrets and PII.
