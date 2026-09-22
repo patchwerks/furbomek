@@ -5,11 +5,12 @@ Status: planning evidence; implementation still requires the acceptance tests be
 
 ## Decision summary
 
-1. **Hermes stays the only character/planning authority.** A project-owned adapter translates Hermes run/session lifecycle into a versioned character/HUD event broker. Renderers never receive the Hermes API key or tool surface.
-2. **A2UI v0.9.1 is an optional HUD content protocol.** The overlay host owns layout, animation, security, redaction, transport, and OBS integration. The first implementation uses the official Lit renderer in a separate sidecar because this repository is Vue/Nuxt and A2UI has no official Vue renderer.
-3. **AIRI is evaluated as a renderer consumer, not adopted as a second agent runtime.** AIRI Stage Web is the preferred first spike when no Inochi2D rig is ready. Inochi Session wins when a usable project-owned `.inp` model already exists. Static PNG/browser output is the mandatory fallback.
-4. **Omarchy is a full Arch/Hyprland operating system.** It cannot be layered into an Ubuntu container as an OS. The desired path is a full Omarchy guest on a minimal Ubuntu/Proxmox KVM host; Ubuntu remains the recovery guest until Omarchy passes the exact GPU/media soak.
-5. **OpenGolem ideas stay in the advisory task plane.** Workers may submit typed proposals to Hermes. They receive no robot, OBS, wallet, social-posting, firmware, or safety-policy authority.
+1. **Hermes stays the only top-level character/planning authority.** A project-owned adapter translates Hermes run/session lifecycle into a versioned character/HUD event broker. Renderers never receive the Hermes API key or tool surface.
+2. **jabberWERK is the canonical speech/media plane.** Furb-o-Mek and AIRI use one STT/TTS/STS/voice-profile/DSP/audio-clock system rather than parallel provider stacks; see [`voice-and-speech.md`](voice-and-speech.md).
+3. **A2UI v0.9.1 is an optional HUD content protocol.** The overlay host owns layout, animation, security, redaction, transport, and OBS integration. The first implementation uses the official Lit renderer in a separate sidecar because this repository is Vue/Nuxt and A2UI has no official Vue renderer.
+4. **AIRI is a renderer by default, a direct capability service when possible, and an A2A specialist only when its own cognitive loop is required.** This preserves Minecraft/Factorio/plugin work without granting AIRI peer authority; see [`agent-interoperability-a2a.md`](agent-interoperability-a2a.md).
+5. **Omarchy is a full Arch/Hyprland operating system.** It cannot be layered into an Ubuntu container as an OS. The desired path is a full Omarchy guest on a minimal Ubuntu/Proxmox KVM host; Ubuntu remains the recovery guest until Omarchy passes the exact GPU/media soak.
+6. **OpenGolem ideas stay in the advisory task plane.** Workers may submit typed proposals to Hermes. They receive no robot, OBS, wallet, social-posting, firmware, or safety-policy authority.
 
 ## Evidence pins
 
@@ -67,7 +68,7 @@ It must not expose hidden chain-of-thought, prompts, cookies, private form field
 
 Hermes exposes authenticated HTTP/OpenAI-compatible, runs/SSE, TUI JSON-RPC, and in-process integration surfaces. These surfaces carry sessions, lifecycle and tool progress, not a stable character animation protocol ([programmatic integration](https://hermes-agent.nousresearch.com/docs/developer-guide/programmatic-integration)). The API server also carries the agent's full tool authority and explicitly requires bearer authentication even on loopback ([API server](https://hermes-agent.nousresearch.com/docs/user-guide/features/api-server)).
 
-Therefore the adapter, not the browser, holds the Hermes key. It emits only allowlisted public activity and character events. The broker owns order, dedupe, TTL, cancel/revoke, snapshots, reconciliation, backpressure and consumer health. TTS/PCM owns viseme timing.
+Therefore the adapter, not the browser, holds the Hermes key. It emits only allowlisted public activity and character events. The broker owns order, dedupe, TTL, cancel/revoke, snapshots, reconciliation, backpressure and consumer health. jabberWERK's canonical PCM/timeline owns speech and viseme timing.
 
 ## AIRI and renderer alternatives
 
@@ -77,7 +78,9 @@ AIRI has reusable Stage, Live2D, audio/lip-sync, server-runtime and SDK packages
 Hermes -> project adapter -> character broker -> AIRI Stage adapter -> OBS
 ```
 
-Hermes acts as an external producer. AIRI Stage remains the consumer. AIRI issue [#2305](https://github.com/moeru-ai/airi/issues/2305) documents that SDK messages sent before transport state `ready` can return false/be dropped, and that `server-sdk` does not expose public consumer registration. The adapter must wait for `ready`, inspect the send result, retry with bounded backoff, reconnect/reannounce, and verify visible output.
+For rendering, Hermes acts as an external producer and AIRI Stage remains the consumer. AIRI issue [#2305](https://github.com/moeru-ai/airi/issues/2305) documents that SDK messages sent before transport state `ready` can return false/be dropped, and that `server-sdk` does not expose public consumer registration. The adapter must wait for `ready`, inspect the send result, retry with bounded backoff, reconnect/reannounce, and verify visible output.
+
+AIRI's non-rendering features are not discarded. Existing Minecraft/Factorio and plugin/bridge capabilities should first be exposed as narrow services/tools called by Hermes. A separate AIRI agent may be delegated a bounded task through Hermes-native A2A only where its own cognitive loop is essential. A2A remains a task/status/artifact plane; audio stays in jabberWERK and visual state stays in the character broker.
 
 The AIRI code license does not automatically license bundled models or Cubism Core. Live2D identifies Cubism Core as proprietary ([official notice](https://github.com/Live2D/CubismNativeSamples/blob/develop/Core/LICENSE.md)); AIRI issue [#2206](https://github.com/moeru-ai/airi/issues/2206) also shows bundled and imported model paths behaving differently. Production uses a project-owned asset with recorded rights and checksum.
 
@@ -144,6 +147,7 @@ Superseded or rejected concepts:
 - Exact Omen GPU/mux/IOMMU groups, driver, capture/audio devices and available VRAM.
 - Exact UM773 RAM/storage/NICs and intended host OS.
 - Existing avatar files and their streaming/commercial/redistribution rights.
+- Exact jabberWERK release artifacts and current live qualification state on Brodex.
 - Current OBS scenes, PipeWire devices and capture path.
 - Inochi Session's best external-control seam for this project.
 - AIRI `input:text` payload details and issue #2305 behavior on the pinned build, verified by a live test.
