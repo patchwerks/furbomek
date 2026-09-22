@@ -100,7 +100,7 @@ The current external OBS camera is the near-term vision source. No camera has be
 
 The desired 1–3 mile link remains a future site-tested goal, not a present capability. It requires line-of-sight/Fresnel and link-budget work, antenna-height and terrain analysis, jurisdiction-specific spectrum/DFS review, weather/interference tests, and measured video/control latency and loss. Video and control remain logically independent; video loss is never the local motion-stop mechanism. Relevant technical references include [RFC 6184](https://www.rfc-editor.org/rfc/rfc6184), [RFC 8834](https://www.rfc-editor.org/rfc/rfc8834), and US [47 CFR Part 15 Subpart E](https://www.ecfr.gov/current/title-47/chapter-I/subchapter-A/part-15/subpart-E).
 
-The public-safe bench-tool baskets and measurement dependencies are recorded in [`FUNDING.md`](FUNDING.md); all schematic evidence/status notes are indexed in [`.schematics/README.md`](.schematics/README.md). Current A2UI, AIRI, avatar, OBS, OpenGolem, Hermes, and Omarchy evidence/pins are consolidated in [`docs/research/runtime-ui-stack-2026-09-21.md`](docs/research/runtime-ui-stack-2026-09-21.md).
+The public-safe bench-tool baskets and measurement dependencies are recorded in [`FUNDING.md`](FUNDING.md); all schematic evidence/status notes are indexed in [`.schematics/README.md`](.schematics/README.md). Topic-organized evidence and source inventories begin at [`docs/research/README.md`](docs/research/README.md); the first runtime decision pass remains in [`docs/research/runtime-ui-stack-2026-09-21.md`](docs/research/runtime-ui-stack-2026-09-21.md). A host Hermes starts with [`HERMES.md`](HERMES.md) and [`docs/operations/hermes-one-shot.md`](docs/operations/hermes-one-shot.md).
 
 ## 3. Chosen product architecture
 
@@ -125,10 +125,13 @@ furbomek/
 │   ├── embodiment-gateway/   # only network path to robot actions
 │   ├── perception/           # detection, tracking, segmentation
 │   ├── stream-director/      # OBS scenes, captions, failover
-│   ├── conversation/         # STT, Hermes session, TTS coordination
+│   ├── conversation/         # Hermes sessions + jabberWERK speech bridge
 │   ├── character-broker/     # authoritative media/presence event bus
 │   ├── hermes-adapter/       # Hermes lifecycle -> safe project events
 │   └── community/            # Twitch/Kick/Discord/Telegram adapters
+├── integrations/
+│   ├── jabberwerk/           # thin client/config; speech implementation stays upstream
+│   └── airi/                 # renderer and scoped capability/A2A adapters
 ├── packages/
 │   ├── protocol/             # versioned commands/events and schemas
 │   ├── safety-policy/        # limits independent of model prompts
@@ -149,6 +152,7 @@ furbomek/
 │   ├── research/
 │   └── adr/
 ├── AGENTS.md
+├── HERMES.md                # clone-to-running agent entrypoint
 └── PLAN.md
 ```
 
@@ -163,7 +167,8 @@ flowchart LR
   Audience[Audience and communities] --> Ingest[Moderated event ingestion]
   Camera[Camera and microphones] --> Media[Media pipeline]
   Media --> Vision[Detection, tracking, segmentation]
-  Media --> STT[Speech-to-text]
+  Media --> Voice[jabberWERK speech broker]
+  Voice --> STT[Accepted final transcript]
   Ingest --> Hermes[Hermes planner]
   STT --> Hermes
   Swarm[Optional OpenGolem-style advisory workers] -->|typed proposals only| Hermes
@@ -178,9 +183,10 @@ flowchart LR
   MCU --> Legs[18 leg servos]
   MCU --> HeadIF[Internal isolation / level / driver interface]
   HeadIF --> Head[Internal head PCB or measured replacement driver]
-  Director --> TTS[TTS + timestamped PCM]
-  TTS --> Character
-  TTS --> Audio[Program audio]
+  Hermes -->|speech request| Voice
+  Voice --> PCM[Timestamped PCM + speech/viseme events]
+  PCM --> Character
+  PCM --> Audio[Program audio]
   Character --> HUD[Constrained A2UI HUD]
   Character --> Avatar[Swappable avatar renderer]
   Character --> Face[Physical-face adapter]
@@ -261,7 +267,33 @@ Rules:
 
 Canonical character states are `idle`, `listening`, `thinking`, `speaking`, `interrupted`, `error`, and `offline`. Renderers may add style, but they may not invent operational state.
 
-### 4.4 Command lifecycle and fail-safe behavior
+### 4.4 Canonical speech and audio plane: jabberWERK
+
+Use [`patchwerks/jabberwerk`](https://github.com/patchwerks/jabberwerk) as the canonical speech/media control plane. Furb-o-Mek must not grow a second set of engine-specific STT/TTS implementations. The Furb-o-Mek integration is a thin authenticated client plus configuration; engine routing, profiles, cloning/conversion, DSP, locality, semantic acceptance, and speech capability negotiation remain in jabberWERK.
+
+| Concern | Owner | Boundary |
+|---|---|---|
+| STT, TTS, streaming speech, duplex STS/S2S | jabberWERK broker and isolated engine packs | Only capabilities declared and empirically qualified may be selected |
+| Voice identity, cloning/conversion, DSP, pronunciation | jabberWERK profiles/graphs | Project-owned profile IDs; raw private voice assets never enter this repository |
+| VAD, endpointing, wake/address and barge-in media signals | jabberWERK media graph plus Hermes dispatch policy | Rejected/background speech never enters Hermes history |
+| Conversation, tools, approvals, memory, delegation | Hermes | jabberWERK is not a second agent or tool authority |
+| Avatar lip-sync and physical-face timing | Character broker consuming jabberWERK PCM/timeline events | Renderers may visualize timing but do not synthesize an independent voice |
+| OBS program audio and local robot playback | Stream director/media sinks | Both consume the same timestamp authority and cancellation events |
+
+The evaluated Jabberwerk snapshot is development release `0.4.0` at private-repository commit `5d175c7389577785f477c990499e2ace4e91771a`. Source inspection confirms a host-neutral broker, public Hermes batch TTS/STT providers, loopback authentication, engine/profile contracts, semantic audio acceptance, and an atomic deploy/rollback package. It is **not yet installed or production-qualified**. Its own roadmap limits v1.0 to Linux/Hermes batch TTS/STT; public streaming TTS, streaming STT, realtime wake/barge-in, and duplex S2S remain later work until generic Hermes seams and live evidence exist.
+
+Adoption rules:
+
+- Use the public `jabberwerk` Hermes providers for the first batch vertical slice; do not import Hermes private streaming registries into Furb-o-Mek.
+- Keep each engine in its independently locked environment. AIRI, Furb-o-Mek, and Hermes select logical capabilities/profiles through the broker rather than importing model SDKs.
+- Route AIRI speech through jabberWERK by default. AIRI may consume PCM, visemes, speech-state, emotion, and cancellation events; its own STT/TTS providers stay disabled unless intentionally wrapped as jabberWERK engine adapters and passed through the same qualification suite.
+- A local engine failure fails locally. Cloud fallback, unrelated voices, or new license terms require an explicitly enabled route; no silent network egress or identity substitution.
+- Do not call speech “working” after a health check or generated file. Require audible-sink evidence, timing metrics, interruption behavior, and rollback as defined by Jabberwerk's live-testing tiers.
+- Furb-o-Mek pins the Jabberwerk release/commit and compatibility matrix; it does not copy the private upstream implementation into this monorepo.
+
+Current compatibility consequence: tonight's low-risk path is **batch** Hermes → jabberWERK TTS → OBS/avatar/known speaker. Streaming and duplex are feature-gated until upstream/public APIs and live tests prove them.
+
+### 4.5 Command lifecycle and fail-safe behavior
 
 ```mermaid
 sequenceDiagram
@@ -531,7 +563,21 @@ Renderer decision:
 | **VTube Studio** | Mature Live2D tool | Mac/Windows fallback only; Linux is not officially supported ([official FAQ](https://github.com/DenchiSoft/VTubeStudio/wiki/FAQ/d5e37702314dd984680d2bfde2834e293f1e079e)) |
 | **Static project-owned PNG/browser scene** | Minimal character presence + captions + Hermes audio | Mandatory fallback if no model-ready renderer works by Hour 2 |
 
-AIRI is promising but not a plug-and-play silver bullet. It is a full AI-character monorepo with its own agent/provider/audio/memory/plugin surfaces, so embedding the complete runtime would duplicate Hermes authority. Pin the evaluation to AIRI `v0.12.0-beta.5`, commit `2c1e223c8dd813d7c74a324d7fd7399fbf47e8bf` ([official releases](https://github.com/moeru-ai/airi/releases/tag/v0.12.0-beta.5)). The Hermes adapter is an **external producer**; AIRI Stage remains the consumer. It waits for transport state `ready`, sends only the documented producer event needed for the spike (`input:text` first), treats a false `send()` result as failure, retries with bounded backoff, and verifies observable Stage output. AIRI issue [#2305](https://github.com/moeru-ai/airi/issues/2305) documents messages sent before `ready` being dropped and confirms the server SDK does not expose a public consumer-registration API.
+A renderer-only default does **not** mean discarding AIRI's game, Discord, memory, or plugin work. It means separating capabilities from ownership so Hermes remains the one character/planning authority.
+
+| AIRI integration mode | Use | Authority | Decision |
+|---|---|---|---|
+| Renderer consumer | Live2D/VRM/MMD/Tachie stage, expressions, motions, lip-sync | Receives character/audio events only | Default and first milestone |
+| Capability service | Minecraft/Mineflayer, Factorio/RCON/CV, editor/device bridges, reusable plugins | Hermes invokes narrow named capabilities through MCP/HTTP or a project adapter | Preferred way to retain AIRI features without another brain |
+| A2A specialist agent | A capability genuinely depends on AIRI's own cognitive loop, memory, or multi-turn task state | Hermes delegates a bounded task and accepts/rejects the result | Experimental, isolated, and used only when extraction is materially worse |
+
+AIRI's public materials show separate Minecraft and Factorio services/agents rather than one inseparable renderer feature ([Minecraft integration](https://github.com/moeru-ai/airi/blob/main/integrations/minecraft/README.md), [AIRI Factorio](https://github.com/moeru-ai/airi-factorio)). First attempt to expose those existing service capabilities directly to Hermes. Do not rewrite working Mineflayer, RCON, CV, dataset, or game-control code merely to make it “native” to Furb-o-Mek.
+
+Use A2A only across a real agent boundary. Pin A2A protocol `v1.0.1` and use Hermes' native bidirectional A2A plugin, which supports Agent Cards, task send/stream/get/list/cancel/subscribe, push notifications, per-peer credentials, rate limits, redaction, audit, and anti-loop limits ([A2A v1.0.1 release](https://github.com/a2aproject/A2A/releases/tag/v1.0.1), [Hermes A2A documentation](https://hermes-agent.nousresearch.com/docs/user-guide/messaging/a2a)). A delegated AIRI agent gets a distinct context/task ID, capability allowlist, budget/deadline, cancellability, and sandboxed game account/environment. It receives no robot, wallet, social-posting, OBS-control, firmware, or general Hermes tool credentials.
+
+A2A carries task messages, status, and artifacts—not raw realtime PCM or per-frame animation. jabberWERK remains the speech/media plane, and the character broker remains the presentation-state plane. This avoids forcing low-latency media through a task protocol while still preserving AIRI's higher-level agent features.
+
+AIRI is promising but not a plug-and-play silver bullet. It is a full AI-character monorepo with its own agent/provider/audio/memory/plugin surfaces, so embedding the complete runtime without boundaries would duplicate Hermes authority. Pin the evaluation to AIRI `v0.12.0-beta.5`, commit `2c1e223c8dd813d7c74a324d7fd7399fbf47e8bf` ([official releases](https://github.com/moeru-ai/airi/releases/tag/v0.12.0-beta.5)). The renderer adapter is an **external producer**; AIRI Stage remains the consumer. It waits for transport state `ready`, sends only the documented producer event needed for the spike (`input:text` first), treats a false `send()` result as failure, retries with bounded backoff, and verifies observable Stage output. AIRI issue [#2305](https://github.com/moeru-ai/airi/issues/2305) documents messages sent before `ready` being dropped and confirms the server SDK does not expose a public consumer-registration API.
 
 Do not install an in-process Hermes avatar plugin for the production path. Projects that replace Hermes entrypoints, poll ad hoc state files, load runtime code/assets from CDNs, or execute with the agent's full privileges may be explored only in a secret-free disposable sandbox. The project-owned broker/adapter is the durable seam.
 
@@ -674,7 +720,8 @@ Acceptance:
 Deliverables:
 
 - move provider credentials and assistant calls server-side;
-- stable STT/Hermes/TTS session service;
+- pinned jabberWERK broker/client integration and public Hermes batch TTS/STT providers;
+- stable microphone/jabberWERK/Hermes/jabberWERK/PCM session path with explicit locality/fallback policy;
 - authenticated Hermes lifecycle adapter and project-owned character broker;
 - versioned event envelope with ordering, dedupe, cancellation, TTL, snapshot/reconciliation, bounded queues, and stale-state disposal;
 - character-state/viseme protocol driven by the TTS/PCM clock;
@@ -684,6 +731,10 @@ Deliverables:
 Acceptance:
 
 - no model/provider key reaches browser storage;
+- no AIRI or Furb-o-Mek process imports speech-engine SDKs or selects an engine outside jabberWERK;
+- the same logical voice profile and timeline feed OBS, avatar, and physical-face consumers;
+- generated, written, and audibly confirmed speech are measured as distinct states;
+- batch rollback restores the exact prior Hermes provider/configuration;
 - speech continues or fails silently without leaving motors active;
 - end-to-end response latency and interruption behavior meet defined budgets;
 - physical and avatar mouths consume the same timing events;
@@ -700,6 +751,7 @@ Deliverables:
 - reduced-catalog A2UI/Lit HUD, fixed slot/effect manifest, redaction policy, CSP, snapshot/delta feed, and static non-A2UI fallback;
 - stream health probes, restart policy, local recording, and reconnect logic;
 - swappable avatar-host contract plus AIRI Stage Web or Inochi first adapter;
+- AIRI renderer adapter plus a separately scoped capability-service adapter for reusable game/plugin features;
 - project-owned licensed character asset and static fallback scene;
 - charge/fault failover state machine.
 
@@ -712,6 +764,7 @@ Acceptance:
 - browser source reload/scene switch converges from snapshot with no stale or replayed transient effect;
 - hostile HUD fixtures cannot execute code, fetch disallowed media, spoof a control, or exhaust the renderer;
 - renderer kill leaves Hermes healthy and activates the static fallback within the measured threshold.
+- disabling AIRI does not disable Hermes, jabberWERK speech, OBS, or static avatar fallback.
 
 ### Phase 6 — Perception and graphical explanations
 
@@ -750,6 +803,8 @@ Start only after the single-Hermes vertical slice, broker, stream director, and 
 Deliverables:
 
 - concrete OpenGolem-style task-plane specification or identified implementation;
+- AIRI capability inventory classifying each feature as renderer, direct capability service, or A2A specialist;
+- pinned A2A v1.0.1 Hermes↔AIRI interoperability fixture only for capabilities that require an AIRI agent loop;
 - typed proposal schema, per-agent identities/credentials, capability allowlists, recursion/concurrency/cost limits, replay protection, idempotency, trace IDs, and circuit breakers;
 - adversarial public-input and compromised-worker tests;
 - explicit prohibition on direct robot, OBS, wallet, social-posting, and firmware authority.
@@ -758,6 +813,7 @@ Acceptance:
 
 - spoofed, replayed, stale, over-budget, and over-authority proposals are rejected and audited;
 - killing or isolating any worker does not interrupt Hermes character state or the stream;
+- AIRI game tasks can be cancelled, rate-limited, and contained without granting AIRI general Hermes or robot authority;
 - a worker cannot turn a proposal into an external side effect without Hermes plus the relevant deterministic policy service;
 - no anti-detection, account concealment/purchasing, proxy rotation, synthetic-human timing, or engagement-manipulation feature enters the product.
 
@@ -769,6 +825,9 @@ Deliverables:
 - KVM/libvirt deployment with pinned Omarchy full-guest and Ubuntu recovery profiles plus optional VFIO;
 - bare-metal Ubuntu installer/provisioner;
 - optional bare-metal Omarchy profile only after its ADR and soak gate;
+- root `HERMES.md` plus `docs/operations/hermes-one-shot.md` as the exact clone-to-running entrypoint;
+- one idempotent bootstrap/doctor command that selects a declared profile, verifies pins/hardware/secrets, builds immutable artifacts, runs tests, stages configuration, and reports every blocked gate;
+- a separate explicit activation transaction for credentials, live services, OBS output, and robot actuation;
 - backup/restore, upgrade/rollback, monitoring, and incident runbooks.
 
 Acceptance:
@@ -777,6 +836,8 @@ Acceptance:
 - rollback restores the previous working firmware and services;
 - VM escape surface is minimized and host files are not mounted into the agent guest;
 - Omarchy ISO/source/package pins and `cidata` secret handling are documented;
+- a clean host Hermes can clone the repository, follow `HERMES.md`, and reach the maximum safe milestone without inventing commands, paths, versions, or permissions;
+- rerunning bootstrap is idempotent and rollback restores the prior complete compatibility set;
 - Omarchy VM and every bare-metal profile pass the same functional and safety contract tests.
 
 ## 9. Immediate execution order
@@ -787,11 +848,11 @@ The tonight goal is deliberately smaller than the production architecture: prove
 
 | Hour | Work | Exit condition |
 |---|---|---|
-| 0–1 | Inventory existing `.inp`, VRM, Live2D, PNG, audio and OBS assets; confirm PipeWire/window/browser capture | One legally usable project asset and one capture method selected |
+| 0–1 | Inventory existing `.inp`, VRM, Live2D, PNG, audio and OBS assets; confirm PipeWire/window/browser capture; pin jabberWERK `0.4.0` source/artifacts | One legally usable project asset, one capture method, and one non-live Jabberwerk configuration selected |
 | 1–2 | Launch Inochi Session if a model-ready `.inp` exists; otherwise launch pinned AIRI Stage Web; if neither is model-ready, use static PNG/browser fallback | Transparent or keyed character is visible in a private OBS scene for 10 minutes |
 | 2–3 | Stand up the minimal character broker and replay fixture events: `idle`, `thinking`, `speaking`, `interrupted`, `error` | Deterministic visible state change in under 1 second; stale/duplicate sequence rejected |
-| 3–4 | Connect the narrow Hermes run/session adapter; no renderer receives the Hermes key | A real Hermes run changes the avatar and returns to idle |
-| 4–5 | Route TTS/PCM to OBS and drive mouth energy or available visemes from the audio clock | Recorded sample has audible speech, speech start/end, and barge-in cancellation |
+| 3–4 | Connect the narrow Hermes run/session adapter and isolated jabberWERK batch provider; no renderer receives Hermes or broker secrets | A real Hermes run changes the avatar and requests speech through jabberWERK |
+| 4–5 | Route jabberWERK output PCM to OBS and drive mouth energy or available visemes from the shared audio clock | Recorded sample has audibly confirmed speech, speech start/end, and cancellation behavior |
 | 5–6 | Kill/restart renderer, broker, and Hermes independently; switch scenes and reload source | Thirty-minute private soak; reconnect snapshot converges; static fallback appears in under 2 minutes |
 
 Tonight's artifacts:
@@ -803,6 +864,8 @@ Tonight's artifacts:
 - failure/reconnect checklist with pass/fail results.
 
 Stop rather than hiding a failure if the renderer requires an unlicensed asset, CDN runtime, in-process Hermes patch, broad CORS, disabled authentication, or agent/robot credentials. A static project-owned avatar plus Hermes audio is a successful tracer bullet; it preserves the correct seam and can be replaced later.
+
+Do not enable a second AIRI STT/TTS provider for the tracer bullet. If the current Jabberwerk snapshot cannot pass its isolated batch provider/broker checks, record the blocker and use an existing known audio file only to verify rendering/capture; do not mislabel that fallback as Hermes voice integration or activate an unverified live provider.
 
 The first HUD proof may be a fixed local HTML/Lit overlay fed by fixture events. A2UI stays feature-flagged until the reduced catalog and hostile-input fixtures exist. The first Omarchy action is only to create the VM/ADR branch after host inventory; it is not on tonight's critical path.
 
@@ -816,11 +879,11 @@ The first HUD proof may be a fixed local HTML/Lit overlay fed by fixture events.
 6. Measure the red/green head-button voltages and continuity before designing the interface.
 7. Implement the protocol simulator, then the offboard gateway service, robot-mounted MCU/radio gateway, and Hermes MCP wrapper.
 8. Add head control only after the leg-control watchdog and contract tests pass; then internalize or replace the head PCB and remove the external yellow deck/cable/controls from runtime.
-9. Establish one TTS/OBS/local-playback timing path and use the existing external camera before embedded-camera work.
+9. Pin and qualify jabberWERK as the sole STT/TTS/STS/voice/DSP plane; establish one jabberWERK/OBS/avatar/local-playback timing path and use the existing external camera before embedded-camera work.
 10. Bring up the broker, OBS/A2UI HUD, avatar failover, and recovery tests before adding perception or public community automation.
 11. Build the Omarchy full-VM profile and compare it with the Ubuntu recovery guest; select it for unattended streaming only after the exact hardware soak passes.
 12. Add platform adapters one at a time with a private soak test and revocable credential.
-13. Add an OpenGolem-style advisory swarm only after single-Hermes authority and every side-effect boundary are proven.
+13. Inventory AIRI/OpenGolem capabilities as direct services first; add an A2A specialist or broader advisory swarm only after single-Hermes authority and every side-effect boundary are proven.
 14. Attempt reversible embedded-camera and site-specific 1–3 mile trials only after baseline autonomy is stable.
 
 ## 10. Definition of "fully autonomous"

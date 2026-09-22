@@ -20,8 +20,11 @@ Current reality is much smaller than the target architecture. The checked-in app
 ├── server/                  # separately launched CommonJS Express proxy
 ├── public/                  # static assets
 ├── .schematics/             # photo-derived labelled blueprint sheets
-├── docs/research/           # dated source-backed architecture research and pins
+├── docs/
+│   ├── research/          # evergreen topic evidence plus dated syntheses
+│   └── operations/        # exact deployment, recovery and incident procedures
 ├── FUNDING.md               # public-safe, dated bench-tool baskets and measurement gates
+├── HERMES.md                # fresh-clone host-Hermes deployment entrypoint
 ├── package.json             # root scripts and dependency authority
 ├── PLAN.md                  # architecture, evidence, milestones and gates
 └── AGENTS.md                # this file
@@ -35,6 +38,7 @@ Directory-specific guidance exists in `server/AGENTS.md`, `src/AGENTS.md`, `src/
 - Treat hardware identifications in `PLAN.md` as inferred until confirmed in `docs/hardware/` by model/board markings, measurements, or firmware.
 - Treat `.schematics/` as navigation and planning aids, never as verified fabrication or wiring drawings.
 - Read `.schematics/README.md` and the paired sheet note before changing a hardware, audio, camera, or control-path claim.
+- Read `docs/research/README.md` and the relevant topic note before adopting or replacing an external project, protocol, model, renderer, speech engine, browser worker, or agent framework.
 - Preserve the distinction between current implementation and planned architecture.
 - Prefer repo-relative paths in documentation so clones remain portable.
 - Cite primary vendor/project documentation for hardware, protocols, platform APIs, and deployment claims.
@@ -57,8 +61,10 @@ Directory-specific guidance exists in `server/AGENTS.md`, `src/AGENTS.md`, `src/
 
 - Read `docs/research/runtime-ui-stack-2026-09-21.md` before changing A2UI, AIRI/avatar, OBS, OpenGolem/swarm, Hermes-adapter, or Omarchy decisions.
 - Hermes is the sole character/planning authority. A project-owned broker owns character/HUD state; browser sources and avatar renderers never receive Hermes keys or tools.
+- `patchwerks/jabberwerk` is the canonical STT/TTS/STS/voice/DSP plane. Furb-o-Mek and AIRI consume its capability/profile/timeline contracts and do not grow parallel engine-specific speech stacks.
 - A2UI is a constrained presentation format, not an OBS controller or action surface. Keep protocol and package versions as separate pins and default to a read-only reduced catalog.
-- Avatar implementations are adapters behind one project contract. AIRI is a renderer consumer in this architecture, not a second agent runtime.
+- Avatar implementations are adapters behind one project contract. AIRI is a renderer by default, a scoped capability service when possible, and an isolated A2A specialist only when its own agent loop is genuinely required.
+- A2A carries tasks/status/artifacts, not PCM, visemes, frame animation, OBS commands, or robot motion.
 - Omarchy is a full Arch/Hyprland OS. Run it as a full VM or bare-metal profile, never describe it as an Ubuntu container layer.
 - OpenGolem-style workers are advisory task-plane producers only. Exclude anti-detection, account-concealment/purchasing, proxy-rotation, synthetic-human timing, and engagement-manipulation material.
 
@@ -79,7 +85,7 @@ Directory-specific guidance exists in `server/AGENTS.md`, `src/AGENTS.md`, `src/
 ## Current commands
 
 ```bash
-npm install
+npm ci
 npm run build
 npm run generate
 npm run preview
@@ -88,7 +94,7 @@ npm run start
 
 Notes:
 
-- `npm install` invokes `postinstall`, which builds Nuxt and installs `server/` dependencies.
+- `npm ci` invokes `postinstall`, which builds Nuxt and installs `server/` dependencies.
 - There is no root `dev`, `test`, or dedicated `typecheck` script.
 - `npm run start` launches the proxy and Nuxt concurrently.
 - The proxy listens on localhost port 3500.
@@ -123,3 +129,4 @@ Before committing:
 5. For hardware changes, document measured voltage, pin, firmware version, and safe failure behavior.
 6. Update the nearest `AGENTS.md` when a directory's role or conventions materially change.
 7. For documentation changes, validate relative links and SVG XML/rendering, then scan staged public text for secrets and PII.
+8. Preserve `HERMES.md` and `docs/operations/hermes-one-shot.md` as honest end-to-end entrypoints: never document a command as runnable before it exists and passes its stated gate.
