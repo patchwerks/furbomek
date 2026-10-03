@@ -1,0 +1,182 @@
+{
+  "schemaVersion": 3,
+  "transport": "multi_agent_v2",
+  "teamId": "99d67b3c-e2d5-40ca-901f-3d400406abde",
+  "teamName": "furbomek-visual-refinement",
+  "sessionName": "20261001-083328-refinement",
+  "sessionId": "team-553d48a9",
+  "threadTitleConvention": null,
+  "status": "archived",
+  "createdAt": "2026-10-01T08:52:00.901Z",
+  "updatedAt": "2026-10-01T09:02:35.369Z",
+  "archivedAt": "2026-10-01T09:02:35.369Z",
+  "leader": {
+    "kind": "main-session",
+    "sessionId": null,
+    "agentPath": "/root"
+  },
+  "communication": {
+    "memberLanguage": "english",
+    "replyToUserInUserLanguage": true
+  },
+  "worktree": {
+    "enabled": false,
+    "baseBranch": "dev",
+    "root": "/Users/thales/dev/patchwerks/furbomek/docs/research/.omo/teams/team-553d48a9/worktrees"
+  },
+  "paths": {
+    "dir": "/Users/thales/dev/patchwerks/furbomek/docs/research/.omo/teams/team-553d48a9",
+    "team": "/Users/thales/dev/patchwerks/furbomek/docs/research/.omo/teams/team-553d48a9/team.json",
+    "guide": "/Users/thales/dev/patchwerks/furbomek/docs/research/.omo/teams/team-553d48a9/guide.md",
+    "artifacts": "/Users/thales/dev/patchwerks/furbomek/docs/research/.omo/teams/team-553d48a9/artifacts"
+  },
+  "members": [
+    {
+      "id": "A",
+      "name": "visual-parity",
+      "focus": "reference video effects and honest exact-parity claims",
+      "lens": "perspective",
+      "deliverable": "read-only findings by severity with exact report line references and correction",
+      "taskName": "ref_visual",
+      "agentPath": "/root/ref_visual",
+      "threadId": null,
+      "threadTitle": null,
+      "cwd": "/Users/thales/dev/patchwerks/furbomek/docs/research",
+      "worktree": {
+        "path": null,
+        "branch": null
+      },
+      "status": "archived"
+    },
+    {
+      "id": "B",
+      "name": "camera-cost",
+      "focus": "C922x/Kinect/alternative camera specs and volatile prices",
+      "lens": "perspective",
+      "deliverable": "read-only findings by severity with exact report line references and correction",
+      "taskName": "ref_camera",
+      "agentPath": "/root/ref_camera",
+      "threadId": null,
+      "threadTitle": null,
+      "cwd": "/Users/thales/dev/patchwerks/furbomek/docs/research",
+      "worktree": {
+        "path": null,
+        "branch": null
+      },
+      "status": "archived"
+    },
+    {
+      "id": "C",
+      "name": "software-fit",
+      "focus": "five-candidate ranking, integration and FOSS licensing",
+      "lens": "perspective",
+      "deliverable": "read-only findings by severity with exact report line references and correction",
+      "taskName": "ref_software",
+      "agentPath": "/root/ref_software",
+      "threadId": null,
+      "threadTitle": null,
+      "cwd": "/Users/thales/dev/patchwerks/furbomek/docs/research",
+      "worktree": {
+        "path": null,
+        "branch": null
+      },
+      "status": "archived"
+    },
+    {
+      "id": "D",
+      "name": "project-boundaries",
+      "focus": "PLAN.md current-state and Hermes/A2UI/OBS architecture alignment",
+      "lens": "perspective",
+      "deliverable": "read-only findings by severity with exact report line references and correction",
+      "taskName": "ref_project",
+      "agentPath": "/root/ref_project",
+      "threadId": null,
+      "threadTitle": null,
+      "cwd": "/Users/thales/dev/patchwerks/furbomek/docs/research",
+      "worktree": {
+        "path": null,
+        "branch": null
+      },
+      "status": "archived"
+    },
+    {
+      "id": "E",
+      "name": "citations-qa",
+      "focus": "citation integrity, broken links, contradictory wording and report completeness",
+      "lens": "perspective",
+      "deliverable": "read-only findings by severity with exact report line references and correction",
+      "taskName": "ref_citations",
+      "agentPath": "/root/ref_citations",
+      "threadId": null,
+      "threadTitle": null,
+      "cwd": "/Users/thales/dev/patchwerks/furbomek/docs/research",
+      "worktree": {
+        "path": null,
+        "branch": null
+      },
+      "status": "archived"
+    }
+  ],
+  "log": [
+    {
+      "ts": "2026-10-01T08:52:00.901Z",
+      "event": "created",
+      "detail": "team furbomek-visual-refinement"
+    },
+    {
+      "ts": "2026-10-01T08:52:08.874Z",
+      "event": "add-member",
+      "detail": "member A (perspective): reference video effects and honest exact-parity claims"
+    },
+    {
+      "ts": "2026-10-01T08:52:08.973Z",
+      "event": "add-member",
+      "detail": "member B (perspective): C922x/Kinect/alternative camera specs and volatile prices"
+    },
+    {
+      "ts": "2026-10-01T08:52:09.073Z",
+      "event": "add-member",
+      "detail": "member C (perspective): five-candidate ranking, integration and FOSS licensing"
+    },
+    {
+      "ts": "2026-10-01T08:52:09.172Z",
+      "event": "add-member",
+      "detail": "member D (perspective): PLAN.md current-state and Hermes/A2UI/OBS architecture alignment"
+    },
+    {
+      "ts": "2026-10-01T08:52:09.271Z",
+      "event": "add-member",
+      "detail": "member E (perspective): citation integrity, broken links, contradictory wording and report completeness"
+    },
+    {
+      "ts": "2026-10-01T08:52:47.204Z",
+      "event": "bind-agent",
+      "detail": "member A -> agent /root/ref_visual"
+    },
+    {
+      "ts": "2026-10-01T08:52:47.310Z",
+      "event": "bind-agent",
+      "detail": "member B -> agent /root/ref_camera"
+    },
+    {
+      "ts": "2026-10-01T08:52:47.410Z",
+      "event": "bind-agent",
+      "detail": "member C -> agent /root/ref_software"
+    },
+    {
+      "ts": "2026-10-01T08:52:47.510Z",
+      "event": "bind-agent",
+      "detail": "member D -> agent /root/ref_project"
+    },
+    {
+      "ts": "2026-10-01T08:52:47.610Z",
+      "event": "bind-agent",
+      "detail": "member E -> agent /root/ref_citations"
+    },
+    {
+      "ts": "2026-10-01T09:02:35.369Z",
+      "event": "archive",
+      "detail": "Five refinement perspectives completed; document corrections integrated and final QA underway."
+    }
+  ]
+}

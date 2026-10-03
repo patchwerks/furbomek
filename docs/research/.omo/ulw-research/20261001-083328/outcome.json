@@ -1,0 +1,32 @@
+{
+	"schemaVersion": 1,
+	"sessionDir": "/Users/thales/dev/patchwerks/furbomek/docs/research/.omo/ulw-research/20261001-083328",
+	"startedAt": "2026-10-01T14:33:28.000Z",
+	"finishedAt": "2026-10-01T09:06:19.273Z",
+	"elapsedMinutes": 0,
+	"lane": "no-format",
+	"interview": null,
+	"deliverables": [
+		{
+			"format": "md",
+			"status": "delivered",
+			"promised": true,
+			"updatedAt": "2026-10-01T09:04:40.103Z",
+			"path": "/Users/thales/dev/patchwerks/furbomek/docs/research/linux-live-visuals-touchdesigner-alternatives-2026-10-01.md",
+			"bytes": 50606
+		}
+	],
+	"renders": [],
+	"gates": {
+		"static": "pass",
+		"layout": "not_run",
+		"visual": "pass",
+		"proofread": "pass"
+	},
+	"residualDefects": [],
+	"repair": null,
+	"sources": {
+		"total": 115,
+		"domains": 27
+	}
+}

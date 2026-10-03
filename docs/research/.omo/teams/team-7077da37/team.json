@@ -1,0 +1,452 @@
+{
+  "schemaVersion": 3,
+  "transport": "multi_agent_v2",
+  "teamId": "3ffbbf08-b90a-44ff-b1be-0639e06fe444",
+  "teamName": "furbomek-visual-research",
+  "sessionName": "20261001-083328",
+  "sessionId": "team-7077da37",
+  "threadTitleConvention": null,
+  "status": "archived",
+  "createdAt": "2026-10-01T08:34:36.220Z",
+  "updatedAt": "2026-10-01T08:51:52.739Z",
+  "archivedAt": "2026-10-01T08:51:52.739Z",
+  "leader": {
+    "kind": "main-session",
+    "sessionId": null,
+    "agentPath": "/root"
+  },
+  "communication": {
+    "memberLanguage": "english",
+    "replyToUserInUserLanguage": true
+  },
+  "worktree": {
+    "enabled": false,
+    "baseBranch": "dev",
+    "root": "/Users/thales/dev/patchwerks/furbomek/docs/research/.omo/teams/team-7077da37/worktrees"
+  },
+  "paths": {
+    "dir": "/Users/thales/dev/patchwerks/furbomek/docs/research/.omo/teams/team-7077da37",
+    "team": "/Users/thales/dev/patchwerks/furbomek/docs/research/.omo/teams/team-7077da37/team.json",
+    "guide": "/Users/thales/dev/patchwerks/furbomek/docs/research/.omo/teams/team-7077da37/guide.md",
+    "artifacts": "/Users/thales/dev/patchwerks/furbomek/docs/research/.omo/teams/team-7077da37/artifacts"
+  },
+  "members": [
+    {
+      "id": "A",
+      "name": "current-repo",
+      "focus": "current checked-in implementation and actual media/camera state",
+      "lens": "area",
+      "deliverable": "source-backed findings, observation/claim candidates, and EXPAND leads",
+      "taskName": "repo_current",
+      "agentPath": "/root/repo_current",
+      "threadId": null,
+      "threadTitle": null,
+      "cwd": "/Users/thales/dev/patchwerks/furbomek/docs/research",
+      "worktree": {
+        "path": null,
+        "branch": null
+      },
+      "status": "archived"
+    },
+    {
+      "id": "B",
+      "name": "planned-boundaries",
+      "focus": "PLAN.md perception, OBS, A2UI, Hermes and deployment constraints",
+      "lens": "area",
+      "deliverable": "source-backed findings, observation/claim candidates, and EXPAND leads",
+      "taskName": "repo_plan",
+      "agentPath": "/root/repo_plan",
+      "threadId": null,
+      "threadTitle": null,
+      "cwd": "/Users/thales/dev/patchwerks/furbomek/docs/research",
+      "worktree": {
+        "path": null,
+        "branch": null
+      },
+      "status": "archived"
+    },
+    {
+      "id": "C",
+      "name": "effect-forensics",
+      "focus": "attached video effect inventory and which cues do or do not imply depth",
+      "lens": "perspective",
+      "deliverable": "source-backed findings, observation/claim candidates, and EXPAND leads",
+      "taskName": "video_effects",
+      "agentPath": "/root/video_effects",
+      "threadId": null,
+      "threadTitle": null,
+      "cwd": "/Users/thales/dev/patchwerks/furbomek/docs/research",
+      "worktree": {
+        "path": null,
+        "branch": null
+      },
+      "status": "archived"
+    },
+    {
+      "id": "D",
+      "name": "openframeworks",
+      "focus": "openFrameworks Linux live graphics, Kinect v2, capture, OBS, AI control",
+      "lens": "area",
+      "deliverable": "source-backed findings, observation/claim candidates, and EXPAND leads",
+      "taskName": "openframeworks",
+      "agentPath": "/root/openframeworks",
+      "threadId": null,
+      "threadTitle": null,
+      "cwd": "/Users/thales/dev/patchwerks/furbomek/docs/research",
+      "worktree": {
+        "path": null,
+        "branch": null
+      },
+      "status": "archived"
+    },
+    {
+      "id": "E",
+      "name": "godot",
+      "focus": "Godot 4 Linux live rendering, camera/depth bridges, OBS, shaders, control",
+      "lens": "area",
+      "deliverable": "source-backed findings, observation/claim candidates, and EXPAND leads",
+      "taskName": "godot",
+      "agentPath": "/root/godot",
+      "threadId": null,
+      "threadTitle": null,
+      "cwd": "/Users/thales/dev/patchwerks/furbomek/docs/research",
+      "worktree": {
+        "path": null,
+        "branch": null
+      },
+      "status": "archived"
+    },
+    {
+      "id": "F",
+      "name": "praxis-live",
+      "focus": "Praxis LIVE Linux visual nodes, capture, depth bridge, OBS, control",
+      "lens": "area",
+      "deliverable": "source-backed findings, observation/claim candidates, and EXPAND leads",
+      "taskName": "praxis",
+      "agentPath": "/root/praxis",
+      "threadId": null,
+      "threadTitle": null,
+      "cwd": "/Users/thales/dev/patchwerks/furbomek/docs/research",
+      "worktree": {
+        "path": null,
+        "branch": null
+      },
+      "status": "archived"
+    },
+    {
+      "id": "G",
+      "name": "processing",
+      "focus": "Processing 4 Linux video/shaders, Kinect v2, OBS, control",
+      "lens": "area",
+      "deliverable": "source-backed findings, observation/claim candidates, and EXPAND leads",
+      "taskName": "processing",
+      "agentPath": "/root/processing",
+      "threadId": null,
+      "threadTitle": null,
+      "cwd": "/Users/thales/dev/patchwerks/furbomek/docs/research",
+      "worktree": {
+        "path": null,
+        "branch": null
+      },
+      "status": "archived"
+    },
+    {
+      "id": "H",
+      "name": "obs-pipeline",
+      "focus": "OBS plus GStreamer/OpenCV/GL shader pipeline as TouchDesigner alternative",
+      "lens": "area",
+      "deliverable": "source-backed findings, observation/claim candidates, and EXPAND leads",
+      "taskName": "obs_pipeline",
+      "agentPath": "/root/obs_pipeline",
+      "threadId": null,
+      "threadTitle": null,
+      "cwd": "/Users/thales/dev/patchwerks/furbomek/docs/research",
+      "worktree": {
+        "path": null,
+        "branch": null
+      },
+      "status": "archived"
+    },
+    {
+      "id": "I",
+      "name": "kinect-driver",
+      "focus": "Kinect v2 Linux libfreenect2 driver, modalities, throughput and constraints",
+      "lens": "area",
+      "deliverable": "source-backed findings, observation/claim candidates, and EXPAND leads",
+      "taskName": "kinect_driver",
+      "agentPath": "/root/kinect_driver",
+      "threadId": null,
+      "threadTitle": null,
+      "cwd": "/Users/thales/dev/patchwerks/furbomek/docs/research",
+      "worktree": {
+        "path": null,
+        "branch": null
+      },
+      "status": "archived"
+    },
+    {
+      "id": "J",
+      "name": "budget-depth",
+      "focus": "budget depth-camera options and no-tradeoff counterfactual versus Kinect v2",
+      "lens": "perspective",
+      "deliverable": "source-backed findings, observation/claim candidates, and EXPAND leads",
+      "taskName": "budget_depth",
+      "agentPath": "/root/budget_depth",
+      "threadId": null,
+      "threadTitle": null,
+      "cwd": "/Users/thales/dev/patchwerks/furbomek/docs/research",
+      "worktree": {
+        "path": null,
+        "branch": null
+      },
+      "status": "archived"
+    },
+    {
+      "id": "K",
+      "name": "c922x",
+      "focus": "Logitech C922x exact Linux UVC modes and non-depth effect limits",
+      "lens": "area",
+      "deliverable": "source-backed findings, observation/claim candidates, and EXPAND leads",
+      "taskName": "c922x",
+      "agentPath": "/root/c922x",
+      "threadId": null,
+      "threadTitle": null,
+      "cwd": "/Users/thales/dev/patchwerks/furbomek/docs/research",
+      "worktree": {
+        "path": null,
+        "branch": null
+      },
+      "status": "archived"
+    },
+    {
+      "id": "L",
+      "name": "tracking",
+      "focus": "predefined object tracking, segmentation and point-cloud algorithms",
+      "lens": "area",
+      "deliverable": "source-backed findings, observation/claim candidates, and EXPAND leads",
+      "taskName": "tracking",
+      "agentPath": "/root/tracking",
+      "threadId": null,
+      "threadTitle": null,
+      "cwd": "/Users/thales/dev/patchwerks/furbomek/docs/research",
+      "worktree": {
+        "path": null,
+        "branch": null
+      },
+      "status": "archived"
+    },
+    {
+      "id": "M",
+      "name": "obs-agent",
+      "focus": "OBS, HUD/A2UI and agent/CLI control interfaces and security boundary",
+      "lens": "area",
+      "deliverable": "source-backed findings, observation/claim candidates, and EXPAND leads",
+      "taskName": "obs_agent",
+      "agentPath": "/root/obs_agent",
+      "threadId": null,
+      "threadTitle": null,
+      "cwd": "/Users/thales/dev/patchwerks/furbomek/docs/research",
+      "worktree": {
+        "path": null,
+        "branch": null
+      },
+      "status": "archived"
+    },
+    {
+      "id": "N",
+      "name": "rendered-pages",
+      "focus": "rendered official project/vendor pages including any JS/WAF claims",
+      "lens": "perspective",
+      "deliverable": "source-backed findings, observation/claim candidates, and EXPAND leads",
+      "taskName": "rendered_pages",
+      "agentPath": "/root/rendered_pages",
+      "threadId": null,
+      "threadTitle": null,
+      "cwd": "/Users/thales/dev/patchwerks/furbomek/docs/research",
+      "worktree": {
+        "path": null,
+        "branch": null
+      },
+      "status": "archived"
+    },
+    {
+      "id": "O",
+      "name": "skeptic",
+      "focus": "licensing, TouchDesigner interchange, performance and plug-and-play skepticism",
+      "lens": "perspective",
+      "deliverable": "source-backed findings, observation/claim candidates, and EXPAND leads",
+      "taskName": "skeptic",
+      "agentPath": "/root/skeptic",
+      "threadId": null,
+      "threadTitle": null,
+      "cwd": "/Users/thales/dev/patchwerks/furbomek/docs/research",
+      "worktree": {
+        "path": null,
+        "branch": null
+      },
+      "status": "archived"
+    }
+  ],
+  "log": [
+    {
+      "ts": "2026-10-01T08:34:36.220Z",
+      "event": "created",
+      "detail": "team furbomek-visual-research"
+    },
+    {
+      "ts": "2026-10-01T08:35:00.094Z",
+      "event": "add-member",
+      "detail": "member A (area): current checked-in implementation and actual media/camera state"
+    },
+    {
+      "ts": "2026-10-01T08:35:00.202Z",
+      "event": "add-member",
+      "detail": "member B (area): PLAN.md perception, OBS, A2UI, Hermes and deployment constraints"
+    },
+    {
+      "ts": "2026-10-01T08:35:00.307Z",
+      "event": "add-member",
+      "detail": "member C (perspective): attached video effect inventory and which cues do or do not imply depth"
+    },
+    {
+      "ts": "2026-10-01T08:35:00.402Z",
+      "event": "add-member",
+      "detail": "member D (area): openFrameworks Linux live graphics, Kinect v2, capture, OBS, AI control"
+    },
+    {
+      "ts": "2026-10-01T08:35:00.502Z",
+      "event": "add-member",
+      "detail": "member E (area): Godot 4 Linux live rendering, camera/depth bridges, OBS, shaders, control"
+    },
+    {
+      "ts": "2026-10-01T08:35:00.603Z",
+      "event": "add-member",
+      "detail": "member F (area): Praxis LIVE Linux visual nodes, capture, depth bridge, OBS, control"
+    },
+    {
+      "ts": "2026-10-01T08:35:00.704Z",
+      "event": "add-member",
+      "detail": "member G (area): Processing 4 Linux video/shaders, Kinect v2, OBS, control"
+    },
+    {
+      "ts": "2026-10-01T08:35:00.801Z",
+      "event": "add-member",
+      "detail": "member H (area): OBS plus GStreamer/OpenCV/GL shader pipeline as TouchDesigner alternative"
+    },
+    {
+      "ts": "2026-10-01T08:35:00.898Z",
+      "event": "add-member",
+      "detail": "member I (area): Kinect v2 Linux libfreenect2 driver, modalities, throughput and constraints"
+    },
+    {
+      "ts": "2026-10-01T08:35:00.996Z",
+      "event": "add-member",
+      "detail": "member J (perspective): budget depth-camera options and no-tradeoff counterfactual versus Kinect v2"
+    },
+    {
+      "ts": "2026-10-01T08:35:01.092Z",
+      "event": "add-member",
+      "detail": "member K (area): Logitech C922x exact Linux UVC modes and non-depth effect limits"
+    },
+    {
+      "ts": "2026-10-01T08:35:01.188Z",
+      "event": "add-member",
+      "detail": "member L (area): predefined object tracking, segmentation and point-cloud algorithms"
+    },
+    {
+      "ts": "2026-10-01T08:35:01.285Z",
+      "event": "add-member",
+      "detail": "member M (area): OBS, HUD/A2UI and agent/CLI control interfaces and security boundary"
+    },
+    {
+      "ts": "2026-10-01T08:35:01.380Z",
+      "event": "add-member",
+      "detail": "member N (perspective): rendered official project/vendor pages including any JS/WAF claims"
+    },
+    {
+      "ts": "2026-10-01T08:35:01.476Z",
+      "event": "add-member",
+      "detail": "member O (perspective): licensing, TouchDesigner interchange, performance and plug-and-play skepticism"
+    },
+    {
+      "ts": "2026-10-01T08:37:38.730Z",
+      "event": "bind-agent",
+      "detail": "member A -> agent /root/repo_current"
+    },
+    {
+      "ts": "2026-10-01T08:37:38.833Z",
+      "event": "bind-agent",
+      "detail": "member B -> agent /root/repo_plan"
+    },
+    {
+      "ts": "2026-10-01T08:37:38.933Z",
+      "event": "bind-agent",
+      "detail": "member C -> agent /root/video_effects"
+    },
+    {
+      "ts": "2026-10-01T08:37:39.036Z",
+      "event": "bind-agent",
+      "detail": "member D -> agent /root/openframeworks"
+    },
+    {
+      "ts": "2026-10-01T08:37:39.137Z",
+      "event": "bind-agent",
+      "detail": "member E -> agent /root/godot"
+    },
+    {
+      "ts": "2026-10-01T08:37:39.237Z",
+      "event": "bind-agent",
+      "detail": "member F -> agent /root/praxis"
+    },
+    {
+      "ts": "2026-10-01T08:37:39.340Z",
+      "event": "bind-agent",
+      "detail": "member G -> agent /root/processing"
+    },
+    {
+      "ts": "2026-10-01T08:37:39.442Z",
+      "event": "bind-agent",
+      "detail": "member H -> agent /root/obs_pipeline"
+    },
+    {
+      "ts": "2026-10-01T08:37:39.555Z",
+      "event": "bind-agent",
+      "detail": "member I -> agent /root/kinect_driver"
+    },
+    {
+      "ts": "2026-10-01T08:37:39.657Z",
+      "event": "bind-agent",
+      "detail": "member J -> agent /root/budget_depth"
+    },
+    {
+      "ts": "2026-10-01T08:37:39.762Z",
+      "event": "bind-agent",
+      "detail": "member K -> agent /root/c922x"
+    },
+    {
+      "ts": "2026-10-01T08:37:39.864Z",
+      "event": "bind-agent",
+      "detail": "member L -> agent /root/tracking"
+    },
+    {
+      "ts": "2026-10-01T08:37:39.964Z",
+      "event": "bind-agent",
+      "detail": "member M -> agent /root/obs_agent"
+    },
+    {
+      "ts": "2026-10-01T08:37:40.067Z",
+      "event": "bind-agent",
+      "detail": "member N -> agent /root/rendered_pages"
+    },
+    {
+      "ts": "2026-10-01T08:37:40.171Z",
+      "event": "bind-agent",
+      "detail": "member O -> agent /root/skeptic"
+    },
+    {
+      "ts": "2026-10-01T08:51:52.739Z",
+      "event": "archive",
+      "detail": "First research team completed all 15 initial axes and two focused expansion waves; refinement follows."
+    }
+  ]
+}

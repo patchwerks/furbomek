@@ -1,0 +1,3 @@
+# Wave 1: rendered browser evidence
+
+Observer rendered 8 live official/vendor pages through Brave after in-app browser was unavailable; screenshots in `/tmp/furbomek-rendered-pages-20261001/`, observed 2026-10-01. Praxis 6.7.0 Linux DEBs; openFrameworks 0.12.1 Linux downloads; Godot 4.7.2 Linux download; Logitech C922 spec page; user's Amazon short link resolved to B01LXCDPPK C922x selected variant $119.99 new/in stock (volatile, lower description mislabels C920x); libfreenect2 README; TouchEngine Windows/macOS/paid license page; TD Windows/macOS system requirements. No archive/proxy source. EXPAND: avoid 404 static-fetch error as listing absence; do not infer Ubuntu certification from Logitech vendor OS omission; no hardware performance from pages.

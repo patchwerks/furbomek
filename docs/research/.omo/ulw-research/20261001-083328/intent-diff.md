@@ -1,0 +1,10 @@
+# Intent and reality
+
+| intent_id | expected truth | observed reality | diff | violated invariant | intent source | observations | status | claims |
+|---|---|---|---|---|---|---|---|---|
+| I1 | Selected tools are Linux FOSS and viable for live work | five selected tools have Linux builds/FOSS code and live-media primitives; full pipeline untested | source viability true, deployment proof absent | Linux/FOSS | user request | O10,O11; candidate wave files | true for distribution, unknown for target runtime | C11-C15,C17 |
+| I2 | Stack reproduces every visible effect in attached video | component primitives and recipe documented; no candidate recording exists | exact visual parity unproven | effect parity | user video | O1; wave-2-visual-acceptance.md | unknown until implementation | C01,C02,C10,C17 |
+| I3 | Owned C922x supports useful live effects without depth | vendor RGB modes, UVC and algorithms sourced; user's Linux unit not tested | RGB artistic effects feasible; actual modes unknown | RGB truthfulness | user request | O5 | true for published specs, unknown for actual hardware | C03 |
+| I4 | Kinect v2 is a cost-effective Linux depth source | driver and 24.04 build path sourced; apparent $39.32 complete bundle live | affordable offer evidenced, host/device qualification open | budget and tradeoffs | user request | O6-O9 | true for listing/capability, unknown for operation | C05-C09 |
+| I5 | Stack respects staged Furb-o-Mek OBS/A2UI/Hermes boundaries | report proposes isolated renderer, broker, stream director and bounded presets | refinement review found no contradiction | architecture separation | PLAN.md | O2,O3,O4 | true for proposed design | C04,C15,C17 |
+| I6 | TouchDesigner project interchange is possible or explicitly limited | no verified Linux FOSS .toe/.tox importer; manual port described | automatic portability not established | collaboration accuracy | user request | wave-1-openframeworks.md; wave-1-skeptic.md | true for explicitly limited finding | C16 |
