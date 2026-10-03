@@ -1,6 +1,6 @@
 # Furb-o-Mek implementation plan
 
-Status: evidence-backed planning baseline, revised 2026-09-21
+Status: evidence-backed planning baseline, revised 2026-10-03
 
 ## 1. Outcome and immediate feasibility
 
@@ -96,7 +96,7 @@ Factory-speaker reuse is **TBD** pending a label photograph, conductor/connector
 
 ### 2.6 Camera baseline and staged range goal
 
-The current external OBS camera is the near-term vision source. No camera has been proven to fit an eye or forehead cavity. A later fixed monocular camera behind a reversible forehead or eye insert is preferred over dual/stereo or moving-eye designs until aperture, depth, linkage sweep, focus, ribbon routing, heat, balance, and occlusion are measured. Raspberry Pi lists Camera Module 3 at 25 × 24 × 11.5 mm, which does not itself demonstrate fit ([official product page](https://www.raspberrypi.com/products/camera-module-3/)). See [sheet 06](.schematics/06-eye-camera-integration.md).
+The owned Logitech C922x is the first external RGB/OBS vision source. Its actual Ubuntu capture modes and timing still require measurement. The user reports that the reference video used TouchDesigner and Kinect v2, with Kinect depth driving the point cloud and virtual-camera movement. Reproduce the visible RGB effects with the C922x first; use a qualified Kinect v2 plus `libfreenect2` for measured depth, IR, and calibrated 3D parallax. Neither external camera establishes an eye or forehead fit. A later fixed monocular camera behind a reversible forehead or eye insert is preferred over dual/stereo or moving-eye designs until aperture, depth, linkage sweep, focus, ribbon routing, heat, balance, and occlusion are measured. Raspberry Pi lists Camera Module 3 at 25 × 24 × 11.5 mm, which does not itself demonstrate fit ([official product page](https://www.raspberrypi.com/products/camera-module-3/)). See [sheet 06](.schematics/06-eye-camera-integration.md) and the [live-visuals research](docs/research/linux-live-visuals-touchdesigner-alternatives-2026-10-01.md).
 
 The desired 1–3 mile link remains a future site-tested goal, not a present capability. It requires line-of-sight/Fresnel and link-budget work, antenna-height and terrain analysis, jurisdiction-specific spectrum/DFS review, weather/interference tests, and measured video/control latency and loss. Video and control remain logically independent; video loss is never the local motion-stop mechanism. Relevant technical references include [RFC 6184](https://www.rfc-editor.org/rfc/rfc6184), [RFC 8834](https://www.rfc-editor.org/rfc/rfc8834), and US [47 CFR Part 15 Subpart E](https://www.ecfr.gov/current/title-47/chapter-I/subchapter-A/part-15/subpart-E).
 
@@ -120,9 +120,11 @@ furbomek/
 ├── apps/
 │   ├── operator-ui/          # current Nuxt UI, refactored
 │   ├── overlay-ui/           # constrained A2UI/Lit OBS browser source
+│   ├── visual-effects/       # qualified effects-renderer project after three-tool trial
 │   └── avatar-host/          # renderer shell; AIRI/Inochi/OpenVT adapters
 ├── services/
 │   ├── embodiment-gateway/   # only network path to robot actions
+│   ├── camera-capture/        # one camera owner, timestamped frames and derived media
 │   ├── perception/           # detection, tracking, segmentation
 │   ├── stream-director/      # OBS scenes, captions, failover
 │   ├── conversation/         # Hermes sessions + jabberWERK speech bridge
@@ -494,8 +496,8 @@ Use a staged pipeline rather than running segmentation on every pixel without co
 3. track stable objects between frames;
 4. invoke segmentation only for selected tracks/regions;
 5. emit normalized boxes, masks, labels, confidence, and TTL;
-6. render those events in the transparent overlay UI;
-7. composite the browser source in OBS.
+6. render the sampled/depth scene and frame-locked tracking graphics in a qualified visual-effects renderer; render constrained semantic HUD content in the transparent overlay UI;
+7. composite the effects feed and browser source in OBS.
 
 Meta's [SAM 2 repository](https://github.com/facebookresearch/sam2) describes promptable image/video segmentation with streaming memory for real-time video processing, but "real-time" must be benchmarked on the actual Omen at the target resolution. Start with 720p/30 program video and a lower perception cadence; decouple OBS frame rate from inference rate.
 
@@ -505,6 +507,41 @@ Two modes are distinct:
 - **graphic/chart explanation:** capture a specific OBS/browser source, run OCR/chart understanding, and render a textual callout. This is not the same model or latency budget as physical object tracking.
 
 Never allow overlay recognition output to command motion directly.
+
+One capture owner timestamps each physical camera frame and distributes it to perception and effects consumers. A visual event carries a schema version, camera/frame ID, monotonic capture time, dimensions, normalized coordinate space, crop/scale/mirror transform, track ID, class/label, observation state, typed score, box/corners/landmarks, expiry, and depth provenance (`measured`, `inferred`, or `unavailable`). Raw and processed insets, point cloud, boxes, and probe must refer to the same source frame; expired tracks disappear. Carry masks and point geometry through bounded media/binary transport, not per-frame A2UI or OSC messages. Hermes may select only allowlisted effect presets and bounded parameters through the project broker; it cannot submit shaders, asset URLs, OBS commands, or robot actions to the effects renderer. This is a **proposed** contract, not checked-in runtime.
+
+### 6.3.1 Mandatory visual-effects tool qualification
+
+**Status: proposed evaluation, no tool selected or demonstrated on the target Ubuntu host.** Test **all three**: Godot 4, ossia score, and openFrameworks. Godot is the current code-owned renderer recommendation; ossia score challenges it as a live visual patcher with a documented point-cloud render pipeline and Linux OBS output path; openFrameworks is the lower-level C++ comparison for direct Kinect v2 integration and custom GPU effects. Its different integration model makes it a useful backup rather than a third similar node editor. None has a verified TouchDesigner `.toe`/`.tox` importer or a ready Furb-o-Mek Kinect v2 bridge. [Godot MultiMesh](https://docs.godotengine.org/en/stable/tutorials/performance/using_multimesh.html), [Godot viewports](https://docs.godotengine.org/en/stable/tutorials/rendering/viewports.html), [score point-cloud pipeline](https://ossia.io/score-docs/processes/render-pipeline.html), [score Linux livestreaming](https://ossia.io/score-docs/common-practices/10-livestreaming.html), [openFrameworks video](https://openframeworks.cc/documentation/video/ofVideoGrabber/), [openFrameworks mesh](https://openframeworks.cc/documentation/gl/ofVboMesh/), [libfreenect2](https://github.com/OpenKinect/libfreenect2).
+
+**Order and execution rule.** First pin Ubuntu/GPU/OBS versions, inventory the C922x, qualify the Kinect v2 USB 3/power/host path when available, and create one repeatable input set: the supplied upright reference MOV, recorded C922x RGB, recorded registered Kinect v2 RGB/depth/IR with calibration metadata, and synthetic frames/tracks with known coordinates and expiry. Store the reference and camera recordings in private test storage with hashes and a manifest; the original MOV is not in Git. A recorded RGB-D fixture permits development before the physical sensor is available, but cannot pass the live Kinect gate. Then test **(1) Godot**, to exercise the proposed 3D scene and expose capture/texture-transfer costs; **(2) ossia score**, to compare live patching and its documented OBS route against the same scenes; **(3) openFrameworks**, to establish the direct-C++ integration and performance ceiling. This order reuses the fixture/bridge work and does not rank the outcomes. Reserve an implementation and evidence pass for each candidate regardless of earlier results. A missing common camera/driver fixture is a shared blocker, not a failure attributed to one renderer. Do not select, reject, or omit a candidate from documentation claims alone.
+
+An agent-run harness must build/launch each pinned candidate in a graphical Ubuntu session, replay the same inputs and broker events, drive its documented control surface or recorded UI automation, start/record OBS through the stream director, inject disconnect/crash cases, and save commands, versions, logs, frame timestamps, metrics, screenshots, and full program recordings. Run each candidate from a clean checkout without human editing or clicking during the trial. Report every row as `pass`, `fail`, or `blocked` with the artifact and exact reason; never convert an unrun or fixture-only test to a live pass. The agent may inspect recordings for visual fidelity, but must preserve side-by-side clips and mark aesthetic judgments separately from measured results.
+
+Before running a candidate, annotate the MOV's visible events and intervals: red short-stroke/contour-gap surface, magenta moving body brackets, face-lock state, amber probe, processed magnifier, photographic head inset, leader lines, scan/glitch treatment, and legible HUD. For each effect, pass only if the candidate's recorded moving sequence shows it on the same tracked subject with the intended transition; mark a missing, static, mistimed, or misregistered effect as fail. Keep a separate qualitative similarity score with cited frame pairs, because a different camera scene cannot support a literal pixel-for-pixel comparison.
+
+| Shared gate for **each** tool | Pass evidence | Failure evidence |
+|---|---|---|
+| C922x RGB composition | Recorded OBS program shows a moving subject with the red sampled/stroke surface, body box, face-lock-to-probe transition, tracking labels/reticle, raw and processed insets, glitch treatment, and a bounded HUD image/info panel together at 720p30 before the 1080p30 soak. An agent switches from reference red to two other saved palettes without restarting capture. Compare corresponding events in the upright reference MOV. | An element is absent, the palette is hardcoded, a static mock replaces moving tracking, or the effect is asserted from a still/demo rather than a candidate recording. |
+| Kinect v2 measured 3D | Live `libfreenect2` RGB/depth/IR and registration survive a 30-minute run; invalid depth is rejected; a colored XYZ point cloud changes parallax under scripted virtual-camera pan/orbit. Check distance against measured targets and distinguish real occlusion holes from invented geometry. | Only RGB displacement/relative-depth styling is shown, measured units are invented, the view is a flat crop, or sensor frames/registration cannot be sustained. |
+| Frame and tracking truth | Known synthetic boxes/landmarks reproject within 8 pixels at the 1080p program output (p95); moving face/body and a tagged prop retain the correct ID, expire after TTL, and reacquire after occlusion without stale labels. Raw/processed crops use one frame ID. | Coordinates drift, a lost target remains labeled, the probe jumps to another ID, or the insets and overlays use mismatched frames. |
+| OBS and runtime budget | A 30-minute private 1080p30 recording meets §6.7 targets, with <1% dropped/duplicated program frames, p95 capture-to-program frame age ≤250 ms, and ≥25% GPU/encoder reserve. Record actual render/encode lag and alpha/crop behavior on the target compositor. | Output fails a target, requires an unrecorded manual restart, or a claimed transparent/zero-copy path was not measured. |
+| Agentic control and authoring | An agent creates and saves one new effect, changes an approved preset/parameter and camera move through a reproducible project/API/UI workflow, then replays the project from a clean checkout. One hundred valid bounded updates are visible with §6.7 HUD/event timing; one hundred invalid, stale, oversized, or unauthorized updates produce no effect. No renderer receives Hermes, OBS, or robot credentials. | Human-only authoring is required, changes do not persist/replay, an allowed update is lost without recovery, or an invalid update changes output or gains authority. |
+| Fault recovery | Kill/restart camera feed, perception, effects renderer, broker, Browser Source, and OBS separately. With OBS alive, stale graphics expire and the static fallback appears within §6.7's 2-second target while audio continues; after an OBS crash, record the real outage, restart, and scene reconciliation. | Renderer failure leaves stale graphics or dead air, or an OBS crash is mislabeled as continuous fallback. |
+
+**Godot 4 expectations.** The agent builds a scene with a `Camera3D` orbiting registered Kinect geometry; a shader or GPU/`MultiMesh` point path changes palette and point density without rebuilding the source frames. `SubViewport` or equivalent scene branches produce synchronized raw/processed insets, while UI/2D layers render boxes, reticles, and labels; the separate A2UI sidecar supplies constrained HUD content to OBS. Pass when all shared gates work from an exported/restartable project and a bounded WebSocket or equivalent project adapter; fail a feature when Kinect data cannot reach the renderer at live cadence, a camera move exposes only a flat textured plane, frame copies break the latency budget, or remote changes require arbitrary script execution. Beyond the clip, have the agent build and record **three distinct extras**: a depth-aware occlusion/mesh composition, procedural particles or trails, and a second independent camera/scene transition. Score each extra independently for visual result, saved reproducibility, and OBS cost. [Godot CameraServer](https://docs.godotengine.org/en/stable/classes/class_cameraserver.html), [MultiMesh](https://docs.godotengine.org/en/stable/tutorials/performance/using_multimesh.html), [SubViewports](https://docs.godotengine.org/en/stable/tutorials/rendering/viewports.html), [WebSocketPeer](https://docs.godotengine.org/en/stable/classes/class_websocketpeer.html).
+
+**ossia score expectations.** The agent constructs a saved live patch using camera input, Render Pipeline point topology and compute/ISF stages to display registered Kinect geometry, a scriptable virtual view, the required RGB glitches/insets, and tracker-driven graphics. Send bounded presets/parameters through OSC/OSCQuery or its WebSocket surface and capture the output in OBS using the documented Linux Shmdata/GStreamer/V4L2 path or another measured output route. Pass when the patch can be autonomously created/edited, restarted, and controlled while the shared gates hold; fail a feature when a built-in Freenect/v1 node is mistaken for Kinect v2 acquisition, bridge data loses measured depth, a graph change cannot be reproduced, or OBS transport exceeds the budget. Beyond the clip, record **three distinct extras**: cue/timeline transitions, audio-reactive visuals, and a second output/visual protocol such as Sh4lt or NDI; measure their agentic control and OBS cost. [score camera](https://ossia.io/score-docs/devices/camera-device.html), [point-cloud pipeline](https://ossia.io/score-docs/processes/render-pipeline.html), [compute shaders](https://ossia.io/score-docs/processes/compute-shaders.html), [remote control](https://ossia.io/score-docs/in-depth/remote.html), [cues](https://ossia.io/score-docs/cues.html), [video examples](https://ossia.io/score-docs/examples/video), [video protocols](https://ossia.io/score-docs/reference/protocols-and-formats.html), [Linux livestreaming](https://ossia.io/score-docs/common-practices/10-livestreaming.html).
+
+**openFrameworks expectations.** The agent builds a Linux C++ app that receives C922x frames and registered Kinect v2 frames through a direct `libfreenect2` integration or a measured external bridge, not an assumed-current legacy addon. Draw the moving XYZ cloud and virtual-camera pan with a VBO/mesh plus shader, compose raw/processed views and tracking graphics with FBOs, and provide a bounded project-owned runtime control adapter. Pass when a clean build, restart, controlled parameter change, and OBS capture satisfy every shared gate; fail a feature when a stale addon blocks current builds, CPU uploads or recompilation stall the program, or control requires a human-operated editor. Beyond the clip, record **three distinct extras**: GPU particle/feedback treatment, a second live video or generated source mixed with Kinect geometry, and a new custom effect compiled and deployed by the agent without interrupting the OBS program. Measure build/deploy time as well as visual and runtime cost. [ofVideoGrabber](https://openframeworks.cc/documentation/video/ofVideoGrabber/), [ofVboMesh](https://openframeworks.cc/documentation/gl/ofVboMesh/), [ofFbo](https://openframeworks.cc/documentation/gl/ofFbo/), [ofShader](https://openframeworks.cc/documentation/gl/ofShader/), [libfreenect2](https://github.com/OpenKinect/libfreenect2).
+
+For **each** named extra in the three tool paragraphs, pass only when the agent creates it, records a moving result in OBS, saves/replays it from a clean checkout, and measures its runtime cost. A documentation screenshot, static image, one-off unsaved edit, or effect that breaks the shared OBS budget is a failure for that extra. Keep optional-extra failures separate from the required gates.
+
+For TouchDesigner collaboration, inventory which media, textures, shaders, parameter definitions, and reference recordings each tool can reuse. If a `.toe` or `.tox` is supplied, attempt a real import in each tool and record the result; otherwise mark native-project import `blocked` rather than asserting compatibility. Measure the agent's time to recreate one agreed effect from the available exports, and label that a translation workflow, not an automatic importer.
+
+**Tandem decision.** Multiple effects tools can feed separate OBS sources or exchange textures/media through a measured bridge, but that is **proposed**, not a required production topology. Default to one effects renderer plus the separate A2UI HUD and OBS. After all three solo trials, run a **Godot + ossia score** 30-minute comparison on the same capture-owner frames: Godot supplies the moving depth cloud and score supplies a separate live-authored treatment; OBS composites both. Record matching Godot-only and score-only variants of that treatment to test whether the second renderer adds a capability or reduces measured authoring effort. Do not open the physical camera twice. Pass tandem only if the combined recording preserves the shared visual/tracking gates, cross-tool source age differs by at most two 30-fps frames (p95), all §6.7 performance/fallback targets still pass, and the added effect or measured authoring benefit is documented and reusable. Otherwise deploy a single effects renderer. An openFrameworks bridge may be useful as the one camera/depth producer without making it a second program-output renderer; measure that role separately.
+
+Select a production renderer only after **all three** have a completed scorecard and the tandem trial is recorded or explicitly blocked by a measured prerequisite. Required gates outrank extra effects. Among candidates that pass, compare reference-video fidelity, agentic authoring/control, measured latency/VRAM/recovery, artistic range, portability, licensing, and maintenance cost; record the decision and rejected tradeoffs in an ADR. If none passes, improve the common bridge or revise the architecture and rerun the failed gates. A failed optional extra does not erase a passed required feature, and a polished vendor demo does not replace a local OBS recording.
 
 ### 6.4 Voice and facial synchronization
 
@@ -610,6 +647,8 @@ These are test targets, not claims about the unmeasured Omen. Record p50/p95/p99
 | Measure | First target | Failure behavior |
 |---|---:|---|
 | OBS program output | 1080p30 baseline; 60 fps only after soak | Keep audio/scene live; reduce HUD/avatar/perception cadence |
+| Capture-to-OBS program frame age | p95 ≤250 ms in visual-effects qualification | Drop stale video; mark graphics degraded without affecting motion safety |
+| Program frame continuity | <1% dropped/duplicated frames in a 30-minute private visual-effects soak | Reduce visual profile and record the cause before selecting a renderer |
 | Broker event to first visible frame | p95 ≤250 ms for status/HUD; ≤1 s tonight gate | Mark consumer degraded; coalesce low-priority events |
 | Audio-to-mouth skew | p95 absolute skew ≤80 ms | Fall back to amplitude mouth or neutral mouth |
 | Snapshot convergence after reload | ≤2 s | Show stale banner; do not replay transient effects |
@@ -771,6 +810,9 @@ Acceptance:
 Deliverables:
 
 - detector/tracker/segmenter service with GPU and CPU test profiles;
+- one timestamped camera-capture owner and registered RGB-D fixture with depth provenance;
+- mandatory Godot 4, ossia score, and openFrameworks prototypes and agent-run scorecards from §6.3.1;
+- recorded solo OBS programs for all three and the measured Godot + ossia score tandem trial;
 - chassis-part dataset/labels and evaluation set;
 - `vision.annotation`/explanation events rendered through the same constrained HUD;
 - OCR/chart explanation worker isolated from actuation;
@@ -780,6 +822,8 @@ Deliverables:
 Acceptance:
 
 - measured latency, FPS, VRAM, accuracy, and false-positive rates are recorded on the actual host;
+- all three candidates complete the same RGB, live Kinect v2, tracking, OBS, agentic-authoring, failure, and extra-effects tests; blocked hardware is reported as blocked, not silently scored as pass or fail;
+- a renderer ADR is written only after the three scorecards and tandem result are available;
 - stale masks disappear by TTL;
 - overlay failure cannot affect program audio, stream health, or robot safety;
 - every generated factual callout carries source/time metadata internally;
@@ -869,6 +913,8 @@ Do not enable a second AIRI STT/TTS provider for the tracer bullet. If the curre
 
 The first HUD proof may be a fixed local HTML/Lit overlay fed by fixture events. A2UI stays feature-flagged until the reduced catalog and hostile-input fixtures exist. The first Omarchy action is only to create the VM/ADR branch after host inventory; it is not on tonight's critical path.
 
+Once the common OBS capture/recording fixture exists, begin the §6.3.1 C922x visual-effects trial. Its three candidate builds and Kinect v2 gates are separate from tonight's Hermes/avatar tracer bullet and do not block bench restoration of robot motion.
+
 ### 9.2 Hardware and full-autonomy sequence
 
 1. Rotate every credential that ever appeared in the original working tree, even though the GitHub snapshot contains blanks.
@@ -880,11 +926,12 @@ The first HUD proof may be a fixed local HTML/Lit overlay fed by fixture events.
 7. Implement the protocol simulator, then the offboard gateway service, robot-mounted MCU/radio gateway, and Hermes MCP wrapper.
 8. Add head control only after the leg-control watchdog and contract tests pass; then internalize or replace the head PCB and remove the external yellow deck/cable/controls from runtime.
 9. Pin and qualify jabberWERK as the sole STT/TTS/STS/voice/DSP plane; establish one jabberWERK/OBS/avatar/local-playback timing path and use the existing external camera before embedded-camera work.
-10. Bring up the broker, OBS/A2UI HUD, avatar failover, and recovery tests before adding perception or public community automation.
-11. Build the Omarchy full-VM profile and compare it with the Ubuntu recovery guest; select it for unattended streaming only after the exact hardware soak passes.
-12. Add platform adapters one at a time with a private soak test and revocable credential.
-13. Inventory AIRI/OpenGolem capabilities as direct services first; add an A2A specialist or broader advisory swarm only after single-Hermes authority and every side-effect boundary are proven.
-14. Attempt reversible embedded-camera and site-specific 1–3 mile trials only after baseline autonomy is stable.
+10. Bring up the broker, OBS/A2UI HUD, avatar failover, and recovery tests before adding public community automation.
+11. Qualify one C922x/Kinect v2 capture path, then run **all three** §6.3.1 visual-effects trials in order and compare their recorded OBS outputs; run the tandem trial and document the renderer ADR before committing to a production effects stack.
+12. Build the Omarchy full-VM profile and compare it with the Ubuntu recovery guest; select it for unattended streaming only after the exact hardware soak passes.
+13. Add platform adapters one at a time with a private soak test and revocable credential.
+14. Inventory AIRI/OpenGolem capabilities as direct services first; add an A2A specialist or broader advisory swarm only after single-Hermes authority and every side-effect boundary are proven.
+15. Attempt reversible embedded-camera and site-specific 1–3 mile trials only after baseline autonomy is stable.
 
 ## 10. Definition of "fully autonomous"
 
