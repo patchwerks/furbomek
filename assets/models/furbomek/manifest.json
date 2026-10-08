@@ -1,0 +1,3426 @@
+{
+  "schema_version": 1,
+  "created_date": "2026-10-08",
+  "package": "furbomek-models",
+  "assets": [
+    {
+      "id": "f069",
+      "display_name": "Furb-o-Mek F-069",
+      "scene_model_name": "Furbomek_Boss_F069",
+      "files": {
+        "blender": "blender/f069.blend",
+        "glb": "exports/glb/Furbomek_Boss_F069.glb",
+        "fbx": "exports/roblox/Furbomek_Boss_F069.fbx",
+        "preview": "previews/f069_threequarter.png"
+      },
+      "evidence_status": "reference/inferred",
+      "reference_descriptor": "User-provided F-069 robot footage and visual references",
+      "features": [
+        "Black fur body",
+        "Corrected six articulated legs",
+        "Furby-like head"
+      ],
+      "geometry": {
+        "native_mesh_objects": 2062,
+        "native_vertices": 1374851,
+        "native_faces": 602756,
+        "source_model_objects": 2507,
+        "source_evaluated_triangles": 2253387,
+        "game_mesh_chunks": 37,
+        "game_triangles_before_fbx": 327871,
+        "max_chunk_triangles": 18000,
+        "chunks": [
+          {
+            "name": "Furbomek_Boss_F069__Jet_black_plush_e66bd_01",
+            "material": "Jet black plush",
+            "triangles": 18000
+          },
+          {
+            "name": "Furbomek_Boss_F069__Jet_black_plush_e66bd_02",
+            "material": "Jet black plush",
+            "triangles": 18000
+          },
+          {
+            "name": "Furbomek_Boss_F069__Jet_black_plush_e66bd_03",
+            "material": "Jet black plush",
+            "triangles": 18000
+          },
+          {
+            "name": "Furbomek_Boss_F069__Jet_black_plush_e66bd_04",
+            "material": "Jet black plush",
+            "triangles": 12696
+          },
+          {
+            "name": "Furbomek_Boss_F069__Moulded_black_ABS_ed14b_01",
+            "material": "Moulded black ABS",
+            "triangles": 18000
+          },
+          {
+            "name": "Furbomek_Boss_F069__Moulded_black_ABS_ed14b_02",
+            "material": "Moulded black ABS",
+            "triangles": 18000
+          },
+          {
+            "name": "Furbomek_Boss_F069__Moulded_black_ABS_ed14b_03",
+            "material": "Moulded black ABS",
+            "triangles": 3067
+          },
+          {
+            "name": "Furbomek_Boss_F069__Charcoal_body_casing_3d382_01",
+            "material": "Charcoal body casing",
+            "triangles": 18000
+          },
+          {
+            "name": "Furbomek_Boss_F069__Charcoal_body_casing_3d382_02",
+            "material": "Charcoal body casing",
+            "triangles": 1456
+          },
+          {
+            "name": "Furbomek_Boss_F069__Amber_iris_fibres_2b0b3_01",
+            "material": "Amber iris fibres",
+            "triangles": 18000
+          },
+          {
+            "name": "Furbomek_Boss_F069__Amber_iris_fibres_2b0b3_02",
+            "material": "Amber iris fibres",
+            "triangles": 360
+          },
+          {
+            "name": "Furbomek_Boss_F069__v7_satin_black_bracket_metal_0da40_01",
+            "material": "v7 satin black bracket metal",
+            "triangles": 5585
+          },
+          {
+            "name": "Furbomek_Boss_F069__v7_recessed_screw_sockets_35e0e_01",
+            "material": "v7 recessed screw sockets",
+            "triangles": 12671
+          },
+          {
+            "name": "Furbomek_Boss_F069__Orange_servo_lead_1c368_01",
+            "material": "Orange servo lead",
+            "triangles": 18000
+          },
+          {
+            "name": "Furbomek_Boss_F069__Orange_servo_lead_1c368_02",
+            "material": "Orange servo lead",
+            "triangles": 3852
+          },
+          {
+            "name": "Furbomek_Boss_F069__Bracket_hardware_5e3f6_01",
+            "material": "Bracket hardware",
+            "triangles": 18000
+          },
+          {
+            "name": "Furbomek_Boss_F069__Bracket_hardware_5e3f6_02",
+            "material": "Bracket hardware",
+            "triangles": 18000
+          },
+          {
+            "name": "Furbomek_Boss_F069__Bracket_hardware_5e3f6_03",
+            "material": "Bracket hardware",
+            "triangles": 18000
+          },
+          {
+            "name": "Furbomek_Boss_F069__Bracket_hardware_5e3f6_04",
+            "material": "Bracket hardware",
+            "triangles": 18000
+          },
+          {
+            "name": "Furbomek_Boss_F069__Bracket_hardware_5e3f6_05",
+            "material": "Bracket hardware",
+            "triangles": 1521
+          },
+          {
+            "name": "Furbomek_Boss_F069__Plain_metal_battery_sleeves_fa103_01",
+            "material": "Plain metal battery sleeves",
+            "triangles": 1272
+          },
+          {
+            "name": "Furbomek_Boss_F069__Chestnut_iris_3d21b_01",
+            "material": "Chestnut iris",
+            "triangles": 7936
+          },
+          {
+            "name": "Furbomek_Boss_F069__Controller_green_board_a6ab8_01",
+            "material": "Controller green board",
+            "triangles": 188
+          },
+          {
+            "name": "Furbomek_Boss_F069__Black_controller_PCB_f2a81_01",
+            "material": "Black controller PCB",
+            "triangles": 188
+          },
+          {
+            "name": "Furbomek_Boss_F069__White_eye_plastic_bf441_01",
+            "material": "White eye plastic",
+            "triangles": 5800
+          },
+          {
+            "name": "Furbomek_Boss_F069__Red_supply_lead_f4a20_01",
+            "material": "Red supply lead",
+            "triangles": 612
+          },
+          {
+            "name": "Furbomek_Boss_F069__Dark_iris_fibres_aedf3_01",
+            "material": "Dark iris fibres",
+            "triangles": 11592
+          },
+          {
+            "name": "Furbomek_Boss_F069__Soft_charcoal_fibres_0be06_01",
+            "material": "Soft charcoal fibres",
+            "triangles": 9500
+          },
+          {
+            "name": "Furbomek_Boss_F069__Deep_black_fibres_8a4d1_01",
+            "material": "Deep black fibres",
+            "triangles": 7840
+          },
+          {
+            "name": "Furbomek_Boss_F069__Battery_bay_black_plastic_b3b13_01",
+            "material": "Battery bay black plastic",
+            "triangles": 188
+          },
+          {
+            "name": "Furbomek_Boss_F069__Yellow_beak_aed9d_01",
+            "material": "Yellow beak",
+            "triangles": 4664
+          },
+          {
+            "name": "Furbomek_Boss_F069__Deep_mouth_cavity_e7eda_01",
+            "material": "Deep mouth cavity",
+            "triangles": 960
+          },
+          {
+            "name": "Furbomek_Boss_F069__Recessed_red_mouth_1062f_01",
+            "material": "Recessed red mouth",
+            "triangles": 1520
+          },
+          {
+            "name": "Furbomek_Boss_F069__Glossy_black_pupil_5cde1_01",
+            "material": "Glossy black pupil",
+            "triangles": 3680
+          },
+          {
+            "name": "Furbomek_Boss_F069__Fine_dark_crown_fibres_5ed8b_01",
+            "material": "Fine dark crown fibres",
+            "triangles": 1499
+          },
+          {
+            "name": "Furbomek_Boss_F069__Fine_black_eyelashes_0b80a_01",
+            "material": "Fine black eyelashes",
+            "triangles": 9504
+          },
+          {
+            "name": "Furbomek_Boss_F069__Foot_elastomer_21412_01",
+            "material": "Foot elastomer",
+            "triangles": 3720
+          }
+        ],
+        "target_height_studs": 18,
+        "baked_scale": 3.0690538974128447,
+        "source_bounds": [
+          [
+            -3.7129998207092285,
+            -2.5858194828033447,
+            0.014999998733401299
+          ],
+          [
+            3.7129998207092285,
+            2.5858194828033447,
+            5.87999963760376
+          ]
+        ],
+        "glb_triangles": 327835
+      },
+      "rigging": "static/unrigged",
+      "sanitization": {
+        "geometry_fingerprint_unchanged": true,
+        "saved_readback_fingerprint_unchanged": true,
+        "removed_reference_objects": [
+          "control_path",
+          "head_actuation_control_deck",
+          "onboard_control_electronics",
+          "physical_system",
+          "Video reference 2",
+          "Video reference 3",
+          "Video reference 5"
+        ],
+        "images_remaining": 0
+      },
+      "materials": {
+        "Bracket hardware": {
+          "linear_rgba": [
+            0.4300000071525574,
+            0.46000000834465027,
+            0.4699999988079071,
+            1.0
+          ],
+          "srgb_rgb": [
+            175,
+            181,
+            182
+          ],
+          "double_sided": true
+        },
+        "Plain metal battery sleeves": {
+          "linear_rgba": [
+            0.10999999940395355,
+            0.12999999523162842,
+            0.14000000059604645,
+            1.0
+          ],
+          "srgb_rgb": [
+            93,
+            101,
+            105
+          ],
+          "double_sided": true
+        },
+        "Moulded black ABS": {
+          "linear_rgba": [
+            0.017999999225139618,
+            0.020999999716877937,
+            0.02199999988079071,
+            1.0
+          ],
+          "srgb_rgb": [
+            36,
+            40,
+            41
+          ],
+          "double_sided": true
+        },
+        "Jet black plush": {
+          "linear_rgba": [
+            0.006000000052154064,
+            0.007000000216066837,
+            0.00800000037997961,
+            1.0
+          ],
+          "srgb_rgb": [
+            18,
+            20,
+            22
+          ],
+          "double_sided": true
+        },
+        "Chestnut iris": {
+          "linear_rgba": [
+            0.17000000178813934,
+            0.06800000369548798,
+            0.024000000208616257,
+            1.0
+          ],
+          "srgb_rgb": [
+            115,
+            74,
+            43
+          ],
+          "double_sided": true
+        },
+        "Controller green board": {
+          "linear_rgba": [
+            0.019999999552965164,
+            0.08500000089406967,
+            0.04500000178813934,
+            1.0
+          ],
+          "srgb_rgb": [
+            39,
+            82,
+            60
+          ],
+          "double_sided": true
+        },
+        "Black controller PCB": {
+          "linear_rgba": [
+            0.01600000075995922,
+            0.02500000037252903,
+            0.024000000208616257,
+            1.0
+          ],
+          "srgb_rgb": [
+            34,
+            44,
+            43
+          ],
+          "double_sided": true
+        },
+        "White eye plastic": {
+          "linear_rgba": [
+            0.8399999737739563,
+            0.8500000238418579,
+            0.7799999713897705,
+            1.0
+          ],
+          "srgb_rgb": [
+            236,
+            237,
+            229
+          ],
+          "double_sided": true
+        },
+        "Orange servo lead": {
+          "linear_rgba": [
+            0.5600000023841858,
+            0.20000000298023224,
+            0.041999999433755875,
+            1.0
+          ],
+          "srgb_rgb": [
+            197,
+            124,
+            58
+          ],
+          "double_sided": true
+        },
+        "Red supply lead": {
+          "linear_rgba": [
+            0.3199999928474426,
+            0.014000000432133675,
+            0.014999999664723873,
+            1.0
+          ],
+          "srgb_rgb": [
+            153,
+            31,
+            33
+          ],
+          "double_sided": true
+        },
+        "Dark iris fibres": {
+          "linear_rgba": [
+            0.041999999433755875,
+            0.01600000075995922,
+            0.00800000037997961,
+            1.0
+          ],
+          "srgb_rgb": [
+            58,
+            34,
+            22
+          ],
+          "double_sided": true
+        },
+        "Soft charcoal fibres": {
+          "linear_rgba": [
+            0.012000000104308128,
+            0.014000000432133675,
+            0.01600000075995922,
+            1.0
+          ],
+          "srgb_rgb": [
+            29,
+            31,
+            34
+          ],
+          "double_sided": true
+        },
+        "Deep black fibres": {
+          "linear_rgba": [
+            0.003000000026077032,
+            0.004000000189989805,
+            0.004999999888241291,
+            1.0
+          ],
+          "srgb_rgb": [
+            10,
+            13,
+            16
+          ],
+          "double_sided": true
+        },
+        "Battery bay black plastic": {
+          "linear_rgba": [
+            0.014999999664723873,
+            0.017999999225139618,
+            0.017999999225139618,
+            1.0
+          ],
+          "srgb_rgb": [
+            33,
+            36,
+            36
+          ],
+          "double_sided": true
+        },
+        "Yellow beak": {
+          "linear_rgba": [
+            0.949999988079071,
+            0.6800000071525574,
+            0.00800000037997961,
+            1.0
+          ],
+          "srgb_rgb": [
+            249,
+            215,
+            22
+          ],
+          "double_sided": true
+        },
+        "Deep mouth cavity": {
+          "linear_rgba": [
+            0.004999999888241291,
+            0.0020000000949949026,
+            0.0010000000474974513,
+            1.0
+          ],
+          "srgb_rgb": [
+            16,
+            7,
+            3
+          ],
+          "double_sided": true
+        },
+        "Charcoal body casing": {
+          "linear_rgba": [
+            0.04699999839067459,
+            0.05700000002980232,
+            0.05700000002980232,
+            1.0
+          ],
+          "srgb_rgb": [
+            61,
+            68,
+            68
+          ],
+          "double_sided": true
+        },
+        "Amber iris fibres": {
+          "linear_rgba": [
+            0.20000000298023224,
+            0.08399999886751175,
+            0.026000000536441803,
+            1.0
+          ],
+          "srgb_rgb": [
+            124,
+            82,
+            45
+          ],
+          "double_sided": true
+        },
+        "Recessed red mouth": {
+          "linear_rgba": [
+            0.2199999988079071,
+            0.00800000037997961,
+            0.004999999888241291,
+            1.0
+          ],
+          "srgb_rgb": [
+            129,
+            22,
+            16
+          ],
+          "double_sided": true
+        },
+        "Glossy black pupil": {
+          "linear_rgba": [
+            0.0020000000949949026,
+            0.003000000026077032,
+            0.003000000026077032,
+            1.0
+          ],
+          "srgb_rgb": [
+            7,
+            10,
+            10
+          ],
+          "double_sided": true
+        },
+        "Fine dark crown fibres": {
+          "linear_rgba": [
+            0.008999999612569809,
+            0.009999999776482582,
+            0.008999999612569809,
+            1.0
+          ],
+          "srgb_rgb": [
+            24,
+            25,
+            24
+          ],
+          "double_sided": true
+        },
+        "Fine black eyelashes": {
+          "linear_rgba": [
+            0.008999999612569809,
+            0.00800000037997961,
+            0.006000000052154064,
+            1.0
+          ],
+          "srgb_rgb": [
+            24,
+            22,
+            18
+          ],
+          "double_sided": true
+        },
+        "v7 satin black bracket metal": {
+          "linear_rgba": [
+            0.017999999225139618,
+            0.02199999988079071,
+            0.023000000044703484,
+            1.0
+          ],
+          "srgb_rgb": [
+            36,
+            41,
+            42
+          ],
+          "double_sided": true
+        },
+        "v7 recessed screw sockets": {
+          "linear_rgba": [
+            0.003000000026077032,
+            0.004000000189989805,
+            0.004000000189989805,
+            1.0
+          ],
+          "srgb_rgb": [
+            10,
+            13,
+            13
+          ],
+          "double_sided": true
+        },
+        "Foot elastomer": {
+          "linear_rgba": [
+            0.00800000037997961,
+            0.012000000104308128,
+            0.012000000104308128,
+            1.0
+          ],
+          "srgb_rgb": [
+            22,
+            29,
+            29
+          ],
+          "double_sided": true
+        }
+      },
+      "roblox_position": [
+        0,
+        0,
+        16
+      ]
+    },
+    {
+      "id": "01",
+      "display_name": "Armored Smile Hexapod",
+      "scene_model_name": "Swarm_01_ArmoredSmile",
+      "files": {
+        "blender": "blender/01_armored_smile_hexapod.blend",
+        "glb": "exports/glb/Swarm_01_ArmoredSmile.glb",
+        "fbx": "exports/roblox/Swarm_01_ArmoredSmile.fbx",
+        "preview": "previews/01_armored_smile_hexapod_threequarter.png"
+      },
+      "evidence_status": "reference/inferred",
+      "reference_descriptor": "User-provided concept sheet panel 01",
+      "features": [
+        "six broad articulated armored legs",
+        "flat rectangular footplates",
+        "round segmented riveted torso",
+        "helmet with inset cheerful face",
+        "exposed lower mechanics",
+        "warm neutral armor"
+      ],
+      "geometry": {
+        "native_mesh_objects": 609,
+        "native_vertices": 41204,
+        "native_faces": 37951,
+        "source_model_objects": 608,
+        "source_evaluated_triangles": 105804,
+        "game_mesh_chunks": 6,
+        "game_triangles_before_fbx": 52536,
+        "max_chunk_triangles": 18000,
+        "chunks": [
+          {
+            "name": "Swarm_01_ArmoredSmile__01_Armored_Smile_Hexapod_machined_e_42a56_01",
+            "material": "01 Armored Smile Hexapod machined edges",
+            "triangles": 18000
+          },
+          {
+            "name": "Swarm_01_ArmoredSmile__01_Armored_Smile_Hexapod_machined_e_42a56_02",
+            "material": "01 Armored Smile Hexapod machined edges",
+            "triangles": 12890
+          },
+          {
+            "name": "Swarm_01_ArmoredSmile__01_Armored_Smile_Hexapod_recesses_e6457_01",
+            "material": "01 Armored Smile Hexapod recesses",
+            "triangles": 5756
+          },
+          {
+            "name": "Swarm_01_ArmoredSmile__01_Armored_Smile_Hexapod_pale_warm__18a35_01",
+            "material": "01 Armored Smile Hexapod pale warm enamel",
+            "triangles": 3172
+          },
+          {
+            "name": "Swarm_01_ArmoredSmile__01_Armored_Smile_Hexapod_dark_steel_0daca_01",
+            "material": "01 Armored Smile Hexapod dark steel",
+            "triangles": 3758
+          },
+          {
+            "name": "Swarm_01_ArmoredSmile__01_Armored_Smile_Hexapod_cast_porce_f5958_01",
+            "material": "01 Armored Smile Hexapod cast porcelain mask",
+            "triangles": 8960
+          }
+        ],
+        "target_height_studs": 7,
+        "baked_scale": 2.978723525137537,
+        "source_bounds": [
+          [
+            -1.5550999641418457,
+            -1.1445000171661377,
+            0.0
+          ],
+          [
+            1.5550999641418457,
+            1.1445000171661377,
+            2.3499999046325684
+          ]
+        ],
+        "glb_triangles": 52536
+      },
+      "rigging": "static/unrigged",
+      "sanitization": {
+        "geometry_fingerprint_unchanged": true,
+        "saved_readback_fingerprint_unchanged": true,
+        "removed_reference_objects": [],
+        "images_remaining": 0
+      },
+      "materials": {
+        "01 Armored Smile Hexapod recesses": {
+          "linear_rgba": [
+            0.014999999664723873,
+            0.01899999938905239,
+            0.02199999988079071,
+            1.0
+          ],
+          "srgb_rgb": [
+            33,
+            38,
+            41
+          ],
+          "double_sided": true
+        },
+        "01 Armored Smile Hexapod pale warm enamel": {
+          "linear_rgba": [
+            0.5699999928474426,
+            0.5600000023841858,
+            0.47999998927116394,
+            1.0
+          ],
+          "srgb_rgb": [
+            199,
+            197,
+            184
+          ],
+          "double_sided": true
+        },
+        "01 Armored Smile Hexapod machined edges": {
+          "linear_rgba": [
+            0.6299999952316284,
+            0.6499999761581421,
+            0.6100000143051147,
+            1.0
+          ],
+          "srgb_rgb": [
+            208,
+            211,
+            205
+          ],
+          "double_sided": true
+        },
+        "01 Armored Smile Hexapod dark steel": {
+          "linear_rgba": [
+            0.12999999523162842,
+            0.15000000596046448,
+            0.15000000596046448,
+            1.0
+          ],
+          "srgb_rgb": [
+            101,
+            108,
+            108
+          ],
+          "double_sided": true
+        },
+        "01 Armored Smile Hexapod cast porcelain mask": {
+          "linear_rgba": [
+            0.7599999904632568,
+            0.75,
+            0.6499999761581421,
+            1.0
+          ],
+          "srgb_rgb": [
+            226,
+            225,
+            211
+          ],
+          "double_sided": true
+        }
+      },
+      "roblox_position": [
+        -25,
+        0,
+        25
+      ]
+    },
+    {
+      "id": "02",
+      "display_name": "Fur Needle Scout",
+      "scene_model_name": "Swarm_02_FurScout",
+      "files": {
+        "blender": "blender/02_fur_needle_scout.blend",
+        "glb": "exports/glb/Swarm_02_FurScout.glb",
+        "fbx": "exports/roblox/Swarm_02_FurScout.fbx",
+        "preview": "previews/02_fur_needle_scout_threequarter.png"
+      },
+      "evidence_status": "reference/inferred",
+      "reference_descriptor": "User-provided concept sheet panel 02",
+      "features": [
+        "large pear shaped white and black furry Furby",
+        "large pointed ears",
+        "wide eyes and yellow beak",
+        "compact stacked rectangular underside",
+        "six slender articulated needle legs",
+        "tall crown tuft"
+      ],
+      "geometry": {
+        "native_mesh_objects": 299,
+        "native_vertices": 45743,
+        "native_faces": 32310,
+        "source_model_objects": 298,
+        "source_evaluated_triangles": 73775,
+        "game_mesh_chunks": 9,
+        "game_triangles_before_fbx": 45939,
+        "max_chunk_triangles": 13957,
+        "chunks": [
+          {
+            "name": "Swarm_02_FurScout__02_Fur_Needle_Scout_machined_edges_a9413_01",
+            "material": "02 Fur Needle Scout machined edges",
+            "triangles": 13957
+          },
+          {
+            "name": "Swarm_02_FurScout__02_Fur_Needle_Scout_recesses_62fd4_01",
+            "material": "02 Fur Needle Scout recesses",
+            "triangles": 6255
+          },
+          {
+            "name": "Swarm_02_FurScout__02_Fur_Needle_Scout_warm_painted_al_b8c29_01",
+            "material": "02 Fur Needle Scout warm painted alloy",
+            "triangles": 636
+          },
+          {
+            "name": "Swarm_02_FurScout__02_Fur_Needle_Scout_soft_fur_04482_01",
+            "material": "02 Fur Needle Scout soft fur",
+            "triangles": 10357
+          },
+          {
+            "name": "Swarm_02_FurScout__02_Fur_Needle_Scout_ivory_eye_mask_5cd4d_01",
+            "material": "02 Fur Needle Scout ivory eye mask",
+            "triangles": 7680
+          },
+          {
+            "name": "Swarm_02_FurScout__02_Fur_Needle_Scout_dark_steel_3b4b1_01",
+            "material": "02 Fur Needle Scout dark steel",
+            "triangles": 1922
+          },
+          {
+            "name": "Swarm_02_FurScout__02_Fur_Needle_Scout_smoky_iris_050ff_01",
+            "material": "02 Fur Needle Scout smoky iris",
+            "triangles": 2560
+          },
+          {
+            "name": "Swarm_02_FurScout__02_Fur_Needle_Scout_split_beak_c430e_01",
+            "material": "02 Fur Needle Scout split beak",
+            "triangles": 2560
+          },
+          {
+            "name": "Swarm_02_FurScout__02_Fur_Needle_Scout_ear_velvet_18b11_01",
+            "material": "02 Fur Needle Scout ear velvet",
+            "triangles": 12
+          }
+        ],
+        "target_height_studs": 7,
+        "baked_scale": 2.658519222114872,
+        "source_bounds": [
+          [
+            -0.9783324003219604,
+            -0.7284827828407288,
+            0.0
+          ],
+          [
+            0.9783324003219604,
+            0.7284824848175049,
+            2.633044719696045
+          ]
+        ],
+        "glb_triangles": 45939
+      },
+      "rigging": "static/unrigged",
+      "sanitization": {
+        "geometry_fingerprint_unchanged": true,
+        "saved_readback_fingerprint_unchanged": true,
+        "removed_reference_objects": [],
+        "images_remaining": 0
+      },
+      "materials": {
+        "02 Fur Needle Scout recesses": {
+          "linear_rgba": [
+            0.014999999664723873,
+            0.01899999938905239,
+            0.02199999988079071,
+            1.0
+          ],
+          "srgb_rgb": [
+            33,
+            38,
+            41
+          ],
+          "double_sided": true
+        },
+        "02 Fur Needle Scout warm painted alloy": {
+          "linear_rgba": [
+            0.4300000071525574,
+            0.4399999976158142,
+            0.4000000059604645,
+            1.0
+          ],
+          "srgb_rgb": [
+            175,
+            177,
+            170
+          ],
+          "double_sided": true
+        },
+        "02 Fur Needle Scout machined edges": {
+          "linear_rgba": [
+            0.6299999952316284,
+            0.6499999761581421,
+            0.6100000143051147,
+            1.0
+          ],
+          "srgb_rgb": [
+            208,
+            211,
+            205
+          ],
+          "double_sided": true
+        },
+        "02 Fur Needle Scout soft fur": {
+          "linear_rgba": [
+            0.8600000143051147,
+            0.8600000143051147,
+            0.8100000023841858,
+            1.0
+          ],
+          "srgb_rgb": [
+            239,
+            239,
+            232
+          ],
+          "double_sided": true
+        },
+        "02 Fur Needle Scout ivory eye mask": {
+          "linear_rgba": [
+            0.8999999761581421,
+            0.8899999856948853,
+            0.7799999713897705,
+            1.0
+          ],
+          "srgb_rgb": [
+            243,
+            242,
+            229
+          ],
+          "double_sided": true
+        },
+        "02 Fur Needle Scout dark steel": {
+          "linear_rgba": [
+            0.12999999523162842,
+            0.15000000596046448,
+            0.15000000596046448,
+            1.0
+          ],
+          "srgb_rgb": [
+            101,
+            108,
+            108
+          ],
+          "double_sided": true
+        },
+        "02 Fur Needle Scout smoky iris": {
+          "linear_rgba": [
+            0.23000000417232513,
+            0.3199999928474426,
+            0.27000001072883606,
+            1.0
+          ],
+          "srgb_rgb": [
+            132,
+            153,
+            142
+          ],
+          "double_sided": true
+        },
+        "02 Fur Needle Scout split beak": {
+          "linear_rgba": [
+            0.8999999761581421,
+            0.5799999833106995,
+            0.02500000037252903,
+            1.0
+          ],
+          "srgb_rgb": [
+            243,
+            200,
+            44
+          ],
+          "double_sided": true
+        },
+        "02 Fur Needle Scout ear velvet": {
+          "linear_rgba": [
+            0.10000000149011612,
+            0.11999999731779099,
+            0.11999999731779099,
+            1.0
+          ],
+          "srgb_rgb": [
+            89,
+            97,
+            97
+          ],
+          "double_sided": true
+        }
+      },
+      "roblox_position": [
+        24,
+        0,
+        31
+      ]
+    },
+    {
+      "id": "03",
+      "display_name": "Skull Sentinel",
+      "scene_model_name": "Swarm_03_SkullSentinel",
+      "files": {
+        "blender": "blender/03_skull_sentinel.blend",
+        "glb": "exports/glb/Swarm_03_SkullSentinel.glb",
+        "fbx": "exports/roblox/Swarm_03_SkullSentinel.fbx",
+        "preview": "previews/03_skull_sentinel_threequarter.png"
+      },
+      "evidence_status": "reference/inferred",
+      "reference_descriptor": "User-provided concept sheet panel 03",
+      "features": [
+        "six angled armored spear legs",
+        "spherical domed panel helmet",
+        "round black eyes",
+        "skull-like cheek teeth and muzzle",
+        "symmetrical side hardware",
+        "central exposed mechanisms"
+      ],
+      "geometry": {
+        "native_mesh_objects": 617,
+        "native_vertices": 39388,
+        "native_faces": 36153,
+        "source_model_objects": 616,
+        "source_evaluated_triangles": 102608,
+        "game_mesh_chunks": 6,
+        "game_triangles_before_fbx": 48700,
+        "max_chunk_triangles": 18000,
+        "chunks": [
+          {
+            "name": "Swarm_03_SkullSentinel__03_Skull_Sentinel_machined_edges_bb09a_01",
+            "material": "03 Skull Sentinel machined edges",
+            "triangles": 18000
+          },
+          {
+            "name": "Swarm_03_SkullSentinel__03_Skull_Sentinel_machined_edges_bb09a_02",
+            "material": "03 Skull Sentinel machined edges",
+            "triangles": 12744
+          },
+          {
+            "name": "Swarm_03_SkullSentinel__03_Skull_Sentinel_recesses_c6f05_01",
+            "material": "03 Skull Sentinel recesses",
+            "triangles": 6332
+          },
+          {
+            "name": "Swarm_03_SkullSentinel__03_Skull_Sentinel_warm_painted_allo_fa400_01",
+            "material": "03 Skull Sentinel warm painted alloy",
+            "triangles": 3270
+          },
+          {
+            "name": "Swarm_03_SkullSentinel__03_Skull_Sentinel_dark_steel_f2b1c_01",
+            "material": "03 Skull Sentinel dark steel",
+            "triangles": 3758
+          },
+          {
+            "name": "Swarm_03_SkullSentinel__03_Skull_Sentinel_cast_porcelain_ma_76037_01",
+            "material": "03 Skull Sentinel cast porcelain mask",
+            "triangles": 4596
+          }
+        ],
+        "target_height_studs": 7,
+        "baked_scale": 3.0710865574022903,
+        "source_bounds": [
+          [
+            -1.559314250946045,
+            -1.0926079750061035,
+            0.0
+          ],
+          [
+            1.5593141317367554,
+            1.0926077365875244,
+            2.2793235778808594
+          ]
+        ],
+        "glb_triangles": 48700
+      },
+      "rigging": "static/unrigged",
+      "sanitization": {
+        "geometry_fingerprint_unchanged": true,
+        "saved_readback_fingerprint_unchanged": true,
+        "removed_reference_objects": [],
+        "images_remaining": 0
+      },
+      "materials": {
+        "03 Skull Sentinel recesses": {
+          "linear_rgba": [
+            0.014999999664723873,
+            0.01899999938905239,
+            0.02199999988079071,
+            1.0
+          ],
+          "srgb_rgb": [
+            33,
+            38,
+            41
+          ],
+          "double_sided": true
+        },
+        "03 Skull Sentinel warm painted alloy": {
+          "linear_rgba": [
+            0.4300000071525574,
+            0.4399999976158142,
+            0.4000000059604645,
+            1.0
+          ],
+          "srgb_rgb": [
+            175,
+            177,
+            170
+          ],
+          "double_sided": true
+        },
+        "03 Skull Sentinel machined edges": {
+          "linear_rgba": [
+            0.6299999952316284,
+            0.6499999761581421,
+            0.6100000143051147,
+            1.0
+          ],
+          "srgb_rgb": [
+            208,
+            211,
+            205
+          ],
+          "double_sided": true
+        },
+        "03 Skull Sentinel dark steel": {
+          "linear_rgba": [
+            0.12999999523162842,
+            0.15000000596046448,
+            0.15000000596046448,
+            1.0
+          ],
+          "srgb_rgb": [
+            101,
+            108,
+            108
+          ],
+          "double_sided": true
+        },
+        "03 Skull Sentinel cast porcelain mask": {
+          "linear_rgba": [
+            0.7599999904632568,
+            0.75,
+            0.6499999761581421,
+            1.0
+          ],
+          "srgb_rgb": [
+            226,
+            225,
+            211
+          ],
+          "double_sided": true
+        }
+      },
+      "roblox_position": [
+        -34,
+        0,
+        -1
+      ]
+    },
+    {
+      "id": "04",
+      "display_name": "Cannon Quadruped",
+      "scene_model_name": "Swarm_04_CannonWalker",
+      "files": {
+        "blender": "blender/04_cannon_quadruped.blend",
+        "glb": "exports/glb/Swarm_04_CannonWalker.glb",
+        "fbx": "exports/roblox/Swarm_04_CannonWalker.fbx",
+        "preview": "previews/04_cannon_quadruped_threequarter.png"
+      },
+      "evidence_status": "reference/inferred",
+      "reference_descriptor": "User-provided concept sheet panel 04",
+      "features": [
+        "four heavy armored articulated legs",
+        "long forward ribbed cannon",
+        "angular squat vehicle hull",
+        "white tufted Furby head",
+        "horizontal capsule equipment pod behind head",
+        "tapered feet with tread detail"
+      ],
+      "geometry": {
+        "native_mesh_objects": 421,
+        "native_vertices": 52319,
+        "native_faces": 38608,
+        "source_model_objects": 420,
+        "source_evaluated_triangles": 93243,
+        "game_mesh_chunks": 9,
+        "game_triangles_before_fbx": 54397,
+        "max_chunk_triangles": 18000,
+        "chunks": [
+          {
+            "name": "Swarm_04_CannonWalker__04_Cannon_Quadruped_machined_edges_09881_01",
+            "material": "04 Cannon Quadruped machined edges",
+            "triangles": 18000
+          },
+          {
+            "name": "Swarm_04_CannonWalker__04_Cannon_Quadruped_machined_edges_09881_02",
+            "material": "04 Cannon Quadruped machined edges",
+            "triangles": 1759
+          },
+          {
+            "name": "Swarm_04_CannonWalker__04_Cannon_Quadruped_warm_painted_al_b8795_01",
+            "material": "04 Cannon Quadruped warm painted alloy",
+            "triangles": 646
+          },
+          {
+            "name": "Swarm_04_CannonWalker__04_Cannon_Quadruped_dark_steel_39a2e_01",
+            "material": "04 Cannon Quadruped dark steel",
+            "triangles": 3740
+          },
+          {
+            "name": "Swarm_04_CannonWalker__04_Cannon_Quadruped_recesses_f091e_01",
+            "material": "04 Cannon Quadruped recesses",
+            "triangles": 7631
+          },
+          {
+            "name": "Swarm_04_CannonWalker__04_Cannon_Quadruped_soft_fur_f5c49_01",
+            "material": "04 Cannon Quadruped soft fur",
+            "triangles": 9821
+          },
+          {
+            "name": "Swarm_04_CannonWalker__04_Cannon_Quadruped_ivory_eye_mask_99d98_01",
+            "material": "04 Cannon Quadruped ivory eye mask",
+            "triangles": 7680
+          },
+          {
+            "name": "Swarm_04_CannonWalker__04_Cannon_Quadruped_smoky_iris_4592e_01",
+            "material": "04 Cannon Quadruped smoky iris",
+            "triangles": 2560
+          },
+          {
+            "name": "Swarm_04_CannonWalker__04_Cannon_Quadruped_split_beak_32be1_01",
+            "material": "04 Cannon Quadruped split beak",
+            "triangles": 2560
+          }
+        ],
+        "target_height_studs": 7,
+        "baked_scale": 2.8843959574620257,
+        "source_bounds": [
+          [
+            -1.5282000303268433,
+            -2.618259906768799,
+            0.0
+          ],
+          [
+            1.5282000303268433,
+            1.2289999723434448,
+            2.426851272583008
+          ]
+        ],
+        "glb_triangles": 54397
+      },
+      "rigging": "static/unrigged",
+      "sanitization": {
+        "geometry_fingerprint_unchanged": true,
+        "saved_readback_fingerprint_unchanged": true,
+        "removed_reference_objects": [],
+        "images_remaining": 0
+      },
+      "materials": {
+        "04 Cannon Quadruped warm painted alloy": {
+          "linear_rgba": [
+            0.4300000071525574,
+            0.4399999976158142,
+            0.4000000059604645,
+            1.0
+          ],
+          "srgb_rgb": [
+            175,
+            177,
+            170
+          ],
+          "double_sided": true
+        },
+        "04 Cannon Quadruped dark steel": {
+          "linear_rgba": [
+            0.12999999523162842,
+            0.15000000596046448,
+            0.15000000596046448,
+            1.0
+          ],
+          "srgb_rgb": [
+            101,
+            108,
+            108
+          ],
+          "double_sided": true
+        },
+        "04 Cannon Quadruped recesses": {
+          "linear_rgba": [
+            0.014999999664723873,
+            0.01899999938905239,
+            0.02199999988079071,
+            1.0
+          ],
+          "srgb_rgb": [
+            33,
+            38,
+            41
+          ],
+          "double_sided": true
+        },
+        "04 Cannon Quadruped machined edges": {
+          "linear_rgba": [
+            0.6299999952316284,
+            0.6499999761581421,
+            0.6100000143051147,
+            1.0
+          ],
+          "srgb_rgb": [
+            208,
+            211,
+            205
+          ],
+          "double_sided": true
+        },
+        "04 Cannon Quadruped soft fur": {
+          "linear_rgba": [
+            0.8600000143051147,
+            0.8500000238418579,
+            0.7900000214576721,
+            1.0
+          ],
+          "srgb_rgb": [
+            239,
+            237,
+            230
+          ],
+          "double_sided": true
+        },
+        "04 Cannon Quadruped ivory eye mask": {
+          "linear_rgba": [
+            0.8999999761581421,
+            0.8899999856948853,
+            0.7799999713897705,
+            1.0
+          ],
+          "srgb_rgb": [
+            243,
+            242,
+            229
+          ],
+          "double_sided": true
+        },
+        "04 Cannon Quadruped smoky iris": {
+          "linear_rgba": [
+            0.23000000417232513,
+            0.3199999928474426,
+            0.27000001072883606,
+            1.0
+          ],
+          "srgb_rgb": [
+            132,
+            153,
+            142
+          ],
+          "double_sided": true
+        },
+        "04 Cannon Quadruped split beak": {
+          "linear_rgba": [
+            0.8999999761581421,
+            0.5799999833106995,
+            0.02500000037252903,
+            1.0
+          ],
+          "srgb_rgb": [
+            243,
+            200,
+            44
+          ],
+          "double_sided": true
+        }
+      },
+      "roblox_position": [
+        34,
+        0,
+        2
+      ]
+    },
+    {
+      "id": "05",
+      "display_name": "Tracked Graft Tank",
+      "scene_model_name": "Cudgel_Tank_01",
+      "files": {
+        "blender": "blender/05_tracked_graft_tank.blend",
+        "glb": "exports/glb/Cudgel_Tank_01.glb",
+        "fbx": "exports/roblox/Cudgel_Tank_01.fbx",
+        "preview": "previews/05_tracked_graft_tank_threequarter.png"
+      },
+      "evidence_status": "reference/inferred",
+      "reference_descriptor": "User-provided concept sheet panel 05",
+      "features": [
+        "two continuous linked tracks",
+        "large road wheels and sprockets",
+        "sloped armored hull",
+        "round riveted turret",
+        "long spiked forward barrel",
+        "paired small forward claw arms",
+        "Furby graft head on turret from inset"
+      ],
+      "geometry": {
+        "native_mesh_objects": 809,
+        "native_vertices": 51303,
+        "native_faces": 34344,
+        "source_model_objects": 808,
+        "source_evaluated_triangles": 102419,
+        "game_mesh_chunks": 13,
+        "game_triangles_before_fbx": 61497,
+        "max_chunk_triangles": 15219,
+        "chunks": [
+          {
+            "name": "Cudgel_Tank_01__05_tracked_graft_tank_satin_pale_al_c7692_01",
+            "material": "05_tracked_graft_tank satin pale alloy",
+            "triangles": 10827
+          },
+          {
+            "name": "Cudgel_Tank_01__05_tracked_graft_tank_recessed_gunm_b141d_01",
+            "material": "05_tracked_graft_tank recessed gunmetal",
+            "triangles": 8142
+          },
+          {
+            "name": "Cudgel_Tank_01__05_tracked_graft_tank_machined_edge_886a1_01",
+            "material": "05_tracked_graft_tank machined edges",
+            "triangles": 7850
+          },
+          {
+            "name": "Cudgel_Tank_01__05_tracked_graft_tank_recesses_b2248_01",
+            "material": "05_tracked_graft_tank recesses",
+            "triangles": 2359
+          },
+          {
+            "name": "Cudgel_Tank_01__05_tracked_graft_tank_warm_painted__7d01c_01",
+            "material": "05_tracked_graft_tank warm painted alloy",
+            "triangles": 54
+          },
+          {
+            "name": "Cudgel_Tank_01__05_tracked_graft_tank_soft_fur_4d2c6_01",
+            "material": "05_tracked_graft_tank soft fur",
+            "triangles": 15219
+          },
+          {
+            "name": "Cudgel_Tank_01__05_tracked_graft_tank_ivory_eye_mas_7733c_01",
+            "material": "05_tracked_graft_tank ivory eye mask",
+            "triangles": 7680
+          },
+          {
+            "name": "Cudgel_Tank_01__05_tracked_graft_tank_machined_edge_92737_01",
+            "material": "05_tracked_graft_tank machined edge",
+            "triangles": 3622
+          },
+          {
+            "name": "Cudgel_Tank_01__05_tracked_graft_tank_smoky_iris_a0908_01",
+            "material": "05_tracked_graft_tank smoky iris",
+            "triangles": 2560
+          },
+          {
+            "name": "Cudgel_Tank_01__05_tracked_graft_tank_dark_steel_1d1ab_01",
+            "material": "05_tracked_graft_tank dark steel",
+            "triangles": 54
+          },
+          {
+            "name": "Cudgel_Tank_01__05_tracked_graft_tank_split_beak_22b10_01",
+            "material": "05_tracked_graft_tank split beak",
+            "triangles": 2560
+          },
+          {
+            "name": "Cudgel_Tank_01__05_tracked_graft_tank_ear_velvet_15cf5_01",
+            "material": "05_tracked_graft_tank ear velvet",
+            "triangles": 12
+          },
+          {
+            "name": "Cudgel_Tank_01__05_tracked_graft_tank_track_rubber_0a761_01",
+            "material": "05_tracked_graft_tank track rubber",
+            "triangles": 558
+          }
+        ],
+        "target_height_studs": 6,
+        "baked_scale": 2.374156737845625,
+        "source_bounds": [
+          [
+            -1.3571597337722778,
+            -2.5539798736572266,
+            5.513035583604164e-10
+          ],
+          [
+            1.3571597337722778,
+            1.4830000400543213,
+            2.5272130966186523
+          ]
+        ],
+        "glb_triangles": 61497
+      },
+      "rigging": "static/unrigged",
+      "sanitization": {
+        "geometry_fingerprint_unchanged": true,
+        "saved_readback_fingerprint_unchanged": true,
+        "removed_reference_objects": [],
+        "images_remaining": 0
+      },
+      "materials": {
+        "05_tracked_graft_tank satin pale alloy": {
+          "linear_rgba": [
+            0.47999998927116394,
+            0.5099999904632568,
+            0.5099999904632568,
+            1.0
+          ],
+          "srgb_rgb": [
+            184,
+            189,
+            189
+          ],
+          "double_sided": true
+        },
+        "05_tracked_graft_tank machined edges": {
+          "linear_rgba": [
+            0.6299999952316284,
+            0.6499999761581421,
+            0.6100000143051147,
+            1.0
+          ],
+          "srgb_rgb": [
+            208,
+            211,
+            205
+          ],
+          "double_sided": true
+        },
+        "05_tracked_graft_tank recesses": {
+          "linear_rgba": [
+            0.014999999664723873,
+            0.01899999938905239,
+            0.02199999988079071,
+            1.0
+          ],
+          "srgb_rgb": [
+            33,
+            38,
+            41
+          ],
+          "double_sided": true
+        },
+        "05_tracked_graft_tank warm painted alloy": {
+          "linear_rgba": [
+            0.4300000071525574,
+            0.4399999976158142,
+            0.4000000059604645,
+            1.0
+          ],
+          "srgb_rgb": [
+            175,
+            177,
+            170
+          ],
+          "double_sided": true
+        },
+        "05_tracked_graft_tank recessed gunmetal": {
+          "linear_rgba": [
+            0.054999999701976776,
+            0.0689999982714653,
+            0.07500000298023224,
+            1.0
+          ],
+          "srgb_rgb": [
+            66,
+            74,
+            77
+          ],
+          "double_sided": true
+        },
+        "05_tracked_graft_tank soft fur": {
+          "linear_rgba": [
+            0.7799999713897705,
+            0.800000011920929,
+            0.7300000190734863,
+            1.0
+          ],
+          "srgb_rgb": [
+            229,
+            231,
+            222
+          ],
+          "double_sided": true
+        },
+        "05_tracked_graft_tank ivory eye mask": {
+          "linear_rgba": [
+            0.8999999761581421,
+            0.8899999856948853,
+            0.7799999713897705,
+            1.0
+          ],
+          "srgb_rgb": [
+            243,
+            242,
+            229
+          ],
+          "double_sided": true
+        },
+        "05_tracked_graft_tank machined edge": {
+          "linear_rgba": [
+            0.6899999976158142,
+            0.7200000286102295,
+            0.699999988079071,
+            1.0
+          ],
+          "srgb_rgb": [
+            216,
+            221,
+            218
+          ],
+          "double_sided": true
+        },
+        "05_tracked_graft_tank smoky iris": {
+          "linear_rgba": [
+            0.23000000417232513,
+            0.3199999928474426,
+            0.27000001072883606,
+            1.0
+          ],
+          "srgb_rgb": [
+            132,
+            153,
+            142
+          ],
+          "double_sided": true
+        },
+        "05_tracked_graft_tank dark steel": {
+          "linear_rgba": [
+            0.12999999523162842,
+            0.15000000596046448,
+            0.15000000596046448,
+            1.0
+          ],
+          "srgb_rgb": [
+            101,
+            108,
+            108
+          ],
+          "double_sided": true
+        },
+        "05_tracked_graft_tank split beak": {
+          "linear_rgba": [
+            0.6499999761581421,
+            0.6399999856948853,
+            0.5199999809265137,
+            1.0
+          ],
+          "srgb_rgb": [
+            211,
+            209,
+            191
+          ],
+          "double_sided": true
+        },
+        "05_tracked_graft_tank ear velvet": {
+          "linear_rgba": [
+            0.3199999928474426,
+            0.33000001311302185,
+            0.30000001192092896,
+            1.0
+          ],
+          "srgb_rgb": [
+            153,
+            155,
+            149
+          ],
+          "double_sided": true
+        },
+        "05_tracked_graft_tank track rubber": {
+          "linear_rgba": [
+            0.027000000700354576,
+            0.032999999821186066,
+            0.03500000014901161,
+            1.0
+          ],
+          "srgb_rgb": [
+            46,
+            51,
+            53
+          ],
+          "double_sided": true
+        }
+      },
+      "roblox_position": [
+        -13,
+        0,
+        -17
+      ]
+    },
+    {
+      "id": "06",
+      "display_name": "Blue Orange Hydraulic",
+      "scene_model_name": "Swarm_06_BlueOrange",
+      "files": {
+        "blender": "blender/06_blue_orange_hydraulic.blend",
+        "glb": "exports/glb/Swarm_06_BlueOrange.glb",
+        "fbx": "exports/roblox/Swarm_06_BlueOrange.fbx",
+        "preview": "previews/06_blue_orange_hydraulic_threequarter.png"
+      },
+      "evidence_status": "reference/inferred",
+      "reference_descriptor": "User-provided concept sheet panel 06",
+      "features": [
+        "cyan fur",
+        "orange inner ears",
+        "yellow split beak",
+        "large cream eyes",
+        "two lateral single barrels",
+        "faceted round steel skirt",
+        "six curved blade legs",
+        "small central claw arms"
+      ],
+      "geometry": {
+        "native_mesh_objects": 401,
+        "native_vertices": 62871,
+        "native_faces": 48688,
+        "source_model_objects": 400,
+        "source_evaluated_triangles": 109579,
+        "game_mesh_chunks": 13,
+        "game_triangles_before_fbx": 64723,
+        "max_chunk_triangles": 18000,
+        "chunks": [
+          {
+            "name": "Swarm_06_BlueOrange__06_blue_orange_hydraulic_machined_e_e5d17_01",
+            "material": "06_blue_orange_hydraulic machined edges",
+            "triangles": 18000
+          },
+          {
+            "name": "Swarm_06_BlueOrange__06_blue_orange_hydraulic_machined_e_e5d17_02",
+            "material": "06_blue_orange_hydraulic machined edges",
+            "triangles": 7984
+          },
+          {
+            "name": "Swarm_06_BlueOrange__06_blue_orange_hydraulic_recesses_89189_01",
+            "material": "06_blue_orange_hydraulic recesses",
+            "triangles": 4164
+          },
+          {
+            "name": "Swarm_06_BlueOrange__06_blue_orange_hydraulic_warm_paint_0318f_01",
+            "material": "06_blue_orange_hydraulic warm painted alloy",
+            "triangles": 1666
+          },
+          {
+            "name": "Swarm_06_BlueOrange__06_blue_orange_hydraulic_satin_pale_06aa4_01",
+            "material": "06_blue_orange_hydraulic satin pale alloy",
+            "triangles": 602
+          },
+          {
+            "name": "Swarm_06_BlueOrange__06_blue_orange_hydraulic_recessed_g_e71f0_01",
+            "material": "06_blue_orange_hydraulic recessed gunmetal",
+            "triangles": 1890
+          },
+          {
+            "name": "Swarm_06_BlueOrange__06_blue_orange_hydraulic_soft_fur_80500_01",
+            "material": "06_blue_orange_hydraulic soft fur",
+            "triangles": 15219
+          },
+          {
+            "name": "Swarm_06_BlueOrange__06_blue_orange_hydraulic_machined_e_0f8ca_01",
+            "material": "06_blue_orange_hydraulic machined edge",
+            "triangles": 352
+          },
+          {
+            "name": "Swarm_06_BlueOrange__06_blue_orange_hydraulic_ivory_eye__e90d9_01",
+            "material": "06_blue_orange_hydraulic ivory eye mask",
+            "triangles": 7680
+          },
+          {
+            "name": "Swarm_06_BlueOrange__06_blue_orange_hydraulic_dark_steel_c788d_01",
+            "material": "06_blue_orange_hydraulic dark steel",
+            "triangles": 2034
+          },
+          {
+            "name": "Swarm_06_BlueOrange__06_blue_orange_hydraulic_smoky_iris_0db52_01",
+            "material": "06_blue_orange_hydraulic smoky iris",
+            "triangles": 2560
+          },
+          {
+            "name": "Swarm_06_BlueOrange__06_blue_orange_hydraulic_split_beak_0fdf4_01",
+            "material": "06_blue_orange_hydraulic split beak",
+            "triangles": 2560
+          },
+          {
+            "name": "Swarm_06_BlueOrange__06_blue_orange_hydraulic_ear_velvet_95da6_01",
+            "material": "06_blue_orange_hydraulic ear velvet",
+            "triangles": 12
+          }
+        ],
+        "target_height_studs": 7,
+        "baked_scale": 2.5588741560589185,
+        "source_bounds": [
+          [
+            -1.6464004516601562,
+            -1.0562800168991089,
+            0.0
+          ],
+          [
+            1.6464004516601562,
+            0.8650000095367432,
+            2.7355780601501465
+          ]
+        ],
+        "glb_triangles": 64723
+      },
+      "rigging": "static/unrigged",
+      "sanitization": {
+        "geometry_fingerprint_unchanged": true,
+        "saved_readback_fingerprint_unchanged": true,
+        "removed_reference_objects": [],
+        "images_remaining": 0
+      },
+      "materials": {
+        "06_blue_orange_hydraulic recesses": {
+          "linear_rgba": [
+            0.014999999664723873,
+            0.01899999938905239,
+            0.02199999988079071,
+            1.0
+          ],
+          "srgb_rgb": [
+            33,
+            38,
+            41
+          ],
+          "double_sided": true
+        },
+        "06_blue_orange_hydraulic warm painted alloy": {
+          "linear_rgba": [
+            0.4300000071525574,
+            0.4399999976158142,
+            0.4000000059604645,
+            1.0
+          ],
+          "srgb_rgb": [
+            175,
+            177,
+            170
+          ],
+          "double_sided": true
+        },
+        "06_blue_orange_hydraulic satin pale alloy": {
+          "linear_rgba": [
+            0.47999998927116394,
+            0.5099999904632568,
+            0.5099999904632568,
+            1.0
+          ],
+          "srgb_rgb": [
+            184,
+            189,
+            189
+          ],
+          "double_sided": true
+        },
+        "06_blue_orange_hydraulic machined edges": {
+          "linear_rgba": [
+            0.6299999952316284,
+            0.6499999761581421,
+            0.6100000143051147,
+            1.0
+          ],
+          "srgb_rgb": [
+            208,
+            211,
+            205
+          ],
+          "double_sided": true
+        },
+        "06_blue_orange_hydraulic recessed gunmetal": {
+          "linear_rgba": [
+            0.054999999701976776,
+            0.0689999982714653,
+            0.07500000298023224,
+            1.0
+          ],
+          "srgb_rgb": [
+            66,
+            74,
+            77
+          ],
+          "double_sided": true
+        },
+        "06_blue_orange_hydraulic soft fur": {
+          "linear_rgba": [
+            0.02500000037252903,
+            0.47999998927116394,
+            0.6299999952316284,
+            1.0
+          ],
+          "srgb_rgb": [
+            44,
+            184,
+            208
+          ],
+          "double_sided": true
+        },
+        "06_blue_orange_hydraulic machined edge": {
+          "linear_rgba": [
+            0.6899999976158142,
+            0.7200000286102295,
+            0.699999988079071,
+            1.0
+          ],
+          "srgb_rgb": [
+            216,
+            221,
+            218
+          ],
+          "double_sided": true
+        },
+        "06_blue_orange_hydraulic ivory eye mask": {
+          "linear_rgba": [
+            0.8999999761581421,
+            0.8899999856948853,
+            0.7799999713897705,
+            1.0
+          ],
+          "srgb_rgb": [
+            243,
+            242,
+            229
+          ],
+          "double_sided": true
+        },
+        "06_blue_orange_hydraulic dark steel": {
+          "linear_rgba": [
+            0.12999999523162842,
+            0.15000000596046448,
+            0.15000000596046448,
+            1.0
+          ],
+          "srgb_rgb": [
+            101,
+            108,
+            108
+          ],
+          "double_sided": true
+        },
+        "06_blue_orange_hydraulic smoky iris": {
+          "linear_rgba": [
+            0.23000000417232513,
+            0.3199999928474426,
+            0.27000001072883606,
+            1.0
+          ],
+          "srgb_rgb": [
+            132,
+            153,
+            142
+          ],
+          "double_sided": true
+        },
+        "06_blue_orange_hydraulic split beak": {
+          "linear_rgba": [
+            0.9800000190734863,
+            0.6100000143051147,
+            0.02500000037252903,
+            1.0
+          ],
+          "srgb_rgb": [
+            253,
+            205,
+            44
+          ],
+          "double_sided": true
+        },
+        "06_blue_orange_hydraulic ear velvet": {
+          "linear_rgba": [
+            0.949999988079071,
+            0.3400000035762787,
+            0.06499999761581421,
+            1.0
+          ],
+          "srgb_rgb": [
+            249,
+            158,
+            72
+          ],
+          "double_sided": true
+        }
+      },
+      "roblox_position": [
+        14,
+        0,
+        -21
+      ]
+    },
+    {
+      "id": "07",
+      "display_name": "Navy Red Star",
+      "scene_model_name": "Swarm_07_NavyRed",
+      "files": {
+        "blender": "blender/07_navy_red_star.blend",
+        "glb": "exports/glb/Swarm_07_NavyRed.glb",
+        "fbx": "exports/roblox/Swarm_07_NavyRed.fbx",
+        "preview": "previews/07_navy_red_star_threequarter.png"
+      },
+      "evidence_status": "reference/inferred",
+      "reference_descriptor": "User-provided concept sheet panel 07",
+      "features": [
+        "navy fur",
+        "red inner ears",
+        "pale silver beak",
+        "red star on front square armor",
+        "ribbed front equipment blocks",
+        "six curved blade legs",
+        "red hoses and side barrel modules"
+      ],
+      "geometry": {
+        "native_mesh_objects": 425,
+        "native_vertices": 63835,
+        "native_faces": 50084,
+        "source_model_objects": 424,
+        "source_evaluated_triangles": 115455,
+        "game_mesh_chunks": 14,
+        "game_triangles_before_fbx": 67366,
+        "max_chunk_triangles": 18000,
+        "chunks": [
+          {
+            "name": "Swarm_07_NavyRed__07_navy_red_star_machined_edges_84049_01",
+            "material": "07_navy_red_star machined edges",
+            "triangles": 18000
+          },
+          {
+            "name": "Swarm_07_NavyRed__07_navy_red_star_machined_edges_84049_02",
+            "material": "07_navy_red_star machined edges",
+            "triangles": 7984
+          },
+          {
+            "name": "Swarm_07_NavyRed__07_navy_red_star_recesses_afe21_01",
+            "material": "07_navy_red_star recesses",
+            "triangles": 4165
+          },
+          {
+            "name": "Swarm_07_NavyRed__07_navy_red_star_warm_painted_alloy_2737b_01",
+            "material": "07_navy_red_star warm painted alloy",
+            "triangles": 1666
+          },
+          {
+            "name": "Swarm_07_NavyRed__07_navy_red_star_soft_fur_90ad1_01",
+            "material": "07_navy_red_star soft fur",
+            "triangles": 15219
+          },
+          {
+            "name": "Swarm_07_NavyRed__07_navy_red_star_machined_edge_17a20_01",
+            "material": "07_navy_red_star machined edge",
+            "triangles": 728
+          },
+          {
+            "name": "Swarm_07_NavyRed__07_navy_red_star_ivory_eye_mask_3e265_01",
+            "material": "07_navy_red_star ivory eye mask",
+            "triangles": 7680
+          },
+          {
+            "name": "Swarm_07_NavyRed__07_navy_red_star_vermilion_enamel_73de7_01",
+            "material": "07_navy_red_star vermilion enamel",
+            "triangles": 296
+          },
+          {
+            "name": "Swarm_07_NavyRed__07_navy_red_star_satin_pale_alloy_950a6_01",
+            "material": "07_navy_red_star satin pale alloy",
+            "triangles": 3706
+          },
+          {
+            "name": "Swarm_07_NavyRed__07_navy_red_star_dark_steel_5ea81_01",
+            "material": "07_navy_red_star dark steel",
+            "triangles": 2034
+          },
+          {
+            "name": "Swarm_07_NavyRed__07_navy_red_star_smoky_iris_8375f_01",
+            "material": "07_navy_red_star smoky iris",
+            "triangles": 2560
+          },
+          {
+            "name": "Swarm_07_NavyRed__07_navy_red_star_split_beak_58eeb_01",
+            "material": "07_navy_red_star split beak",
+            "triangles": 2560
+          },
+          {
+            "name": "Swarm_07_NavyRed__07_navy_red_star_recessed_gunmetal_c0bd0_01",
+            "material": "07_navy_red_star recessed gunmetal",
+            "triangles": 756
+          },
+          {
+            "name": "Swarm_07_NavyRed__07_navy_red_star_ear_velvet_b59dc_01",
+            "material": "07_navy_red_star ear velvet",
+            "triangles": 12
+          }
+        ],
+        "target_height_studs": 7,
+        "baked_scale": 2.521239200839356,
+        "source_bounds": [
+          [
+            -1.6464004516601562,
+            -1.0562800168991089,
+            0.0
+          ],
+          [
+            1.6464004516601562,
+            0.9399999976158142,
+            2.7764124870300293
+          ]
+        ],
+        "glb_triangles": 67366
+      },
+      "rigging": "static/unrigged",
+      "sanitization": {
+        "geometry_fingerprint_unchanged": true,
+        "saved_readback_fingerprint_unchanged": true,
+        "removed_reference_objects": [],
+        "images_remaining": 0
+      },
+      "materials": {
+        "07_navy_red_star recesses": {
+          "linear_rgba": [
+            0.014999999664723873,
+            0.01899999938905239,
+            0.02199999988079071,
+            1.0
+          ],
+          "srgb_rgb": [
+            33,
+            38,
+            41
+          ],
+          "double_sided": true
+        },
+        "07_navy_red_star warm painted alloy": {
+          "linear_rgba": [
+            0.4300000071525574,
+            0.4399999976158142,
+            0.4000000059604645,
+            1.0
+          ],
+          "srgb_rgb": [
+            175,
+            177,
+            170
+          ],
+          "double_sided": true
+        },
+        "07_navy_red_star machined edges": {
+          "linear_rgba": [
+            0.6299999952316284,
+            0.6499999761581421,
+            0.6100000143051147,
+            1.0
+          ],
+          "srgb_rgb": [
+            208,
+            211,
+            205
+          ],
+          "double_sided": true
+        },
+        "07_navy_red_star soft fur": {
+          "linear_rgba": [
+            0.006000000052154064,
+            0.02500000037252903,
+            0.07999999821186066,
+            1.0
+          ],
+          "srgb_rgb": [
+            18,
+            44,
+            80
+          ],
+          "double_sided": true
+        },
+        "07_navy_red_star machined edge": {
+          "linear_rgba": [
+            0.6899999976158142,
+            0.7200000286102295,
+            0.699999988079071,
+            1.0
+          ],
+          "srgb_rgb": [
+            216,
+            221,
+            218
+          ],
+          "double_sided": true
+        },
+        "07_navy_red_star ivory eye mask": {
+          "linear_rgba": [
+            0.8999999761581421,
+            0.8899999856948853,
+            0.7799999713897705,
+            1.0
+          ],
+          "srgb_rgb": [
+            243,
+            242,
+            229
+          ],
+          "double_sided": true
+        },
+        "07_navy_red_star vermilion enamel": {
+          "linear_rgba": [
+            0.6800000071525574,
+            0.017999999225139618,
+            0.02500000037252903,
+            1.0
+          ],
+          "srgb_rgb": [
+            215,
+            36,
+            44
+          ],
+          "double_sided": true
+        },
+        "07_navy_red_star satin pale alloy": {
+          "linear_rgba": [
+            0.47999998927116394,
+            0.5099999904632568,
+            0.5099999904632568,
+            1.0
+          ],
+          "srgb_rgb": [
+            184,
+            189,
+            189
+          ],
+          "double_sided": true
+        },
+        "07_navy_red_star dark steel": {
+          "linear_rgba": [
+            0.12999999523162842,
+            0.15000000596046448,
+            0.15000000596046448,
+            1.0
+          ],
+          "srgb_rgb": [
+            101,
+            108,
+            108
+          ],
+          "double_sided": true
+        },
+        "07_navy_red_star smoky iris": {
+          "linear_rgba": [
+            0.23000000417232513,
+            0.3199999928474426,
+            0.27000001072883606,
+            1.0
+          ],
+          "srgb_rgb": [
+            132,
+            153,
+            142
+          ],
+          "double_sided": true
+        },
+        "07_navy_red_star split beak": {
+          "linear_rgba": [
+            0.6800000071525574,
+            0.699999988079071,
+            0.6700000166893005,
+            1.0
+          ],
+          "srgb_rgb": [
+            215,
+            218,
+            214
+          ],
+          "double_sided": true
+        },
+        "07_navy_red_star recessed gunmetal": {
+          "linear_rgba": [
+            0.054999999701976776,
+            0.0689999982714653,
+            0.07500000298023224,
+            1.0
+          ],
+          "srgb_rgb": [
+            66,
+            74,
+            77
+          ],
+          "double_sided": true
+        },
+        "07_navy_red_star ear velvet": {
+          "linear_rgba": [
+            0.7599999904632568,
+            0.014000000432133675,
+            0.028999999165534973,
+            1.0
+          ],
+          "srgb_rgb": [
+            226,
+            31,
+            48
+          ],
+          "double_sided": true
+        }
+      },
+      "roblox_position": [
+        -27,
+        0,
+        -24
+      ]
+    },
+    {
+      "id": "08",
+      "display_name": "Blue Red Cheek Gunner",
+      "scene_model_name": "Swarm_08_BlueRed",
+      "files": {
+        "blender": "blender/08_blue_red_cheek_gunner.blend",
+        "glb": "exports/glb/Swarm_08_BlueRed.glb",
+        "fbx": "exports/roblox/Swarm_08_BlueRed.fbx",
+        "preview": "previews/08_blue_red_cheek_gunner_threequarter.png"
+      },
+      "evidence_status": "reference/inferred",
+      "reference_descriptor": "User-provided concept sheet panel 08",
+      "features": [
+        "bright cyan fur",
+        "red inner ears",
+        "pale split beak",
+        "two twin cheek barrel arrays",
+        "box chassis with circular red star badge",
+        "six curved blade legs",
+        "white little paws",
+        "red hydraulics",
+        "long spiked side-mounted attachment from side view"
+      ],
+      "geometry": {
+        "native_mesh_objects": 509,
+        "native_vertices": 83867,
+        "native_faces": 69528,
+        "source_model_objects": 508,
+        "source_evaluated_triangles": 153503,
+        "game_mesh_chunks": 16,
+        "game_triangles_before_fbx": 87300,
+        "max_chunk_triangles": 18000,
+        "chunks": [
+          {
+            "name": "Swarm_08_BlueRed__08_blue_red_cheek_gunner_machined_e_efb3c_01",
+            "material": "08_blue_red_cheek_gunner machined edges",
+            "triangles": 18000
+          },
+          {
+            "name": "Swarm_08_BlueRed__08_blue_red_cheek_gunner_machined_e_efb3c_02",
+            "material": "08_blue_red_cheek_gunner machined edges",
+            "triangles": 18000
+          },
+          {
+            "name": "Swarm_08_BlueRed__08_blue_red_cheek_gunner_machined_e_efb3c_03",
+            "material": "08_blue_red_cheek_gunner machined edges",
+            "triangles": 7717
+          },
+          {
+            "name": "Swarm_08_BlueRed__08_blue_red_cheek_gunner_recesses_b8713_01",
+            "material": "08_blue_red_cheek_gunner recesses",
+            "triangles": 4331
+          },
+          {
+            "name": "Swarm_08_BlueRed__08_blue_red_cheek_gunner_warm_paint_46bf0_01",
+            "material": "08_blue_red_cheek_gunner warm painted alloy",
+            "triangles": 1834
+          },
+          {
+            "name": "Swarm_08_BlueRed__08_blue_red_cheek_gunner_machined_e_15e19_01",
+            "material": "08_blue_red_cheek_gunner machined edge",
+            "triangles": 117
+          },
+          {
+            "name": "Swarm_08_BlueRed__08_blue_red_cheek_gunner_soft_fur_43990_01",
+            "material": "08_blue_red_cheek_gunner soft fur",
+            "triangles": 15219
+          },
+          {
+            "name": "Swarm_08_BlueRed__08_blue_red_cheek_gunner_recessed_g_e5326_01",
+            "material": "08_blue_red_cheek_gunner recessed gunmetal",
+            "triangles": 892
+          },
+          {
+            "name": "Swarm_08_BlueRed__08_blue_red_cheek_gunner_satin_pale_77408_01",
+            "material": "08_blue_red_cheek_gunner satin pale alloy",
+            "triangles": 776
+          },
+          {
+            "name": "Swarm_08_BlueRed__08_blue_red_cheek_gunner_ivory_eye__493e4_01",
+            "material": "08_blue_red_cheek_gunner ivory eye mask",
+            "triangles": 7680
+          },
+          {
+            "name": "Swarm_08_BlueRed__08_blue_red_cheek_gunner_vermilion__47ed3_01",
+            "material": "08_blue_red_cheek_gunner vermilion enamel",
+            "triangles": 282
+          },
+          {
+            "name": "Swarm_08_BlueRed__08_blue_red_cheek_gunner_dark_steel_4354a_01",
+            "material": "08_blue_red_cheek_gunner dark steel",
+            "triangles": 2200
+          },
+          {
+            "name": "Swarm_08_BlueRed__08_blue_red_cheek_gunner_smoky_iris_f5b6e_01",
+            "material": "08_blue_red_cheek_gunner smoky iris",
+            "triangles": 2560
+          },
+          {
+            "name": "Swarm_08_BlueRed__08_blue_red_cheek_gunner_warm_pale__49834_01",
+            "material": "08_blue_red_cheek_gunner warm pale paws",
+            "triangles": 5120
+          },
+          {
+            "name": "Swarm_08_BlueRed__08_blue_red_cheek_gunner_split_beak_bcf41_01",
+            "material": "08_blue_red_cheek_gunner split beak",
+            "triangles": 2560
+          },
+          {
+            "name": "Swarm_08_BlueRed__08_blue_red_cheek_gunner_ear_velvet_ad868_01",
+            "material": "08_blue_red_cheek_gunner ear velvet",
+            "triangles": 12
+          }
+        ],
+        "target_height_studs": 7,
+        "baked_scale": 2.4751760984009725,
+        "source_bounds": [
+          [
+            -1.6464004516601562,
+            -2.0203025341033936,
+            0.0
+          ],
+          [
+            1.6464004516601562,
+            0.8361142873764038,
+            2.8280816078186035
+          ]
+        ],
+        "glb_triangles": 87300
+      },
+      "rigging": "static/unrigged",
+      "sanitization": {
+        "geometry_fingerprint_unchanged": true,
+        "saved_readback_fingerprint_unchanged": true,
+        "removed_reference_objects": [],
+        "images_remaining": 0
+      },
+      "materials": {
+        "08_blue_red_cheek_gunner recesses": {
+          "linear_rgba": [
+            0.014999999664723873,
+            0.01899999938905239,
+            0.02199999988079071,
+            1.0
+          ],
+          "srgb_rgb": [
+            33,
+            38,
+            41
+          ],
+          "double_sided": true
+        },
+        "08_blue_red_cheek_gunner warm painted alloy": {
+          "linear_rgba": [
+            0.4300000071525574,
+            0.4399999976158142,
+            0.4000000059604645,
+            1.0
+          ],
+          "srgb_rgb": [
+            175,
+            177,
+            170
+          ],
+          "double_sided": true
+        },
+        "08_blue_red_cheek_gunner machined edges": {
+          "linear_rgba": [
+            0.6299999952316284,
+            0.6499999761581421,
+            0.6100000143051147,
+            1.0
+          ],
+          "srgb_rgb": [
+            208,
+            211,
+            205
+          ],
+          "double_sided": true
+        },
+        "08_blue_red_cheek_gunner machined edge": {
+          "linear_rgba": [
+            0.6899999976158142,
+            0.7200000286102295,
+            0.699999988079071,
+            1.0
+          ],
+          "srgb_rgb": [
+            216,
+            221,
+            218
+          ],
+          "double_sided": true
+        },
+        "08_blue_red_cheek_gunner soft fur": {
+          "linear_rgba": [
+            0.012000000104308128,
+            0.47999998927116394,
+            0.6899999976158142,
+            1.0
+          ],
+          "srgb_rgb": [
+            29,
+            184,
+            216
+          ],
+          "double_sided": true
+        },
+        "08_blue_red_cheek_gunner recessed gunmetal": {
+          "linear_rgba": [
+            0.054999999701976776,
+            0.0689999982714653,
+            0.07500000298023224,
+            1.0
+          ],
+          "srgb_rgb": [
+            66,
+            74,
+            77
+          ],
+          "double_sided": true
+        },
+        "08_blue_red_cheek_gunner satin pale alloy": {
+          "linear_rgba": [
+            0.47999998927116394,
+            0.5099999904632568,
+            0.5099999904632568,
+            1.0
+          ],
+          "srgb_rgb": [
+            184,
+            189,
+            189
+          ],
+          "double_sided": true
+        },
+        "08_blue_red_cheek_gunner ivory eye mask": {
+          "linear_rgba": [
+            0.8999999761581421,
+            0.8899999856948853,
+            0.7799999713897705,
+            1.0
+          ],
+          "srgb_rgb": [
+            243,
+            242,
+            229
+          ],
+          "double_sided": true
+        },
+        "08_blue_red_cheek_gunner vermilion enamel": {
+          "linear_rgba": [
+            0.6800000071525574,
+            0.017999999225139618,
+            0.02500000037252903,
+            1.0
+          ],
+          "srgb_rgb": [
+            215,
+            36,
+            44
+          ],
+          "double_sided": true
+        },
+        "08_blue_red_cheek_gunner dark steel": {
+          "linear_rgba": [
+            0.12999999523162842,
+            0.15000000596046448,
+            0.15000000596046448,
+            1.0
+          ],
+          "srgb_rgb": [
+            101,
+            108,
+            108
+          ],
+          "double_sided": true
+        },
+        "08_blue_red_cheek_gunner smoky iris": {
+          "linear_rgba": [
+            0.23000000417232513,
+            0.3199999928474426,
+            0.27000001072883606,
+            1.0
+          ],
+          "srgb_rgb": [
+            132,
+            153,
+            142
+          ],
+          "double_sided": true
+        },
+        "08_blue_red_cheek_gunner warm pale paws": {
+          "linear_rgba": [
+            0.8799999952316284,
+            0.8799999952316284,
+            0.7799999713897705,
+            1.0
+          ],
+          "srgb_rgb": [
+            241,
+            241,
+            229
+          ],
+          "double_sided": true
+        },
+        "08_blue_red_cheek_gunner split beak": {
+          "linear_rgba": [
+            0.7300000190734863,
+            0.7599999904632568,
+            0.699999988079071,
+            1.0
+          ],
+          "srgb_rgb": [
+            222,
+            226,
+            218
+          ],
+          "double_sided": true
+        },
+        "08_blue_red_cheek_gunner ear velvet": {
+          "linear_rgba": [
+            0.8100000023841858,
+            0.01600000075995922,
+            0.03200000151991844,
+            1.0
+          ],
+          "srgb_rgb": [
+            232,
+            34,
+            50
+          ],
+          "double_sided": true
+        }
+      },
+      "roblox_position": [
+        28,
+        0,
+        -21
+      ]
+    },
+    {
+      "id": "09",
+      "display_name": "Video Armored Crawler",
+      "scene_model_name": "Swarm_09_ArmoredCrawler",
+      "files": {
+        "blender": "blender/09_video_armored_crawler.blend",
+        "glb": "exports/glb/Swarm_09_ArmoredCrawler.glb",
+        "fbx": "exports/roblox/Swarm_09_ArmoredCrawler.fbx",
+        "preview": "previews/09_video_armored_crawler_threequarter.png"
+      },
+      "evidence_status": "reference/inferred",
+      "reference_descriptor": "User-provided crawler video; long wedge-nosed six-legged vehicle",
+      "features": [
+        "long wedge-nosed six-leg vehicle",
+        "small white black Furby head on top",
+        "six pointed hydraulic legs",
+        "round knee joints",
+        "angled armor plates",
+        "rear equipment and antenna stalks",
+        "side vents and rivets"
+      ],
+      "geometry": {
+        "native_mesh_objects": 351,
+        "native_vertices": 46895,
+        "native_faces": 33260,
+        "source_model_objects": 350,
+        "source_evaluated_triangles": 78307,
+        "game_mesh_chunks": 8,
+        "game_triangles_before_fbx": 47677,
+        "max_chunk_triangles": 14810,
+        "chunks": [
+          {
+            "name": "Swarm_09_ArmoredCrawler__09_Video_Armored_Crawler_machined_e_e30c9_01",
+            "material": "09 Video Armored Crawler machined edges",
+            "triangles": 14810
+          },
+          {
+            "name": "Swarm_09_ArmoredCrawler__09_Video_Armored_Crawler_warm_paint_ce9bb_01",
+            "material": "09 Video Armored Crawler warm painted alloy",
+            "triangles": 782
+          },
+          {
+            "name": "Swarm_09_ArmoredCrawler__09_Video_Armored_Crawler_dark_steel_19519_01",
+            "material": "09 Video Armored Crawler dark steel",
+            "triangles": 2208
+          },
+          {
+            "name": "Swarm_09_ArmoredCrawler__09_Video_Armored_Crawler_recesses_ae8bb_01",
+            "material": "09 Video Armored Crawler recesses",
+            "triangles": 7256
+          },
+          {
+            "name": "Swarm_09_ArmoredCrawler__09_Video_Armored_Crawler_soft_fur_d9679_01",
+            "material": "09 Video Armored Crawler soft fur",
+            "triangles": 9821
+          },
+          {
+            "name": "Swarm_09_ArmoredCrawler__09_Video_Armored_Crawler_ivory_eye__90df6_01",
+            "material": "09 Video Armored Crawler ivory eye mask",
+            "triangles": 7680
+          },
+          {
+            "name": "Swarm_09_ArmoredCrawler__09_Video_Armored_Crawler_smoky_iris_0fde1_01",
+            "material": "09 Video Armored Crawler smoky iris",
+            "triangles": 2560
+          },
+          {
+            "name": "Swarm_09_ArmoredCrawler__09_Video_Armored_Crawler_split_beak_ab4ca_01",
+            "material": "09 Video Armored Crawler split beak",
+            "triangles": 2560
+          }
+        ],
+        "target_height_studs": 7,
+        "baked_scale": 3.3734551372063017,
+        "source_bounds": [
+          [
+            -1.4078397750854492,
+            -1.2719733715057373,
+            0.0
+          ],
+          [
+            1.4078397750854492,
+            0.9686258435249329,
+            2.075023889541626
+          ]
+        ],
+        "glb_triangles": 47677
+      },
+      "rigging": "static/unrigged",
+      "sanitization": {
+        "geometry_fingerprint_unchanged": true,
+        "saved_readback_fingerprint_unchanged": true,
+        "removed_reference_objects": [],
+        "images_remaining": 0
+      },
+      "materials": {
+        "09 Video Armored Crawler machined edges": {
+          "linear_rgba": [
+            0.6299999952316284,
+            0.6499999761581421,
+            0.6100000143051147,
+            1.0
+          ],
+          "srgb_rgb": [
+            208,
+            211,
+            205
+          ],
+          "double_sided": true
+        },
+        "09 Video Armored Crawler warm painted alloy": {
+          "linear_rgba": [
+            0.4300000071525574,
+            0.4399999976158142,
+            0.4000000059604645,
+            1.0
+          ],
+          "srgb_rgb": [
+            175,
+            177,
+            170
+          ],
+          "double_sided": true
+        },
+        "09 Video Armored Crawler dark steel": {
+          "linear_rgba": [
+            0.12999999523162842,
+            0.15000000596046448,
+            0.15000000596046448,
+            1.0
+          ],
+          "srgb_rgb": [
+            101,
+            108,
+            108
+          ],
+          "double_sided": true
+        },
+        "09 Video Armored Crawler recesses": {
+          "linear_rgba": [
+            0.014999999664723873,
+            0.01899999938905239,
+            0.02199999988079071,
+            1.0
+          ],
+          "srgb_rgb": [
+            33,
+            38,
+            41
+          ],
+          "double_sided": true
+        },
+        "09 Video Armored Crawler soft fur": {
+          "linear_rgba": [
+            0.8100000023841858,
+            0.8100000023841858,
+            0.7699999809265137,
+            1.0
+          ],
+          "srgb_rgb": [
+            232,
+            232,
+            227
+          ],
+          "double_sided": true
+        },
+        "09 Video Armored Crawler ivory eye mask": {
+          "linear_rgba": [
+            0.8999999761581421,
+            0.8899999856948853,
+            0.7799999713897705,
+            1.0
+          ],
+          "srgb_rgb": [
+            243,
+            242,
+            229
+          ],
+          "double_sided": true
+        },
+        "09 Video Armored Crawler smoky iris": {
+          "linear_rgba": [
+            0.23000000417232513,
+            0.3199999928474426,
+            0.27000001072883606,
+            1.0
+          ],
+          "srgb_rgb": [
+            132,
+            153,
+            142
+          ],
+          "double_sided": true
+        },
+        "09 Video Armored Crawler split beak": {
+          "linear_rgba": [
+            0.5299999713897705,
+            0.5400000214576721,
+            0.47999998927116394,
+            1.0
+          ],
+          "srgb_rgb": [
+            192,
+            194,
+            184
+          ],
+          "double_sided": true
+        }
+      },
+      "roblox_position": [
+        0,
+        0,
+        -27
+      ]
+    }
+  ],
+  "files": [
+    {
+      "path": "blender/01_armored_smile_hexapod.blend",
+      "size_bytes": 534643,
+      "sha256": "58db4d3f46667d29ffe4545a1ef166ddc6bc0fb2911bda8f400ffbe9a4ed152f",
+      "tier": "native_source"
+    },
+    {
+      "path": "blender/02_fur_needle_scout.blend",
+      "size_bytes": 796275,
+      "sha256": "3accb1ae76138b08e9a1af8e59093d8fae142e8a5d6ea0e1be6a546a888bb548",
+      "tier": "native_source"
+    },
+    {
+      "path": "blender/03_skull_sentinel.blend",
+      "size_bytes": 584977,
+      "sha256": "e6e9d2cd5a9b44383bbd7cbd909de632d57cfeeaf956a5ff23f4d1673818785a",
+      "tier": "native_source"
+    },
+    {
+      "path": "blender/04_cannon_quadruped.blend",
+      "size_bytes": 851759,
+      "sha256": "c2e5fea6b7e043f3b1f58cdd72ce5e03a12b428756b2b03e8d67ef361c5adefe",
+      "tier": "native_source"
+    },
+    {
+      "path": "blender/05_tracked_graft_tank.blend",
+      "size_bytes": 924583,
+      "sha256": "61728a8eee855b29ac1f13e6d6316f327d07bf556e3478bdf925e543bbbe68ef",
+      "tier": "native_source"
+    },
+    {
+      "path": "blender/06_blue_orange_hydraulic.blend",
+      "size_bytes": 913063,
+      "sha256": "e7432b3193f3fd540e3dc8afae6a96a433590cd9ce7afd50a699e498a128a1be",
+      "tier": "native_source"
+    },
+    {
+      "path": "blender/07_navy_red_star.blend",
+      "size_bytes": 910548,
+      "sha256": "546f571745dbdd7f59d30dd6f84c640950a0e8fd0bd9c981d93b7143de36cb3c",
+      "tier": "native_source"
+    },
+    {
+      "path": "blender/08_blue_red_cheek_gunner.blend",
+      "size_bytes": 970247,
+      "sha256": "b76097835b973e21bd5b6c4c7c292ca8c5f78844201569b56b8614d86ee50abb",
+      "tier": "native_source"
+    },
+    {
+      "path": "blender/09_video_armored_crawler.blend",
+      "size_bytes": 808530,
+      "sha256": "5ed8099f0b0569a17e90897790979c1a5acf93a9b67504d91011cc34006ba323",
+      "tier": "native_source"
+    },
+    {
+      "path": "blender/f069.blend",
+      "size_bytes": 30720306,
+      "sha256": "548644b0941ee9dd29e2fc34e6d2f728e0d597a8cfb64e7a07c0707185c8603f",
+      "tier": "native_source"
+    },
+    {
+      "path": "exports/glb/Cudgel_Tank_01.glb",
+      "size_bytes": 2610040,
+      "sha256": "c791eb5f4cabb259e6aef628b202be5d9e460be539974e29fe5430c7767c9f60",
+      "tier": "game_ready"
+    },
+    {
+      "path": "exports/glb/Furbomek_Boss_F069.glb",
+      "size_bytes": 12597232,
+      "sha256": "e690f881f83e8a787161e7a5cbfe71f50af81f50d9743db5b9e83d6f492d7d7b",
+      "tier": "game_ready"
+    },
+    {
+      "path": "exports/glb/Swarm_01_ArmoredSmile.glb",
+      "size_bytes": 1945180,
+      "sha256": "da20da4239b8bc45abfcb11c0e6b9656673e4a2908b53afa4bb75a4d766a6f33",
+      "tier": "game_ready"
+    },
+    {
+      "path": "exports/glb/Swarm_02_FurScout.glb",
+      "size_bytes": 1850144,
+      "sha256": "0307ff63616e76ac939193c491fa9aa843f3f578d65c41f5473a7bbb760e7f0b",
+      "tier": "game_ready"
+    },
+    {
+      "path": "exports/glb/Swarm_03_SkullSentinel.glb",
+      "size_bytes": 1875112,
+      "sha256": "62b83c7b89e079458fa02cf697552d1de325b70ac78ccd261522a99c91cc2353",
+      "tier": "game_ready"
+    },
+    {
+      "path": "exports/glb/Swarm_04_CannonWalker.glb",
+      "size_bytes": 2160256,
+      "sha256": "4a08e7e3de0322397fa1dd4aa37d422a722351ddd3b6cc93bef0edbe86f5375f",
+      "tier": "game_ready"
+    },
+    {
+      "path": "exports/glb/Swarm_06_BlueOrange.glb",
+      "size_bytes": 2556412,
+      "sha256": "075a69c8bc21d1e0167d41e5a7b7ac1fa79a28e98cd29178f3a19340b4c1eecc",
+      "tier": "game_ready"
+    },
+    {
+      "path": "exports/glb/Swarm_07_NavyRed.glb",
+      "size_bytes": 2658864,
+      "sha256": "556dd29f4b9927c541f5948cae50a2730e940cf77069399c16ee1a76226740a7",
+      "tier": "game_ready"
+    },
+    {
+      "path": "exports/glb/Swarm_08_BlueRed.glb",
+      "size_bytes": 3295060,
+      "sha256": "fabc853bd5ffebae96271458c906fb4e0dfe2db56aabf7c461050b4a2c8b59b5",
+      "tier": "game_ready"
+    },
+    {
+      "path": "exports/glb/Swarm_09_ArmoredCrawler.glb",
+      "size_bytes": 1927656,
+      "sha256": "368338b9bf5e48376c3e957742630ff092a189f7c78814abf2ef1553b7313d6c",
+      "tier": "game_ready"
+    },
+    {
+      "path": "exports/roblox/BIPCI_All_10_Characters.fbx",
+      "size_bytes": 30940348,
+      "sha256": "be9b61668ae006610bc27df72bc8398f800bb0bdba41bb09444c8981f0edf232",
+      "tier": "game_ready"
+    },
+    {
+      "path": "exports/roblox/Cudgel_Tank_01.fbx",
+      "size_bytes": 2250780,
+      "sha256": "a03a783c29a560e780f818320f8f5a7f77e11b94f5de31e12ee1c2a071f5251a",
+      "tier": "game_ready"
+    },
+    {
+      "path": "exports/roblox/Furbomek_Boss_F069.fbx",
+      "size_bytes": 11990796,
+      "sha256": "ff9438b6fd3ecbdb8296e6c52a14aa44f63d86aee1f8876218866b86bc771e62",
+      "tier": "game_ready"
+    },
+    {
+      "path": "exports/roblox/Swarm_01_ArmoredSmile.fbx",
+      "size_bytes": 1664076,
+      "sha256": "385e4363782720bfe0e7efd5ac30bffb060b34af494eaf5ed30635820151704b",
+      "tier": "game_ready"
+    },
+    {
+      "path": "exports/roblox/Swarm_02_FurScout.fbx",
+      "size_bytes": 1785884,
+      "sha256": "a0c794a862ec29656ac8fc12acb8f55b9d7e17741cc812200ebe6ac9d82bc07f",
+      "tier": "game_ready"
+    },
+    {
+      "path": "exports/roblox/Swarm_03_SkullSentinel.fbx",
+      "size_bytes": 1632108,
+      "sha256": "8e0d0b686ff4fb89871267b566727247ed03e539286abc7a189f4542fdde89c3",
+      "tier": "game_ready"
+    },
+    {
+      "path": "exports/roblox/Swarm_04_CannonWalker.fbx",
+      "size_bytes": 2024780,
+      "sha256": "355a52b30d44d676b78fa42e93999633379fadc652bfc932ab1bd683229c9c25",
+      "tier": "game_ready"
+    },
+    {
+      "path": "exports/roblox/Swarm_06_BlueOrange.fbx",
+      "size_bytes": 2424044,
+      "sha256": "4dc77b68896dd1654b5741774064b4be2e2d408981f203a6f6e90d2b4edbeeb5",
+      "tier": "game_ready"
+    },
+    {
+      "path": "exports/roblox/Swarm_07_NavyRed.fbx",
+      "size_bytes": 2490204,
+      "sha256": "5f11a5abd382c425874da1be0d6dfa4fd2a1bf717c2498d6b23dfc250454f4b2",
+      "tier": "game_ready"
+    },
+    {
+      "path": "exports/roblox/Swarm_08_BlueRed.fbx",
+      "size_bytes": 2954956,
+      "sha256": "01003e836d9ebbea06a6b0f051d49e9e0d9f75b31ea878fb64f982f6450be08d",
+      "tier": "game_ready"
+    },
+    {
+      "path": "exports/roblox/Swarm_09_ArmoredCrawler.fbx",
+      "size_bytes": 1830284,
+      "sha256": "08ac6a5a5ca793f903095f20a0d1791c01279c1a08598df17e077228263d2cb3",
+      "tier": "game_ready"
+    },
+    {
+      "path": "previews/01_armored_smile_hexapod_threequarter.png",
+      "size_bytes": 930256,
+      "sha256": "353ab3e7e60dcc8cab995975fd11b661cbfe4da61566b05afa6289590c7c6881",
+      "tier": "generated_preview"
+    },
+    {
+      "path": "previews/02_fur_needle_scout_threequarter.png",
+      "size_bytes": 899587,
+      "sha256": "d28f58b688817184a9678753528a7e3195630fb1cf7ce0a802c46a716a272e5d",
+      "tier": "generated_preview"
+    },
+    {
+      "path": "previews/03_skull_sentinel_threequarter.png",
+      "size_bytes": 926306,
+      "sha256": "351e9f399987db9812c6150fbbd7c88715971a85f3ba2cb7d2a86f5f24be071b",
+      "tier": "generated_preview"
+    },
+    {
+      "path": "previews/04_cannon_quadruped_threequarter.png",
+      "size_bytes": 923599,
+      "sha256": "470fea9605320f5961f04a05127684cde10e7f04a2b98f383fd257a7c957b101",
+      "tier": "generated_preview"
+    },
+    {
+      "path": "previews/05_tracked_graft_tank_threequarter.png",
+      "size_bytes": 965036,
+      "sha256": "c43134783db0ba00fba1badc7e5b4b94b4f6db9361ff3b1df23e33c8b68c484e",
+      "tier": "generated_preview"
+    },
+    {
+      "path": "previews/06_blue_orange_hydraulic_threequarter.png",
+      "size_bytes": 986330,
+      "sha256": "6286faf180c9f94dea3e4c4f3d507c8d6b3794336b03c3c9db62e97ccddad26d",
+      "tier": "generated_preview"
+    },
+    {
+      "path": "previews/07_navy_red_star_threequarter.png",
+      "size_bytes": 991840,
+      "sha256": "612e90fa9b949887cd18cd586f5bbf1262533fadcf575bbeb171d94eb4398787",
+      "tier": "generated_preview"
+    },
+    {
+      "path": "previews/08_blue_red_cheek_gunner_threequarter.png",
+      "size_bytes": 1002552,
+      "sha256": "0d427ce23dc085a9e6c429a93947f5ea93884bb1d17a5ecb912a8af96b5f2d44",
+      "tier": "generated_preview"
+    },
+    {
+      "path": "previews/09_video_armored_crawler_threequarter.png",
+      "size_bytes": 902186,
+      "sha256": "e030c41db081ed2139f034fefb41b21257e7224e65c557d430b4ccfea59558be",
+      "tier": "generated_preview"
+    },
+    {
+      "path": "previews/f069_threequarter.png",
+      "size_bytes": 1397658,
+      "sha256": "b630256dc7b04e07cda9856147f66093b6c58facd779535abc7753c2a89af9d0",
+      "tier": "generated_preview"
+    },
+    {
+      "path": "previews/roblox_scene.jpg",
+      "size_bytes": 238638,
+      "sha256": "0babbc4a1a6fe57f785aafc307502b86c9b217787dbb21eb4c10a9f823516bfa",
+      "tier": "generated_preview"
+    },
+    {
+      "path": "previews/swarm_lineup.png",
+      "size_bytes": 3721934,
+      "sha256": "8136edf1f6f6f93ded3de9c485cf62c08d060364a6f984494dd914b8e9fa2fcf",
+      "tier": "generated_preview"
+    },
+    {
+      "path": "provenance.json",
+      "size_bytes": 1039,
+      "sha256": "154c008be9e3359f70b54d3a3bde547cbd2f69828fb4a53729d53276a85226c6",
+      "tier": "metadata"
+    },
+    {
+      "path": "scenes/BIPCI_Furbomek_Arena_Blender_Models.rbxl",
+      "size_bytes": 2327390,
+      "sha256": "8449a62bfdc593ca9cb7d750014bfd2999d180a07eba9879cde4495202092ec9",
+      "tier": "roblox_scene"
+    }
+  ],
+  "units": {
+    "native": "Uncalibrated authoring units; not fabrication dimensions",
+    "game": "Geometry baked to Roblox target stud heights; GLB numeric dimensions preserve this game scale",
+    "fbx_axis_forward": "-Z",
+    "fbx_axis_up": "Y",
+    "fbx_import_scale_factor": 0.01,
+    "fbx_note": "FBX centimeter metadata; use importScaleFactor 0.01 in Roblox"
+  },
+  "combined_fbx": "exports/roblox/BIPCI_All_10_Characters.fbx",
+  "scene": "scenes/BIPCI_Furbomek_Arena_Blender_Models.rbxl",
+  "scene_portability": "Scene contains uploaded Roblox mesh asset references, whose permissions may depend on the original publishing account. Other accounts should reimport the supplied FBX files.",
+  "fbx_validation": {
+    "passed": true,
+    "validation": "Blender FBX read-back, game_ready combined",
+    "asset_roots": 10,
+    "mesh_chunks": 131,
+    "triangles": 857970,
+    "pre_export_triangles": 858006,
+    "triangles_removed_during_fbx_roundtrip": 36,
+    "triangle_count_note": "36 triangles removed during FBX export/import mesh validation; all mesh objects and materials retained.",
+    "max_triangles_per_chunk": 18000,
+    "one_material_per_chunk": true,
+    "all_meshes_have_uv": true,
+    "assets": [
+      {
+        "name": "Swarm_02_FurScout",
+        "height": 7.000021727788408,
+        "target_height": 7,
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "bounds_blender": [
+          [
+            21.398834228515625,
+            -32.93689727783203,
+            -1.6482579667354003e-05
+          ],
+          [
+            26.601165771484375,
+            -29.062931060791016,
+            7.00000524520874
+          ]
+        ]
+      },
+      {
+        "name": "Furbomek_Boss_F069",
+        "height": 18.00000250090818,
+        "target_height": 18,
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "bounds_blender": [
+          [
+            -11.395397186279297,
+            -23.936019897460938,
+            1.313789084633754e-06
+          ],
+          [
+            11.395397186279297,
+            -8.063980102539062,
+            18.000003814697266
+          ]
+        ]
+      },
+      {
+        "name": "Swarm_01_ArmoredSmile",
+        "height": 6.9929126016795635,
+        "target_height": 7,
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "bounds_blender": [
+          [
+            -29.624176025390625,
+            -28.400428771972656,
+            0.008283782750368118
+          ],
+          [
+            -20.375823974609375,
+            -21.59956932067871,
+            7.001196384429932
+          ]
+        ]
+      },
+      {
+        "name": "Swarm_03_SkullSentinel",
+        "height": 6.994235136429779,
+        "target_height": 7,
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "bounds_blender": [
+          [
+            -38.78889465332031,
+            -2.35589861869812,
+            -0.001350977341644466
+          ],
+          [
+            -29.211105346679688,
+            4.354424476623535,
+            6.992884159088135
+          ]
+        ]
+      },
+      {
+        "name": "Swarm_04_CannonWalker",
+        "height": 7.000001054962922,
+        "target_height": 7,
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "bounds_blender": [
+          [
+            29.592065811157227,
+            -7.548511028289795,
+            -5.781257641501725e-07
+          ],
+          [
+            38.407936096191406,
+            3.5485119819641113,
+            7.000000476837158
+          ]
+        ]
+      },
+      {
+        "name": "Cudgel_Tank_01",
+        "height": 6.000000689378794,
+        "target_height": 6,
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "bounds_blender": [
+          [
+            -16.219938278198242,
+            12.207789421081543,
+            -3.550401743268594e-06
+          ],
+          [
+            -9.779584884643555,
+            21.792211532592773,
+            5.999997138977051
+          ]
+        ]
+      },
+      {
+        "name": "Swarm_06_BlueOrange",
+        "height": 6.999029284052085,
+        "target_height": 7,
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "bounds_blender": [
+          [
+            9.787473678588867,
+            18.54184341430664,
+            0.0009673780878074467
+          ],
+          [
+            18.212623596191406,
+            23.45815658569336,
+            6.999996662139893
+          ]
+        ]
+      },
+      {
+        "name": "Swarm_07_NavyRed",
+        "height": 6.999043690855615,
+        "target_height": 7,
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "bounds_blender": [
+          [
+            -31.150569915771484,
+            21.483449935913086,
+            0.000952494447119534
+          ],
+          [
+            -22.849332809448242,
+            26.516550064086914,
+            6.999996185302734
+          ]
+        ]
+      },
+      {
+        "name": "Swarm_08_BlueRed",
+        "height": 6.999061394541059,
+        "target_height": 7,
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "bounds_blender": [
+          [
+            23.925260543823242,
+            17.467512130737305,
+            0.0009352675988338888
+          ],
+          [
+            32.074832916259766,
+            24.535188674926758,
+            6.999996662139893
+          ]
+        ]
+      },
+      {
+        "name": "Swarm_09_ArmoredCrawler",
+        "height": 7.000615525641479,
+        "target_height": 7,
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "bounds_blender": [
+          [
+            -4.75028133392334,
+            23.25191879272461,
+            -0.0006193403387442231
+          ],
+          [
+            4.750412464141846,
+            30.778839111328125,
+            6.999996185302734
+          ]
+        ]
+      }
+    ],
+    "boss_forward_audit": {
+      "white_eye_bounds_blender": [
+        [
+          -3.154074192047119,
+          -21.630178451538086,
+          11.546243667602539
+        ],
+        [
+          3.1540729999542236,
+          -16.656774520874023,
+          18.000003814697266
+        ]
+      ],
+      "plush_and_undercoat_bounds_blender": [
+        [
+          -4.654452323913574,
+          -20.949766159057617,
+          5.835219383239746
+        ],
+        [
+          4.663127899169922,
+          -12.831391334533691,
+          16.667896270751953
+        ]
+      ],
+      "eye_center_y": -19.143476486206055,
+      "plush_center_y": -16.890578746795654,
+      "eyes_toward_negative_blender_y": true,
+      "note": "Jet black plush material combines fur and black undercoat; standalone undercoat is merged."
+    },
+    "roblox_runtime_import_verified": false
+  },
+  "fbx_integrity": "All 11 FBX files copied byte-identically from validated game-ready exports after private-path scan.",
+  "tiers": {
+    "native_source": "Full authoring geometry with studio/camera setup; reference images removed",
+    "game_ready": "Reduced static geometry, per-material chunks at most 18000 triangles; model geometry only",
+    "generated_preview": "Generated model renders and Roblox scene screenshot"
+  },
+  "manifest_note": "File index excludes manifest itself to avoid recursive hashing; documentation is maintained separately.",
+  "glb_validation": {
+    "mesh_chunks": 131,
+    "triangles": 857970,
+    "images": 0,
+    "cameras": 0,
+    "note": "GLB export removes the same 36 degenerate hero triangles as FBX read-back."
+  }
+}

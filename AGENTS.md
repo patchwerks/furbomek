@@ -19,6 +19,7 @@ Current reality is much smaller than the target architecture. The checked-in app
 │   └── settings.vue         # settings UI
 ├── server/                  # separately launched CommonJS Express proxy
 ├── public/                  # static assets
+├── assets/models/furbomek/   # editable character sources, game exports, scene, provenance
 ├── .schematics/             # photo-derived labelled blueprint sheets
 ├── docs/
 │   ├── research/          # evergreen topic evidence plus dated syntheses
@@ -31,6 +32,8 @@ Current reality is much smaller than the target architecture. The checked-in app
 ```
 
 Directory-specific guidance exists in `server/AGENTS.md`, `src/AGENTS.md`, `src/chat/AGENTS.md`, and `src/tts/AGENTS.md`.
+
+For character assets, read [`assets/models/furbomek/AGENTS.md`](assets/models/furbomek/AGENTS.md) and its README. This pack is visual source material, not a completed Phase 5 avatar integration or verified hardware model.
 
 ## Source of truth and evidence rules
 

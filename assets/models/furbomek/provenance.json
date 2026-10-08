@@ -1,0 +1,22 @@
+{
+  "schema_version": 1,
+  "created_date": "2026-10-08",
+  "authoring_project": "BIPCI / Furb-o-Mek",
+  "authoring_session": "Reference reconstruction and Roblox model preparation",
+  "evidence_status": "reference/inferred",
+  "original_references_redistributed": false,
+  "excluded_sources": [
+    "User photographs",
+    "Concept sheet images",
+    "Original videos and extracted stills",
+    "Historical Blender versions",
+    "Task logs"
+  ],
+  "license": {
+    "status": "TBD \u2014 owner review before public or commercial distribution",
+    "note": "No separate asset license was provided. This package makes no ownership or redistribution grant."
+  },
+  "scope": "Visual reconstructions; no claim of verified hardware design, fabrication accuracy, or autonomous robot capability.",
+  "asset_mapping": "F069 is the hero. 01\u201308 map to concept sheet panels; 05 is the tracked tank. 09 is the video-referenced long armored crawler.",
+  "source_preservation": "Original authoring files remain unchanged outside this repository."
+}

@@ -1,0 +1,4 @@
+/assets/models/furbomek/blender/*.blend filter=lfs diff=lfs merge=lfs -text
+/assets/models/furbomek/exports/glb/*.glb filter=lfs diff=lfs merge=lfs -text
+/assets/models/furbomek/exports/roblox/*.fbx filter=lfs diff=lfs merge=lfs -text
+/assets/models/furbomek/scenes/*.rbxl filter=lfs diff=lfs merge=lfs -text

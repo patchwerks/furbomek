@@ -1,0 +1,16 @@
+{
+  "project": "BIPSCI miniature Furb bot swarm and tank",
+  "count": 9,
+  "scale": "Miniature scene assets, relative scale from visual references; printed dimensions and illegible labels are not verified measurements.",
+  "models": [
+    {"id": 1, "slug": "armored_smile_hexapod", "reference": "01_armored_smile.png", "features": ["six broad articulated armored legs", "flat rectangular footplates", "round segmented riveted torso", "helmet with inset cheerful face", "exposed lower mechanics", "warm neutral armor"]},
+    {"id": 2, "slug": "fur_needle_scout", "reference": "02_fur_scout.png", "features": ["large pear shaped white and black furry Furby", "large pointed ears", "wide eyes and yellow beak", "compact stacked rectangular underside", "six slender articulated needle legs", "tall crown tuft"]},
+    {"id": 3, "slug": "skull_sentinel", "reference": "03_skull_sentinel.png", "features": ["six angled armored spear legs", "spherical domed panel helmet", "round black eyes", "skull-like cheek teeth and muzzle", "symmetrical side hardware", "central exposed mechanisms"]},
+    {"id": 4, "slug": "cannon_quadruped", "reference": "04_cannon_walker.png", "features": ["four heavy armored articulated legs", "long forward ribbed cannon", "angular squat vehicle hull", "white tufted Furby head", "horizontal capsule equipment pod behind head", "tapered feet with tread detail"]},
+    {"id": 5, "slug": "tracked_graft_tank", "reference": "05_tracked_tank.png", "features": ["two continuous linked tracks", "large road wheels and sprockets", "sloped armored hull", "round riveted turret", "long spiked forward barrel", "paired small forward claw arms", "Furby graft head on turret from inset"]},
+    {"id": 6, "slug": "blue_orange_hydraulic", "reference": "06_blue_orange.png", "features": ["cyan fur", "orange inner ears", "yellow split beak", "large cream eyes", "two lateral single barrels", "faceted round steel skirt", "six curved blade legs", "small central claw arms"]},
+    {"id": 7, "slug": "navy_red_star", "reference": "07_navy_red.png", "features": ["navy fur", "red inner ears", "pale silver beak", "red star on front square armor", "ribbed front equipment blocks", "six curved blade legs", "red hoses and side barrel modules"]},
+    {"id": 8, "slug": "blue_red_cheek_gunner", "reference": "08_blue_red.png", "features": ["bright cyan fur", "red inner ears", "pale split beak", "two twin cheek barrel arrays", "box chassis with circular red star badge", "six curved blade legs", "white little paws", "red hydraulics", "long spiked side-mounted attachment from side view"]},
+    {"id": 9, "slug": "video_armored_crawler", "reference": "video_04.jpg", "features": ["long wedge-nosed six-leg vehicle", "small white black Furby head on top", "six pointed hydraulic legs", "round knee joints", "angled armor plates", "rear equipment and antenna stalks", "side vents and rivets"]}
+  ]
+}

@@ -9,6 +9,7 @@ Furb-o-Mek is a planned fully autonomous Hermes-controlled streaming robot built
 - Exact current and target deployment flow: [`docs/operations/hermes-one-shot.md`](docs/operations/hermes-one-shot.md).
 - Source-backed topic research: [`docs/research/README.md`](docs/research/README.md).
 - Hardware/visual evidence: [`.schematics/README.md`](.schematics/README.md).
+- Editable character models, game exports, and scene handoff: [`assets/models/furbomek/README.md`](assets/models/furbomek/README.md). These visual assets do not implement the planned avatar runtime.
 
 ## Current status
 

@@ -25,3 +25,10 @@ logs
 
 # Nested duplicate workspace snapshot; canonical source is repo root.
 /furbomek-code/
+
+# Character asset working files; authoritative deliverables remain tracked.
+/assets/models/furbomek/**/*.blend[0-9]
+/assets/models/furbomek/**/*.lock
+/assets/models/furbomek/**/__pycache__/
+/assets/models/furbomek/generated/
+/assets/models/furbomek/rebuild/
