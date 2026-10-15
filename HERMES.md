@@ -10,6 +10,12 @@ You are the host Hermes Agent deploying Furb-o-Mek from a fresh clone. Treat rep
 4. `docs/research/README.md`
 5. only the topic notes relevant to the current deployment step
 
+Before robot work, also read `docs/hardware/README.md`,
+`docs/hardware/hardware.json` and `docs/hardware/firmware.json`. Record every
+hardware/firmware discovery or change there before handoff. USB echo is verified;
+installed firmware identity and robot-local safety remain unqualified. Do not
+repeat initial discovery or enable motion from the echo result alone.
+
 ## Operating rule
 
 Advance only through implemented, testable milestones. Never invent a command, service, firmware, credential, measurement or passing result merely to complete the deployment narrative.

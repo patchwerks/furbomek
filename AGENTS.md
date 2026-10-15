@@ -40,6 +40,9 @@ Agents own operational runbooks, launch/recovery and QA. The user does not read 
 
 - Use current code over the generic Nuxt `README.md` when they conflict.
 - Treat hardware identifications in `PLAN.md` as inferred until confirmed in `docs/hardware/` by model/board markings, measurements, or firmware.
+- Read `docs/hardware/hardware.json`, `docs/hardware/firmware.json`, and `docs/hardware/README.md` before robot hardware or firmware work. These are the current evidence records, not permission to activate actuators.
+- Every agent must record hardware/firmware discoveries and changes in those JSON files in the same commit series: date, evidence status/provenance, before/after state, measurements, artifact hashes, verification, safety impact and rollback limits. Append firmware history for writes/configuration changes. Keep unknowns explicit; never infer an installed version from an echo or assign remote-board markings to the robot. Do not repeat established discovery unless needed to verify current state.
+- No firmware write until actual board/MCU/output mapping, programming method, private preservation of the existing image where supported, reproducible replacement artifact and rollback limits are recorded. No Hermes motion until robot-local TTL/watchdog/STOP and supported-bench/cutoff acceptance pass. Stock-compatible echo alone does not meet these gates.
 - Treat `.schematics/` as navigation and planning aids, never as verified fabrication or wiring drawings.
 - Read `.schematics/README.md` and the paired sheet note before changing a hardware, audio, camera, or control-path claim.
 - Read `docs/research/README.md` and the relevant topic note before adopting or replacing an external project, protocol, model, renderer, speech engine, browser worker, or agent framework.
