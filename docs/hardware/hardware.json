@@ -1,0 +1,90 @@
+{
+  "schema_version": 1,
+  "updated_on": "2026-10-15",
+  "scope": "Current robot hardware evidence; not a verified wiring diagram or runtime authorization",
+  "robot": {
+    "platform": {
+      "value": "Freenove Hexapod Robot Kit FNK0031 or compatible modified platform",
+      "status": "reference/inferred",
+      "evidence": "PLAN.md section 2.2 and .schematics/01-physical-system-blueprint.md"
+    },
+    "legs": {"value": 6, "status": "observed"},
+    "servo_channels": {"value": 18, "status": "observed/reference"},
+    "servo_models": null,
+    "calibration": null
+  },
+  "motion_controller": {
+    "board_model": null,
+    "board_revision": null,
+    "mcu": {
+      "value": "ATmega2560-class",
+      "status": "reference/inferred",
+      "evidence": "Vendor FNHR source targets ARDUINO_AVR_MEGA2560; actual chip marking/signature not yet confirmed"
+    },
+    "pin_map": null,
+    "usb": {
+      "bridge": "CH340",
+      "vendor_id": "1a86",
+      "product_id": "7523",
+      "linux_driver": "ch341",
+      "status": "observed",
+      "last_observed_device_node": "/dev/ttyUSB0",
+      "device_node_is_stable_identity": false,
+      "method": "lsusb and udevadm info --query=property --name=/dev/ttyUSB0",
+      "observed_on": "2026-10-15",
+      "identity_limit": "Both the handheld remote and robot controller enumerate with this generic bridge; VID/PID cannot distinguish them"
+    },
+    "serial_echo": {
+      "status": "measured",
+      "observed_on": "2026-10-15",
+      "baud": 115200,
+      "data_bits": 8,
+      "parity": "none",
+      "stop_bits": 1,
+      "request_hex": "80 00 81",
+      "response_hex": "80 01 81",
+      "identity_limit": "Confirms stock-compatible echo behavior, not board model, installed firmware version, or safety readiness"
+    }
+  },
+  "legacy_handheld_remote": {
+    "shield_marking": {"value": "Smart Car Remote Shield", "status": "observed"},
+    "lower_board_marking": {"value": "Control Board V4.1", "status": "observed"},
+    "evidence": "Four user-supplied close-up photographs reviewed 2026-10-15; originals remain outside Git",
+    "identity_limit": "V4.1 belongs to the photographed remote assembly; do not assign it to the robot controller",
+    "runtime_authority": "none"
+  },
+  "radios": {
+    "wlan_chipset": null,
+    "legacy_remote_chipset": null,
+    "authenticated_robot_link": "not implemented"
+  },
+  "head": {
+    "mechanism": "Furby-like coupled mechanism; generation unconfirmed",
+    "electrical_interface_measured": false,
+    "driver_pin_map": null,
+    "motor_current": null,
+    "travel_limits": null,
+    "speaker_impedance": null,
+    "evidence": ".schematics/03-head-actuation-control-deck.md and .schematics/05-furby-audio-mechanism.md"
+  },
+  "power": {
+    "battery_bay": {"value": "dual-cell bay", "status": "observed"},
+    "cell_type": {"value": "two flat-top 18650 cells", "status": "reference/inferred"},
+    "rail_voltages": null,
+    "polarity_and_power_topology": null,
+    "usb_backfeed_isolation": null
+  },
+  "safety_qualification": {
+    "robot_mounted_watchdog_gateway": "not implemented/verified",
+    "independent_actuator_cutoff_test": "not performed",
+    "supported_bench_setup": "not confirmed",
+    "live_motion_authorized": false
+  },
+  "last_test_conditions": {
+    "date": "2026-10-15",
+    "actuator_power": "disconnected, reported by operator before USB tests",
+    "controller_connection": "operator reports USB moved from handheld remote to robot controller",
+    "commands": "echo only; no motion or firmware writes",
+    "warning": "These are historical test conditions, not proof of current physical isolation; reconfirm before opening serial"
+  }
+}
