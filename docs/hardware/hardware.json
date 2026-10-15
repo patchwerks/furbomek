@@ -4,9 +4,10 @@
   "scope": "Current robot hardware evidence; not a verified wiring diagram or runtime authorization",
   "robot": {
     "platform": {
-      "value": "Freenove Hexapod Robot Kit FNK0031 or compatible modified platform",
-      "status": "reference/inferred",
-      "evidence": "PLAN.md section 2.2 and .schematics/01-physical-system-blueprint.md"
+      "value": "Freenove hexapod chassis with modified Furby-like head",
+      "status": "observed/operator-confirmed",
+      "reference_kit": "FNK0031",
+      "evidence": "Operator-established chassis identity; evidence/2026-10-15/robot-usb-and-chassis.jpg and robot-freenove-marking.jpg"
     },
     "legs": {"value": 6, "status": "observed"},
     "servo_channels": {"value": 18, "status": "observed/reference"},
@@ -14,12 +15,15 @@
     "calibration": null
   },
   "motion_controller": {
-    "board_model": null,
+    "board_model": "Freenove robot motion controller",
+    "board_identity_evidence": "FREENOVE silkscreen in evidence/2026-10-15/robot-freenove-marking.jpg; exact PCB revision still unreadable",
     "board_revision": null,
     "mcu": {
-      "value": "ATmega2560-class",
-      "status": "reference/inferred",
-      "evidence": "Vendor FNHR source targets ARDUINO_AVR_MEGA2560; actual chip marking/signature not yet confirmed"
+      "value": "ATmega2560",
+      "status": "measured via serial bootloader",
+      "signature_hex": "1e 98 01",
+      "evidence": "AVRDUDE 7.1 wiring/STK500v2 signature read on 2026-10-15; 262144-byte flash and 4096-byte EEPROM read and independently verified; flash includes ATmega2560 identifier",
+      "method_limit": "Bootloader-reported identity, not direct ISP/physical chip-marking verification"
     },
     "pin_map": null,
     "usb": {
@@ -49,12 +53,15 @@
   "legacy_handheld_remote": {
     "shield_marking": {"value": "Smart Car Remote Shield", "status": "observed"},
     "lower_board_marking": {"value": "Control Board V4.1", "status": "observed"},
-    "evidence": "Four user-supplied close-up photographs reviewed 2026-10-15; originals remain outside Git",
+    "evidence": "Original photos preserved in evidence/2026-10-15/remote-*.jpg; indexed by evidence/2026-10-15/manifest.json",
     "identity_limit": "V4.1 belongs to the photographed remote assembly; do not assign it to the robot controller",
     "runtime_authority": "none"
   },
   "radios": {
-    "wlan_chipset": null,
+    "wlan_chipset": "ESP8266EX",
+    "wlan_module": "ESP-01",
+    "wlan_identity_status": "observed chip and board markings",
+    "wlan_evidence": "evidence/2026-10-15/robot-radio-closeup.jpg and robot-controller-and-wlan.jpg",
     "legacy_remote_chipset": null,
     "authenticated_robot_link": "not implemented"
   },
@@ -84,7 +91,7 @@
     "date": "2026-10-15",
     "actuator_power": "disconnected, reported by operator before USB tests",
     "controller_connection": "operator reports USB moved from handheld remote to robot controller",
-    "commands": "echo only; no motion or firmware writes",
+    "commands": "echo plus no-write bootloader signature, flash/EEPROM readback and verification; no motion or firmware writes",
     "warning": "These are historical test conditions, not proof of current physical isolation; reconfirm before opening serial"
   }
 }

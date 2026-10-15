@@ -10,13 +10,18 @@ Separate photographed electronics from platform-derived identifications and from
 
 | Element | Status | Limitation |
 |---|---|---|
-| Crawling-robot controller and servo headers | Observed | Exact board revision, MCU, power distribution, and pin map are TBD |
-| WLAN module/socket | Observed; function supported by Freenove docs | Chipset and packet framing are not established; do not label ESP8266 without a marking |
+| Crawling-robot controller and servo headers | Observed; ATmega2560 signature measured via bootloader | Exact board revision, power distribution, and pin map remain unqualified; installed flash/EEPROM backed up and verified |
+| WLAN module/socket | Observed ESP-01 / ESP8266EX markings | Radio firmware and WLAN behavior remain unqualified; original photo evidence is preserved |
 | Optional wireless-remote module/socket | Observed/reference | Separate from WLAN; not required in the autonomous end state |
 | 18 servo channels | Observed/reference | Ranges, calibration, current, and fault behavior require tests |
 | Robot-mounted isolated gateway | Proposed | New physical MCU/radio plus watchdog, power conditioning, and protected isolation/driver stage |
 
-Freenove documents a robot-created WLAN and an optional two-module handheld remote. The programming guide also warns that custom code changes compatibility with Processing, Android, and remote modes. Treat stock protocol capture and firmware preservation as prerequisites, not as permission to assume packet framing.
+Current unit evidence is in [`hardware.json`](../docs/hardware/hardware.json),
+[`firmware.json`](../docs/hardware/firmware.json), and the
+[original-photo index](../docs/hardware/evidence/README.md). These supersede the
+earlier unknown MCU/WLAN labels in the planning image; do not restart discovery.
+
+Freenove documents a robot-created WLAN and an optional two-module handheld remote. The programming guide also warns that custom code changes compatibility with Processing, Android, and remote modes. Stock USB echo and image preservation are now verified, but no motion/safety qualification follows from them.
 
 ## Autonomous control design
 
