@@ -1,0 +1,24 @@
+; Engine configuration file.
+; Edit from within Godot when adding project-wide settings.
+config_version=5
+
+[application]
+config/name="Furb-o-Mek Kinect 2 Broadcast"
+run/main_scene="res://main.tscn"
+
+[display]
+
+[display/window]
+size/viewport_width=1920
+size/viewport_height=1080
+size/window_width_override=1920
+size/window_height_override=1080
+stretch/mode="canvas_items"
+size/resizable=false
+size/mode=3
+size/borderless=true
+
+[rendering]
+renderer/rendering_method="gl_compatibility"
+renderer/rendering_method.mobile="gl_compatibility"
+environment/defaults/default_clear_color=Color(0.003922, 0.007843, 0.015686, 1)

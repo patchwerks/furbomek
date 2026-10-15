@@ -1,0 +1,72 @@
+[gd_scene load_steps=9 format=3]
+
+[ext_resource type="Script" path="res://main.gd" id="1_main"]
+[ext_resource type="Script" path="res://stream_loader.gd" id="2_loader"]
+[ext_resource type="Script" path="res://broadcast_hud.gd" id="3_hud"]
+[ext_resource type="Script" path="res://activity_ports.gd" id="4_ports"]
+[ext_resource type="Script" path="res://color_surface.gd" id="5_color"]
+
+[sub_resource type="Environment" id="Environment_stage"]
+background_mode = 1
+background_color = Color(0.019608, 0.007843, 0.015686, 1)
+ambient_light_source = 3
+ambient_light_color = Color(0.12, 0.01, 0.025, 1)
+ambient_light_energy = 0.18
+
+[sub_resource type="SystemFont" id="Font_hud"]
+font_names = PackedStringArray("DejaVu Sans Mono", "Liberation Mono")
+
+[sub_resource type="Theme" id="Theme_hud"]
+default_font = SubResource("Font_hud")
+
+[node name="PointCloudBroadcast" type="Node3D"]
+script = ExtResource("1_main")
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_stage")
+
+[node name="Orbit" type="Node3D" parent="."]
+position = Vector3(0, 0, -2)
+
+[node name="Camera3D" type="Camera3D" parent="Orbit"]
+current = true
+fov = 62.0
+
+[node name="PointCloud" type="MultiMeshInstance3D" parent="."]
+cast_shadow = 0
+
+[node name="StreamLoader" type="Node" parent="."]
+script = ExtResource("2_loader")
+
+[node name="Hud" type="CanvasLayer" parent="."]
+
+[node name="ColorSurface" type="ColorRect" parent="Hud"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+script = ExtResource("5_color")
+
+[node name="BroadcastHUD" type="Control" parent="Hud"]
+theme = SubResource("Theme_hud")
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+script = ExtResource("3_hud")
+
+[node name="ActivityPorts" type="Control" parent="Hud"]
+theme = SubResource("Theme_hud")
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+script = ExtResource("4_ports")
