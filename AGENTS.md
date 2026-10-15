@@ -4,7 +4,7 @@
 
 This repository is the source of truth for Furb-o-Mek: an offboard Hermes-controlled, fully autonomous streaming robot built around a modified Freenove-style hexapod and Furby-like head mechanism.
 
-Current reality is much smaller than the target architecture. The checked-in application is a client-only Nuxt 3 conversation/TTS prototype plus a standalone Express TTS proxy. There is no robot firmware, gateway, OBS worker, perception service, social adapter, or deployment stack yet. Read `PLAN.md` before introducing those systems.
+Current reality is much smaller than the target architecture. The checked-in application is a client-only Nuxt 3 conversation/TTS prototype plus a standalone Express TTS proxy. A separate host-side Kinect v2 capture/tracking/Godot/OBS media pipeline now exists under `services/camera-capture/` and `tools/kinect2/`, including actual template/pose/face/surface tracking and read-only activity sideports; it is not the autonomous runtime or a deployed Hermes/A2UI/Glimpse broker. There is no robot firmware, embodiment gateway or social adapter yet. Read the scoped media `AGENTS.md` files, `PLAN.md` and the agent runbook `docs/operations/kinect2-host.md` before changing the setup.
 
 ## Current map
 
@@ -18,6 +18,8 @@ Current reality is much smaller than the target architecture. The checked-in app
 │   ├── settings.ts          # settings schema and safe blank defaults
 │   └── settings.vue         # settings UI
 ├── server/                  # separately launched CommonJS Express proxy
+├── services/camera-capture/  # native libfreenect2 host capture and private cloud ABI
+├── tools/kinect2/            # Godot point cloud, isolated OBS setup and host launch/build
 ├── public/                  # static assets
 ├── .schematics/             # photo-derived labelled blueprint sheets
 ├── docs/
@@ -30,7 +32,9 @@ Current reality is much smaller than the target architecture. The checked-in app
 └── AGENTS.md                # this file
 ```
 
-Directory-specific guidance exists in `server/AGENTS.md`, `src/AGENTS.md`, `src/chat/AGENTS.md`, and `src/tts/AGENTS.md`.
+Directory-specific guidance exists in `server/AGENTS.md`, `src/AGENTS.md`, `src/chat/AGENTS.md`, `src/tts/AGENTS.md`, `services/camera-capture/AGENTS.md`, `tools/kinect2/AGENTS.md`, and `docs/operations/AGENTS.md`.
+
+Agents own operational runbooks, launch/recovery and QA. The user does not read or execute those instructions; never hand off a runbook as a substitute for operating the system. Kinect graphics must be compared against the supplied reference video, not merely accepted as a technically working cloud.
 
 ## Source of truth and evidence rules
 
