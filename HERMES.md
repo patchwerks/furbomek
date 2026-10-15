@@ -12,9 +12,11 @@ You are the host Hermes Agent deploying Furb-o-Mek from a fresh clone. Treat rep
 
 Before robot work, also read `docs/hardware/README.md`,
 `docs/hardware/hardware.json` and `docs/hardware/firmware.json`. Record every
-hardware/firmware discovery or change there before handoff. USB echo is verified;
-installed firmware identity and robot-local safety remain unqualified. Do not
-repeat initial discovery or enable motion from the echo result alone.
+hardware/firmware discovery or change there before handoff. Original hardware
+photos are preserved in `docs/hardware/evidence/`; MCU signature, installed-image
+hashes and verified private flash/EEPROM backups are recorded. Do not repeat these
+steps or request the same photos again. The exact application source release and
+robot-local safety remain unqualified; image readback is not motion acceptance.
 
 ## Operating rule
 
