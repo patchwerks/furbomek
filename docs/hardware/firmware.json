@@ -1,0 +1,75 @@
+{
+  "schema_version": 1,
+  "updated_on": "2026-10-15",
+  "installed": {
+    "identity_status": "unknown",
+    "version": null,
+    "source_revision": null,
+    "flash_sha256": null,
+    "eeprom_backup_sha256": null,
+    "mcu_signature": null,
+    "bootloader": null,
+    "fuses_and_lock_bits": null,
+    "rollback_verified": false,
+    "protocol_observation": "Stock-compatible echo at 115200: 80 00 81 -> 80 01 81",
+    "version_query": "No version/board identification command found in inspected vendor command table",
+    "safety_qualification": "unverified; do not enable Hermes motion",
+    "writes_this_session": false
+  },
+  "reference_source": {
+    "status": "inspected reference, NOT installed-image identification",
+    "repository": "https://github.com/Freenove/Freenove_Hexapod_Robot_Kit",
+    "commit": "1596c5ffe07a262fa7dc6d0189de6c2321270278",
+    "archive": "ArduinoLibraries/FNHR.zip",
+    "version_header": "V12.6",
+    "source_date_header": "2023/09/19",
+    "inspected_on": "2026-10-15",
+    "license": "CC-BY-NC-SA-3.0; do not copy/redistribute firmware without provenance and license review",
+    "intended_target": "ARDUINO_AVR_MEGA2560",
+    "sources": {
+      "commands": "FNHR/src/FNHROrders.h",
+      "serial_parser_and_dispatch": "FNHR/src/FNHRComm.cpp",
+      "default_sketch": "FNHR/examples/Default/Robot/Robot.ino",
+      "power_control": "FNHR/src/FNHRBasic.h and FNHR/src/FNHRBasic.cpp"
+    },
+    "protocol": {
+      "baud": 115200,
+      "frame_start_hex": "80",
+      "frame_end_hex": "81",
+      "echo_request_hex": "80 00 81",
+      "echo_response_hex": "80 01 81",
+      "supply_query_hex": "80 0a 81",
+      "supply_response_format": "80 0b hi lo 81; volts = (128 * hi + lo) / 100",
+      "supply_query_executed": false
+    },
+    "safety_findings": {
+      "robot_local_command_ttl": "absent in inspected serial command path",
+      "serial_link_loss_stop": "absent in inspected serial command path",
+      "unconditional_stop_command": "absent from inspected command table",
+      "auto_sleep": "Action-related timeout exists; it is not a link-loss watchdog or STOP guarantee",
+      "reset_behavior": "Vendor assembly documentation warns that restart can rotate servos; serial open/DTR may reset controller",
+      "qualification": "fails required autonomous-motion safety contract"
+    }
+  },
+  "project_safety_firmware": {
+    "status": "not implemented",
+    "artifact_sha256": null,
+    "flashed": false,
+    "required_gates": [
+      "Confirm physical controller revision, MCU identity, output pin mapping and power topology",
+      "Identify programming method and preserve installed image/configuration privately where supported",
+      "Build a reproducible firmware artifact and establish rollback limits",
+      "Verify inactive boot/reset outputs, local TTL/watchdog, unconditional STOP and head interlocks",
+      "Pass simulator and unpowered hardware tests including stale/malformed frames and process/link/heartbeat loss",
+      "Confirm supported chassis, independent power cutoff and staged powered acceptance before Hermes activation"
+    ]
+  },
+  "history": [
+    {
+      "date": "2026-10-15",
+      "change": "Initial records after USB echo bring-up; no firmware flashed",
+      "verification": "Three-byte echo request returned exact documented response with actuator power disconnected",
+      "rollback": "No firmware or persistent host changes to roll back; serial port closed and prior termios settings restored"
+    }
+  ]
+}
