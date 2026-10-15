@@ -1,0 +1,63 @@
+{
+  "schema_version": 1,
+  "received_on": "2026-10-15",
+  "source": "Operator-supplied photographs explicitly requested to be preserved in the repository",
+  "storage": "Original uploaded JPEG bytes; no recompression or edits",
+  "privacy_review": "Visually reviewed; EXIF contains dimensions/orientation/resolution, no GPS fields; operator authorized repository storage",
+  "photos": [
+    {
+      "file": "robot-radio-closeup.jpg",
+      "original_upload": "moshi-paste-3523094027.jpg",
+      "sha256": "ef4ed24f2dc192163ea78b853801116a59ce4f3132bd763f96f7f6594a3dbda7",
+      "observations": "ESP-01 board and ESP8266EX marking visible on right; separate RF module on left"
+    },
+    {
+      "file": "robot-usb-and-chassis.jpg",
+      "original_upload": "moshi-paste-4188587458.jpg",
+      "sha256": "16f6107306aac2118073d0f978a8e0d6dcf1993646b9b5f723172c186045aed1",
+      "observations": "USB physically connected to robot; Furby-like head, chassis, servo wiring and empty dual-cell bay visible"
+    },
+    {
+      "file": "robot-controller-and-wlan.jpg",
+      "original_upload": "moshi-paste-2556032439.jpg",
+      "sha256": "bad99bf372183bf25a42e2bda79cf5eb3b89145cc6c63e0f73eef7ad44ea0c4c",
+      "observations": "Controller headers and status LEDs; ESP-01 and ESP8266EX marking visible"
+    },
+    {
+      "file": "robot-freenove-marking.jpg",
+      "original_upload": "moshi-paste-1511530894.jpg",
+      "sha256": "0785c2cd87be00653d866f836317a753697c52d7ce7862c767edba335be65e72",
+      "observations": "FREENOVE silkscreen on robot controller; main MCU package visible but marking obscured/unreadable"
+    },
+    {
+      "file": "robot-controller-overview.jpg",
+      "original_upload": "moshi-paste-1076585704.jpg",
+      "sha256": "6630fef390fa45650091b4126c919c0fdff07c1a715d5138c157578df0013f86",
+      "observations": "Both plug-in radios, numbered servo headers, 5V/3.3V silkscreen and disconnected white connector; silkscreen is not a voltage measurement"
+    },
+    {
+      "file": "remote-usb-overview.jpg",
+      "original_upload": "moshi-paste-2096803242.jpg",
+      "sha256": "a8c693cccab5301c615a01ed3109c0da25ec33450cca3519b22a5fc31b0cd2a5",
+      "observations": "Earlier USB connection to handheld remote, not robot; disconnected barrel plug visible"
+    },
+    {
+      "file": "remote-shield-overview.jpg",
+      "original_upload": "moshi-paste-3918192852.jpg",
+      "sha256": "8c5b98d602ed3bc8938b4e5c603f16bc41157bdcd8e4be6dcac55012c8055bd6",
+      "observations": "Remote joystick, knobs, buttons, switches, radio and battery"
+    },
+    {
+      "file": "remote-board-v4.1-marking.jpg",
+      "original_upload": "moshi-paste-1782277672.jpg",
+      "sha256": "f051a4d65e1eae1b630522e4e79938ad5ebc7498dbdca90b1791d2c26f9405a5",
+      "observations": "Smart Car Remote Shield and lower Control Board V4.1 markings; not robot controller revision"
+    },
+    {
+      "file": "remote-control-board-side.jpg",
+      "original_upload": "moshi-paste-3525004209.jpg",
+      "sha256": "4d610a6519399273b00371a103bae519d42bf4cfb2319962d33795381227884d",
+      "observations": "Side view of remote shield and USB-connected lower board"
+    }
+  ]
+}
