@@ -2,13 +2,40 @@
   "schema_version": 1,
   "updated_on": "2026-10-15",
   "installed": {
-    "identity_status": "unknown",
+    "identity_status": "installed image captured and independently read-verified; source release unknown",
     "version": null,
     "source_revision": null,
-    "flash_sha256": null,
-    "eeprom_backup_sha256": null,
-    "mcu_signature": null,
-    "bootloader": null,
+    "flash_sha256": "ba6baca09ee20125e1a58b8d6e4ec5013982b92a46a413aef6a34608f8aa9dd9",
+    "eeprom_backup_sha256": "c7b4f2f7e8e5dae2a53aa146f64f868ec17c9744e9833d13f844c378ae4ad9b1",
+    "mcu_signature": "0x1e9801 (ATmega2560), reported via bootloader",
+    "bootloader": {
+      "protocol": "STK500v2, AVRDUDE wiring programmer",
+      "reported_programmer_firmware_version": "2.10",
+      "flash_identifier": "Arduino explorer stk500V2 by MLS",
+      "flash_date_string": "Mar  7 2013",
+      "date_string_limit": "Embedded string, not a verified installation date or application release"
+    },
+    "readback": {
+      "date": "2026-10-15",
+      "tool": "AVRDUDE 7.1, Ubuntu package 7.1+dfsg-3build2 extracted temporarily; not installed system-wide",
+      "tool_package_sha256": "ce201d754e629ebdc750ea7077a1d019848752f478946ecd3bb95cc5eeefe6e5",
+      "mode": "-n -D -p m2560 -c wiring -P /dev/ttyUSB0 -b 115200; only :r: then :v: operations",
+      "flash_bytes": 262144,
+      "eeprom_bytes": 4096,
+      "independent_verification": "AVRDUDE reread and verified all 262144 flash bytes and 4096 EEPROM bytes; exit 0",
+      "private_backup_directory": "~/.local/state/furbomek/firmware-backups/2026-10-15",
+      "backup_files": ["flash.bin", "eeprom.bin"],
+      "private_logs": ["readback.log", "verify.log"],
+      "permissions": "backup directory 0700; images and logs 0600",
+      "embedded_identifiers": [
+        {"offset_hex": "0xb231", "text": "Freenove Hexapod Robot"},
+        {"offset_hex": "0x3e0e4", "text": "ATmega2560"},
+        {"offset_hex": "0x3e0ef", "text": "Arduino explorer stk500V2 by MLS"},
+        {"offset_hex": "0x3e1b7", "text": "Mar  7 2013"}
+      ],
+      "post_readback_echo_hex": "80 01 81",
+      "limits": "Readback includes non-erased boot-region content but cannot prove all protected physical bytes are exposed; fuse/lock state and restore procedure are not verified"
+    },
     "fuses_and_lock_bits": null,
     "rollback_verified": false,
     "protocol_observation": "Stock-compatible echo at 115200: 80 00 81 -> 80 01 81",
@@ -56,8 +83,8 @@
     "artifact_sha256": null,
     "flashed": false,
     "required_gates": [
-      "Confirm physical controller revision, MCU identity, output pin mapping and power topology",
-      "Identify programming method and preserve installed image/configuration privately where supported",
+      "Review output pin mapping and power topology against recorded Freenove hardware; exact PCB revision remains unreadable",
+      "Keep verified flash/EEPROM backups; record fuse/lock and restoration limitations before any replacement write",
       "Build a reproducible firmware artifact and establish rollback limits",
       "Verify inactive boot/reset outputs, local TTL/watchdog, unconditional STOP and head interlocks",
       "Pass simulator and unpowered hardware tests including stale/malformed frames and process/link/heartbeat loss",
@@ -70,6 +97,15 @@
       "change": "Initial records after USB echo bring-up; no firmware flashed",
       "verification": "Three-byte echo request returned exact documented response with actuator power disconnected",
       "rollback": "No firmware or persistent host changes to roll back; serial port closed and prior termios settings restored"
+    },
+    {
+      "date": "2026-10-15",
+      "change": "Identified ATmega2560 via bootloader; captured and verified installed flash and EEPROM without writes",
+      "before": "Only echo-compatible transport known; no installed-image backup",
+      "after": "Installed image identified by SHA-256; Freenove and STK500v2 identifiers observed; source release still unknown",
+      "verification": "Signature/readback/verification commands exited 0; exact byte counts and hashes above; application echo passed after bootloader exit",
+      "safety": "Actuator power remains operator-reported disconnected; serial reset occurred; no movement command, erase or memory write issued",
+      "rollback": "No device change to undo. Preserve private backups; restoration has not been tested and may not recover protected boot/fuse/lock state"
     }
   ]
 }

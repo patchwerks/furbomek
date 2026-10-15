@@ -24,8 +24,11 @@ and append firmware history for programming/configuration changes. Record:
 
 Preserve meaningful history; do not overwrite an old measurement with a new guess.
 Keep secrets, USB serial numbers, network identities/endpoints, unknown binary
-dumps, private photos and logs outside Git. Commit public-safe metadata and hashes,
-not raw firmware dumps with unresolved provenance. Stage only task-owned paths.
+dumps, private media and logs outside Git. Hardware photos explicitly designated
+by the operator for repository evidence belong in [`evidence/`](evidence/README.md)
+with provenance and hashes, not only temporary paste storage. Commit metadata and
+hashes rather than raw firmware dumps with unresolved provenance. Stage only
+task-owned paths.
 
 ## Verified bring-up, 2026-10-15
 
@@ -36,11 +39,19 @@ After moving USB to the robot controller, Brodex enumerated a CH340 bridge and a
 reported disconnected. No motion command or firmware write was sent. Device node
 `/dev/ttyUSB0` is a historical observation, never a stable identity.
 
-The installed firmware version and actual MCU remain unknown. The inspected
-vendor source lacks local command expiry/link-loss STOP; a host-side wrapper
+Subsequent no-write bootloader probing reported ATmega2560 signature `1e 98 01`.
+The installed 262144-byte flash and 4096-byte EEPROM were backed up privately and
+independently verified against a second device read. Their hashes and embedded
+Freenove/STK500v2 identifiers are in `firmware.json`. The application echo still
+passed afterward. The installed source release remains unknown, but the installed
+image is now identified by its hash; do not repeat identification or demand more
+photos merely because the exact release label is absent.
+
+The inspected vendor source lacks local command expiry/link-loss STOP; a host-side wrapper
 cannot repair that failure boundary. Do not reconnect actuator power as a result
 of a successful echo. Current hardware identification and safe programming gates
-are listed in `firmware.json`.
+are listed in `firmware.json`. The [readback runbook](../operations/robot-readback.md)
+records commands, private backup locations, evidence and rollback limits.
 
 ## Primary reference evidence
 
