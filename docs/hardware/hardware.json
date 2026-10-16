@@ -25,7 +25,18 @@
       "evidence": "AVRDUDE 7.1 wiring/STK500v2 signature read on 2026-10-15; 262144-byte flash and 4096-byte EEPROM read and independently verified; flash includes ATmega2560 identifier",
       "method_limit": "Bootloader-reported identity, not direct ISP/physical chip-marking verification"
     },
-    "pin_map": null,
+    "pin_map": {
+      "status": "vendor reference only; not electrically qualified on installed board",
+      "reference_index": "vendor/freenove/INDEX.md",
+      "servo_signal_headers": "Arduino D22 through D39; leg/joint orientation and calibration not qualified",
+      "power_enable_by_reference_revision": {
+        "FNM0019_V2.0": ["A15", "A14", "A13"],
+        "FNM0019B_V3.2": ["A15", "A14"]
+      },
+      "clock_reference_hz": 16000000,
+      "clock_measured": false,
+      "warning": "Two versus three supply groups differ across official schematics. Do not select installed pin mapping from MCU identity alone; the diagnostic image never writes these pins."
+    },
     "usb": {
       "bridge": "CH340",
       "vendor_id": "1a86",

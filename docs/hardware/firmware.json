@@ -48,6 +48,9 @@
     "repository": "https://github.com/Freenove/Freenove_Hexapod_Robot_Kit",
     "commit": "1596c5ffe07a262fa7dc6d0189de6c2321270278",
     "archive": "ArduinoLibraries/FNHR.zip",
+    "archived_reference": "docs/hardware/vendor/freenove/firmware/FNHR.zip",
+    "archive_sha256": "dccc37b9707a705f097096cd66a02253b5ae3f6b7a7a77f6ba14b53a665f0d4b",
+    "archive_license_review": "Unmodified attributed offline reference collection under preserved CC-BY-NC-SA-3.0; not linked into project diagnostic firmware and not permission for commercial actuation",
     "version_header": "V12.6",
     "source_date_header": "2023/09/19",
     "inspected_on": "2026-10-15",
@@ -79,14 +82,36 @@
     }
   },
   "project_safety_firmware": {
-    "status": "not implemented",
-    "artifact_sha256": null,
+    "status": "implemented diagnostic component; native-tested and AVR cross-compiled, not flashed or physically qualified",
+    "source_directory": "firmware/robot-safety",
+    "profile": "UART0/Timer1 diagnostic, no actuator adapter or output-enable switch",
+    "artifact_sha256": "e95f283f5983ab7b39beda5bbfc246b7b9e74d2cba09a6b0d99b7be37b58a951",
+    "artifact_format": "Intel HEX, ATmega2560, reference clock 16 MHz",
+    "elf_sha256": "9f4d8f92b3c6c9b40eb98a73ac952ac73128ed3abbe63dff228c3b81b991671c",
     "flashed": false,
+    "actuator_capability_bitmap": 0,
+    "vendor_gait_linked": false,
+    "hardware_watchdog_enabled_by_image": false,
+    "hardware_watchdog_qualified": false,
+    "verification": {
+      "date": "2026-10-15",
+      "native_checks_passed": 93,
+      "native_compiler": "GCC 13.3.0, warnings as errors",
+      "avr_compiler": "GCC AVR 7.3.0; Binutils 2.26.20160125; avr-libc 2.0.0",
+      "image_sizes_bytes": {"text": 4020, "data": 80, "bss": 139},
+      "two_clean_builds_identical": true,
+      "timer_register_order_disassembly_check": "passed",
+      "native_driver_manual_qa": "help, clear/lease, rate rejection, exact expiry, malformed frames, emergency STOP, sticky fault and invalid input passed",
+      "lsp": "clangd and bash language servers unavailable; installation previously declined; strict compilers and bash -n used",
+      "evidence": "firmware/robot-safety/docs/BUILD_EVIDENCE.md",
+      "limits": "Software-only diagnostic; no hardware tests, no physical safe sink, no gait, no authenticated boot/session freshness. Finite sequence ordering is not indefinite anti-replay. Epoch-exhaustion branch not dynamically exercised."
+    },
     "required_gates": [
       "Review output pin mapping and power topology against recorded Freenove hardware; exact PCB revision remains unreadable",
       "Keep verified flash/EEPROM backups; record fuse/lock and restoration limitations before any replacement write",
-      "Build a reproducible firmware artifact and establish rollback limits",
+      "Preserve this reproducible diagnostic as software evidence, not an actuation artifact; establish hardware rollback before any write",
       "Verify inactive boot/reset outputs, local TTL/watchdog, unconditional STOP and head interlocks",
+      "Provide authenticated boot/session freshness and a bounded semantic adapter before any Hermes actuation; finite diagnostic sequence ordering is not sufficient",
       "Pass simulator and unpowered hardware tests including stale/malformed frames and process/link/heartbeat loss",
       "Confirm supported chassis, independent power cutoff and staged powered acceptance before Hermes activation"
     ]
@@ -106,6 +131,15 @@
       "verification": "Signature/readback/verification commands exited 0; exact byte counts and hashes above; application echo passed after bootloader exit",
       "safety": "Actuator power remains operator-reported disconnected; serial reset occurred; no movement command, erase or memory write issued",
       "rollback": "No device change to undo. Preserve private backups; restoration has not been tested and may not recover protected boot/fuse/lock state"
+    },
+    {
+      "date": "2026-10-15",
+      "change": "Archived official manuals/schematics/FNHR reference and implemented project-owned actuator-disabled safety diagnostic",
+      "before": "No project safety source or locally archived official manuals",
+      "after": "Portable bounded STOP/lease/sequence/CRC kernel, atomic transport-fault commit boundary and deterministic Timer1 shell cross-compiled; hardware unchanged",
+      "verification": "93 native checks, two clean matching AVR builds, actual timer disassembly-order check and manual native protocol QA passed",
+      "safety": "No serial access or device writes this stage. Physical cutoff, gait adapter, authenticated freshness, watchdog reset and HIL remain unqualified",
+      "rollback": "No installed firmware change. Remove/revert project source commits if needed; preserve original private flash/EEPROM backups and unrelated media changes"
     }
   ]
 }
