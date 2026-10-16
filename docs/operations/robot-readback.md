@@ -96,11 +96,21 @@ options before any bootloader/fuse change. No such change is currently authorize
 
 ## Next safe programming step
 
-Do not ask for the same photographs again. Use the preserved evidence, confirmed
-Mega2560-class USB programming path and vendor schematics to review servo/output
-mapping and power behavior. Prepare a reproducible safety-firmware artifact and
-simulator tests before considering a write; retain the baseline and explicitly
-record restore limitations. Robot-local command expiry/watchdog, STOP, inactive
-reset outputs and interlocks must be implemented and exercised unpowered before
-a supported-bench, independent-cutoff powered test. Hermes motion remains gated
-on those tests, not on discovering a human-readable stock version number.
+Do not ask for the same photographs again. Use the preserved evidence and the
+[downloaded official references](../hardware/vendor/freenove/INDEX.md). The V2.0
+and V3.2 schematics differ in servo supply-group wiring; do not choose a power
+pin map based on MCU identity alone.
+
+The [project safety diagnostic](../../firmware/robot-safety/README.md) is now
+implemented, natively tested and reproducibly cross-compiled. It provides bounded
+STOP/lease/CRC/framing behavior and atomic fault/command ordering, but contains no
+actuator adapter, no gait or authenticated boot freshness, and does not configure
+the hardware watchdog. Inherited bootloader watchdog state remains unqualified.
+It is not a replacement operational image or a simulated robot.
+
+Before any write, qualify installed output/power mapping, present physical
+isolation and the restoration/ISP recovery limits. Before powered motion, add and
+test the measured adapter, local hardware watchdog/reset behavior, inactive boot
+outputs, head interlocks, supported chassis and independent cutoff. Preserve the
+baseline. These hardware gates, not a missing stock version label, block flashing
+and Hermes motion. No firmware was flashed during diagnostic development.

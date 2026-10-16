@@ -4,6 +4,11 @@
   unknowns, and safety qualification.
 - [`firmware.json`](firmware.json): installed-image identity, inspected reference
   source, safety findings, flash/rollback state, and firmware change history.
+- [`Official Freenove archive`](vendor/freenove/INDEX.md): V2/V3 manuals,
+  battery and calibration guides, troubleshooting, all five controller schematics,
+  original FNHR ZIP and upstream license, pinned and hash-verified offline.
+- [`Project safety diagnostic`](../../firmware/robot-safety/README.md): implemented
+  protocol/kernel and AVR build; actuator-disabled, not flashed or HIL-qualified.
 
 Use strict JSON, with context in named fields rather than comments. `null` means
 unknown, not absent or safe. These are evidence records, **not activation config**.
@@ -72,5 +77,14 @@ contains the robot implementation; its source header says V12.6 / 2023-09-19.
   startup/restart can rotate servos.
 
 The vendor source is a reference, not a dump or identification of this controller.
-Its noncommercial/share-alike license needs review before incorporating code into
-this streaming-robot project. No vendor firmware was copied into this repository.
+Its noncommercial/share-alike license limits reuse in this streaming-robot
+project. The official ZIP is now preserved unchanged as an attributed reference
+collection with its original license; none of its code is linked into the
+project-owned safety diagnostic.
+
+The official V2 and V3.2 schematics differ in the number of servo power groups.
+Those reference mappings are recorded in `hardware.json`, not promoted to
+measured installed-board facts. This is why the new diagnostic has no output
+adapter. Its STOP/lease logic, CRC/framing, expiry boundaries and atomic UART
+fault handling are host-tested and cross-compiled; physical actuation and
+watchdog-reset behavior still need separate acceptance.
