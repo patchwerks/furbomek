@@ -30,6 +30,20 @@ substitute for the recorded signature/readback evidence.
 These are the earlier remote assembly, not the robot controller. Preserve this
 distinction: a remote's board revision is not the robot's revision.
 
+## Exposed POWER control and rear-right-leg report, 2026-10-16
+
+The [new manifest](2026-10-16/manifest.json) preserves three more original photos:
+
+- [Clear cover shifted](2026-10-16/controller-clear-cover-shifted.jpg)
+- [POWER button and V3.1 marking](2026-10-16/power-button-v3.1-closeup.jpg)
+- [Reported rear-right extension fault](2026-10-16/rear-right-leg-reported-extension-fault.jpg)
+
+The accessible blue/white POWER pushbutton is now observed on the installed
+controller, and its adjacent revision label reads V3.1. This supersedes the
+earlier unreadable-revision and hidden-control notes. Do not infer ON/OFF from
+the plunger position alone. The leg image records an asymmetric position and an
+operator-reported symptom; it does not establish the mechanical/electrical cause.
+
 For later operator-designated hardware evidence, preserve the files and add
 provenance, hashes and observations in the same commit series. Never keep the only
 copy under `/tmp`. Do not automatically publish other private media or firmware
