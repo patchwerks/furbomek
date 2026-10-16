@@ -87,7 +87,27 @@
     "wlan_identity_status": "observed chip and board markings",
     "wlan_evidence": "evidence/2026-10-15/robot-radio-closeup.jpg and robot-controller-and-wlan.jpg",
     "legacy_remote_chipset": null,
-    "authenticated_robot_link": "not implemented"
+    "authenticated_robot_link": "not implemented",
+    "stock_wifi_transport": {
+      "status": "observed and wireless TCP echo verified",
+      "verified_on": "2026-10-16",
+      "access_point": "Vendor-default Freenove Hexapod Robot SoftAP, channel 1, WPA2 association",
+      "tcp_port": 65535,
+      "request_hex": "80 00 81",
+      "response_hex": "80 01 81",
+      "host_wifi_interface": "wlp2s0",
+      "host_internet_interface": "enp3s0",
+      "ethernet_prechecks": "Two independent HTTPS requests explicitly bound to Ethernet returned HTTP 200; Ethernet default-route metric 100; Tailscale peer ping passed",
+      "post_switch_checks": "Wireless echo matched; Ethernet HTTPS HTTP 200, preferred Ethernet default route and Tailscale peer ping all passed before checkpoint confirmation",
+      "profile": "furbomek-bench-wifi, runtime-only under /run/NetworkManager/system-connections; not boot-persistent",
+      "profile_policy": "autoconnect=no; ipv4.never-default=yes; ipv4.ignore-auto-dns=yes; ipv6.method=disabled",
+      "single_radio_constraint": "Brodex supports only one managed Wi-Fi client and one radio channel; Internet/remote access therefore needs Ethernet while this interface is joined to the robot",
+      "power_conditions": "Operator reports motor power OFF and USB reconnected; AP visible and echo succeeded in that condition; no USB serial session opened",
+      "motion_commands_sent": false,
+      "firmware_writes": false,
+      "runbook": "docs/operations/robot-wireless.md",
+      "qualification_limit": "Stock Wi-Fi transport only; no new local watchdog, authenticated semantic gateway, leg test or motion acceptance"
+    }
   },
   "head": {
     "mechanism": "Furby-like coupled mechanism; generation unconfirmed",

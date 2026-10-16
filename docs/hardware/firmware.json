@@ -39,6 +39,15 @@
     "fuses_and_lock_bits": null,
     "rollback_verified": false,
     "protocol_observation": "Stock-compatible echo at 115200: 80 00 81 -> 80 01 81",
+    "wireless_protocol_observation": {
+      "date": "2026-10-16",
+      "transport": "Stock ESP8266 SoftAP TCP service, port 65535",
+      "request_hex": "80 00 81",
+      "response_hex": "80 01 81",
+      "verified": true,
+      "device_memory_changed": false,
+      "limit": "Echo identifies compatible transport behavior, not an installed source release or safe motion gateway"
+    },
     "version_query": "No version/board identification command found in inspected vendor command table",
     "safety_qualification": "unverified; do not enable Hermes motion",
     "writes_this_session": false
