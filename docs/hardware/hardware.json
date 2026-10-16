@@ -135,7 +135,9 @@
   "safety_qualification": {
     "robot_mounted_watchdog_gateway": "not implemented/verified",
     "independent_actuator_cutoff_test": "not performed",
-    "supported_bench_setup": "operator reports feet raised; current front camera confirms elevated chassis on an oval white case, but all-foot clearance and support restraint are not visible",
+    "supported_bench_setup": "2026-10-16 follow-up: operator confirms all legs suspended; fresh C930e frame shows chassis elevated on a rigid central block with visible front leg clearance. Earlier oval-case view is historical, not the current support.",
+    "operator_authorized_supervised_check": true,
+    "powered_movement_test": "not performed; installed stock control has no qualified local command expiry/preemptive STOP and the project diagnostic has no actuator adapter",
     "live_motion_authorized": false
   },
   "last_test_conditions": {
@@ -162,6 +164,16 @@
     "capture_limit": "109 fresh frames captured, then process reported a core dump during shutdown; no capture process remains; not a proven continuous observation path",
     "robot_actions": "No motion, serial probes, firmware changes or power switching performed",
     "next_view": "Side/underside view of all feet, chassis support and accessible battery cutoff before powered checks",
+    "supported_setup_followup": {
+      "date": "2026-10-16",
+      "operator_report": "Motor power remains OFF, all legs suspended; operator requests supervised individual-leg check",
+      "camera_observation": "Current C930e image shows central chassis raised on a rigid black block; visible front legs above table",
+      "private_image": "/data/furbomek-media/bench-2026-10-16-pre-motion/raised-chassis.jpg",
+      "image_sha256": "13573092fdf90e18c19ba25febc9d570e6425b74170d823d34ca323054a48173",
+      "wireless_recheck": "Exact echo 80 00 81 -> 80 01 81 succeeded; Ethernet remains Internet default route",
+      "remaining_control_limit": "Stock per-leg request is not a verified preemptible local-TTL safety path; new safety diagnostic is unflashed and cannot actuate",
+      "handoff": "Do not repeat camera/support preparation as if it resolves the software control limitation. No movement or firmware write has occurred."
+    },
     "second_camera": {
       "model": "Logitech Webcam C930e",
       "usb_vendor_id": "046d",

@@ -97,3 +97,21 @@ runtime `furbomek-bench-wifi` profile. Select the existing profile from local
 NetworkManager state, not a guessed SSID or UUID. Do not disconnect Ethernet
 before restoring another verified Internet path. No robot firmware rollback is
 needed: no device memory was changed.
+
+## Supported-bench follow-up: do not repeat the wrong gate
+
+The operator subsequently confirmed motor power OFF and all legs suspended. A
+fresh C930e frame now shows the chassis on a rigid central black block, replacing
+the earlier broad padded-case arrangement. Private frame/hash are recorded in
+`hardware.json`. The stock wireless echo passed again and Ethernet remained the
+Internet default route. Treat the repeated support-preparation step as completed
+for this arrangement; do not ask for it again without evidence of a changed setup.
+
+No powered movement check was performed. The remaining limitation is the control
+implementation, not the wireless connection or the operator's compliance:
+stock code has a relative leg request but no qualified local TTL/preemptive STOP;
+the new project diagnostic is unflashed and has no actuator adapter. Do not imply
+that another power cycle, camera angle or platform change installs that missing
+software. A replacement actuation-capable controller image needs its own tested
+artifact, programming authorization and qualified recovery/physical acceptance.
+Do not flash the actuator-disabled diagnostic as if it enabled safe movement.
