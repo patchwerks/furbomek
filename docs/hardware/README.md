@@ -9,6 +9,8 @@
   original FNHR ZIP and upstream license, pinned and hash-verified offline.
 - [`Project safety diagnostic`](../../firmware/robot-safety/README.md): implemented
   protocol/kernel and AVR build; actuator-disabled, not flashed or HIL-qualified.
+- [`Verified stock Wi-Fi connection`](../operations/robot-wireless.md): wireless
+  echo works; Ethernet preserves Internet/Tailscale while Wi-Fi serves the robot.
 
 Use strict JSON, with context in named fields rather than comments. `null` means
 unknown, not absent or safe. These are evidence records, **not activation config**.
