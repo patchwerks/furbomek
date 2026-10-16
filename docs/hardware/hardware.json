@@ -12,12 +12,25 @@
     "legs": {"value": 6, "status": "observed"},
     "servo_channels": {"value": 18, "status": "observed/reference"},
     "servo_models": null,
-    "calibration": null
+    "calibration": null,
+    "reported_leg_faults": [
+      {
+        "reported_on": "2026-10-16",
+        "location": "rear-right, as identified by operator",
+        "firmware_leg_index": null,
+        "symptom": "Does not fully extend with other legs on stock power-up",
+        "evidence": "evidence/2026-10-16/rear-right-leg-reported-extension-fault.jpg; operator reports subsequently repositioning leg by hand",
+        "status": "operator-reported symptom; asymmetric photographed pose observed; root cause not diagnosed",
+        "agent_movement_test": "not performed; robot USB connection absent",
+        "precaution": "Motor power off during inspection; do not force powered joints or run repeated startup/gait tests against possible binding/stall"
+      }
+    ]
   },
   "motion_controller": {
     "board_model": "Freenove robot motion controller",
-    "board_identity_evidence": "FREENOVE silkscreen in evidence/2026-10-15/robot-freenove-marking.jpg; exact PCB revision still unreadable",
-    "board_revision": null,
+    "board_identity_evidence": "FREENOVE silkscreen in earlier photos; V3.1 marking now visible adjacent to POWER control in evidence/2026-10-16/power-button-v3.1-closeup.jpg",
+    "board_revision": "V3.1",
+    "board_revision_status": "observed PCB silkscreen",
     "mcu": {
       "value": "ATmega2560",
       "status": "measured via serial bootloader",
@@ -94,7 +107,7 @@
     "control_reference": {
       "source": "vendor/freenove/manuals/Tutorial_for_V3.pdf, page 16; official controller schematic S1",
       "power_switch": "Blue square actuator on white latching pushbutton housing, labelled POWER on the controller; distinct from the small RESET button",
-      "installed_visibility": "Power control is obscured by chassis/head in current side camera view; OFF state not visually confirmed",
+      "installed_visibility": "Observed directly in evidence/2026-10-16/power-button-v3.1-closeup.jpg after operator slid clear plate aside; electrical OFF state is not inferred from button appearance",
       "separate_battery_disconnect": "No separate battery-disconnect connector has been identified on the modified robot; do not imply one exists or identify the unknown white connector as battery power",
       "handling_isolation": "USB unplugged and both removable cells removed isolates the stock controller from those sources before handling; this is not a tested emergency-cutoff procedure"
     }

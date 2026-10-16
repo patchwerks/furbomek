@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_on": "2026-10-15",
+  "updated_on": "2026-10-16",
   "installed": {
     "identity_status": "installed image captured and independently read-verified; source release unknown",
     "version": null,
@@ -107,7 +107,7 @@
       "limits": "Software-only diagnostic; no hardware tests, no physical safe sink, no gait, no authenticated boot/session freshness. Finite sequence ordering is not indefinite anti-replay. Epoch-exhaustion branch not dynamically exercised."
     },
     "required_gates": [
-      "Review output pin mapping and power topology against recorded Freenove hardware; exact PCB revision remains unreadable",
+      "Review output pin mapping and power topology against the now-photographed V3.1 carrier; revision is identified but electrical qualification remains incomplete",
       "Keep verified flash/EEPROM backups; record fuse/lock and restoration limitations before any replacement write",
       "Preserve this reproducible diagnostic as software evidence, not an actuation artifact; establish hardware rollback before any write",
       "Verify inactive boot/reset outputs, local TTL/watchdog, unconditional STOP and head interlocks",

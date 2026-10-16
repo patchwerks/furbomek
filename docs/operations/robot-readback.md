@@ -160,3 +160,35 @@ wiring. For handling, removal of both cells and USB isolates the stock controlle
 from those sources; that is not evidence of an accessible, tested emergency
 cutoff during motion. Identify the actual POWER control and its accessibility
 before claiming cutoff acceptance.
+
+### Exposed control, V3.1 marking and reported leg fault
+
+The operator subsequently slid the clear plate aside and supplied three more
+[original photos](../hardware/evidence/2026-10-16/manifest.json). The POWER control
+is now directly visible and accessible; the adjacent board marking reads V3.1.
+This supersedes the earlier hidden-switch/unreadable-revision observation, but
+does not prove its electrical OFF state or cutoff behavior.
+
+The operator reports stock power-up expands the other legs, while the rear-right
+leg stops short; the photographed asymmetry is preserved. The operator then moved
+the leg manually. Cause is unverified: do not label a motor, cable, gear, horn or
+calibration as failed from this photo alone. Freenove's archived troubleshooting
+guide, page 1, warns to turn power off immediately if a servo is stuck, to avoid
+servo/controller damage. Do not force powered joints or repeatedly cycle startup
+against suspected binding.
+
+At this inspection `lsusb` still showed both cameras and no CH340 robot bridge;
+neither `/dev/ttyUSB*` nor `/dev/ttyACM*` existed. No serial command or movement
+check was performed. Keep batteries installed if desired, but use motor power OFF
+before reconnecting controller USB for non-actuating communication checks.
+
+The pinned reference source has a per-leg foot-displacement request:
+`FNHROrders.h::requestMoveLeg` (30), with leg index 1–6 and relative XYZ parameters.
+`FNHRComm.cpp` dispatches it to `LegMoveToRelativelyDirectly`, which uses the
+controller's software-estimated leg points and returns an acknowledgement, not
+measured servo-position feedback. It is not a raw single-servo jog or a guarantee
+that manually displaced hardware will move only a small distance. The physical
+rear-right-to-firmware-index mapping remains unverified. Do not automatically
+enter installation/calibration states, write offsets, or flash a vendor test
+sketch to make an individual-leg check appear to work. Hardware stop/clearance and
+fault isolation remain separate from protocol availability.
