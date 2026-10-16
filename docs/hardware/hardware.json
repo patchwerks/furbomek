@@ -90,7 +90,14 @@
     "cell_type": {"value": "two flat-top 18650 cells", "status": "reference/inferred"},
     "rail_voltages": null,
     "polarity_and_power_topology": null,
-    "usb_backfeed_isolation": null
+    "usb_backfeed_isolation": null,
+    "control_reference": {
+      "source": "vendor/freenove/manuals/Tutorial_for_V3.pdf, page 16; official controller schematic S1",
+      "power_switch": "Blue square actuator on white latching pushbutton housing, labelled POWER on the controller; distinct from the small RESET button",
+      "installed_visibility": "Power control is obscured by chassis/head in current side camera view; OFF state not visually confirmed",
+      "separate_battery_disconnect": "No separate battery-disconnect connector has been identified on the modified robot; do not imply one exists or identify the unknown white connector as battery power",
+      "handling_isolation": "USB unplugged and both removable cells removed isolates the stock controller from those sources before handling; this is not a tested emergency-cutoff procedure"
+    }
   },
   "safety_qualification": {
     "robot_mounted_watchdog_gateway": "not implemented/verified",
@@ -121,6 +128,15 @@
     ],
     "capture_limit": "109 fresh frames captured, then process reported a core dump during shutdown; no capture process remains; not a proven continuous observation path",
     "robot_actions": "No motion, serial probes, firmware changes or power switching performed",
-    "next_view": "Side/underside view of all feet, chassis support and accessible battery cutoff before powered checks"
+    "next_view": "Side/underside view of all feet, chassis support and accessible battery cutoff before powered checks",
+    "second_camera": {
+      "model": "Logitech Webcam C930e",
+      "usb_vendor_id": "046d",
+      "usb_product_id": "0843",
+      "status": "observed; captured current 1280x720 side image through /dev/video0",
+      "private_image": "/data/furbomek-media/bench-2026-10-16-camera2/c930e-side.jpg",
+      "image_sha256": "926ca508b8dc9e0352f4ebf762fe5f6dad82706bfc19bf0898a83d169580b924",
+      "visibility": "Side of robot on broad padded case; controller switch and battery contacts remain obscured. Full leg sweep and restraint still not qualified."
+    }
   }
 }

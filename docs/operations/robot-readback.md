@@ -138,3 +138,25 @@ Private images, metadata and capture log are preserved at
 no capture process remained afterward. The acquired frames are fresh evidence,
 but this is not proof of reliable continuous camera supervision. Do not silently
 turn this observation into a claim that powered testing or cutoff acceptance passed.
+
+### Second camera and power-control terminology
+
+A newly connected Logitech C930e (`046d:0843`) successfully supplied a fresh
+1280x720 side image through `/dev/video0` using a bounded FFmpeg V4L2 capture.
+No Kinect owner or robot USB device was running/connected. The private image is
+`/data/furbomek-media/bench-2026-10-16-camera2/c930e-side.jpg`; its hash is in
+`hardware.json`. It shows the side of the robot on the broad padded case, but
+does not expose the board's switch, battery contacts or full leg movement envelope.
+
+The official V3 tutorial, page 16, depicts the blue square actuator on a white
+pushbutton housing marked **POWER**. This is the hardware power control, identified
+as S1 in the official schematics, not the small RESET button. Its position/state
+has not been verified on the installed board from the current live views.
+
+Earlier wording about a “battery power disconnector” was imprecise: no separate
+disconnect connector has been identified on this modified robot. Do not direct
+the operator to unplug the visible white connector as if it were known battery
+wiring. For handling, removal of both cells and USB isolates the stock controller
+from those sources; that is not evidence of an accessible, tested emergency
+cutoff during motion. Identify the actual POWER control and its accessibility
+before claiming cutoff acceptance.
