@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_on": "2026-10-15",
+  "updated_on": "2026-10-16",
   "scope": "Current robot hardware evidence; not a verified wiring diagram or runtime authorization",
   "robot": {
     "platform": {
@@ -95,7 +95,7 @@
   "safety_qualification": {
     "robot_mounted_watchdog_gateway": "not implemented/verified",
     "independent_actuator_cutoff_test": "not performed",
-    "supported_bench_setup": "not confirmed",
+    "supported_bench_setup": "operator reports feet raised; current front camera confirms elevated chassis on an oval white case, but all-foot clearance and support restraint are not visible",
     "live_motion_authorized": false
   },
   "last_test_conditions": {
@@ -104,5 +104,23 @@
     "controller_connection": "operator reports USB moved from handheld remote to robot controller",
     "commands": "echo plus no-write bootloader signature, flash/EEPROM readback and verification; no motion or firmware writes",
     "warning": "These are historical test conditions, not proof of current physical isolation; reconfirm before opening serial"
+  },
+  "latest_bench_inspection": {
+    "date": "2026-10-16",
+    "operator_report": "USB unplugged, batteries installed, robot raised off desk",
+    "usb_observation": "lsusb finds Kinect v2 but no CH340 robot bridge; no serial access attempted",
+    "camera_observation": "Fresh 1920x1080 Kinect optical frame shows front of robot, elevated chassis supported on an oval white case",
+    "camera_sequence": 109,
+    "capture_fps": 27.186,
+    "private_evidence_directory": "/data/furbomek-media/bench-2026-10-16-1146",
+    "optical_image_sha256": "647a1b5e024124a44ad394a73debab4c84e7de248acfc9ace1a25f1a5bd40522",
+    "visibility_limits": [
+      "Not all six feet and their full movement clearance are visible",
+      "Chassis contact and restraint on support cannot be verified from the front",
+      "Battery cutoff, actuator power-switch state and separate head-power isolation are not visible"
+    ],
+    "capture_limit": "109 fresh frames captured, then process reported a core dump during shutdown; no capture process remains; not a proven continuous observation path",
+    "robot_actions": "No motion, serial probes, firmware changes or power switching performed",
+    "next_view": "Side/underside view of all feet, chassis support and accessible battery cutoff before powered checks"
   }
 }

@@ -114,3 +114,27 @@ test the measured adapter, local hardware watchdog/reset behavior, inactive boot
 outputs, head interlocks, supported chassis and independent cutoff. Preserve the
 baseline. These hardware gates, not a missing stock version label, block flashing
 and Hermes motion. No firmware was flashed during diagnostic development.
+
+## Bench observation, 2026-10-16
+
+The operator reports USB unplugged, batteries installed and the robot raised off
+the desk. Live `lsusb` confirms no CH340 bridge is connected; only the Kinect is
+available for this inspection. No robot serial device was opened or command sent.
+
+No camera-capture owner was running. A one-shot, ordinary-user capture held the
+existing `/data/furbomek-media/host-session.lock`, used the current X11 display and
+Xauthority, and ran the already-built capture binary with `--seconds 4` into a new
+owner-only shared-memory directory. OBS and the renderer were not launched.
+It produced 109 frames, approximately 27.186 paired FPS, and matching registered
+and 1920x1080 optical JPEGs. The optical frame visibly shows the robot raised on
+an oval white case. It does not show all foot clearances, support restraint,
+battery cutoff or power-switch/head-power state. A side/underside camera view is
+the next physical prerequisite, not another controller-identification photo.
+
+Private images, metadata and capture log are preserved at
+`/data/furbomek-media/bench-2026-10-16-1146`; the optical image hash is recorded in
+`hardware.json`. Do not commit these private camera frames. Capture logged
+`capture_complete frames=109` followed by a core-dump report during teardown;
+no capture process remained afterward. The acquired frames are fresh evidence,
+but this is not proof of reliable continuous camera supervision. Do not silently
+turn this observation into a claim that powered testing or cutoff acceptance passed.
