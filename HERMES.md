@@ -22,7 +22,19 @@ robot-local safety remain unqualified; image readback is not motion acceptance.
 
 Advance only through implemented, testable milestones. Never invent a command, service, firmware, credential, measurement or passing result merely to complete the deployment narrative.
 
-The current repository contains a legacy Nuxt/Express prototype and planning/evidence documents. It does **not** yet contain the planned robot firmware, embodiment gateway, character broker, Jabberwerk integration, AIRI adapter, OBS worker, A2UI overlay, VM image or production bootstrap CLI. A fresh clone can build and privately run the current app; it cannot truthfully one-shot the complete autonomous robot yet.
+The current repository contains a legacy Nuxt/Express prototype, planning/evidence
+documents, official offline hardware references, and an actuator-disabled safety
+diagnostic under `firmware/robot-safety/`. The diagnostic is host-tested and
+cross-compiled, not flashed, not motion firmware and not a qualified hardware
+watchdog. It does **not** yet contain the operational embodiment gateway,
+character broker, Jabberwerk integration, AIRI adapter, OBS worker, A2UI overlay,
+VM image or production bootstrap CLI. A fresh clone cannot truthfully one-shot
+the complete autonomous robot yet.
+
+Robot agents must consult `docs/hardware/vendor/freenove/INDEX.md` and
+`firmware/robot-safety/AGENTS.md`. Run the native safety checks with
+`firmware/robot-safety/test.sh`; never interpret passing software checks or a HEX
+artifact as permission to flash or reconnect actuators.
 
 ## Current-clone procedure
 

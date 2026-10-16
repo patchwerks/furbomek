@@ -4,7 +4,7 @@
 
 This repository is the source of truth for Furb-o-Mek: an offboard Hermes-controlled, fully autonomous streaming robot built around a modified Freenove-style hexapod and Furby-like head mechanism.
 
-Current reality is much smaller than the target architecture. The checked-in application is a client-only Nuxt 3 conversation/TTS prototype plus a standalone Express TTS proxy. A separate host-side Kinect v2 capture/tracking/Godot/OBS media pipeline now exists under `services/camera-capture/` and `tools/kinect2/`, including actual template/pose/face/surface tracking and read-only activity sideports; it is not the autonomous runtime or a deployed Hermes/A2UI/Glimpse broker. There is no robot firmware, embodiment gateway or social adapter yet. Read the scoped media `AGENTS.md` files, `PLAN.md` and the agent runbook `docs/operations/kinect2-host.md` before changing the setup.
+Current reality is much smaller than the target architecture. The checked-in application is a client-only Nuxt 3 conversation/TTS prototype plus a standalone Express TTS proxy. A separate host-side Kinect v2 capture/tracking/Godot/OBS media pipeline now exists under `services/camera-capture/` and `tools/kinect2/`, including actual template/pose/face/surface tracking and read-only activity sideports; it is not the autonomous runtime or a deployed Hermes/A2UI/Glimpse broker. `firmware/robot-safety/` now contains a host-tested, cross-compiled, actuator-disabled safety diagnostic, not installed motion firmware or a hardware-qualified watchdog. There is no operational embodiment gateway or social adapter yet. Read scoped guides, `PLAN.md` and the relevant operational runbook before changing the setup.
 
 ## Current map
 
@@ -20,6 +20,7 @@ Current reality is much smaller than the target architecture. The checked-in app
 ├── server/                  # separately launched CommonJS Express proxy
 ├── services/camera-capture/  # native libfreenect2 host capture and private cloud ABI
 ├── tools/kinect2/            # Godot point cloud, isolated OBS setup and host launch/build
+├── firmware/robot-safety/    # project-owned STOP/lease diagnostic, zero actuator capabilities
 ├── public/                  # static assets
 ├── .schematics/             # photo-derived labelled blueprint sheets
 ├── docs/
@@ -41,6 +42,8 @@ Agents own operational runbooks, launch/recovery and QA. The user does not read 
 - Use current code over the generic Nuxt `README.md` when they conflict.
 - Treat hardware identifications in `PLAN.md` as inferred until confirmed in `docs/hardware/` by model/board markings, measurements, or firmware.
 - Read `docs/hardware/hardware.json`, `docs/hardware/firmware.json`, and `docs/hardware/README.md` before robot hardware or firmware work. These are the current evidence records, not permission to activate actuators.
+- Official offline manuals/schematics and the unmodified vendor firmware reference are under `docs/hardware/vendor/freenove/INDEX.md`, with a pinned source and checksum manifest. Read the correct revision: V2.0 and V3.2 power-group mappings differ. Do not treat archived vendor code as licensed commercial runtime or link it into the independent diagnostic.
+- Read `firmware/robot-safety/AGENTS.md` before safety-code work. Its capability bitmap is zero and its native protocol harness is not a robot simulator/HIL. Keep finite sequence ordering separate from authentication, inherited watchdog state unqualified, and installed firmware separate from unflashed build artifacts.
 - Every agent must record hardware/firmware discoveries and changes in those JSON files in the same commit series: date, evidence status/provenance, before/after state, measurements, artifact hashes, verification, safety impact and rollback limits. Append firmware history for writes/configuration changes. Keep unknowns explicit; never infer an installed version from an echo or assign remote-board markings to the robot. Do not repeat established discovery unless needed to verify current state.
 - Preserve operator-designated hardware photographs in `docs/hardware/evidence/` with a manifest mapping original uploads, hashes and observed markings. Review privacy before committing. Read this evidence before requesting photos again; `/tmp` is not durable storage. The Freenove chassis, ESP-01/ESP8266EX and ATmega2560 bootloader identity/readback are already established; exact application release is separate from an installed-image hash. Lack of a release label or readable chip photo is not a reason to restart discovery.
 - No firmware write until actual board/MCU/output mapping, programming method, private preservation of the existing image where supported, reproducible replacement artifact and rollback limits are recorded. No Hermes motion until robot-local TTL/watchdog/STOP and supported-bench/cutoff acceptance pass. Stock-compatible echo alone does not meet these gates.
