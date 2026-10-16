@@ -46,6 +46,9 @@
       "response_hex": "80 01 81",
       "verified": true,
       "device_memory_changed": false,
+      "hermes_native_mcp_verified": "Fresh default-profile Hermes session invoked stock echo and supply tools; no motion requested",
+      "controller_reported_supply_volts": 1.55,
+      "supply_reading_limit": "Not a calibrated battery or motor-power safety measurement",
       "limit": "Echo identifies compatible transport behavior, not an installed source release or safe motion gateway"
     },
     "version_query": "No version/board identification command found in inspected vendor command table",
@@ -79,7 +82,7 @@
       "echo_response_hex": "80 01 81",
       "supply_query_hex": "80 0a 81",
       "supply_response_format": "80 0b hi lo 81; volts = (128 * hi + lo) / 100",
-      "supply_query_executed": false
+      "supply_query_executed": true
     },
     "safety_findings": {
       "robot_local_command_ttl": "absent in inspected serial command path",

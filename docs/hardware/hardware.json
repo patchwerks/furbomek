@@ -106,8 +106,25 @@
       "motion_commands_sent": false,
       "firmware_writes": false,
       "runbook": "docs/operations/robot-wireless.md",
-      "qualification_limit": "Stock Wi-Fi transport only; no new local watchdog, authenticated semantic gateway, leg test or motion acceptance"
+      "qualification_limit": "Stock Wi-Fi transport and native read-only Hermes MCP verified; no new local watchdog, leg test or motion acceptance"
     }
+  },
+  "hermes_adapter": {
+    "verified_on": "2026-10-16",
+    "source_directory": "services/embodiment-gateway",
+    "native_mcp_server": "furbomek",
+    "profile_scope": "default Hermes profile; fresh CLI session tested, no active gateway restarted",
+    "transport": "stdio MCP to privately configured stock Wi-Fi TCP endpoint",
+    "actual_tools_invoked_by_hermes": ["mcp__furbomek__robot_get_state", "mcp__furbomek__robot_get_supply_voltage"],
+    "live_echo_validated": true,
+    "controller_reported_supply_volts": 1.55,
+    "voltage_interpretation": "Controller-reported, not calibrated battery charge or motor power/cutoff evidence",
+    "motor_power_known_from_tools": false,
+    "motion_enabled": false,
+    "motion_request_policy": "Rejected before socket access; no configuration toggle or fake STOP",
+    "stock_firmware_and_remote_preserved": true,
+    "full_user_config_preserved": "Original bytes/comments unchanged outside one owned MCP stanza; private backup retained",
+    "evidence": "docs/operations/hermes-robot.md"
   },
   "head": {
     "mechanism": "Furby-like coupled mechanism; generation unconfirmed",
