@@ -12,10 +12,11 @@ Furb-o-Mek is a planned fully autonomous Hermes-controlled streaming robot built
 - Current hardware/firmware records: [`docs/hardware/README.md`](docs/hardware/README.md).
 - Downloaded official manuals and schematics: [`Freenove archive`](docs/hardware/vendor/freenove/INDEX.md).
 - Tested actuator-disabled safety component: [`firmware/robot-safety/README.md`](firmware/robot-safety/README.md).
+- Live native Hermes robot reads: [`docs/operations/hermes-robot.md`](docs/operations/hermes-robot.md).
 
 ## Current status
 
-The checked-in application is still a client-only Nuxt 3 conversation/TTS prototype plus an Express TTS proxy. The project now has an original STOP/lease/CRC safety diagnostic with native tests and a reproducible ATmega2560 build. It cannot actuate hardware and has not been flashed. Actuation-capable firmware, embodiment gateway, character broker, Jabberwerk integration, AIRI adapter, A2UI overlay, OBS worker and reproducible VM/bare-metal deployment remain planned.
+The checked-in application is still a client-only Nuxt 3 conversation/TTS prototype plus an Express TTS proxy. Native Hermes MCP tools now perform real stock Wi-Fi echo and controller-supply reads, preserving the existing controller, firmware and remotes. Motion requests are rejected before network access. The project also has a STOP/lease/CRC diagnostic with native tests and a reproducible ATmega2560 build; it cannot actuate hardware and has not been flashed. Qualified autonomous actuation, character broker, Jabberwerk integration, AIRI adapter, A2UI overlay, OBS worker and reproducible VM/bare-metal deployment remain planned.
 
 Do not interpret a successful web build as autonomous-robot readiness.
 

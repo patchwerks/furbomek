@@ -23,10 +23,14 @@ robot-local safety remain unqualified; image readback is not motion acceptance.
 Advance only through implemented, testable milestones. Never invent a command, service, firmware, credential, measurement or passing result merely to complete the deployment narrative.
 
 The current repository contains a legacy Nuxt/Express prototype, planning/evidence
-documents, official offline hardware references, and an actuator-disabled safety
-diagnostic under `firmware/robot-safety/`. The diagnostic is host-tested and
+documents, official offline hardware references, a native read-only stock Wi-Fi
+MCP adapter under `services/embodiment-gateway/`, and an actuator-disabled safety
+diagnostic under `firmware/robot-safety/`. The adapter has been invoked by a real
+Hermes session for echo and supply reads; motion requests are explicitly rejected.
+See `docs/operations/hermes-robot.md` for native tool names and profile scope.
+The diagnostic is host-tested and
 cross-compiled, not flashed, not motion firmware and not a qualified hardware
-watchdog. It does **not** yet contain the operational embodiment gateway,
+watchdog. It does **not** yet contain a qualified actuation-capable gateway,
 character broker, Jabberwerk integration, AIRI adapter, OBS worker, A2UI overlay,
 VM image or production bootstrap CLI. A fresh clone cannot truthfully one-shot
 the complete autonomous robot yet.
