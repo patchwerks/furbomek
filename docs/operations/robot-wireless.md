@@ -112,6 +112,13 @@ implementation, not the wireless connection or the operator's compliance:
 stock code has a relative leg request but no qualified local TTL/preemptive STOP;
 the new project diagnostic is unflashed and has no actuator adapter. Do not imply
 that another power cycle, camera angle or platform change installs that missing
-software. A replacement actuation-capable controller image needs its own tested
-artifact, programming authorization and qualified recovery/physical acceptance.
-Do not flash the actuator-disabled diagnostic as if it enabled safe movement.
+software. Do not conclude that the working controller or all its gait code must
+be replaced. Any targeted controller change or independent local gateway needs
+its own acceptance; no whole-firmware replacement is authorized by an echo or by
+bench preparation. Do not flash the actuator-disabled diagnostic as if it enabled
+safe movement.
+
+The [native Hermes MCP adapter](hermes-robot.md) is now registered and has been
+invoked by an actual Hermes session for stock echo and supply reads. Motion
+requests remain explicitly rejected; integration is real but a movement test has
+not been performed. Existing hardware, firmware and remotes remain preserved.
