@@ -1,0 +1,28 @@
+{
+  "schema_version": 1,
+  "received_on": "2026-10-16",
+  "source": "Operator-supplied hardware photographs, preserved under the standing request to retain hardware evidence",
+  "storage": "Original uploaded JPEG bytes; no recompression or edits",
+  "privacy_review": "Visually reviewed; EXIF contains dimensions/orientation/resolution and no GPS fields",
+  "photos": [
+    {
+      "file": "controller-clear-cover-shifted.jpg",
+      "original_upload": "moshi-paste-612499247.jpg",
+      "sha256": "d3c16a25080fda362c5184e350f033b21033bbba31b16c63e30a6a53f5f8a780",
+      "observations": "Clear plate shifted aside; blue POWER control now accessible; disconnected white head-area connector remains electrically unidentified"
+    },
+    {
+      "file": "power-button-v3.1-closeup.jpg",
+      "original_upload": "moshi-paste-610535506.jpg",
+      "sha256": "a27193daec47470779a129b50e403334f95c87fb55e1e5a50d0e957fae26e1ac",
+      "observations": "POWER label and blue/white latching pushbutton clearly visible; adjacent PCB marking reads V3.1; ON/OFF electrical state not established from plunger appearance"
+    },
+    {
+      "file": "rear-right-leg-reported-extension-fault.jpg",
+      "original_upload": "moshi-paste-2862384938.jpg",
+      "sha256": "7e9149988450a86d2d07f0ef590c27aa3711b796211f44400b47faf515f7a48d",
+      "observations": "Rear-view leg asymmetry visible; operator identifies rear-right leg as not fully extending on power-up. This is a reported fault-state photo, not proof of current bench support or a diagnosed servo failure."
+    }
+  ],
+  "operator_report": "Most legs expand on power-on; rear-right leg does not fully extend; operator subsequently repositioned it manually. No agent movement check has been performed."
+}
