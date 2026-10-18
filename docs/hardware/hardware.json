@@ -1,7 +1,15 @@
 {
   "schema_version": 1,
-  "updated_on": "2026-10-16",
+  "updated_on": "2026-10-17",
   "scope": "Current robot hardware evidence; not a verified wiring diagram or runtime authorization",
+  "current_control_state": {
+    "date": "2026-10-17",
+    "operator_power": "OFF explicitly confirmed by user",
+    "guard": "BOOT, sequence0, fault0, busyfalse, not armed",
+    "method": "Deliberate robot USB DTR reset while motor POWER OFF, then actual readonly STATUS through handheld RF bridge",
+    "reason": "User could not locate RESET button; no pins poked or hardware disassembly required",
+    "limits": "No action or memory write sent. This is operator reset, not an automatic/MCP reset capability. No movement scheduled"
+  },
   "robot": {
     "platform": {
       "value": "Freenove hexapod chassis with modified Furby-like head",
@@ -12,7 +20,15 @@
     "legs": {"value": 6, "status": "observed"},
     "servo_channels": {"value": 18, "status": "observed/reference"},
     "servo_models": null,
-    "calibration": null,
+    "calibration": {
+      "date": "2026-10-17",
+      "status": "Installed/candidate decoding equivalence established offline; physical calibration quality not independently measured",
+      "addresses": "100..135, eighteen two-byte pairs; all FF in preserved EEPROM",
+      "actual_avr_result_degrees": -0.01,
+      "binary_evidence": "Installed application 0x30d6..0x3124 and guarded candidate RobotJoint::Set 0x15fc..0x164a: identical assembly core reassembles signed 16-bit word, ASR/ROR divides, odd parity selects positive multiplier, signed float conversion then 0.01 scaling",
+      "correction": "Earlier +327.67-degree interpretation incorrectly used desktop integer width. It was not an actual robot or replacement-firmware fault. No offsets were rewritten.",
+      "limits": "Exact installed release tag and rear-right extension cause remain unknown; do not infer physical servo alignment from software offsets"
+    },
     "reported_leg_faults": [
       {
         "reported_on": "2026-10-16",
@@ -20,8 +36,17 @@
         "firmware_leg_index": null,
         "symptom": "Does not fully extend with other legs on stock power-up",
         "evidence": "evidence/2026-10-16/rear-right-leg-reported-extension-fault.jpg; operator reports subsequently repositioning leg by hand",
-        "status": "operator-reported symptom; asymmetric photographed pose observed; root cause not diagnosed",
-        "agent_movement_test": "not performed; robot USB connection absent",
+        "status": "Operator reports full extension restored ONLY during the guarded USB-remote/RF ARM and Active test; general repair and root cause not established",
+        "agent_movement_test": "2026-10-17 supported powered sequence: guarded ARM-only settling and STOP, then a fresh guarded session with ARM, one Active transition, completion and STOP",
+        "method_scoped_restoration": {
+          "reported_on": "2026-10-17",
+          "status": "operator-reported restoration for this method only",
+          "observation": "Back-right leg now fully extends alongside the other legs during the tested method",
+          "method": "Brodex USB -> programmed ATmega328P handheld bridge -> RF -> guarded ATmega2560 controller; supported chassis, staged ARM, one vendor Active transition, local keepalive/deadlines and STOP",
+          "deployment_reference": "Restoration report applies to the supported powered test using Mega HEX 662fa0c3d6ecaa19257f58c962fa88acbfeb3d6df06d03ebbef8c94eb9855a78 and remote HEX a12bd8dcf0136304c4e2a778dc8778fb09ada8cefcdb8d84034b919d07194179. Later telemetry/adapter updates were motor-off tests only and do not expand that report",
+          "unchanged": "No servo replacement, mechanical adjustment or EEPROM calibration write performed by the agent",
+          "limits": "Do not claim stock-startup restoration, original-firmware repair, all manual modes, walking, long-term reliability or diagnosed mechanical cause. Those were not tested."
+        },
         "precaution": "Motor power off during inspection; do not force powered joints or run repeated startup/gait tests against possible binding/stall"
       }
     ]
@@ -44,7 +69,15 @@
       "servo_signal_headers": "Arduino D22 through D39; leg/joint orientation and calibration not qualified",
       "power_enable_by_reference_revision": {
         "FNM0019_V2.0": ["A15", "A14", "A13"],
+        "FNM0019B_V3.1": ["A15", "A14"],
         "FNM0019B_V3.2": ["A15", "A14"]
+      },
+      "v3_1_enable_reference": {
+        "status": "reference/inferred; installed circuitry not electrically measured",
+        "source": "vendor/freenove/schematics/FNM0019B_Freenove Crawling Robot Controller V3.1_Schematic.pdf",
+        "servo_bank_enables": "TD1583 U3/U4 EN pin 7, driven by A15/PK7 and A14/PK6; HIGH enables, LOW disables; R4/R7 10k pulldowns",
+        "correction": "AO4407 U1/U2 belong to battery/S1/protection circuitry, not MCU-controlled servo cutoff. A13 is not a V3.1 servo-bank enable.",
+        "limits": "No measured rail decay, signal backfeed, physical cutoff latency or POWER-switch acceptance"
       },
       "clock_reference_hz": 16000000,
       "clock_measured": false,
@@ -75,11 +108,44 @@
     }
   },
   "legacy_handheld_remote": {
+    "motor_off_bridge_qualification": {
+      "date": "2026-10-17",
+      "status": "Live bidirectional USB/RF protocol verified temporarily; original handheld application restored",
+      "observed": "Robot-originated boot status, BEGIN, staged ARM, software Active acceptance/busy, STOP to FAULT, rejected rearm, heartbeat expiry and malformed-heartbeat non-renewal",
+      "conditions": "Fresh operator-confirmed robot POWER OFF, both USB ports connected; no servo power-on",
+      "restoration": "Application restored; full 32768-byte flash and 1024-byte EEPROM verification against original baseline passed, exit zero",
+      "limits": "No manual gesture, calibrated movement, physical rail cutoff, watchdog reset or ESP acceptance. Bridge not currently installed"
+    },
+    "mcu_readback": {
+      "date": "2026-10-17",
+      "status": "measured through serial bootloader, not direct ISP",
+      "mcu": "ATmega328P",
+      "signature_hex": "1e 95 0f",
+      "flash_bytes": 32768,
+      "eeprom_bytes": 1024,
+      "flash_sha256": "2d53908deacc48079f7981f7a8d269a3e4c4f8932cd181170375b624abd81abb",
+      "eeprom_sha256": "b47991a509ae276bae3b34fa950e6ed37285e23c0d6a1db8bbcb7cd823db4960",
+      "method": "AVRDUDE 7.1 -n -D -p m328p -c arduino -b 115200; full flash/EEPROM read then separate device reread/verification; both exits zero",
+      "private_backup_directory": "~/.local/state/furbomek/firmware-backups/remote-2026-10-17.73OVsW",
+      "safety": "No device-memory writes or agent movement commands; handheld reset occurred; robot USB port untouched",
+      "limits": "Installed source release, fuse/lock state, bootloader boundary and physical restoration unqualified"
+    },
     "shield_marking": {"value": "Smart Car Remote Shield", "status": "observed"},
     "lower_board_marking": {"value": "Control Board V4.1", "status": "observed"},
     "evidence": "Original photos preserved in evidence/2026-10-15/remote-*.jpg; indexed by evidence/2026-10-15/manifest.json",
     "identity_limit": "V4.1 belongs to the photographed remote assembly; do not assign it to the robot controller",
-    "runtime_authority": "none"
+    "runtime_authority": "none",
+    "usb_bridge_probe": {
+      "date": "2026-10-17",
+      "status": "USB serial enumerated; no bridge response established",
+      "identity_basis": "Operator reports newly connecting handheld; later-initialized second CH340 is /dev/ttyUSB1. Generic VID/PID is not MCU or application identity.",
+      "method": "Exclusive 115200 8N1 session; three-second passive listen then three echo-only requests, one-second response window each; original termios restored and port closed",
+      "request_hex": "80 00 81",
+      "received_bytes_by_phase": [0, 0, 0, 0],
+      "limits": "Silence does not prove absence of one-way RF forwarding: inspected robot RF path deliberately ignores echo and stock remote does not relay replies. Installed handheld firmware remains unidentified.",
+      "safety": "No movement command, firmware/EEPROM write, bootloader probe or network change; robot /dev/ttyUSB0 not opened",
+      "reference_correction": "Pinned FNHRRemote::Update sends RF packets every 20ms, including idle echo. The remote does have periodic traffic; stock robot UpdateRF24 ignores echo instead of using it for link-loss expiry. Manual remote preservation need not be ruled out merely for lack of periodic traffic."
+    }
   },
   "radios": {
     "wlan_chipset": "ESP8266EX",
@@ -110,20 +176,25 @@
     }
   },
   "hermes_adapter": {
-    "verified_on": "2026-10-16",
+    "verified_on": "2026-10-17",
     "source_directory": "services/embodiment-gateway",
     "native_mcp_server": "furbomek",
-    "profile_scope": "default Hermes profile; fresh CLI session tested, no active gateway restarted",
-    "transport": "stdio MCP to privately configured stock Wi-Fi TCP endpoint",
-    "actual_tools_invoked_by_hermes": ["mcp__furbomek__robot_get_state", "mcp__furbomek__robot_get_supply_voltage"],
-    "live_echo_validated": true,
-    "controller_reported_supply_volts": 1.55,
+    "profile_scope": "Existing furbomek profile enabled; default profile hardware entry disabled to avoid unrelated chats reserving exclusive UART. Other config bytes and sessions preserved",
+    "transport": "stdio MCP -> scoped dialout UART -> handheld USB/RF bridge -> guarded Mega; no Wi-Fi dependency for these tools",
+    "actual_tools_invoked_by_hermes": ["mcp__furbomek__robot_get_state", "mcp__furbomek__robot_get_supply_voltage", "mcp__furbomek__robot_get_capabilities", "mcp__furbomek__robot_perform_action", "mcp__furbomek__robot_stop"],
+    "live_echo_validated": false,
+    "live_guard_status_validated": true,
+    "controller_reported_supply_volts": 8.15,
     "voltage_interpretation": "Controller-reported, not calibrated battery charge or motor power/cutoff evidence",
     "motor_power_known_from_tools": false,
-    "motion_enabled": false,
-    "motion_request_policy": "Rejected before socket access; no configuration toggle or fake STOP",
-    "stock_firmware_and_remote_preserved": true,
-    "full_user_config_preserved": "Original bytes/comments unchanged outside one owned MCP stanza; private backup retained",
+    "motion_enabled": true,
+    "motor_off_check_enabled": false,
+    "qualified_powered_actions": ["active","sleep","forward","backward","left","right","turn_left","turn_right"],
+    "motion_request_policy": "Supervised supported powered profile, explicit8action allowlist, fresh6.5–8.6V reported-supply gate, one bounded quantum per call. Healthy completion disarms and can repeat without reset. Emergency STOP/faults latch. No raw/per-leg/speed/duration/repeat/reset tool arguments or unattended/floor qualification",
+    "original_images_and_calibration_preserved": true,
+    "current_firmware": "Project guarded applications installed; originals retained in private backups, not currently installed",
+    "actual_check_result": "Powered Hermes session20261017_115945_c654b1 completed all8commands exactlyonce, each completed_and_disarmed/reset_required=false. Final explicitSTOPverifiedFault4/notbusy/resetrequired=true. Actual camera evidence reviewed separately confirms visible supported leg motions and still post-STOP frames",
+    "full_user_config_preserved": "All bytes outside owned MCP blocks in default and robot profiles byte-identical to backups. Other MCPs/providers/drafts unchanged",
     "evidence": "docs/operations/hermes-robot.md"
   },
   "head": {
@@ -150,12 +221,54 @@
     }
   },
   "safety_qualification": {
-    "robot_mounted_watchdog_gateway": "not implemented/verified",
+    "robot_mounted_watchdog_gateway": "Integrated Mega guard implements local TTL/STOP and configured AVR watchdog; local deadline behavior verified motor-off. No separate isolated gateway or actual watchdog-reset qualification claimed",
     "independent_actuator_cutoff_test": "not performed",
     "supported_bench_setup": "2026-10-16 follow-up: operator confirms all legs suspended; fresh C930e frame shows chassis elevated on a rigid central block with visible front leg clearance. Earlier oval-case view is historical, not the current support.",
     "operator_authorized_supervised_check": true,
-    "powered_movement_test": "not performed; installed stock control has no qualified local command expiry/preemptive STOP and the project diagnostic has no actuator adapter",
-    "live_motion_authorized": false
+    "powered_movement_test": "2026-10-17: Native and actual Hermes supported powered acceptance passed all8bounded actions with visible motions, normal DISARM and no reset between successful commands. Final explicit emergencySTOP Fault4 verified. No floor-locomotion or individual-joint health qualification",
+    "live_motion_authorized": true,
+    "live_motion_scope": "Operator-present supported bench only, enrolled bounded8commands. No further movement scheduled. After final emergencySTOP test, user confirmed POWER OFF and deliberate USB reset verified BOOT; see current_control_state for latest checkpoint. No floor travel/unattended/jointhealth or watchdog-reset qualification"
+  },
+  "powered_hermes_acceptance": {
+    "date": "2026-10-17",
+    "session_id": "20261017_115945_c654b1",
+    "profile": "furbomek",
+    "scope": "Supported powered movement control from actual Hermes, not floor locomotion or full unattended autonomy",
+    "actions": ["active","sleep","forward","backward","left","right","turn_left","turn_right"],
+    "all_completed_and_disarmed": true,
+    "resets_between_normal_actions": 0,
+    "controller_reported_supply_volts": 8.15,
+    "operator_condition": "User confirmed POWER ON stayed still with supported chassis/all legs free and operator ready at POWER cutoff",
+    "visual_observation": "Recorded visible posture and gait changes while chassis remains supported; reviewed post-STOP frames show no continuing motion. Not measured translation, torque, current or individual-joint feedback",
+    "final_controller_state": "Historical end of acceptance, BEFORE subsequent user-confirmed POWER OFF and USB reset: EmergencySTOP Fault4, notbusy, deliberate reset required. Latest checkpoint is current_control_state, not this test-end state",
+    "private_jsonl": "~/.local/state/furbomek/hermes-guard-enroll.boty2A/hermes-powered-eight-actions.jsonl",
+    "jsonl_sha256": "b66a78ace2ae3aef2a808487b4579880a4da739fd6d19925b6e96f19911b8942",
+    "private_video": "/data/furbomek-media/robot-motion-2026-10-17.Ahmaq7/hermes-powered-eight-actions.mp4",
+    "video_sha256": "6249e64180073aa96788df1cd878f5ec117104abe9df0e580daf4428b1d2a664",
+    "native_powered_video_sha256": {
+      "repeatable-active-sleep.mp4": "1c9a21855f2c58fad36fcf9902110155392835e853d9fc1bd9db0acbcfdfd858",
+      "repeatable-forward-backward.mp4": "680e265667bdc393c28d4119934195b995088936bb950bd94b2a99ff28dcabed",
+      "repeatable-left-right.mp4": "b15e193b890358e19286e264658df1872ef1f6b120b7342eaff583c9e0710795",
+      "repeatable-turns.mp4": "cf9ced74211781254a8f0a3d23288f701fbcedf419df5e839fde8352d8327e20"
+    },
+    "limits": "Do not expand the earlier method-scoped rear-right restoration report. Floor walking, battery-only/untethered power, manual gesture hardware, electrical timing, watchdog reset and unattended use not qualified"
+  },
+  "supported_powered_acceptance": {
+    "date": "2026-10-17",
+    "status": "One supported in-place Active visibly verified over USB-remote/RF path; not autonomous locomotion acceptance",
+    "operator": "Confirmed POWER ON while disarmed caused no movement; operator at POWER switch; prior all-legs-suspended support confirmation retained",
+    "controller_reported_supply_volts": [8.18, 8.17],
+    "measurement_limit": "Vendor ADC-derived report, not independent voltage/current/rail characterization",
+    "observed": "Visible leg positions change during one Active; chassis stays supported; STATUS busy=1 to busy=0; STOP enters Fault; reviewed post-STOP frames show no continuing motion",
+    "final_state": "Guard/bridge installed, STOP-latched FAULT; physical POWER ON for test, OFF afterward not confirmed",
+    "private_directory": "/data/furbomek-media/robot-motion-2026-10-17.Ahmaq7",
+    "evidence_sha256": {
+      "arm-only.mp4": "088497cea5d2f4ac019312c78fd0c52288d8ec513343c8f3701f990695fad993",
+      "active-once.mp4": "591e6a60acd7a5e9554ed82b1c924504286a932788ca905d6ca02a75037fa51a",
+      "active-before.jpg": "0876c3a4d53c57e021d9fc6f95d08eefe6a5a7e724047124f2930fd23b2a65b4",
+      "active-after.jpg": "ce7508a8c54d9b82d3aff498864ffd9a3abb00dbcc3af6662d80a78a06faa013"
+    },
+    "limits": "No walking, torque/current, measured rail cutoff latency, manual gesture, watchdog-reset or ESP diagnostic acceptance. Rear-right symptom not diagnosed. Hermes MCP motion denied. No further movement this test."
   },
   "last_test_conditions": {
     "date": "2026-10-15",
