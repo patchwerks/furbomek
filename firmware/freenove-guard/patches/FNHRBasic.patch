@@ -1,0 +1,90 @@
+--- FNHRBasic.cpp
++++ FNHRBasic.cpp
+@@ -23,63 +23,11 @@
+   for (int i = 0; i < samplingSize; i++)
+     samplingData[i] = 0;
+ 
+-  pinMode(powerGroup1Pin, OUTPUT);
+-  pinMode(powerGroup2Pin, OUTPUT);
+-  pinMode(powerGroup3Pin, OUTPUT);
+ }
+ 
+ void Power::Update()
+ {
+   Sampling();
+-
+-  if (!powerGroupAutoSwitch)
+-    return;
+-
+-  if (voltage > powerGroupOnVoltage)
+-    powerGroupState = true;
+-  else if (voltage < powerGroupOffVoltage)
+-    powerGroupState = false;
+-
+-  if (++updateCounter < powerGroupBootInterval)
+-    return;
+-  updateCounter = 0;
+-
+-  if (powerGroupState)
+-  {
+-    if (!powerGroup1State)
+-    {
+-      SetPowerGroupState(1, true);
+-      return;
+-    }
+-    else if (!powerGroup2State)
+-    {
+-      SetPowerGroupState(2, true);
+-      return;
+-    }
+-    else if (!powerGroup3State)
+-    {
+-      SetPowerGroupState(3, true);
+-      return;
+-    }
+-  }
+-  else
+-  {
+-    if (powerGroup1State)
+-    {
+-      SetPowerGroupState(1, false);
+-      return;
+-    }
+-    else if (powerGroup2State)
+-    {
+-      SetPowerGroupState(2, false);
+-      return;
+-    }
+-    else if (powerGroup3State)
+-    {
+-      SetPowerGroupState(3, false);
+-      return;
+-    }
+-  }
+ }
+ 
+ void Power::Sampling()
+@@ -109,21 +57,8 @@
+ 
+ void Power::SetPowerGroupState(int group, bool state)
+ {
+-  switch (group)
+-  {
+-  case 1:
+-    digitalWrite(powerGroup1Pin, state);
+-    powerGroup1State = state;
+-    break;
+-  case 2:
+-    digitalWrite(powerGroup2Pin, state);
+-    powerGroup2State = state;
+-    break;
+-  case 3:
+-    digitalWrite(powerGroup3Pin, state);
+-    powerGroup3State = state;
+-    break;
+-  }
++  static_cast<void>(group);
++  static_cast<void>(state);
+ }
+ 
+ Point::Point() {}

@@ -1,0 +1,11 @@
+--- FNHRBasic.cpp
++++ FNHRBasic.cpp
+@@ -184,8 +184,6 @@
+  if (offsetInt < 0 || offsetInt > 65535)
+    return;
+ 
+-  EEPROM.write(offsetAddress, offsetInt / 256);
+-  EEPROM.write(offsetAddress + 1, offsetInt % 256);
+   this->offset = offset;
+ }
+ }

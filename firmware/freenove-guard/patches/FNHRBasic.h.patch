@@ -1,0 +1,7 @@
+--- FNHRBasic.h
++++ FNHRBasic.h
+@@ -85,3 +85,3 @@
+-  const int powerGroup2Pin = A13;
+-  const int powerGroup3Pin = A14;
++  const int powerGroup2Pin = A14;
++  const int powerGroup3Pin = -1;

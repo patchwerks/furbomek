@@ -1,0 +1,14 @@
+This package uses a temporary derivative overlay of Freenove FNHR V12.6,
+2023-09-19, from Freenove/Freenove_Hexapod_Robot_Kit commit
+1596c5ffe07a262fa7dc6d0189de6c2321270278.
+
+Original author: Ethan Pan @ Freenove (support@freenove.com).
+Original license: Creative Commons Attribution-NonCommercial-ShareAlike 3.0
+Unported (CC BY-NC-SA 3.0).
+License URI: https://creativecommons.org/licenses/by-nc-sa/3.0/legalcode
+
+The vendor preimage is read from /tmp/opencode/fnhr/FNHR and its SHA-256 is
+verified by build.sh. It is not the installed application release. This
+derivative overlay package is explicitly marked and provided under the same
+CC BY-NC-SA 3.0 terms and does not grant commercial permission or imply
+Freenove endorsement.
