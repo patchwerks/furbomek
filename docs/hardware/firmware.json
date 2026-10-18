@@ -1,8 +1,26 @@
 {
   "schema_version": 1,
-  "updated_on": "2026-10-16",
+  "updated_on": "2026-10-17",
+  "active_deployment": {
+    "status": "User confirmed POWER OFF. Operator deliberately reset the robot controller over its existing USB link and verified BOOT/sequence0/fault0/notbusy through the handheld RF bridge. Emergency-test latch cleared; not armed, no action scheduled",
+    "latest_operator_reset": "2026-10-17: user could not locate RESET button; with explicit POWER-OFF confirmation, operator used robot USB DTR reset, then radio STATUS confirmed BOOT. No firmware/EEPROM write or BEGIN/ARM/EXEC. Automatic/model reset remains disabled",
+    "source_directory": "firmware/freenove-guard",
+    "mega_hex_sha256": "09157b7dbe220843a6feb29dccc0fe85bfb963c9fcfd9b867af11b7abdc6acb6",
+    "mega_elf_sha256": "e64a5e5c5aa4a68c5de1b58d75cbf28601af162faf8c4b4bc51ef3d00a97260d",
+    "remote_hex_sha256": "0aada2dd6109adb096261fec9735610a49015cf3066818fde8d735e91250114a",
+    "verification": "Two matching Mega builds; application writes verified by AVRDUDE; both EEPROMs verified unchanged; live USB remote returned robot BOOT state, not Armed; disarmed supply query 80 0a 81 returned 80 0b 01 1a 81 = 1.54 controller-reported volts with POWER OFF",
+    "voltage_sampling_change": "Patched Power::Update is sampling-only and now runs while disarmed/faulted, independently of gait updates; no new output-enable path",
+    "calibration": "Installed and candidate decoder machine code agrees: all-FF words decode as -0.01 degrees on AVR. Prior +327.67 claim was a host-width interpretation error, not actual incompatibility",
+    "authorization": "Existing Hermes furbomek profile now has actually verified powered controls for active/sleep/forward/backward/left/right/turn_left/turn_right, one bounded quantum per request on the supported robot with operator present. Normal success disarms and requires no reset; emergency STOP/faults remain latched. No floor-locomotion, raw/per-leg or unattended qualification; no reset tool",
+    "hermes_powered_result": "Actual session20261017_115945_c654b1 readDisarmed/8.15V/capabilities, then completed all8powered requests once in order, each completed_and_disarmed with physical_reset_required=false. Final robot_stop sent=true/fault_verified=true and final stateFault4/resetrequired=true. Separate recorded camera confirms visible posture/gait changes on support and still post-STOP frames",
+    "hermes_motor_off_result": "Actual session 20261017_055112_0725f7 readBOOT, supply1.56V, capabilities; check completed1119ms Active accepted/busycleared/STOPsent/faultverified; explicitSTOPverified; finalFAULT4 resetrequired. Physical motion not inferred from this motor-off result",
+    "powered_result": "Operator confirmed POWER ON caused no movement while disarmed. Controller supply 8.18 V for ARM-only and 8.17 V for Active. RF accepted one Active request busy=1, later STATUS busy=0, then STOP returned Fault/fault=4. Recording shows visible leg-position change with chassis supported and no continuing motion in reviewed post-STOP frames",
+    "operator_leg_observation": "User reports back-right leg fully extends with the others ONLY for the guarded USB-remote/RF ARM/Active method just tested. Not a claim of general repair, stock-firmware restoration, walking health or diagnosed cause; no calibration bytes changed",
+    "private_evidence": "See hardware.json supported_powered_acceptance for camera files/hashes. Not a measured electrical cutoff latency, current or torque test",
+    "rollback": "Original private flash/EEPROM baselines retained; application-only restoration already demonstrated and full flash/EEPROM verification passed on both boards"
+  },
   "installed": {
-    "identity_status": "installed image captured and independently read-verified; source release unknown",
+    "identity_status": "Historical original image preserved and independently verified; see active_deployment for current guard image. Original exact source release unknown",
     "version": null,
     "source_revision": null,
     "flash_sha256": "ba6baca09ee20125e1a58b8d6e4ec5013982b92a46a413aef6a34608f8aa9dd9",
@@ -13,7 +31,17 @@
       "reported_programmer_firmware_version": "2.10",
       "flash_identifier": "Arduino explorer stk500V2 by MLS",
       "flash_date_string": "Mar  7 2013",
-      "date_string_limit": "Embedded string, not a verified installation date or application release"
+      "date_string_limit": "Embedded string, not a verified installation date or application release",
+      "reference_match": {
+        "status": "byte-for-byte comparison of preserved boot-region readback with official reference",
+        "source": "https://github.com/arduino/ArduinoCore-avr/tree/42fa4a1ea1b1b11d1cc0a60298e529d37f9d14bd/bootloaders/stk500v2",
+        "reference_file": "stk500boot_v2_mega2560.hex",
+        "range": "0x3e000 inclusive through 0x40000 exclusive; 8192 bytes, FF padded",
+        "differing_bytes": 0,
+        "range_sha256": "fdef04c5b772b0b4cc6e8919f90036ae88217cf3f0c17c399ef09fa8742db711",
+        "watchdog_reference": "stk500boot.c clears MCUSR and disables WDT before application entry; application cannot reliably recover reset identity from MCUSR",
+        "limits": "No physical watchdog reset or restoration test; fuse/lock state still unknown"
+      }
     },
     "readback": {
       "date": "2026-10-15",
@@ -37,7 +65,7 @@
       "limits": "Readback includes non-erased boot-region content but cannot prove all protected physical bytes are exposed; fuse/lock state and restore procedure are not verified"
     },
     "fuses_and_lock_bits": null,
-    "rollback_verified": false,
+    "rollback_verified": "Application restoration tested 2026-10-17; full flash and EEPROM match original through serial bootloader. ISP/fuse/lock recovery not established.",
     "protocol_observation": "Stock-compatible echo at 115200: 80 00 81 -> 80 01 81",
     "wireless_protocol_observation": {
       "date": "2026-10-16",
@@ -53,7 +81,7 @@
     },
     "version_query": "No version/board identification command found in inspected vendor command table",
     "safety_qualification": "unverified; do not enable Hermes motion",
-    "writes_this_session": false
+    "writes_this_session": true
   },
   "reference_source": {
     "status": "inspected reference, NOT installed-image identification",
@@ -128,7 +156,225 @@
       "Confirm supported chassis, independent power cutoff and staged powered acceptance before Hermes activation"
     ]
   },
+  "guard_overlay_prototype": {
+    "source_directory": "firmware/freenove-guard",
+    "radio_integration_update": {
+      "date": "2026-10-17",
+      "status": "Narrow motor-off RF/STOP hardware checks passed; original applications restored. Manual gestures, ESP diagnostics and physical cutoff not hardware-qualified",
+      "development_verification": "Worker native dispatcher/scheduler/ESP regressions and two matching AVR builds passed; source review found and corrected RF STOP size, false local ACK, pipe-address collision, reply-route ownership, missing deadlines and malformed CIPSEND",
+      "mega_elf_sha256": "c874872c15b1ab74a51ca19b8d4df48a8356d0df67f4f53bdb2a6705cf4a6cf8",
+      "mega_hex_sha256": "a2a96f48df446243da76d356afc6551dc7384b088334122c07c069e7cb1f516a",
+      "remote_elf_sha256": "894dabe3baa95cf394ed257fa5fcffe30978c45b5e6636eda48ef3be7e4f4665",
+      "remote_hex_sha256": "a12bd8dcf0136304c4e2a778dc8778fb09ada8cefcdb8d84034b919d07194179",
+      "remaining_gate": "AVR decoder compatibility and one supported powered Active transition verified. Walking, rear-right fault diagnosis, watchdog-reset, manual gestures, ESP diagnostics and Hermes MCP actuation remain outside this acceptance",
+      "historical_scope": "Older prototype hashes and exclusions below are historical. Current programmed applications and authorization are recorded in active_deployment."
+    },
+    "status": "Temporary motor-off RF/STOP test passed; original applications restored; powered motion unqualified",
+    "flashed": "temporarily on 2026-10-17; no longer installed",
+    "retained_reference": "Pinned FNHRBasic gait geometry and EEPROM calibration reads; not established equivalence to unknown installed application",
+    "implemented": "Raw priority STOP matcher, reset-disarmed outputs, Timer2 command service during blocking gait, Timer4 expiry and staged enables, hardware WDT configuration, reset-only in-session fault latch",
+    "bounds_ms": {"transport": 500, "operation": 3000, "session": 30000, "watchdog_nominal": 250},
+    "elf_sha256": "14558b956fd3611b59c24d24e824d381efdf6a8a55c273219dab2382e7d7e73d",
+    "hex_sha256": "3db3e49e3d896c3ebcc7d3de2c7755e9ee6e0a003fb75b894932434119d2fc10",
+    "avr_size_bytes": {"text": 41172, "data": 72, "bss": 2568},
+    "verification": "Parent-run native tests and source scan passed; two parent AVR builds byte-identical; tmux driver exercised help, bad input, arm, action, busy rejection, STOP and rejected rearm; no hardware QA",
+    "lsp": "clangd unavailable; installation previously declined; compiler checks substituted",
+    "blockers": [
+      "Prototype excludes ESP8266 Wi-Fi and RF24 remote support, so installation would conflict with preserving working interfaces",
+      "No authenticated boot/session freshness; Hermes motion remains denied",
+      "V3.1 physical cutoff, power rails, independent cutoff, watchdog behavior and restoration remain unqualified",
+      "Main may remain blocked in vendor gait after terminal cutoff until reset; watchdog fed by Timer4 does not detect main-only stalls",
+      "Rear-right extension fault remains unresolved"
+    ],
+    "rollback": "No device changes; preserve installed image and private backups. Remove prototype source if abandoned. No bootloader, EEPROM, fuse or lock writes occurred."
+  },
   "history": [
+    {
+      "date": "2026-10-17",
+      "change": "Cleared end-of-test emergency latch with deliberate operator USB reset after user confirmed POWER OFF",
+      "before": "Acceptance left FAULT4; user turned physical POWER OFF and could not find reset button",
+      "method": "Exclusive robot USB port by-path usb-0:9:1.0-port0,115200 baud; DTR false for100ms then true, wait2s. Opened handheld usb-0:3:1.0-port0 and requested readonly STATUS over RF",
+      "verification": "Actual CRC-validated robot reply Accepted/BOOT/sequence0/fault0/busyfalse. No BEGIN, ARM, EXEC, firmware, EEPROM, bootloader, fuse or lock write",
+      "after": "Controller boot-disarmed, physical POWER operator-confirmed OFF; no further movement scheduled. User need not find or poke reset pins while this USB connection is available",
+      "safety": "Explicit operator procedure only, not automatic fault clearing or a new reset model tool. Powered profile remains supervised/on-support. Turn POWER on only when ready to supervise a requested action",
+      "rollback": "No persistent change or restoration required; existing application/calibration/backups unchanged"
+    },
+    {
+      "date": "2026-10-17",
+      "change": "Completed actual powered Hermes acceptance for all8repeatable semantic actions and final emergency STOP",
+      "governed_config_snapshot": "Chezmoi/Forgejo source commit0c5bc42 includes the powered operator settings, MCP tool selection, network-context update and powered-control changelog; project implementation/evidence remain in owning repository",
+      "state": "complete; guard/bridge remain installed, supervised powered profile enrolled, final emergency STOP is latched",
+      "session": "20261017_115945_c654b1",
+      "actions": ["active","sleep","forward","backward","left","right","turn_left","turn_right"],
+      "tool_durations_ms": {"active":193,"sleep":1101,"forward":2001,"backward":1194,"left":1102,"right":908,"turn_left":1106,"turn_right":996},
+      "actual_result": "All8mcp__furbomek__robot_perform_action calls completed_and_disarmed, accepted/completed/disarm_acknowledged=true, reset_required=false, no panicSTOP between them. Explicit final mcp__furbomek__robot_stop verified FAULT; finalstateFault4/notbusy/resetrequired. Supply8.15V throughout reported results",
+      "visual_evidence": "Private39.9s camera recording shows visible posture/gait changes while chassis stays on central support and reviewed post-STOP frames remain still; not a measured distance or joint-feedback result",
+      "private_jsonl": "~/.local/state/furbomek/hermes-guard-enroll.boty2A/hermes-powered-eight-actions.jsonl SHA256b66a78ace2ae3aef2a808487b4579880a4da739fd6d19925b6e96f19911b8942",
+      "private_video": "/data/furbomek-media/robot-motion-2026-10-17.Ahmaq7/hermes-powered-eight-actions.mp4 SHA2566249e64180073aa96788df1cd878f5ec117104abe9df0e580daf4428b1d2a664",
+      "verification": "Current strict lint/format/type checks passed;92tests passed in final full run. One unchanged legacy TCP serialization fixture flaked in an earlier run and passed isolation/full rerun; not modified or weakened. Native safety/clock/query regressions and paired AVR builds passed before hardware use",
+      "safety": "No further movement or reset after final STOP. Explicitly told operator POWER OFF now, keep USB. Normal actions need no reset; this final deliberate emergency-stop test requires one deliberate robot RESET while POWER OFF before next powered use. Do not automatically clear faults. Floor walking, unattended control, measured electrical cutoff/current and watchdog-reset behavior remain unqualified",
+      "scope": "Hermes powered movement interface is operational under supported operator-present conditions, not the entire autonomous streaming architecture. Earlier rear-right restoration report remains method-specific; no general mechanical repair or EEPROM change claimed",
+      "rollback": "Configuration can return to private motor-off backup via targeted Chezmoi sources/owned block; original full firmware/EEPROM images and demonstrated application restoration remain available. No bootloader/fuse/lock writes"
+    },
+    {
+      "date": "2026-10-17",
+      "change": "Qualified all8bounded semantic actions on support and enabled supervised powered Hermes allowlist",
+      "state": "Native qualification complete; actual Hermes powered run pending",
+      "operator_condition": "User explicitly confirmed supported robot, all legs free, POWER ON stayed still, operator ready at POWER cutoff",
+      "verification": "New40ms PWM-settle ARM-only test disarmed normally and stayed idle. Active/Sleep, forward/backward, left/right and both turns each executed once in recorded powered native tests, returned DISARMED with no reset between requests. Supply8.16–8.18V; visible gait/posture changes, chassis stayed supported",
+      "timings_seconds": {"active":0.953,"sleep":0.946,"forward":1.742,"backward":0.850,"left":0.942,"right":0.761,"turn_left":0.941,"turn_right":0.835},
+      "private_evidence": "repeatable-powered-*.log under ~/.local/state/furbomek/hermes-guard-enroll.boty2A/ and repeatable-*.mp4/contact sheets under /data/furbomek-media/robot-motion-2026-10-17.Ahmaq7/",
+      "configuration": "Chezmoi targeted robot-guard.json and robot MCP owned stanza: mode supervised_powered_bench, operator_present_supported_chassis, explicit8action allowlist,2500ms host bound,200ms perqueryattempt, no automaticreset. Stockbackenddeny and defaultprofiledisabled preserved",
+      "safety": "Bench qualification only, not measured translation/floor walking or general joint repair. No EEPROM/calibration changes. Earlier rear-right restoration report retains its method-specific scope. Normal disarm is not emergency fault clearing",
+      "validation_note": "Strict lint/format/type checks passed;92test full suite passed on rerun. One unchanged legacy TCP serialized-handler fixture intermittently reported max_active2 instead1 under load and passed isolation; not modified or weakened",
+      "rollback": "Restore prior motor-off operator settings from private backup and apply owned targets only if powered acceptance fails; keep physical POWER OFF for any programming/handling"
+    },
+    {
+      "date": "2026-10-17",
+      "change": "Completed40 sequential motor-off actions with normal DISARM and no resets between actions",
+      "state": "motor-off acceptance passed; awaiting supported powered acceptance before public powered allowlist",
+      "verification": "All eight actions exercised from sleep and active modes with consecutive direction/turn phases. All40 completed with exact sequence-bearing DISARM ACKs; longest1.842s. After700ms idle state remained Disarmed, proving old deadlines did not reactivate. Explicit STOP entered Fault4 and subsequent DISARM could not clear it",
+      "private_evidence": "~/.local/state/furbomek/hermes-guard-enroll.boty2A/repeatable-motoroff-v3.jsonl SHA256bcc226cc367a5fb129724298b7c0050c6478531018f806b32533edd65e3d929d; stderr empty",
+      "safety": "POWER OFF throughout. Firmware3s operation/500ms lease unchanged. New query-only retries never retransmit movement and do not renew lease through duplicates; fresh per-event clocks and lease-budget margins verified in source/tests",
+      "current_state": "After acceptance STOP, operator-agent reset through robot USB while POWER OFF, then verified BOOT and0V quiescent report. No model reset tool or automatic fault clearing introduced",
+      "rollback": "Repeatable guard remains installed; original baselines and prior working telemetry artifacts retained. No EEPROM/calibration/bootloader/fuse/lock changes"
+    },
+    {
+      "date": "2026-10-17",
+      "change": "Measured repeatable motor-off sessions and prepared query-only ACK recovery",
+      "state": "motor-off qualification in progress; powered model allowlist still not enabled",
+      "observed": "Fourteen healthy action/disarm cycles completed without reset. Active0.947s, Sleep0.846s, forward fromSleep1.779s and backward fromSleep1.746s; later STATUS exchange timed out200ms and harness issued STOP without retrying movement",
+      "voltage_observation": "Healthy quiescent POWER-OFF BOOT reports0V with PWM disabled. ARM without EXEC changed report0.16,0.46,0.83,1.18V; normal DISARM and idle STATUS succeeded. This is controller telemetry behavior, not an independent backfeed/rail measurement",
+      "artifacts": {"mega_hex_sha256": "09157b7dbe220843a6feb29dccc0fe85bfb963c9fcfd9b867af11b7abdc6acb6", "remote_hex_sha256": "0aada2dd6109adb096261fec9735610a49015cf3066818fde8d735e91250114a"},
+      "scope": "New explicit query-replay ACK result10 only for KEEP/STATUS, never renews TTL or sequence. Host may retransmit identical queries once on timeout, never BEGIN/ARM/EXEC/DISARM. Fresh paired Timer4 clocks per ingress event and conservative host lease/sleep budget protect500ms local TTL",
+      "verification": "Native query/clock regressions and two matching AVR builds; host92tests and strict quality gates passed. All source/test modules split below250pureLOC",
+      "safety": "User-confirmed POWER OFF retained. No powered movement in this work. Three-second operation bound unchanged, walking/per-leg/unattended model control not enabled; powered controls will require physical acceptance",
+      "rollback": "Application-only AVRDUDE writes and unchanged EEPROM verification; previous working guarded artifacts and original baselines retained"
+    },
+    {
+      "date": "2026-10-17",
+      "change": "Prepared repeatable normal DISARM lifecycle and bounded semantic-action qualification",
+      "state": "prepared for motor-off application-only qualification; powered allowlist not yet enabled",
+      "conditions": "Latest operator POWER-OFF confirmation remains in effect; no subsequent power-on requested",
+      "artifacts": {"mega_hex_sha256": "f68af5898a43d642703141d8cdc3dc7214be0455994e465a8551e505bab6c0ed", "remote_hex_sha256": "e2ee23a6f0c1161c77c0c9f6e8e9c02ee081935b7fe55fb43607b284f356d30b"},
+      "contract": "Healthy completed operations may explicitly DISARM to state5 without clearing faults; every fault/STOP remains reset-only. Exact global sequence and changed fresh session ID on resumed BEGIN. PWM restored while EN low,40ms before first bank,20ms between banks; state-owned local deadlines. No EEPROM writes",
+      "verification": "Oracle reviewed firmware source and found no motor-off write blocker. Host cancellation-after-BEGIN and shield-boundary defects corrected with regressions; compact DISARM grammar removed. Native tests and two identical AVR builds passed; host strict tests reported84passed",
+      "safety": "Three-second firmware operation limit unchanged. Operator-only motor-off harness will measure all actions before selecting powered allowlist; public powered tool remains mode/allowlist denied. No walking or powered-action acceptance implied yet",
+      "rollback": "Last working telemetry artifacts and original full private baselines retained. AVRDUDE -D application-only writes with EEPROM verification, no bootloader/fuse/lock changes"
+    },
+    {
+      "date": "2026-10-17",
+      "change": "Installed read-only RF supply extension and verified all five Guard MCP tools through actual Hermes",
+      "state": "complete; POWER OFF, guard and bridge installed, STOP-latched FAULT4",
+      "verification": "Application-only writes and unchanged full EEPROM comparisons passed both boards. Native telemetry routing regression fixed; two AVR builds matched. Host66tests, Ruff/format, basedpyright zero errors/warnings and UV lock checks passed",
+      "profile": "Existing furbomek profile now owns enabled5toolserver; default hardwareentry disabled after unrelated livechat auto-loaded it and exclusively reserved UART. Supported config reload released only hardwareentry; no other session/provider/draft touched",
+      "actual_hermes": "Session20261017_055112_0725f7: BOOT read,1.56V RF supply, capabilities, exactlyone motor-offcheck completed1119ms, trueSTOPsent/faultverified, finalFAULT4physicalresetrequired. Evidence is actual tool_result events, not CLI exit alone",
+      "private_evidence": "~/.local/state/furbomek/hermes-guard-enroll.boty2A/hermes-guard-live.jsonl SHA2567fc32644e665ac7ed6d8b5502105ca5c1075b84024ea5b22248e5b2ff391c47d",
+      "safety": "User confirmed POWER OFF; no powered motion this run. Current mode fixed motor_off_bench, conservative reported-voltage gate<3V not independent power proof; no walking, per-leg, raw-serial or auto-reset model tools. Previous rear-right restoration remains scoped to previous supported ARM/Active method, not generalized",
+      "rollback": "Disable only robot-profile owned MCP stanza and apply targeted Chezmoi targets; retain configs outside ownedblocks byte-identical. Original robot/remote baselines and demonstrated application restoration remain available. No network/group/udev changes"
+    },
+    {
+      "date": "2026-10-17",
+      "change": "Prepared RF supply telemetry and motor-off Hermes integration",
+      "state": "prepared; deployment and live tool results recorded separately afterward",
+      "conditions": "User explicitly confirmed physical POWER OFF after supported movement test; both USB links retained",
+      "artifacts": {"mega_hex_sha256": "fb34d154ce05364feb84a24eea96e92b30fa350de352deeac2b01d6af69ec99e", "remote_hex_sha256": "0c230a68fb421a77f61b2955f6eb6fa45f88a8ff848e10974a635ff6c8e0ab7e"},
+      "change_scope": "Read-only RF request 0x34/reply0x35 carries controller centivolts; does not arm, renew lease, advance accepted sequence or change session ownership. Delayed ARM acknowledgement retains original owner route during foreign telemetry",
+      "verification": "Native regression reproduced delayed-ARM route theft before fix; corrected native suite and two matching AVR builds passed. Host adapter 66 tests, Ruff/format, basedpyright zero errors/warnings and UV lock checks passed",
+      "safety": "Only motor-off Active check exposed; requires explicit operator profile and controller voltage below3V as additional gate, not independent motor-power proof. Walking/per-leg/raw frames and automatic robot reset not exposed",
+      "rollback": "Application-only writes with AVRDUDE -D, unchanged EEPROM verification; original private images and demonstrated restoration path retained. MCP rollback is owned stanza only, not full Hermes config"
+    },
+    {
+      "date": "2026-10-17",
+      "change": "Recorded operator-confirmed rear-right full extension with method-specific scope",
+      "observation": "User reports the formerly short-extending back-right leg now fully extends alongside others during the tested guarded USB-remote/RF ARM/Active sequence",
+      "scope": "Restored ONLY for this tested method and current artifact hashes in active_deployment. No general mechanical repair, original-firmware fix, stock-startup, walking or other-mode acceptance implied",
+      "device_changes": "None in this reporting step; EEPROM/calibration remain unchanged",
+      "operator_next_step": "Explicitly instructed POWER OFF now and leave both USB connections connected. No further motion scheduled; physical POWER OFF not recorded as confirmed until operator says so",
+      "rollback": "Documentation-only observation update; installed guard remains STOP-latched and original backups retained"
+    },
+    {
+      "date": "2026-10-17",
+      "change": "Completed first supported powered actuation through Brodex USB remote and RF robot guard",
+      "before": "Guard/bridge installed, EEPROM unchanged, radio BOOT verified; false calibration blocker resolved from emitted AVR code",
+      "operator_condition": "User confirmed POWER ON with robot staying still while disarmed; chassis on confirmed central support, operator ready at POWER cutoff",
+      "sequence": "Recorded ARM-only settling with 100ms keepalives then STOP. Reviewed video before separate fresh guarded session; sent one Active, continued keepalive/status until busy=0, then STOP. No crawl or floor walking",
+      "observations": "Controller supply 8.18 then 8.17 V. Robot replies Armed, Active accepted busy=1, completion busy=0, final Fault/fault=4. Actual camera before/after shows visible leg-position change with supported chassis; reviewed post-STOP frames show no continuing motion",
+      "evidence": "Private /data/furbomek-media/robot-motion-2026-10-17.Ahmaq7; hashes in hardware.json. No private media committed",
+      "safety": "Left STOP-latched FAULT; no further reset or movement. Physical POWER OFF needed before handling. Does not qualify rear-right symptom, walking, current/torque, electrical cutoff timing, watchdog reset or unattended Hermes control",
+      "rollback": "Guard remains installed; originals not currently restored. Private original baselines retained and application restoration previously demonstrated. EEPROM/calibration untouched"
+    },
+    {
+      "date": "2026-10-17",
+      "change": "Installed compatible guarded RF bench candidate after correcting AVR calibration interpretation; enabled voltage sampling while disarmed",
+      "before": "Original applications restored; previous false calibration blocker removed by actual machine-code comparison",
+      "after": "Current guard/bridge applications verified in flash; EEPROM unchanged; live remote reports robot BOOT. Controller voltage query works while disarmed and reports 1.54 V with physical POWER OFF",
+      "verification": "AVRDUDE application-only -D flash writes and full EEPROM comparisons exited zero; Mega HEX 662fa0c3d6ecaa19257f58c962fa88acbfeb3d6df06d03ebbef8c94eb9855a78 from two matching builds",
+      "safety": "No powered movement yet. Await physical POWER ON with operator ready to cut off; observe disarmed state before ARM. No calibration, bootloader, fuse or lock changes",
+      "rollback": "Use tested private application-only baselines; do not erase EEPROM. Current installed images are no longer the originals"
+    },
+    {
+      "date": "2026-10-17",
+      "change": "Corrected false calibration incompatibility diagnosis by comparing actual installed and candidate AVR machine code",
+      "before": "Host-width interpretation incorrectly treated FF FF as +327.67 degrees and blocked powered acceptance",
+      "after": "Both actual AVR decoders produce -0.01 degrees from FF FF using signed 16-bit ASR/ROR, parity multiplier and signed float conversion. V12-format calibration addresses 100..135, format0 and product3 independently confirmed in installed binary. No calibration rewrite needed",
+      "evidence": "Installed flash 0x30d6..0x3124 compared with candidate ELF RobotJoint::Set 0x15fc..0x164a; EEPROM reads, arithmetic core, __floatsisf and 0.01 float scaling agree. Exact installed patch-release string not found; decoder compatibility is direct evidence rather than release-name inference",
+      "verification": "Parent inspected both disassemblies after independent binary analysis; candidate artifacts unchanged from successful motor-off RF test",
+      "safety": "This removes the erroneous software blocker, not physical acceptance requirements. Next installation retains EEPROM unchanged and boot disarmed; first powered test must be supported ARM-only settling before one bounded Active transition",
+      "rollback": "Both full private baselines remain verified and application restoration already demonstrated. No new device write in this analysis step"
+    },
+    {
+      "date": "2026-10-17",
+      "change": "Temporarily programmed both application regions, passed live motor-off USB/RF STOP/deadman checks, then restored originals",
+      "state": "complete; both original applications restored and verified",
+      "before": "Fresh operator POWER-OFF confirmation; fresh robot flash/EEPROM matched baseline; handheld independently preserved",
+      "artifacts": {"mega_hex_sha256": "a2a96f48df446243da76d356afc6551dc7384b088334122c07c069e7cb1f516a", "remote_hex_sha256": "a12bd8dcf0136304c4e2a778dc8778fb09ada8cefcdb8d84034b919d07194179"},
+      "writes": "AVRDUDE 7.1 -D flash:w application-only HEX: Mega 50722 bytes, remote 14888 bytes, both from address zero; automatic verification passed. No bootloader, EEPROM, fuse or lock writes requested",
+      "live_result": "Direct/bridged boot status passed; RF BEGIN returned Session, ARM returned Armed, software Active accepted busy=1. RF STOP returned Fault/fault=4 and rearm rejected. Fresh-session host silence over 650ms caused local Fault; malformed heartbeats over 700ms also caused Fault. Replies CRC-validated and robot-originated",
+      "harness_correction": "Initial driver incorrectly expected rejected ARM to echo proposed sequence. Robot retained last accepted sequence; corrected driver rerun passed without firmware change",
+      "after": "Original application bytes restored below Mega 0x3e000 and remote 0x7800. Full original flash verification including boot region and full EEPROM verification passed on both boards, exit zero",
+      "private_logs": ["~/.local/state/furbomek/firmware-backups/robot-preflash-2026-10-17.rAKvmC/diagnostic-write.log", "~/.local/state/furbomek/firmware-backups/robot-preflash-2026-10-17.rAKvmC/restore-and-verify.log", "~/.local/state/furbomek/firmware-backups/remote-2026-10-17.73OVsW/diagnostic-write.log", "~/.local/state/furbomek/firmware-backups/remote-2026-10-17.73OVsW/restore-and-verify.log"],
+      "safety": "Actuator POWER remained OFF. Software action sent only in motor-off diagnostic; no powered movement. Calibration unchanged; all-FF reference offsets block powered replacement use. Physical rail cutoff, watchdog reset, manual gestures and ESP diagnostics not accepted",
+      "rollback": "Completed application restoration, not merely proposed. Full flash/EEPROM baselines match via bootloader. Fuse/lock/ISP recovery and restored manual behavior untested. No host network profile change"
+    },
+    {
+      "date": "2026-10-17",
+      "change": "Prepared temporary motor-off application-only RF qualification with baseline restoration required before power-on",
+      "state": "prepared; no write recorded yet",
+      "conditions": "Operator freshly confirms actuator POWER OFF and both USB connections; fresh robot flash and EEPROM hashes exactly match preserved baseline",
+      "artifacts": {"mega_hex_sha256": "a2a96f48df446243da76d356afc6551dc7384b088334122c07c069e7cb1f516a", "remote_hex_sha256": "a12bd8dcf0136304c4e2a778dc8778fb09ada8cefcdb8d84034b919d07194179"},
+      "programming_method": "AVRDUDE 7.1 flash-only -D; Mega wiring/m2560/115200, remote arduino/m328p/115200; application records only, no EEPROM/bootloader/fuse/lock write",
+      "compatibility": "Pinned Robot::Start supports EEPROM format 1/product 30. Byte 140 belongs to excluded FNHRComm and is not used. Calibration bytes 100..135 are all FF and decode unsafely under the pinned reference; do not energize servos or claim calibrated movement",
+      "recovery": "Restore original application bytes below Mega 0x3e000 and remote 0x7800 from verified private baselines; then verify entire flash and EEPROM independently. Remote upper 512 bytes match official Optiboot executable/version except ten zero-versus-FF padding bytes; fuse/lock state remains unknown",
+      "limits": "Temporary diagnostic only. Physical cutoff/electrical behavior and powered gait remain unqualified. Baseline restoration is mandatory before actuator power-on."
+    },
+    {
+      "date": "2026-10-17",
+      "change": "Preserved and independently verified connected handheld application/EEPROM; implemented unflashed two-board RF integration",
+      "before": "Handheld USB echo silent, installed MCU/application unidentified; guard prototype lacked RF/Wi-Fi transports",
+      "after": "Bootloader reports ATmega328P; 32768 flash and 1024 EEPROM bytes preserved and separately read-verified. Two-board transport source now includes authoritative robot replies, deliberate manual ownership and independent local deadlines",
+      "verification": "Handheld AVRDUDE no-write read and second verification exit zero; hashes in hardware.json. Software integration checks reported above; hardware integration not performed",
+      "safety": "No memory writes or movement commands; robot serial not opened. Current physical actuator-power isolation must be confirmed before robot reset/programming",
+      "rollback": "No firmware change to roll back. Both controllers have private preserved images; restoration remains untested. Do not modify bootloader/fuses/lock bits or EEPROM."
+    },
+    {
+      "date": "2026-10-17",
+      "change": "Tested operator-connected handheld USB interface without motion or memory writes",
+      "before": "USB-to-radio bridge inferred feasible but not verified; remote periodic-traffic behavior misstated in conversation",
+      "after": "Three echo-only probes produced zero serial response; no stock USB bridge established. Source confirms 20ms RF traffic including idle echo, which robot receiver currently ignores for expiry",
+      "verification": "Three-second passive listen and three one-second echo windows on newly connected /dev/ttyUSB1, exclusive scoped dialout session; all four phases received zero bytes; port closed and termios restored",
+      "safety": "Robot serial port untouched, no movement or firmware writes, existing remotes and network unchanged. Echo-only silence cannot exclude an unidentified one-way bridge",
+      "rollback": "No persistent device or host configuration change; local STOP/link-loss enforcement must not depend on on-demand Wi-Fi association"
+    },
+    {
+      "date": "2026-10-16",
+      "change": "Implemented and reviewed build-only FNHR guard overlay; corrected V3.1 enable topology and identified exact bootloader reference",
+      "before": "Read-only Hermes bridge and actuator-disabled independent diagnostic; no targeted gait guard",
+      "after": "Native-tested, reproducibly built USB guard prototype; original controller application, calibration, Wi-Fi and remotes untouched",
+      "verification": "Native and deterministic build results in guard_overlay_prototype; review caught and corrected blocking STOP, parser-resync STOP, cutoff/arm race and dual-clock deadline defects",
+      "safety": "Not installed or physically qualified. Prototype intentionally not flashed because it excludes working Wi-Fi/RF interfaces; no movement command sent",
+      "rollback": "No device state to restore; original private flash/EEPROM preservation remains unchanged and physical restoration untested"
+    },
     {
       "date": "2026-10-15",
       "change": "Initial records after USB echo bring-up; no firmware flashed",
