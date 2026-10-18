@@ -1,6 +1,59 @@
 # Furb-o-Mek implementation plan
 
-Status: evidence-backed planning baseline, revised 2026-10-03
+Status: evidence-backed architecture baseline with robot progress updated 2026-10-18
+
+## Current implementation checkpoint, 2026-10-18
+
+**Completed and physically observed, 2026-10-17:** installed
+`firmware/freenove-guard/` preserves the pinned vendor gait/calibration reads and
+uses the existing handheld as USB/RF bridge. Forty motor-off cycles, recorded
+native powered checks and actual Hermes session `20261017_115945_c654b1` passed
+`active`, `sleep`, `forward`, `backward`, `left`, `right`, `turn_left`, and
+`turn_right` on the supported chassis with an operator at POWER. Every normal
+action completed and DISARMED without reset. Final emergency STOP verified FAULT4.
+Original applications were preserved and restoration demonstrated; both EEPROMs
+remain unchanged. Rear-right extension restoration is reported only for the
+tested guarded ARM/Active method, not as general mechanical repair.
+
+**Last verified handoff:** after user-confirmed physical POWER OFF, an agent used
+the robot's existing USB DTR reset and RF STATUS verified BOOT/sequence0/fault0/
+notbusy. No movement is scheduled. This checkpoint is not live telemetry: future
+hardware operations require current ownership and fresh power confirmation.
+Agents own authorized USB reset recovery; do not ask the user to locate RESET
+unless that recovery is unavailable or unsafe. No automatic/model reset exists.
+
+| Milestone | Evidence/status | Still open |
+|---|---|---|
+| Stock identification and preservation | Board/MCU records, original flash/EEPROM backups and demonstrated restoration | Original application source release remains unknown; do not repeat established discovery |
+| Guarded robot firmware | Reproducible AVR artifacts, native safety checks, installed hashes and local expiry/STOP evidence | Electrical cutoff/current/torque, watchdog-reset behavior and broader failure qualification |
+| Host MCP adapter | 92 tests including PTY/stdio, Ruff and strict types; separate legacy read-only backend | No arbitrary/raw/per-leg commands or automatic reset |
+| Supported powered Hermes slice | All eight bounded actions, normal DISARM, final STOP and private visual evidence | Floor travel, continuous gait, manual handoff, authentication and unattended autonomy |
+| Character/stream slice | Separate existing Kinect/Godot/OBS work; not completed by robot acceptance | Broker/lifecycle, jabberWERK/shared audio clock, avatar failover and private soak gates in §9.1 |
+
+**Next robot work:** fix and regression-test cross-ingress STOP acknowledgement
+routing before claiming manual/Hermes handoff. `Dispatcher::stop()` currently
+emits the ACK before clearing ownership, so a different-ingress requester can
+miss the ACK even though STOP quiesces/latches; it must not infer success from
+that missing reply. Current acceptance stayed on RadioComputer and does not
+qualify this handoff. Plan remaining safety tests before any new live deployment.
+
+**Safe parallel work:** use a separate worktree/branch from published
+`upstream/main`, claim a non-overlapping component and coordinate shared contract
+or plan edits. A firmware-only STOP-routing regression/fix or isolated character/
+voice work can proceed without hardware. Worktrees do not isolate robot UARTs,
+camera, OBS or private Hermes profiles: only one designated operator may own
+those. Do not reset/flash/move the robot or change host configuration as an
+incidental test. Existing unrelated Kinect/activity/stream work in the main
+worktree belongs to its current owner and is not part of this robot publication.
+
+Evidence and exact recovery/rollback: [Hermes runbook](docs/operations/hermes-robot.md),
+[current deployment/history](docs/hardware/firmware.json),
+[hardware observations](docs/hardware/hardware.json),
+[gateway](services/embodiment-gateway/README.md), and
+[guard firmware](firmware/freenove-guard/README.md). Historical records describe
+their own test times; `active_deployment` and the latest handoff supersede old
+"POWER OFF not confirmed"/"motion unqualified" statements. Architecture and
+future full-phase gates below are not all complete.
 
 ## 1. Outcome and immediate feasibility
 
@@ -8,7 +61,7 @@ Furb-o-Mek can be made to look and behave like a self-contained autonomous strea
 
 | Capability | Possible now? | What is missing |
 |---|---:|---|
-| Hermes controls walking/poses over USB or Wi-Fi | Yes | Import/restore the Freenove firmware, document its protocol, then expose bounded commands through a robot gateway |
+| Hermes controls walking/poses | Supported USB/RF bench slice accepted | Eight bounded actions implemented; floor/autonomous operation and guarded Wi-Fi actuation remain unqualified |
 | Hermes speaks through the stream and synchronizes the Furby face | Yes, with limitations | Digitize the two-button head controller; add position/homing feedback for repeatable expressions |
 | Hermes controls OBS and appears to self-stream | Yes | OBS scene contract, authenticated WebSocket worker, capture/audio routing, reconnect policy |
 | Live object/part recognition and segmentation overlays | Yes on the Omen-class GPU host | Camera, detector/segmenter pipeline, overlay renderer, latency benchmark |
@@ -29,9 +82,9 @@ Normal operation is explicitly untethered from **both** legacy controllers. The 
 
 ## 2. Evidence baseline
 
-### 2.1 What exists in this repository
+### 2.1 Original application baseline (historical)
 
-This repository is currently a Nuxt 3 browser application plus an Express TTS proxy, not a robotics stack:
+The original application was a Nuxt 3 browser application plus an Express TTS proxy, not a robotics stack. The current progress checkpoint above supersedes this original inventory:
 
 - [`package.json`](https://github.com/patchwerks/furbomek/blob/main/package.json#L5-L11) starts Nuxt and `server/tts-proxy.js` together and has no firmware, robot, OBS, or perception service.
 - [`nuxt.config.ts`](https://github.com/patchwerks/furbomek/blob/main/nuxt.config.ts#L12) makes the application client-only (`ssr: false`).
@@ -746,6 +799,18 @@ Acceptance:
 - simulator and physical adapter pass the same contract suite;
 - Hermes cannot access the serial device except through the gateway.
 
+### Phase 2A — Completed supported-bench robot/MCP vertical slice
+
+The checkpoint above closes the bounded operator-present supported-chassis slice,
+not every Phase1/2 gate. Installed guarded firmware, unchanged calibration,
+normal repeatable DISARM and actual powered Hermes invocation are accepted in
+that scope. The handheld is currently a USB/RF bridge; the target untethered
+architecture has not yet been delivered. Stock joystick modes, per-leg calibration,
+independent electrical cutoff measurement, full failure matrix, authenticated
+radio and an OS-enforced Hermes serial sandbox are not established by this run.
+Keep those gates open; do not redo preservation or demand new tools as a
+substitute for already recorded evidence.
+
 ### Phase 3 — Digitize and instrument the Furby head
 
 Deliverables:
@@ -929,6 +994,12 @@ The first HUD proof may be a fixed local HTML/Lit overlay fed by fixture events.
 Once the common OBS capture/recording fixture exists, begin the §6.3.1 C922x visual-effects trial. Its three candidate builds and Kinect v2 gates are separate from tonight's Hermes/avatar tracer bullet and do not block bench restoration of robot motion.
 
 ### 9.2 Hardware and full-autonomy sequence
+
+Progress note: identification/preservation, USB/RF guard and supported powered
+Hermes actions in steps3–5/7 now have the scoped evidence above. Those steps are
+not instructions to repeat discovery or movement. Next leg-control work is the
+STOP-routing regression and remaining explicit qualification gaps; the following
+list retains the broader full-autonomy dependencies, not an unchecked restart.
 
 1. Rotate every credential that ever appeared in the original working tree, even though the GitHub snapshot contains blanks.
 2. Capture host inventory and determine whether the Omen can dedicate its GPU to a KVM guest.
