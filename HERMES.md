@@ -15,22 +15,38 @@ Before robot work, also read `docs/hardware/README.md`,
 hardware/firmware discovery or change there before handoff. Original hardware
 photos are preserved in `docs/hardware/evidence/`; MCU signature, installed-image
 hashes and verified private flash/EEPROM backups are recorded. Do not repeat these
-steps or request the same photos again. The exact application source release and
-robot-local safety remain unqualified; image readback is not motion acceptance.
+steps or request the same photos again. The original application source release
+remains unknown; image readback is not motion
+acceptance. Current guarded supported-bench acceptance is separately recorded below.
 
 ## Operating rule
 
 Advance only through implemented, testable milestones. Never invent a command, service, firmware, credential, measurement or passing result merely to complete the deployment narrative.
 
 The current repository contains a legacy Nuxt/Express prototype, planning/evidence
-documents, official offline hardware references, a native read-only stock Wi-Fi
-MCP adapter under `services/embodiment-gateway/`, and an actuator-disabled safety
-diagnostic under `firmware/robot-safety/`. The adapter has been invoked by a real
-Hermes session for echo and supply reads; motion requests are explicitly rejected.
+documents, official offline hardware references, stock read-only and guarded
+USB/RF MCP adapters under `services/embodiment-gateway/`, plus the actuator-disabled
+`firmware/robot-safety/` diagnostic. The installed `firmware/freenove-guard/` passed
+supported powered acceptance for all eight bounded actions. Hermes's existing
+`furbomek` profile invokes state, radio supply, capabilities, actions and STOP; the
+default profile entry is disabled so unrelated chats do not reserve the UART.
+The robot profile now has an operator-present supported powered mode: actual
+Hermes session `20261017_115945_c654b1` completed all eight bounded actions and
+verified emergency STOP, with separate recorded visual evidence. Normal actions DISARM and
+can repeat without reset; emergency STOP/faults still require deliberate reset.
+Do not infer floor-walking or unattended-operation qualification from bench tests.
 See `docs/operations/hermes-robot.md` for native tool names and profile scope.
+After the final STOP, user-confirmed POWER OFF and an agent-operated robot USB
+DTR reset produced RF-verified BOOT/sequence0/fault0/notbusy. This is the last
+verified checkpoint, not a reason to reset again. A trusted maintenance agent
+handles authorized USB reset recovery with fresh POWER-OFF confirmation; do not
+ask the user to find RESET unless USB recovery is unavailable or unsafe. The MCP
+has no reset tool and never automatically clears faults or resumes movement.
+Parallel sessions require separate worktrees and non-overlapping ownership;
+hardware, camera, OBS and private host profiles remain shared resources.
 The diagnostic is host-tested and
 cross-compiled, not flashed, not motion firmware and not a qualified hardware
-watchdog. It does **not** yet contain a qualified actuation-capable gateway,
+watchdog. It does **not** yet contain an unattended-autonomy-qualified gateway,
 character broker, Jabberwerk integration, AIRI adapter, OBS worker, A2UI overlay,
 VM image or production bootstrap CLI. A fresh clone cannot truthfully one-shot
 the complete autonomous robot yet.
