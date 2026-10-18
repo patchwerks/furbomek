@@ -12,6 +12,7 @@ dependencies = [
     "anyio>=4,<5",
     "mcp==1.27.1",
     "pydantic>=2,<3",
+    "pyserial==3.5",
     "pyyaml==6.0.3",
     "typer>=0.16,<1",
 ]
@@ -25,6 +26,7 @@ dev = [
     "basedpyright>=1.31,<2",
     "pytest>=8,<10",
     "ruff>=0.13,<1",
+    "types-pyserial>=3.5.0.20260712",
     "types-pyyaml>=6,<7",
 ]
 
