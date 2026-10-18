@@ -4,7 +4,7 @@
 
 This repository is the source of truth for Furb-o-Mek: an offboard Hermes-controlled, fully autonomous streaming robot built around a modified Freenove-style hexapod and Furby-like head mechanism.
 
-Current reality is much smaller than the target architecture. The checked-in application is a client-only Nuxt 3 conversation/TTS prototype plus a standalone Express TTS proxy. A separate host-side Kinect v2 capture/tracking/Godot/OBS media pipeline exists under `services/camera-capture/` and `tools/kinect2/`; it is not the autonomous runtime or a deployed Hermes/A2UI/Glimpse broker. `firmware/robot-safety/` is a host-tested, cross-compiled, actuator-disabled diagnostic, not installed motion firmware. `services/embodiment-gateway/` now supplies real stock Wi-Fi reads through Hermes's native MCP client, verified in a fresh Hermes session. Motion requests are rejected, not executed. There is no qualified actuator gateway or social adapter yet. Read scoped guides and the relevant operational runbook before changes.
+Current reality is smaller than the target architecture. The Nuxt/Express prototype and separate Kinect/Godot/OBS pipeline are not an autonomous character broker; `firmware/robot-safety/` remains actuator-disabled. The installed `firmware/freenove-guard/` and handheld USB/RF bridge now provide repeatable normal DISARM without clearing faults. Forty motor-off cycles, recorded native powered checks and actual Hermes session `20261017_115945_c654b1` passed all eight bounded actions: Active, Sleep, forward/backward/left/right and both turns, followed by verified emergency STOP. The existing Hermes `furbomek` profile is enrolled for operator-present supported powered control; default-profile hardware access remains disabled. Normal success requires no reset; emergency STOP/faults remain latched until deliberate reset. Floor travel, raw/per-leg control, watchdog-reset behavior and unattended autonomy are not qualified. Preserve the method-scoped rear-right restoration report; read current records before action. After the final STOP test, the user confirmed POWER OFF and an agent deliberately reset the robot over USB; RF STATUS verified BOOT/sequence0/fault0/notbusy. This is the last verified checkpoint, not a live-state guarantee; no further movement is scheduled.
 
 ## Current map
 
@@ -19,9 +19,10 @@ Current reality is much smaller than the target architecture. The checked-in app
 │   └── settings.vue         # settings UI
 ├── server/                  # separately launched CommonJS Express proxy
 ├── services/camera-capture/  # native libfreenect2 host capture and private cloud ABI
-├── services/embodiment-gateway/ # stock read-only Wi-Fi MCP bridge, no firmware replacement
+├── services/embodiment-gateway/ # legacy stock reads plus deployed guarded USB/RF MCP actions
 ├── tools/kinect2/            # Godot point cloud, isolated OBS setup and host launch/build
 ├── firmware/robot-safety/    # project-owned STOP/lease diagnostic, zero actuator capabilities
+├── firmware/freenove-guard/  # installed overlay; eight supported powered actions accepted
 ├── public/                  # static assets
 ├── .schematics/             # photo-derived labelled blueprint sheets
 ├── docs/
@@ -38,6 +39,22 @@ Directory-specific guidance exists in `server/AGENTS.md`, `src/AGENTS.md`, `src/
 
 Agents own operational runbooks, launch/recovery and QA. The user does not read or execute those instructions; never hand off a runbook as a substitute for operating the system. Kinect graphics must be compared against the supplied reference video, not merely accepted as a technically working cloud.
 
+## Parallel sessions and recovery ownership
+
+- Use a separate Git worktree and branch for each parallel implementation session;
+  a second session in this directory or a branch switch here is not isolation.
+  Preserve other agents' dirty files. Start from published `upstream/main` and
+  claim a non-overlapping component before editing shared plans or contracts.
+- Worktree isolation does not isolate USB devices, camera, OBS, Hermes profiles,
+  host configs or robot power. Only one designated hardware operator may own
+  those resources. Other sessions remain build/test-only; do not auto-load robot
+  MCP, reset, flash or move hardware as part of unrelated work.
+- Agents can deliberately reset the robot controller through its existing USB
+  DTR link with authorized recovery and fresh user-confirmed POWER OFF. Prefer
+  that agent-operated procedure; ask the user to locate RESET only if USB recovery
+  is unavailable or unsafe. Read `docs/operations/hermes-robot.md` first. Never
+  turn this maintenance path into automatic fault clearing or post-reset motion.
+
 ## Source of truth and evidence rules
 
 - Use current code over the generic Nuxt `README.md` when they conflict.
@@ -45,7 +62,7 @@ Agents own operational runbooks, launch/recovery and QA. The user does not read 
 - Read `docs/hardware/hardware.json`, `docs/hardware/firmware.json`, and `docs/hardware/README.md` before robot hardware or firmware work. These are the current evidence records, not permission to activate actuators.
 - Official offline manuals/schematics and the unmodified vendor firmware reference are under `docs/hardware/vendor/freenove/INDEX.md`, with a pinned source and checksum manifest. Read the correct revision: V2.0 and V3.2 power-group mappings differ. Do not treat archived vendor code as licensed commercial runtime or link it into the independent diagnostic.
 - Read `firmware/robot-safety/AGENTS.md` before safety-code work. Its capability bitmap is zero and its native protocol harness is not a robot simulator/HIL. Keep finite sequence ordering separate from authentication, inherited watchdog state unqualified, and installed firmware separate from unflashed build artifacts.
-- Read `services/embodiment-gateway/AGENTS.md` and `docs/operations/hermes-robot.md` before Hermes robot-tool changes. Native registration and actual echo/supply tool invocation are verified; motion is not. Preserve working hardware, remotes and stock gait code. Do not infer that future safety qualification requires throwing out the controller or replacing all factory firmware.
+- Read `services/embodiment-gateway/AGENTS.md` and `docs/operations/hermes-robot.md` before Hermes robot-tool changes. Eight bounded powered actions are accepted only on the supported operator-present bench; this is not floor/autonomy qualification. Preserve working hardware, remotes and stock gait code. Do not infer that future safety qualification requires throwing out the controller or replacing all factory firmware.
 - Every agent must record hardware/firmware discoveries and changes in those JSON files in the same commit series: date, evidence status/provenance, before/after state, measurements, artifact hashes, verification, safety impact and rollback limits. Append firmware history for writes/configuration changes. Keep unknowns explicit; never infer an installed version from an echo or assign remote-board markings to the robot. Do not repeat established discovery unless needed to verify current state.
 - Preserve operator-designated hardware photographs in `docs/hardware/evidence/` with a manifest mapping original uploads, hashes and observed markings. Review privacy before committing. Read this evidence before requesting photos again; `/tmp` is not durable storage. The Freenove chassis, ESP-01/ESP8266EX and ATmega2560 bootloader identity/readback are already established; exact application release is separate from an installed-image hash. Lack of a release label or readable chip photo is not a reason to restart discovery.
 - No firmware write until actual board/MCU/output mapping, programming method, private preservation of the existing image where supported, reproducible replacement artifact and rollback limits are recorded. No Hermes motion until robot-local TTL/watchdog/STOP and supported-bench/cutoff acceptance pass. Stock-compatible echo alone does not meet these gates.
