@@ -1,0 +1,19 @@
+--- FNHRRemote.h
++++ FNHRRemote.h
+@@ -28,6 +28,10 @@
+  * Retval    None
+  * -----------------------------------------------------------------------------------------------*/
+  void Start();
++  bool SendPacket(byte* buffer, byte length);
++  bool ReceivePacket(byte* buffer, byte& length, byte& pipe);
++  bool SendManualPacket(byte* buffer, byte length);
++  void SetManualEnabled(bool enabled);
+ 
+  /*
+   * Brief     Update the remote
+@@ -78,4 +80,5 @@
+  static const int outDataSize = 32;
+ 
+  RF24 rf24 = RF24(9, 10);
++ bool manualEnabled = true;
+  byte rf24Address[6] = { 'F', 'N', 'K', '2', '9' };

@@ -1,0 +1,83 @@
+--- FNHRRemote.cpp
++++ FNHRRemote.cpp
+@@ -24,7 +24,7 @@
+ void FNHRRemote::StartPins()
+ {
+-  pinMode(joystickZPin, INPUT);
+-  pinMode(s1Pin, INPUT);
+-  pinMode(s2Pin, INPUT);
+-  pinMode(s2Pin, INPUT);
++  pinMode(joystickZPin, INPUT_PULLUP);
++  pinMode(s1Pin, INPUT_PULLUP);
++  pinMode(s2Pin, INPUT_PULLUP);
++  pinMode(s3Pin, INPUT_PULLUP);
+   pinMode(led1Pin, OUTPUT);
+@@ -43,5 +43,8 @@
+   rf24.setChannel(rf24Channel);
+   rf24.openWritingPipe(rf24Address);
+-  rf24.openReadingPipe(1, rf24Address);
+-  rf24.stopListening();
++  byte computerReplyAddress[6] = { 'C', 'N', 'K', '2', 'R', 0 };
++  byte manualReplyAddress[6] = { 'M', 'N', 'K', '2', 'R', 0 };
++  rf24.openReadingPipe(1, computerReplyAddress);
++  rf24.openReadingPipe(2, manualReplyAddress);
++  rf24.startListening();
+ }
+@@ -49,4 +49,6 @@
+ 
+ void FNHRRemote::Update()
+ {
++  if (!manualEnabled)
++    return;
+  int pot1Value = analogRead(pot1Pin);
+@@ -155,4 +157,4 @@
+     if (!lastRf24Connected)
+       StartRF24();
+-    if (rf24.write(rf24OutData, rf24OutDataCounter))
++    if (SendManualPacket(rf24OutData, rf24OutDataCounter))
+     {
+@@ -202,4 +204,44 @@
+  rf24Address[4] = byte4;
+ }
+ 
++bool FNHRRemote::SendPacket(byte* buffer, byte length)
++{
++  rf24.stopListening();
++  bool written = rf24.write(buffer, length);
++  rf24.startListening();
++  return written;
++}
++
++bool FNHRRemote::ReceivePacket(byte* buffer, byte& length, byte& pipe)
++{
++  if (!rf24.available(&pipe))
++    return false;
++  length = rf24.getDynamicPayloadSize();
++  if (length == 0 || length > outDataSize)
++  {
++    rf24.flush_rx();
++    return false;
++  }
++  rf24.read(buffer, length);
++  return true;
++}
++
++bool FNHRRemote::SendManualPacket(byte* buffer, byte length)
++{
++  if (length > outDataSize - 3)
++    return false;
++  byte packet[outDataSize];
++  packet[0] = 0x52;
++  packet[1] = 2;
++  packet[2] = length;
++  for (byte index = 0; index < length; ++index)
++    packet[index + 3] = buffer[index];
++  return SendPacket(packet, length + 3);
++}
++
++void FNHRRemote::SetManualEnabled(bool enabled)
++{
++  manualEnabled = enabled;
++}
++
+ void FNHRRemote::SetChannel(byte channel)
