@@ -6,6 +6,7 @@ from typing import override
 
 from pydantic import ValidationError
 
+from furbomek_gateway.guard_models import GuardSettings
 from furbomek_gateway.models import GatewaySettings
 
 
@@ -40,5 +41,17 @@ def load_settings(path: Path) -> GatewaySettings:
         raise SettingsLoadError(SettingsErrorCode.FILE_UNREADABLE) from error
     try:
         return GatewaySettings.model_validate_json(raw)
+    except ValidationError as error:
+        raise SettingsLoadError(SettingsErrorCode.JSON_INVALID) from error
+
+
+def load_guard_settings(path: Path) -> GuardSettings:
+    """Load the closed private configuration for the separate Guard server."""
+    try:
+        raw = path.read_text(encoding="utf-8")
+    except (OSError, UnicodeError) as error:
+        raise SettingsLoadError(SettingsErrorCode.FILE_UNREADABLE) from error
+    try:
+        return GuardSettings.model_validate_json(raw)
     except ValidationError as error:
         raise SettingsLoadError(SettingsErrorCode.JSON_INVALID) from error
