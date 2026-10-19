@@ -30,12 +30,16 @@ unless that recovery is unavailable or unsafe. No automatic/model reset exists.
 | Supported powered Hermes slice | All eight bounded actions, normal DISARM, final STOP and private visual evidence | Floor travel, continuous gait, manual handoff, authentication and unattended autonomy |
 | Character/stream slice | Separate existing Kinect/Godot/OBS work; not completed by robot acceptance | Broker/lifecycle, jabberWERK/shared audio clock, avatar failover and private soak gates in §9.1 |
 
-**Next robot work:** fix and regression-test cross-ingress STOP acknowledgement
-routing before claiming manual/Hermes handoff. `Dispatcher::stop()` currently
-emits the ACK before clearing ownership, so a different-ingress requester can
-miss the ACK even though STOP quiesces/latches; it must not infer success from
-that missing reply. Current acceptance stayed on RadioComputer and does not
-qualify this handoff. Plan remaining safety tests before any new live deployment.
+**STOP slice, 2026-10-18:** cross-ingress STOP ACK routing is fixed in source and
+regression-tested across all USB/computer-RF/manual-RF owner/requester pairs,
+including pending ARM reply ownership. Two AVR builds match; native driver QA
+passed. **Not flashed:** the installed image still has the stale-owner ACK route.
+Next is an authorized wired application update plus motor-off cross-ingress HIL
+under the [maintenance protocol](docs/operations/robot-wired-maintenance.md), not
+an automatic reset/flash or manual/Hermes handoff claim. Current powered acceptance
+stayed on RadioComputer. Exact commands, red/green proof, candidate hashes, local
+dirty-work inventory and exclusions are in the
+[dated test record](docs/operations/robot-stop-ack-2026-10-18.md).
 
 **Safe parallel work:** use a separate worktree/branch from published
 `upstream/main`, claim a non-overlapping component and coordinate shared contract
@@ -998,7 +1002,7 @@ Once the common OBS capture/recording fixture exists, begin the §6.3.1 C922x vi
 Progress note: identification/preservation, USB/RF guard and supported powered
 Hermes actions in steps3–5/7 now have the scoped evidence above. Those steps are
 not instructions to repeat discovery or movement. Next leg-control work is the
-STOP-routing regression and remaining explicit qualification gaps; the following
+STOP-routing candidate deployment/HIL and remaining explicit qualification gaps; the following
 list retains the broader full-autonomy dependencies, not an unchecked restart.
 
 1. Rotate every credential that ever appeared in the original working tree, even though the GitHub snapshot contains blanks.
