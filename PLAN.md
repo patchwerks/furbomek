@@ -968,6 +968,17 @@ Acceptance:
 
 ### 9.1 Tonight: Hermes + avatar + OBS vertical slice
 
+**Existing-work disposition, 2026-10-18:** the dirty `services/hermes-activity/`,
+`services/stream-supervisor/`, `tools/kinect2/stream.sh` and Godot screen/timeline
+changes are **relevant unfinished implementations of this slice, not outdated
+or superseded code**. Retain and continue them rather than recreate them. The21
+unit tests pass, but the broker has no script entrypoint, its timestamp format
+does not match the Godot consumer, spool events replay, and supervision/recording
+wiring is incomplete. A loaded but inactive host service already references the
+supervisor. Do not adopt or activate this as a completed feature. See the
+[assessment and disposition](docs/operations/stream-dirty-work-assessment-2026-10-18.md)
+for exact files, observed tests and the next bounded integration work.
+
 **Current checkpoint:** the user accepted the first-run Kinect/Godot/OBS visuals. The camera, tracker, reference-style presentation and read-only public-activity consumer exist; the authenticated Hermes lifecycle adapter, character broker, real A2UI/Glimpse producer, qualified speech path and avatar fallback are still unfinished. The next integration slice is to carry a real, redacted Hermes run through the broker into the existing side window, then add the jabberWERK batch-audio/shared-clock and static-avatar failover path below. Before unattended use, add explicit whole-stack stop/start supervision and complete the private soak gates; closing only the viewer currently does not stop capture/tracking or OBS. The user's acceptance of a first run does not close those production or safety gates.
 
 The tonight goal is deliberately smaller than the production architecture: prove that Hermes can drive a visible, swappable character through the project broker while OBS stays independent. Do this on the current working Linux environment; do **not** make an Omarchy install, GPU passthrough, A2UI generation, OpenGolem integration, public trading, or robot motion a prerequisite.
