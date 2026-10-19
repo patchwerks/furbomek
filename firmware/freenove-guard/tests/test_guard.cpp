@@ -7,6 +7,8 @@
 #include <cassert>
 #include <vector>
 
+void test_stop_routes();
+
 namespace {
 
 using namespace freenove_guard;
@@ -126,6 +128,7 @@ void begin_and_arm(Dispatcher& dispatcher, Replies& replies, uint8_t source) {
 }
 
 int main() {
+  test_stop_routes();
   assert(metadata_supported(1U, 30U));
   assert(metadata_supported(1U, 31U));
   assert(metadata_supported(1U, 32U));

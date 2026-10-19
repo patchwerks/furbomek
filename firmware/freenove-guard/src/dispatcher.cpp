@@ -8,7 +8,8 @@ Dispatcher::Dispatcher(MotionSink& motion, RoutedReplySink& replies)
 
 void Dispatcher::send(const Frame& frame) {
   const bool ingress_supply = reply_to_ingress_ && frame.size > 2U && frame.bytes[2] == 0x35U;
-  replies_.send(ingress_supply || owner_ == LinkOwner::None ? route_ : owner_route_, frame);
+  const bool ingress_stop = frame.size > 2U && frame.bytes[2] == kStop + 1U;
+  replies_.send(ingress_supply || ingress_stop || owner_ == LinkOwner::None ? route_ : owner_route_, frame);
 }
 
 void Dispatcher::receive_usb(uint8_t value, uint32_t now_ms) {
