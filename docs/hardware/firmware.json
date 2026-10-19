@@ -1,6 +1,20 @@
 {
   "schema_version": 1,
-  "updated_on": "2026-10-17",
+  "updated_on": "2026-10-18",
+  "pending_deployment": {
+    "date": "2026-10-18",
+    "status": "STOP ACK routing fixed and software-tested; NOT FLASHED. active_deployment remains authoritative for installed images",
+    "source_branch": "work/stop-ack-maintenance",
+    "mega_hex_sha256": "7961cd3ca7ec19cc1a8fb88ace49f69f3d300a0062e443a21a3762fc438581de",
+    "mega_elf_sha256": "85d39d08e1280ab625ecff305915b5040e690c1fc8b233011111a1810a625674",
+    "remote_hex_sha256": "0aada2dd6109adb096261fec9735610a49015cf3066818fde8d735e91250114a",
+    "remote_changed": false,
+    "verification": "Failing-first wrong-route regression, 63 route/state cases plus pending ARM/dedicated STOP envelope, full native suite, two matching AVR builds and tmux native-driver usage passed",
+    "device_access": false,
+    "next_gate": "Authorized isolated wired Mega application update, verified flash/EEPROM preservation and motor-off cross-ingress HIL. No manual/Hermes handoff acceptance yet",
+    "evidence": "docs/operations/robot-stop-ack-2026-10-18.md",
+    "maintenance_protocol": "docs/operations/robot-wired-maintenance.md"
+  },
   "active_deployment": {
     "status": "User confirmed POWER OFF. Operator deliberately reset the robot controller over its existing USB link and verified BOOT/sequence0/fault0/notbusy through the handheld RF bridge. Emergency-test latch cleared; not armed, no action scheduled",
     "latest_operator_reset": "2026-10-17: user could not locate RESET button; with explicit POWER-OFF confirmation, operator used robot USB DTR reset, then radio STATUS confirmed BOOT. No firmware/EEPROM write or BEGIN/ARM/EXEC. Automatic/model reset remains disabled",
@@ -189,6 +203,16 @@
     "rollback": "No device changes; preserve installed image and private backups. Remove prototype source if abandoned. No bootloader, EEPROM, fuse or lock writes occurred."
   },
   "history": [
+    {
+      "date": "2026-10-18",
+      "change": "Prepared unflashed STOP ACK route fix and mandatory wired downtime maintenance protocol",
+      "before": "Installed dispatcher routes STOP ACK to previous session owner when requester uses another ingress",
+      "after": "Source routes opcode0x31 ACK to STOP ingress after safe-stop, preserving pending ARM owner routing; native regression and reproducible candidate passed",
+      "device_changes": "None: no device/serial access, reset, flash, EEPROM, charging or power operation. Installed images and last physical checkpoint unchanged",
+      "verification": "Exact red/green commands, expected/actual results, candidate hashes, software QA and remaining HIL gates in docs/operations/robot-stop-ack-2026-10-18.md",
+      "safety": "Charging is not device-access authorization; charger-connected USB operation unqualified. Fresh physical isolation/ownership confirmation and preservation required before future update. No automatic reset/motion introduced",
+      "rollback": "Source revert only for this slice. Device restoration not needed; existing private images and demonstrated application restoration retained"
+    },
     {
       "date": "2026-10-17",
       "change": "Cleared end-of-test emergency latch with deliberate operator USB reset after user confirmed POWER OFF",

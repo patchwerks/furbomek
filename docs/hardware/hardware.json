@@ -1,6 +1,13 @@
 {
   "schema_version": 1,
-  "updated_on": "2026-10-17",
+  "updated_on": "2026-10-18",
+  "maintenance": {
+    "protocol": "docs/operations/robot-wired-maintenance.md",
+    "latest_software_record": "docs/operations/robot-stop-ack-2026-10-18.md",
+    "device_access_this_slice": false,
+    "charging_limit": "Vendor V3 battery guide says USB does not charge the cells. Simultaneous active charger connected to robot plus USB is not qualified; no charging/isolation measurement performed",
+    "pending_firmware": "STOP ACK routing candidate software-tested, not installed; see firmware.json pending_deployment. Do not substitute candidate results for live state or hardware handoff acceptance"
+  },
   "scope": "Current robot hardware evidence; not a verified wiring diagram or runtime authorization",
   "current_control_state": {
     "date": "2026-10-17",
