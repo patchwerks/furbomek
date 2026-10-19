@@ -50,3 +50,9 @@ Use one atomic paired Timer4 tick/millisecond sample per UART/RF event and mirro
 deadline; never reuse a pre-gait callback clock after heavy `Robot.Update` work.
 Only duplicate latest KEEP/STATUS may return fresh QueryReplay10 snapshots,
 without sequence/lease/callback changes. Never retry or deduplicate actuation.
+
+STOP ACKs route to their requesting ingress even while a different session owns
+the dispatcher. Do not clear ownership early to achieve this: a pending ARM ACK
+must still reach its owner, and safe-stop must precede the STOP ACK. The native
+route/state matrix is software evidence only. The STOP routing candidate is not
+installed; follow the root wired-maintenance protocol before device qualification.
