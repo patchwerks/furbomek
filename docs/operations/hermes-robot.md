@@ -56,6 +56,10 @@ specific guarded ARM/Active method.
 
 ## Agent-owned USB reset recovery
 
+First follow the [wired maintenance protocol](robot-wired-maintenance.md) for
+ownership, charging/isolation and recording requirements. An idle/charging robot
+does not authorize a serial open, reset or update.
+
 Recovery belongs to the trusted host maintenance agent, not the user and not
 the motion MCP runtime. When recovery is authorized, obtain **fresh user
 confirmation of physical POWER OFF** and keep the chassis supported. A prior
