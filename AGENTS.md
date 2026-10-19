@@ -41,6 +41,12 @@ Agents own operational runbooks, launch/recovery and QA. The user does not read 
 
 ## Parallel sessions and recovery ownership
 
+- Before device maintenance, follow `docs/operations/robot-wired-maintenance.md`.
+  Charging/idle time is not authorization for device access. USB does not charge
+  the cells, and simultaneous charger-connected USB operation is unqualified.
+  Every slice needs a dated test record, candidate-vs-installed hashes and an
+  explicit statement of what was not tested; software work does not imply flashing.
+
 - Use a separate Git worktree and branch for each parallel implementation session;
   a second session in this directory or a branch switch here is not isolation.
   Preserve other agents' dirty files. Start from published `upstream/main` and
