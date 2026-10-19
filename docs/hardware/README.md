@@ -12,7 +12,10 @@
 - [`Verified stock Wi-Fi connection`](../operations/robot-wireless.md): wireless
   echo works; Ethernet preserves Internet/Tailscale while Wi-Fi serves the robot.
 - [`Native Hermes robot tools`](../operations/hermes-robot.md): registered and
-  exercised against the live stock link; read-only, not a completed movement test.
+  exercised for eight bounded supported powered actions; not floor/autonomy acceptance.
+- [`Wired downtime maintenance`](../operations/robot-wired-maintenance.md): agent
+  ownership, charging/isolation gates, application update/rollback and mandatory
+  test records. Candidate software is not an installed firmware update.
 
 Use strict JSON, with context in named fields rather than comments. `null` means
 unknown, not absent or safe. These are evidence records, **not activation config**.
