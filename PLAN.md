@@ -4,6 +4,14 @@ Status: evidence-backed architecture baseline with robot progress updated 2026-1
 
 ## Current implementation checkpoint, 2026-10-18
 
+**Architecture review, 2026-10-19:** see the
+[current-state map, findings and deepening candidates](docs/operations/architecture-review-2026-10-19.md).
+The relevant dirty activity/supervision work can proceed now, independently of
+the robot STOP deployment. Its first gates are fail-closed screen privacy and
+real executable/producer-consumer tests, not further robot feature work. The
+review distinguishes reproduced defects, source-inspected risks, historical
+acceptance and unqualified hardware behavior; no runtime fixes were made.
+
 **Completed and physically observed, 2026-10-17:** installed
 `firmware/freenove-guard/` preserves the pinned vendor gait/calibration reads and
 uses the existing handheld as USB/RF bridge. Forty motor-off cycles, recorded
