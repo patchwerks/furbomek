@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_on": "2026-10-18",
+  "updated_on": "2026-10-19",
   "maintenance": {
     "protocol": "docs/operations/robot-wired-maintenance.md",
     "latest_software_record": "docs/operations/robot-stop-ack-2026-10-18.md",
@@ -206,6 +206,17 @@
   },
   "head": {
     "mechanism": "Furby-like coupled mechanism; generation unconfirmed",
+    "separate_control_device": {
+      "status": "Observed legacy yellow head-control deck; distinct from the Freenove chassis movement handheld",
+      "documented_elements": "Red/green momentary controls, speed potentiometer, reversible PWM motor board, two SRD-05VDC-SL-C relays and cable to head mechanism",
+      "usb_data_interface": null,
+      "host_protocol": null,
+      "operator_update": "2026-10-19: user plans to inspect the separate head-control device when home for a possible Brodex USB connection while preparing eventual internal head wiring/soldering",
+      "identity_limit": "If the device being inspected differs from the documented yellow deck, identify it separately. Do not assign the chassis handheld's ATmega328P/USB bridge identity or firmware to it",
+      "next_gate": "With head motor power isolated, identify any actual USB data connector and controller before host enumeration/probing; a USB-shaped connector may be power-only. Preserve any supported firmware before writes, characterize protocol and independently bounded STOP/interlocks before actuation",
+      "scope": "A verified temporary host-to-head bridge may support controlled bench integration. Final normal operation remains untethered with the retained measured PCB internalized or replaced; no requirement for human button operation",
+      "no_changes": "No head USB connection, electrical measurement, firmware write, wire attachment or movement was performed in this software slice"
+    },
     "electrical_interface_measured": false,
     "driver_pin_map": null,
     "motor_current": null,
@@ -214,6 +225,7 @@
     "evidence": ".schematics/03-head-actuation-control-deck.md and .schematics/05-furby-audio-mechanism.md"
   },
   "power": {
+    "operator_charging_arrangement": "2026-10-19 clarification: removable batteries charge in a separate container outside the robot. Downtime software maintenance does not imply a charger is attached to the robot",
     "battery_bay": {"value": "dual-cell bay", "status": "observed"},
     "cell_type": {"value": "two flat-top 18650 cells", "status": "reference/inferred"},
     "rail_voltages": null,

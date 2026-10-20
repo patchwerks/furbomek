@@ -14,6 +14,22 @@ The original-era Furby patent family describes a reversible motor and cam/gear t
 
 ## Characterize, then internalize or replace
 
+### Separate host bridge inspection, 2026-10-19
+
+The user plans to inspect the separate head-control device for a possible USB
+link to Brodex while preparing eventual internal wiring. This is not the Freenove
+chassis handheld whose USB/RF bridge is already verified. The documented head
+device is the yellow wired deck above; if another controller is present, identify
+it separately. USB data capability and a host protocol are **unknown**, not absent
+and not established by a connector's shape. No head probe or movement occurred.
+
+Only after motor-power isolation and device identification should an agent inspect
+enumeration/protocol non-destructively. Do not apply chassis firmware or assumed
+GPIO voltage to the head device. A temporary verified bridge is a bench integration
+step, not a revision of the final untethered/internalized runtime plan. Bounded
+pulses, mutually exclusive directions, local STOP/expiry and measured electrical
+compatibility remain required before Hermes head actuation.
+
 1. Remove power and photograph every board face, connector, wire color, motor label, and control marking.
 2. With current-limited power, record button-released/pressed voltages relative to every plausible reference; then map continuity unpowered.
 3. Measure output polarity, PWM/frequency, speed range, no-load and stall current, relay truth table, and both-buttons behavior.
