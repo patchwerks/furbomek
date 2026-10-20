@@ -13,6 +13,7 @@ from furbomek_gateway.config_overlay import (
     overlay_mcp_server,
 )
 from furbomek_gateway.guard_server import create_guard_server
+from furbomek_gateway.plugin_overlay import ObserverOverlayError, overlay_observer
 from furbomek_gateway.server import create_server
 from furbomek_gateway.settings import (
     SettingsLoadError,
@@ -70,6 +71,16 @@ def overlay(
         server_entry = McpServerEntry.model_validate_json(entry.read_text("utf-8"))
         result = overlay_mcp_server(sys.stdin.read(), server_entry)
     except (OSError, UnicodeError, ValidationError, ConfigOverlayError):
+        raise typer.Exit(code=2) from None
+    _ = sys.stdout.write(result)
+
+
+@app.command("overlay-observer")
+def overlay_observer_command() -> None:
+    """Transform Hermes YAML to enroll the managed observer plugin."""
+    try:
+        result = overlay_observer(sys.stdin.read())
+    except (ObserverOverlayError, UnicodeError):
         raise typer.Exit(code=2) from None
     _ = sys.stdout.write(result)
 
