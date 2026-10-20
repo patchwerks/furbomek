@@ -44,6 +44,14 @@ ask the user to find RESET unless USB recovery is unavailable or unsafe. The MCP
 has no reset tool and never automatically clears faults or resumes movement.
 Parallel sessions require separate worktrees and non-overlapping ownership;
 hardware, camera, OBS and private host profiles remain shared resources.
+
+The public text/timeline activity module and private media-session supervisor are
+implemented under `services/hermes-activity/` and `services/stream-supervisor/`.
+Run `bash tools/verify-media.sh` for non-live verification before deployment;
+consult `docs/operations/media-integration-2026-10-19.md` for actual acceptance and
+host ownership. Desktop screenshots are deliberately rejected pending a
+plan-consistent privacy/authority contract. A real redacted activity feed is not
+proof of a complete character broker, voice, avatar or physical-head adapter.
 The diagnostic is host-tested and
 cross-compiled, not flashed, not motion firmware and not a qualified hardware
 watchdog. It does **not** yet contain an unattended-autonomy-qualified gateway,

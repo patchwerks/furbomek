@@ -12,11 +12,15 @@ Furb-o-Mek is a planned fully autonomous Hermes-controlled streaming robot built
 - Current hardware/firmware records: [`docs/hardware/README.md`](docs/hardware/README.md).
 - Downloaded official manuals and schematics: [`Freenove archive`](docs/hardware/vendor/freenove/INDEX.md).
 - Tested actuator-disabled safety component: [`firmware/robot-safety/README.md`](firmware/robot-safety/README.md).
-- Live native Hermes robot reads: [`docs/operations/hermes-robot.md`](docs/operations/hermes-robot.md).
+- Bounded supported Hermes robot control: [`docs/operations/hermes-robot.md`](docs/operations/hermes-robot.md).
+- Public activity and private media lifecycle: [`services/hermes-activity`](services/hermes-activity/README.md), [`services/stream-supervisor`](services/stream-supervisor/README.md).
+- Non-live media verification: `bash tools/verify-media.sh`.
 
 ## Current status
 
-The checked-in application is still a client-only Nuxt 3 conversation/TTS prototype plus an Express TTS proxy. Native Hermes MCP tools now perform real stock Wi-Fi echo and controller-supply reads, preserving the existing controller, firmware and remotes. Motion requests are rejected before network access. The project also has a STOP/lease/CRC diagnostic with native tests and a reproducible ATmega2560 build; it cannot actuate hardware and has not been flashed. Qualified autonomous actuation, character broker, Jabberwerk integration, AIRI adapter, A2UI overlay, OBS worker and reproducible VM/bare-metal deployment remain planned.
+The legacy browser application remains a Nuxt conversation/TTS prototype plus an Express proxy. Separately, the installed guarded USB/RF path completed eight bounded actions through actual Hermes on the supported operator-present bench. The STOP requester-ACK correction is software-tested but not yet installed. The independent actuator-disabled diagnostic remains separate from installed motion firmware.
+
+The project also implements native Kinect/tracking/Godot presentation, a redacted Hermes activity observer/broker, locked private media-session supervision and non-live interface tests. Desktop screenshot publication remains unqualified and rejected; text/timeline activity does not require it. Exact deployment/private acceptance is recorded in [`media integration`](docs/operations/media-integration-2026-10-19.md). Floor/autonomous motion, the complete character bus, jabberWERK integration, avatar fallback, physical-head control and full unattended deployment remain separate gates.
 
 Do not interpret a successful web build as autonomous-robot readiness.
 
