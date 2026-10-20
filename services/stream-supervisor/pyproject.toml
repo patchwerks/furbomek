@@ -1,0 +1,87 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "furbomek-stream-supervisor"
+version = "0.1.0"
+description = "Typed private Kinect2 media-session supervisor"
+requires-python = ">=3.12,<3.13"
+dependencies = [
+    "anyio>=4,<5",
+    "pydantic>=2,<3",
+]
+
+[dependency-groups]
+dev = [
+    "basedpyright>=1.31,<2",
+    "pytest>=8,<10",
+    "ruff>=0.13,<1",
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["furbomek_stream_supervisor"]
+
+[tool.basedpyright]
+typeCheckingMode = "all"
+pythonVersion = "3.12"
+pythonPlatform = "All"
+include = ["supervisor.py", "furbomek_stream_supervisor", "tests"]
+exclude = ["**/__pycache__", "**/.venv", "**/build", "**/dist"]
+reportUnusedCallResult = "warning"
+reportUnnecessaryTypeIgnoreComment = "error"
+reportUnusedVariable = "error"
+reportMissingParameterType = "error"
+reportPrivateUsage = "error"
+
+[tool.ruff]
+target-version = "py312"
+line-length = 100
+src = ["furbomek_stream_supervisor", "tests"]
+
+[tool.ruff.lint]
+select = ["ALL"]
+ignore = [
+    "COM812",
+    "ISC001",
+    "D203",
+    "D213",
+    "CPY001",
+    "FBT001",
+    "FBT002",
+    "TD002",
+    "TD003",
+    "FIX002",
+    "S603",
+    "S607",
+    "S108",
+    "D102",
+    "D107",
+    "EM101",
+    "EM102",
+    "FBT003",
+    "PLC0415",
+    "TC001",
+    "TC003",
+    "TRY003",
+    "TRY301",
+    "T201",
+    "C901",
+    "PLR0912",
+    "PLR0915",
+    "PLR2004",
+]
+fixable = ["ALL"]
+unfixable = []
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**/*.py" = ["S101", "ARG", "PLR2004", "SLF001", "D"]
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"
+
+[tool.pytest.ini_options]
+minversion = "8.0"
+testpaths = ["tests"]
+addopts = ["-ra", "--strict-config", "--strict-markers"]
+filterwarnings = ["error"]
