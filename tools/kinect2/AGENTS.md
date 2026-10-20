@@ -33,11 +33,12 @@ unavailable credentials or an actual design decision that tools cannot resolve.
   Close/stop this session's OBS before a controlled rebuild/restart, then verify
   all launcher-owned camera/viewer processes have stopped. Do not run two camera
   owners. Keep OBS profile/collection and any operator-entered destination intact.
-- Closing only the Godot window does not currently end the launcher session:
-  capture/tracking and OBS can remain alive. Check all components and output state
-  separately. If the user exited the viewer to use the desktop, do not reopen a
-  fullscreen viewer merely to check status. Whole-stack lifecycle supervision is
-  an unfinished operational milestone, not an already-proven feature.
+- Managed sessions use `bash tools/kinect2/stream.sh` and the locked
+  `services/stream-supervisor` module. Clean viewer/OBS exit ends that managed
+  session; crashes use bounded restarts. The older `launch-host.sh` remains a
+  separate unsupervised path: do not mix launchers or infer its lifecycle changed.
+  If the user exited a viewer to use the desktop, do not reopen it merely to check
+  status. Check current unit/health and the dated acceptance record instead.
 - Never start public broadcasting without the user's requested destination and
   authorization. Do not print or commit stream keys. Do not enable an unauthenticated
   OBS control listener or weaken SSH, Tailscale, UFW, GDM or RustDesk.
@@ -70,6 +71,10 @@ unavailable credentials or an actual design decision that tools cannot resolve.
 - Side mini windows are reusable presentation slots for camera probes and
   A2UI/Glimpse/Hermes activity. Their contents are read-only and unprivileged;
   missing real activity is idle/unavailable, never fabricated agent work.
+- The activity observer/broker produces real redacted text/timeline events.
+  Desktop pixels remain unqualified and rejected, not an exception granted by
+  private recording. The native X11/OBS program must be inspected: a healthy
+  process list did not prevent black XComposite output on the QA virtual desktop.
 - Record the actual revised OBS program. Compare upright reference and output
   at the same presentation scale, including motion, brackets and insets. A build,
   static mock or generic visual-QA PASS does not establish reference fidelity.

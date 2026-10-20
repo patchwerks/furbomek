@@ -19,6 +19,8 @@ Current reality is smaller than the target architecture. The Nuxt/Express protot
 │   └── settings.vue         # settings UI
 ├── server/                  # separately launched CommonJS Express proxy
 ├── services/camera-capture/  # native libfreenect2 host capture and private cloud ABI
+├── services/hermes-activity/ # redacted observer/spool/broker public text and timeline
+├── services/stream-supervisor/ # locked private media lifecycle and recording controls
 ├── services/embodiment-gateway/ # legacy stock reads plus deployed guarded USB/RF MCP actions
 ├── tools/kinect2/            # Godot point cloud, isolated OBS setup and host launch/build
 ├── firmware/robot-safety/    # project-owned STOP/lease diagnostic, zero actuator capabilities
@@ -118,7 +120,16 @@ Agents own operational runbooks, launch/recovery and QA. The user does not read 
 - Hardware tests require physical support for the robot and an independent actuator power cut.
 - Never select final head driver, fuse, battery, speaker amplifier, or camera mount before the dependent measurements are recorded.
 
-## Current commands
+## Media verification and operation
+
+`bash tools/verify-media.sh` is the non-live gate for locked Python modules,
+snapshot regressions and the real Godot consumer fixtures. Managed media uses
+`bash tools/kinect2/stream.sh`; agents own deployment and private acceptance.
+See `docs/operations/media-integration-2026-10-19.md` for actual results and limits.
+Desktop screenshots remain unqualified and rejected; do not enable them to make
+a screen placeholder look active. No serial/head action is part of media QA.
+
+## Legacy prototype commands
 
 ```bash
 npm ci
@@ -133,7 +144,8 @@ Notes:
 - `npm ci` invokes `postinstall`, which builds Nuxt and installs `server/` dependencies.
 - There is no root `dev`, `test`, or dedicated `typecheck` script.
 - `npm run start` launches the proxy and Nuxt concurrently.
-- The proxy listens on localhost port 3500.
+- The legacy proxy logs a localhost URL on port3500 but does not enforce loopback
+  binding. Keep its production hardening separate from the managed media path.
 
 ## Conventions
 
