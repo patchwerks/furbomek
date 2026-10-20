@@ -9,6 +9,7 @@ from types import FrameType
 import anyio
 
 from .models import RuntimePaths, RuntimeSettings, ScreenPolicy
+from .ownership import OwnershipError, assert_available, record_owners
 from .session import Session
 from .support import (
     PRIVACY_BLOCKER,
@@ -50,6 +51,11 @@ def run_session(
         raise SessionError(PRIVACY_BLOCKER)
     ensure_directories(paths)
     with session_lock(paths.lock):
+        try:
+            assert_available(paths.owners)
+        except OwnershipError as error:
+            raise SessionError(str(error)) from error
+        record_owners(paths.owners, {})
         session = Session(settings, paths, env, deps)
         previous = install_signal_handlers(session)
         try:

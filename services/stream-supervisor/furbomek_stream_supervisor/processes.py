@@ -115,6 +115,10 @@ async def cleanup_processes(
     for child in children.values():
         if group_alive(child.pgid):
             signal_group(child, signal.SIGKILL)
+    deadline += 1.0
+    while clock.monotonic() < deadline and any(group_alive(c.pgid) for c in children.values()):
+        reap_exited()
+        await sleep(min(0.02, max(0.001, deadline - clock.monotonic())))
     for child in children.values():
         try:
             remaining = max(0.0, deadline - clock.monotonic())

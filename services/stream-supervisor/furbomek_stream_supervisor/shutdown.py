@@ -7,8 +7,9 @@ from typing import Protocol
 
 import anyio
 
-from .models import HealthState, RuntimeSettings, WorkerStatus
-from .processes import ManagedProcess, cleanup_processes
+from .models import HealthState, RuntimePaths, RuntimeSettings, WorkerStatus
+from .ownership import record_owners
+from .processes import ManagedProcess, cleanup_processes, group_alive
 from .support import Dependencies, WorkerState
 
 
@@ -16,6 +17,7 @@ class ShutdownSource(Protocol):
     """Session fields needed during finalization."""
 
     state: HealthState
+    paths: RuntimePaths
     success: bool
     stop_reason: str | None
     settings: RuntimeSettings
@@ -55,9 +57,15 @@ async def shutdown_session(source: ShutdownSource) -> None:
     if not cleaned:
         source.success = False
         source.stop_reason = source.stop_reason or "child cleanup did not complete"
-    source.children.clear()
+    try:
+        record_owners(source.paths.owners, source.children)
+    except OSError as error:
+        source.success = False
+        source.stop_reason = f"ownership record failed: {error}"
+    if cleaned:
+        source.children.clear()
     for state in source.states.values():
-        if not cleaned and state.child is not None and state.child.poll() is None:
+        if not cleaned and state.child is not None and group_alive(state.child.pgid):
             state.status = WorkerStatus.FAILED
         else:
             state.child = None

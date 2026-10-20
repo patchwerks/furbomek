@@ -16,6 +16,7 @@ from .models import (
     RuntimeSettings,
     WorkerStatus,
 )
+from .ownership import record_owners
 from .processes import ManagedProcess, cleanup_processes
 from .readiness import ReadinessResult
 from .shutdown import shutdown_session
@@ -83,8 +84,10 @@ class Session:
         publish_health(self)
 
     def _spawn(self, state: WorkerState) -> None:
+        record_owners(self.paths.owners, self.children, pending_spawn=True)
         state.child = self.deps.spawn(state.definition, self.env, self.paths.media_root / "logs")
         self.children[state.definition.key] = state.child
+        record_owners(self.paths.owners, self.children)
         state.status = WorkerStatus.STARTING
         state.restart_at = None
 
@@ -105,7 +108,7 @@ class Session:
         except OSError:
             return False
 
-    async def _wait_ready(self) -> None:
+    async def _wait_ready(self, *, initial: bool = True) -> None:
         deadline = self.startup_deadline or (
             self.deps.clock.monotonic() + self.settings.readiness_timeout_s
         )
@@ -118,7 +121,7 @@ class Session:
                 raise SessionError(self.stop_reason or "interrupted")
             if any(state.status is WorkerStatus.FAILED for state in self.states.values()):
                 raise SessionError("worker restart limit exceeded during readiness")
-            alive = self._alive(initial=True)
+            alive = self._alive(initial=initial)
             result = self.deps.readiness(self.paths.kinect_dir, self.deps.clock.time, alive)
             self.freshness = result.freshness
             self.publish()
@@ -141,6 +144,7 @@ class Session:
             raise SessionError(f"{key} cleanup did not complete; refusing another owner")
         _ = self.children.pop(key, None)
         state.child = None
+        record_owners(self.paths.owners, self.children)
         state.last_exit = f"exit {code}"
 
     def schedule_restart(self, state: WorkerState) -> None:
@@ -211,9 +215,7 @@ class Session:
             if state.definition.starts_after_configure:
                 self._spawn(state)
         await self.deps.sleep(0)
-        await self._observe_workers()
-        if not self._alive(initial=False):
-            raise SessionError("worker exited immediately after startup")
+        await self._wait_ready(initial=False)
         self.state = HealthState.READY
         self.publish()
 

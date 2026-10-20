@@ -161,6 +161,11 @@ class RuntimePaths:
         return self.media_root / "host-session.lock"
 
     @property
+    def owners(self) -> Path:
+        """Return the residual-owner fence shared by all launch adapters."""
+        return self.media_root / "host-session.owners.json"
+
+    @property
     def health(self) -> Path:
         """Return the atomic health document path."""
         return self.media_root / "health.json"
