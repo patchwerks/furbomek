@@ -1,0 +1,63 @@
+[project]
+name = "furbomek-hermes-activity"
+version = "0.1.0"
+description = "Fail-closed Hermes public activity adapter"
+requires-python = ">=3.12,<3.13"
+dependencies = [
+    "click>=8.1,<8.3",
+    "pillow==12.3.0",
+    "pydantic==2.12.3",
+    "psutil>=6,<7",
+    "typer==0.21.1",
+]
+
+[dependency-groups]
+dev = [
+    "basedpyright>=1.31,<2",
+    "pytest>=8.3,<9",
+    "ruff>=0.14,<0.15",
+]
+
+[tool.basedpyright]
+typeCheckingMode = "all"
+pythonVersion = "3.12"
+pythonPlatform = "All"
+include = ["broker.py", "cli.py", "publisher.py", "reducer.py", "runtime.py", "hermes_feed.py", "cursor.py", "activity_models.py", "privacy.py", "screen.py", "persistence.py", "plugin", "tests"]
+extraPaths = ["plugin"]
+exclude = ["**/__pycache__", "**/.venv"]
+reportUnusedCallResult = "none"
+reportUnnecessaryTypeIgnoreComment = "error"
+reportUnusedVariable = "error"
+reportMissingParameterType = "error"
+reportPrivateUsage = "error"
+reportUnnecessaryComparison = "none"
+
+[tool.ruff]
+target-version = "py312"
+line-length = 120
+src = ["."]
+
+[tool.ruff.lint]
+select = ["ALL"]
+ignore = ["COM812", "ISC001", "D203", "D213", "CPY001", "FBT001", "FBT002", "TD002", "TD003", "FIX002"]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**/*.py" = ["S101", "ARG", "PLR2004", "SLF001", "D", "S603", "S607", "E501", "I001", "TC003", "FBT003", "INP001", "S105", "S108", "PLR0913"]
+"broker.py" = ["E501", "TC003", "FBT003", "PLR0911", "PLC0415"]
+"cli.py" = ["TC003", "TRY003", "EM101"]
+"cursor.py" = ["E501"]
+"persistence.py" = []
+"hermes_feed.py" = ["S108"]
+"privacy.py" = ["E501", "RUF021"]
+"screen.py" = ["E501", "FBT003", "PLR2004", "TRY003", "EM101"]
+"publisher.py" = ["TC003"]
+"reducer.py" = ["E501", "PLR0911"]
+"runtime.py" = ["E501", "TC003"]
+"plugin/furbomek_stream/projection.py" = ["PLR0911", "PLR0912", "PLR2004", "C901", "RUF021", "E501"]
+"plugin/furbomek_stream/observer.py" = ["PLR0913", "E501", "TRY003", "EM101", "PTH105", "PTH113", "S108"]
+
+[tool.pytest.ini_options]
+minversion = "8.0"
+testpaths = ["tests"]
+addopts = ["-ra", "--strict-config", "--strict-markers"]
+filterwarnings = ["error"]
