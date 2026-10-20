@@ -153,7 +153,7 @@ func _draw() -> void:
 	_draw_guides()
 	_draw_panels()
 	if snapshot.is_empty():
-		_draw_text(Vector2(130, 560), "OFFLINE / AWAITING MATCHED SENSOR SNAPSHOT", 16, Color("7e2630"))
+		_draw_text(Vector2(520, 560), "OFFLINE / AWAITING MATCHED SENSOR SNAPSHOT", 16, Color("7e2630"))
 	else:
 		_draw_tracking()
 	draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)

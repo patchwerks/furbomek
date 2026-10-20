@@ -27,7 +27,8 @@ var source_valid := false
 
 
 func _ready() -> void:
-	get_window().mode = Window.MODE_FULLSCREEN
+	if DisplayServer.get_name() != "headless":
+		get_window().mode = Window.MODE_FULLSCREEN
 	material = ShaderMaterial.new()
 	material.shader = preload("res://point_cloud.gdshader")
 	material.set_shader_parameter("palette_index", palette)
