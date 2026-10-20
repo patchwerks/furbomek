@@ -59,7 +59,7 @@ Failures were observed before fixes, not inferred from a green build:
 | Invalid-frame revival | Absent/invalid JSON followed by a newer event could revive an old screen sequence; reader now raises its release floor on every clear path |
 
 Final source gates are run with `bash tools/verify-media.sh`. At the recorded
-qualification stage: gateway121 tests, activity60, supervisor14 and snapshot3;
+qualification stage: gateway121 tests, activity60, supervisor18 and snapshot3;
 Ruff ALL, formatting, strict basedpyright, UV locks and Godot fixtures pass.
 Godot fixtures include the PLAN example with UTC whole seconds, one/nine-digit
 fractions, malformed/private/oversized inputs, duplicate/out-of-order/negative
@@ -68,6 +68,16 @@ percentages. clangd/Bash/Python LSP servers remain unavailable as previously
 declined; compiler/parser/type-check CLIs supply the available evidence.
 
 ## Actual Hermes producer acceptance
+
+Final negative-path qualification also proves that expired producer metadata
+after OBS configuration cannot publish READY. Residual process groups persist
+in a private ownership fence and prevent a second session even after the parent
+returns. Spawns are fenced before process creation; ambiguous pending outcomes
+are not guessed clean. The foreground launcher now delegates to the same module.
+Tests use real child groups and verify both exclusion and recovery after groups
+are gone. The non-live screen suite has an autouse denial of `ImageGrab.grab`;
+its frame-publication test patches the runtime function and verifies fake calls,
+rather than vacuously forcing publication with `--once` or patching a facade.
 
 Installed Hermes: v0.22.0, revision `e06df9c2eae6`, managed Python3.14.7.
 Godot4.7.2 and OBS32.2.2; systemd255, Chezmoi2.70.5, UV0.11.7.

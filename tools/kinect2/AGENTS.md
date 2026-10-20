@@ -35,8 +35,9 @@ unavailable credentials or an actual design decision that tools cannot resolve.
   owners. Keep OBS profile/collection and any operator-entered destination intact.
 - Managed sessions use `bash tools/kinect2/stream.sh` and the locked
   `services/stream-supervisor` module. Clean viewer/OBS exit ends that managed
-  session; crashes use bounded restarts. The older `launch-host.sh` remains a
-  separate unsupervised path: do not mix launchers or infer its lifecycle changed.
+  session; crashes use bounded restarts. `launch-host.sh` preserves its foreground
+  arguments but delegates to that same module, lock and residual-owner fence.
+  Never mix launchers or manually clear ownership while any recorded group lives.
   If the user exited a viewer to use the desktop, do not reopen it merely to check
   status. Check current unit/health and the dated acceptance record instead.
 - Never start public broadcasting without the user's requested destination and

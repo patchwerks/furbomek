@@ -50,6 +50,14 @@ must not be hidden by fake activity, automatic firmware reset or extra camera ow
 
 ## Verification
 
+An owner ledger is fenced before each spawn. Failed terminal cleanup leaves
+surviving groups recorded, so a later session is refused even after its parent
+has exited and released the flock. Ledger IDs are checked, never used to kill
+persisted processes. Dead groups permit normal startup; an ambiguous pending
+spawn or malformed ledger requires operator reconciliation. Never remove a
+fence to bypass a still-live group. The foreground launcher delegates to the
+same module instead of maintaining another ownership implementation.
+
 ```sh
 uv run --frozen pytest -q
 uv run --frozen ruff check .

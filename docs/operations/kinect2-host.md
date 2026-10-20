@@ -37,8 +37,9 @@ event contract. No agent tasks should be fabricated to populate the window.
 
 The current managed path is `bash tools/kinect2/stream.sh` with the locked
 `services/stream-supervisor` unit, real redacted Hermes activity module and
-Godot consumer. It holds the same camera-session lock as the older launcher;
-never mix the two. Clean viewer/OBS exit stops the managed stack; crashes have
+Godot consumer. The foreground `launch-host.sh` now delegates to the same lifecycle
+module, lock and durable residual-owner fence; never mix launchers.
+Clean viewer/OBS exit stops the managed stack; crashes have
 bounded restart/backoff and health records distinguish degraded/failed states.
 `start --record` reaches the actual unit settings and OBS recording argv.
 
