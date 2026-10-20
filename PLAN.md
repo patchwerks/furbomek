@@ -1,8 +1,18 @@
 # Furb-o-Mek implementation plan
 
-Status: evidence-backed architecture baseline with robot progress updated 2026-10-18
+Status: evidence-backed architecture baseline, robot checkpoint and media integration updated 2026-10-20
 
 ## Current implementation checkpoint, 2026-10-18
+
+**Media completion, 2026-10-20:** the relevant dirty draft is now implemented as
+locked public activity and managed private media modules, with real Hermes
+observer delivery, native Godot/OBS recording, stale/recovery/rejection checks
+and a30-minute native health soak. See the
+[dated implementation/acceptance record](docs/operations/media-integration-2026-10-19.md)
+for source, deployment, commands, hashes and exact qualification limits.
+`bash tools/verify-media.sh` is the non-live gate. Live desktop screenshots remain
+explicitly blocked by the current observer-authority/privacy contract; this is
+not a complete character bus, speech/avatar integration or unattended release.
 
 **Architecture review, 2026-10-19:** see the
 [current-state map, findings and deepening candidates](docs/operations/architecture-review-2026-10-19.md).
@@ -51,12 +61,12 @@ dirty-work inventory and exclusions are in the
 
 **Safe parallel work:** use a separate worktree/branch from published
 `upstream/main`, claim a non-overlapping component and coordinate shared contract
-or plan edits. A firmware-only STOP-routing regression/fix or isolated character/
+or plan edits. Non-live firmware qualification preparation or isolated character/
 voice work can proceed without hardware. Worktrees do not isolate robot UARTs,
 camera, OBS or private Hermes profiles: only one designated operator may own
 those. Do not reset/flash/move the robot or change host configuration as an
-incidental test. Existing unrelated Kinect/activity/stream work in the main
-worktree belongs to its current owner and is not part of this robot publication.
+incidental test. The media slice explicitly adopts the documented activity/
+supervision/Godot draft paths; no other local work may be staged or overwritten.
 
 Evidence and exact recovery/rollback: [Hermes runbook](docs/operations/hermes-robot.md),
 [current deployment/history](docs/hardware/firmware.json),
@@ -976,18 +986,18 @@ Acceptance:
 
 ### 9.1 Tonight: Hermes + avatar + OBS vertical slice
 
-**Existing-work disposition, 2026-10-18:** the dirty `services/hermes-activity/`,
-`services/stream-supervisor/`, `tools/kinect2/stream.sh` and Godot screen/timeline
-changes are **relevant unfinished implementations of this slice, not outdated
-or superseded code**. Retain and continue them rather than recreate them. The21
-unit tests pass, but the broker has no script entrypoint, its timestamp format
-does not match the Godot consumer, spool events replay, and supervision/recording
-wiring is incomplete. A loaded but inactive host service already references the
-supervisor. Do not adopt or activate this as a completed feature. See the
-[assessment and disposition](docs/operations/stream-dirty-work-assessment-2026-10-18.md)
-for exact files, observed tests and the next bounded integration work.
+**Existing-work completion, 2026-10-20:** the relevant drafts under
+`services/hermes-activity/`, `services/stream-supervisor/`, `tools/kinect2/stream.sh`
+and Godot were retained and integrated, not discarded or recreated. The missing
+entrypoint, timestamp/replay, false readiness, cleanup, recording and text-redaction
+defects now have interface regressions. Real Hermes events and private native
+media acceptance are recorded in the
+[current integration record](docs/operations/media-integration-2026-10-19.md).
+The [earlier assessment](docs/operations/stream-dirty-work-assessment-2026-10-18.md)
+is history, not a current list of unfixed defects. Desktop pixels remain blocked;
+the public text/timeline slice does not need that authority expansion.
 
-**Current checkpoint:** the user accepted the first-run Kinect/Godot/OBS visuals. The camera, tracker, reference-style presentation and read-only public-activity consumer exist; the authenticated Hermes lifecycle adapter, character broker, real A2UI/Glimpse producer, qualified speech path and avatar fallback are still unfinished. The next integration slice is to carry a real, redacted Hermes run through the broker into the existing side window, then add the jabberWERK batch-audio/shared-clock and static-avatar failover path below. Before unattended use, add explicit whole-stack stop/start supervision and complete the private soak gates; closing only the viewer currently does not stop capture/tracking or OBS. The user's acceptance of a first run does not close those production or safety gates.
+**Current checkpoint:** native profile-scoped Hermes observation, private public-activity projection, consumer interface tests and managed whole-stack lifecycle now exist alongside camera/tracking/Godot/OBS. The managed path ends on clean viewer/OBS exit and uses bounded restarts for crashes; the older launcher is unchanged. The full authenticated character bus, real A2UI/Glimpse producer, qualified jabberWERK audio/shared clock and avatar fallback remain unfinished. Those are next integration work; the implementation below is not all complete merely because the text/timeline and private media slice passed. Public/unattended and hardware gates remain separate.
 
 The tonight goal is deliberately smaller than the production architecture: prove that Hermes can drive a visible, swappable character through the project broker while OBS stays independent. Do this on the current working Linux environment; do **not** make an Omarchy install, GPU passthrough, A2UI generation, OpenGolem integration, public trading, or robot motion a prerequisite.
 
