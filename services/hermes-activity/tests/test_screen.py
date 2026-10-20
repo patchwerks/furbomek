@@ -121,17 +121,18 @@ def test_new_frame_is_published_before_heartbeat(tmp_path: Path, monkeypatch: py
     spool.write_text(navigation_events(), encoding="utf-8")
     output = tmp_path / "output"
     monkeypatch.setattr("runtime.desktop_health", health)
+    captures: list[Mapping[str, str]] = []
 
     def fake_capture(_env: Mapping[str, str]) -> CapturedFrame:
+        captures.append(_env)
         return CapturedFrame(b"jpeg", 1, 1, NOW)
 
-    monkeypatch.setattr("broker.capture_frame", fake_capture)
-    broker = ActivityBroker(
-        RunConfig(spool, tmp_path, output, once=True, screen_policy=ScreenPolicy.BOT_DESKTOP), FixedClock()
-    )
+    monkeypatch.setattr("runtime.capture_frame", fake_capture)
+    broker = ActivityBroker(RunConfig(spool, tmp_path, output, screen_policy=ScreenPolicy.BOT_DESKTOP), FixedClock())
     broker.step(NOW)
     first = ActivityEvent.model_validate_json((output / "activity.json").read_text(encoding="utf-8"))
     broker.step(NOW + 250)
     second = ActivityEvent.model_validate_json((output / "activity.json").read_text(encoding="utf-8"))
     assert second.seq > first.seq
+    assert len(captures) == 2
     broker.reader.close()

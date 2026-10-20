@@ -7,7 +7,7 @@ import runpy
 from activity_models import BrokerState
 from reducer import apply_event, idle_state, refresh_timeline
 from runtime import ActivityBroker, RunConfig, run
-from screen import ScreenPolicy, capture_frame
+from screen import ScreenPolicy
 
 __all__ = [
     "ActivityBroker",
@@ -15,7 +15,6 @@ __all__ = [
     "RunConfig",
     "ScreenPolicy",
     "apply_event",
-    "capture_frame",
     "idle_state",
     "refresh_timeline",
     "run",
