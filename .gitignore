@@ -25,3 +25,10 @@ logs
 
 # Nested duplicate workspace snapshot; canonical source is repo root.
 /furbomek-code/
+
+# Python validation/runtime artifacts
+**/.venv/
+**/__pycache__/
+**/.pytest_cache/
+**/.ruff_cache/
+*.py[cod]
