@@ -6,7 +6,6 @@ from __future__ import annotations
 
 import hashlib
 import os
-import struct
 import time
 from pathlib import Path
 
@@ -14,7 +13,7 @@ import mediapipe as mp
 import typer
 from detect_targets import TrackState, assign_ids, detect
 from mediapipe.tasks.python import BaseOptions, vision
-from vision_frames import VisionFrame, load_snapshot
+from vision_frames import VisionFrame, frame_sequence_matches, load_snapshot
 
 
 def main(inspect_image: Path | None = None, seconds: int = 0) -> None:
@@ -62,9 +61,7 @@ def main(inspect_image: Path | None = None, seconds: int = 0) -> None:
                 continue
             last_sequence = snapshot.meta.sequence
             candidates = detect(snapshot, (pose, face), models / "robot-template.png")
-            with (directory / snapshot.meta.frame_file).open("rb") as stream:
-                header = stream.read(16)
-            if len(header) != 16 or struct.unpack("<4I", header)[2] != last_sequence:
+            if not frame_sequence_matches(directory / snapshot.meta.frame_file, last_sequence):
                 continue
             if time.monotonic_ns() - snapshot.meta.capture_monotonic_ns > 600_000_000:
                 continue

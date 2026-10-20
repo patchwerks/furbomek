@@ -86,3 +86,13 @@ def load_snapshot(directory: Path) -> Snapshot | None:
         return None
     return Snapshot(meta, np.frombuffer(cloud, dtype="<f4", offset=16).reshape(424, 512, 16),
                     image, np.frombuffer(mapping, dtype="<i4", offset=4).reshape(424, 512))
+
+
+def frame_sequence_matches(path: Path, sequence: int) -> bool:
+    """Reject a ring slot replaced or removed while detection was running."""
+    try:
+        with path.open("rb") as stream:
+            header = stream.read(16)
+    except FileNotFoundError:
+        return False
+    return len(header) == 16 and struct.unpack("<4I", header)[2] == sequence
