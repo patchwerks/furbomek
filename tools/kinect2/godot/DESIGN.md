@@ -22,7 +22,7 @@
 
 ## 2. Type, Scale, and Surface
 
-Use DejaVu Sans Mono or Liberation Mono in uppercase. The title is 19 px, track labels 15 px, camera panel headers 12 px, port headers/telemetry 10 px, and fine probe metadata 9 px at the native 1920 x 1080 canvas. Text is dusty pink, never white. Public preview images use RGB multiplier `(0.45, 0.30, 0.33)` so a white page cannot dominate the sensor subject.
+Use DejaVu Sans Mono or Liberation Mono in uppercase. The title is 19 px, track labels 15 px, camera panel headers 12 px, port headers/telemetry 10 px, NOW title 12 px, activity primary rows 11 px, activity details 10 px, and fine probe metadata 9 px at the native 1920 x 1080 canvas. Text is dusty pink, never white. Legacy public preview images use RGB multiplier `(0.45, 0.30, 0.33)` so a white page cannot dominate the sensor subject. The Hermes desktop screen uses the lighter `(0.90, 0.63, 0.68)` multiplier: it belongs to the crimson field while preserving a readable browser title or app surface.
 
 Panels are thin 2 px crimson chamfered outlines over translucent oxblood-black, with 30 px header strips and a 5 px hot status bar. Alignment ticks are 2 px and sparse. There are no rounded SaaS cards, gradients, fake metrics, or decorative full-box trackers.
 
@@ -49,12 +49,15 @@ The upper right `01 / TARGET MAGNIFICATION` uses the same-frame native optical i
 - **Chamfer panel:** dark header, cut upper-right corner, 2 px crimson edge, image or text payload.
 - **Corner tracker:** four open L arms only; selected current track / hidden when expired.
 - **Surface probe:** amber corner marker, actual projected sample, leader to inset / hidden when unavailable or expired.
-- **Activity port:** read-only public activity / `IDLE` / `AWAITING PUBLIC ACTIVITY`; it never invents Hermes work.
+- **Hermes screen port:** a 440 px-wide chamfer panel at roughly `x=36..476`, below the global header, with a 420 x 236 16:9 inset, a thin crimson edge, tracked header/status strip, and no retained frame for shuttered, offline, stale, missing, or invalid activity. The screen visual state is `LIVE`, `SCREEN STALE`, `PRIVACY SHUTTER`, or `SCREEN OFFLINE`.
+- **Now port:** directly below the screen port; presents the public status chip, tool, title, and one cleanly truncated detail line in mono. `ACTING` is hot crimson; `THINKING` and `AWAITING APPROVAL` amber; `PRIVACY SHUTTER` and `ERROR` muted red; `IDLE` muted. It never flashes solely for decoration.
+- **Activity timeline:** a fixed lower-left port with at most six read-only rows: compact age, category, action, then dimmed detail. `running` rows are hot and `error` rows muted red. A missing/invalid activity event leaves it empty.
+- **Activity port compatibility:** v1 remains a read-only public activity / `IDLE` / `AWAITING PUBLIC ACTIVITY` projection; optional v2 screen/timeline fields do not create invented work. Its legacy safe PNG preview remains supported when a v1 producer supplies it.
 - **Context port:** camera-derived sequence, source FPS, valid point count, and feed state.
 
 ## 6. Interaction and Accessibility
 
-`1` RGB, `2` crimson, `3` depth; `[` and `]` bound pixel stroke width; arrows orbit; wheel zoom; `O` toggles bounded auto orbit; `R` returns to a head-on stage view; `Esc` exits. Text states distinguish LIVE from OFFLINE without relying on color. The fixed 1920 x 1080 canvas is capture-first accepted debt; it scales as canvas items for smaller display surfaces.
+`1` RGB, `2` crimson, `3` depth; `[` and `]` bound pixel stroke width; arrows orbit; wheel zoom; `O` toggles bounded auto orbit; `R` returns to a head-on stage view; `Esc` exits. Text states distinguish LIVE from OFFLINE without relying on color. The fixed 1920 x 1080 canvas is capture-first accepted debt; it scales as canvas items for smaller display surfaces. The Hermes left column intentionally occupies only the far-left `x=36..476` region and begins below `y=94`, protecting the title header, central robot, and right-side insets. When the sensor is offline, its central annunciator begins at `x=520`, never behind the Hermes activity stack.
 
 ## 7. Freshness and Design Debt
 
