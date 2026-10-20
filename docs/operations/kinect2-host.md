@@ -33,6 +33,23 @@ event contract. No agent tasks should be fabricated to populate the window.
 
 ## Working path
 
+### Managed media session, 2026-10-20
+
+The current managed path is `bash tools/kinect2/stream.sh` with the locked
+`services/stream-supervisor` unit, real redacted Hermes activity module and
+Godot consumer. It holds the same camera-session lock as the older launcher;
+never mix the two. Clean viewer/OBS exit stops the managed stack; crashes have
+bounded restart/backoff and health records distinguish degraded/failed states.
+`start --record` reaches the actual unit settings and OBS recording argv.
+
+Desktop screenshot publication is unqualified and rejected. Real public text/
+timeline does not require it. Native X11 is the qualified capture path; the QA
+virtual desktop produced black XComposite output and was explicitly rejected.
+See [media integration](media-integration-2026-10-19.md) for exact recordings,
+soak, failure/recovery checks, governed unit, observer enrollment and rollback.
+
+### Earlier standalone launcher and evidence
+
 **Observed on Brodex, 2026-10-14:** Kinect v2 → native libfreenect2 OpenGL capture → private shared-memory MultiMesh frames → Godot 4 point-cloud window → OBS XComposite capture → NVENC H.264 local recording. The VM is not required for this media path and remains intact and powered off.
 
 From this repository, launch the already-built host stack:

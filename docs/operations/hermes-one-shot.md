@@ -10,6 +10,16 @@ This document separates what works **now** from the target end-to-end deployment
 
 ## Current repository reality
 
+**Status correction, 2026-10-19:** the inventory immediately below is the original
+2026-09-21 browser-prototype baseline, not the latest implemented ceiling. Current
+source includes the guarded embodiment path and firmware, native media capture/
+tracking/Godot, public activity projection and managed private media lifecycle.
+Read `PLAN.md`, the hardware active/pending records and
+[`media integration`](media-integration-2026-10-19.md) before choosing a gate.
+The full autonomous bootstrap CLI and unattended deployment remain unimplemented.
+
+### Historical browser-prototype inventory
+
 Implemented today:
 
 - Nuxt 3 client-only conversation/TTS prototype;
