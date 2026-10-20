@@ -22,7 +22,7 @@ SECRET = "hunter2-sk-live-XYZ"
         ("http://127.0.0.1:8080/admin", "private page"),
         ("http://192.168.1.4/", "private page"),
         ("http://localhost:3000", "private page"),
-        ("https://brodex.tail0d31ad.ts.net/", "private page"),
+        ("https://example-host.example-tailnet.ts.net/", "private page"),
         ("file:///home/lock/.hermes/.env", "local page"),
         ("javascript:alert(1)", "—"),
         (12, "—"),
