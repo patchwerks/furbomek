@@ -1,0 +1,41 @@
+name: Physical maintenance or characterization gate
+description: Physically gated work; issue creation never authorizes device access.
+title: "[Physical gate]: "
+labels: [needs-triage, requires-hardware, blocked]
+projects: ["patchwerks/1"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        This remains physically gated regardless of board position or assignee.
+        No serial/probe/USB-reset/flash/power/movement permission follows from filing it.
+        Read root and hardware/operations guides; use the designated hardware operator.
+        Keep raw backups, credentials and identifying/private media out of issue text.
+  - type: textarea
+    id: outcome
+    attributes:
+      label: Bounded outcome
+      description: Identify the correct subsystem and evidence-backed goal; separate proposed from installed state.
+    validations:
+      required: true
+  - type: textarea
+    id: gates
+    attributes:
+      label: Blocked by and required physical conditions
+      description: Name fresh authorization, ownership, isolation/power conditions, procedure and stop conditions.
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance criteria and evidence
+      description: Include before/after state, candidate versus installed hashes where applicable, actual measurements and untested limits.
+    validations:
+      required: true
+  - type: textarea
+    id: scope
+    attributes:
+      label: Explicit exclusions and rollback limits
+      description: State prohibited actions, what agents may prepare non-live, and how to stop/recover safely.
+    validations:
+      required: true
