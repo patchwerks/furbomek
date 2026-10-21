@@ -5,6 +5,9 @@ Furb-o-Mek is a planned fully autonomous Hermes-controlled streaming robot built
 ## Start here
 
 - Humans and coding agents: [`AGENTS.md`](AGENTS.md), then [`PLAN.md`](PLAN.md).
+- Shared work queue: [delivery boards](https://github.com/orgs/patchwerks/projects/1)
+  and [GitHub Issues](https://github.com/patchwerks/furbomek/issues); follow the
+  [claim, tracking and closeout policy](docs/agents/issue-tracker.md) from any harness.
 - A host Hermes deploying a fresh clone: [`HERMES.md`](HERMES.md).
 - Exact current and target deployment flow: [`docs/operations/hermes-one-shot.md`](docs/operations/hermes-one-shot.md).
 - Source-backed topic research: [`docs/research/README.md`](docs/research/README.md).

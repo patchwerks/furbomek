@@ -41,6 +41,30 @@ Directory-specific guidance exists in `server/AGENTS.md`, `src/AGENTS.md`, `src/
 
 Agents own operational runbooks, launch/recovery and QA. The user does not read or execute those instructions; never hand off a runbook as a substitute for operating the system. Kinect graphics must be compared against the supplied reference video, not merely accepted as a technically working cloud.
 
+## Agent skills
+
+### Issue tracker
+
+GitHub Issues and the private [shared delivery Project](https://github.com/orgs/patchwerks/projects/1)
+are authoritative across humans, Hermes, OmO and other harnesses. Read
+[`docs/agents/issue-tracker.md`](docs/agents/issue-tracker.md) before starting,
+claiming, handing off or closing work. Use an issue-numbered branch and separate
+worktree; post the owner/harness/session, scope and resource claim on the issue.
+Assignments are not atomic locks. Native harness tasks must reference the issue,
+not become competing backlogs. Closing a session must release or hand off its claim.
+
+### Triage labels
+
+Use the configured canonical roles and area/physical-gate labels in
+[`docs/agents/triage-labels.md`](docs/agents/triage-labels.md). Only unblocked,
+specified work is Ready. No card or claim grants physical authorization.
+
+### Domain docs
+
+Current domain authority is `PLAN.md` plus the existing research/operations and
+hardware evidence, not an invented `CONTEXT.md` or ADR tree. See
+[`docs/agents/domain.md`](docs/agents/domain.md) for consumer routing.
+
 ## Parallel sessions and recovery ownership
 
 - Before device maintenance, follow `docs/operations/robot-wired-maintenance.md`.
