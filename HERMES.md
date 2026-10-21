@@ -19,6 +19,20 @@ steps or request the same photos again. The original application source release
 remains unknown; image readback is not motion
 acceptance. Current guarded supported-bench acceptance is separately recorded below.
 
+## Shared work and kanban
+
+Use the private [GitHub delivery Project](https://github.com/orgs/patchwerks/projects/1)
+and its repository issues as the shared source of truth. Before starting a slice,
+read [`docs/agents/issue-tracker.md`](docs/agents/issue-tracker.md), check dependencies
+and current claims, and post your harness/session, branch/worktree, scope and
+resource ownership on the issue. Release or hand off the claim before ending.
+
+Hermes kanban may schedule local execution subtasks, but each must reference the
+canonical GitHub issue and report blockers/evidence/closeout back there. OmO and
+other harness tasks follow the same rule through root `AGENTS.md`. No automatic
+kanban/OmO/GitHub synchronization is installed or implied, and no claim/card
+authorizes hardware access or relaxes this entrypoint's deployment gates.
+
 ## Operating rule
 
 Advance only through implemented, testable milestones. Never invent a command, service, firmware, credential, measurement or passing result merely to complete the deployment narrative.

@@ -1,0 +1,43 @@
+name: Software delivery slice
+description: A bounded, independently verifiable software or qualification outcome.
+title: "[Slice]: "
+labels: [needs-triage]
+projects: ["patchwerks/1"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        GitHub Issues and the shared Project are authoritative for every harness.
+        Read the tracking policy before claiming work:
+        https://github.com/patchwerks/furbomek/blob/main/docs/agents/issue-tracker.md
+        Do not include credentials, private media, transcripts or device identifiers.
+  - type: textarea
+    id: outcome
+    attributes:
+      label: What to build
+      description: Describe one complete, observable outcome and its PLAN references.
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance criteria
+      description: Use checkboxes; include the real-interface verification and evidence needed to close.
+      placeholder: "- [ ] A real consumer demonstrates the outcome, with observed evidence."
+    validations:
+      required: true
+  - type: textarea
+    id: dependencies
+    attributes:
+      label: Blocked by
+      description: Link actual issue prerequisites and any access/asset gate, or explicitly say None.
+    validations:
+      required: true
+  - type: textarea
+    id: scope
+    attributes:
+      label: Non-goals, safety and execution scope
+      description: State exclusions, shared resources, private/live qualification and rollback limits.
+      placeholder: No robot/head access, raw screenshots or public stream unless separately authorized and qualified.
+    validations:
+      required: true
