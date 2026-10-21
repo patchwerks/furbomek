@@ -34,7 +34,7 @@ a bounded slice; it cannot silently override the plan or safety gates. See
 | In progress | One current owner has posted an explicit claim |
 | Review | Implementation/evidence ready for independent acceptance |
 | Blocked | Named dependency, access, decision or physical gate unresolved |
-| Done | Accepted, published and closed; not merely code written |
+| Done | Closed terminal disposition; delivery requires accepted/published evidence and a completed closure reason |
 
 Use native GitHub issue dependencies plus a readable **Blocked by** section.
 The initial software dependency chain is #2 -> #6; #3, #5 and #6 -> #7; #7 -> #8.
@@ -44,7 +44,9 @@ the live issues and Project carry current state.
 
 GitHub's built-in item-closed and PR-merged workflows are enabled. The default
 Auto-close issue workflow is also enabled: moving a card to Done can close it.
-Never move to Done to bypass review. A linked PR closing keyword only closes its
+Never move to Done to bypass review. A closed-as-not-planned issue may also land
+in Done; inspect its closure reason and disposition comment rather than counting
+every Done card as delivered. A linked PR closing keyword only closes its
 issue when merged into the repository's default branch. There is no promise that
 closing a blocker automatically updates downstream labels/status; the completing
 agent must re-evaluate dependencies and promote newly ready work explicitly.
@@ -64,8 +66,8 @@ Before editing or using shared resources:
 
 1. Read the issue, comments, native dependencies, relevant plan and scoped guides.
    Ready status alone is not enough if a later comment records a blocker.
-2. Check for an existing live claim. Assign yourself where permitted, move the
-   item to In progress, and post this claim record:
+2. Check for an existing live claim. Assign yourself where permitted, remove
+   `ready-for-agent`, move the item to In progress, and post this claim record:
 
    ```text
    CLAIM
@@ -113,7 +115,7 @@ option IDs from `field-list`, then use the installed CLI's `gh project item-edit
 --id ITEM_ID --project-id PROJECT_ID --field-id STATUS_FIELD_ID
 --single-select-option-id OPTION_ID`. Do not assume newer name-based flags exist.
 
-Only unblocked issues receive `ready-for-agent` and Ready status. When blocked,
+Only unblocked, unclaimed issues receive `ready-for-agent` and Ready status. When blocked,
 remove `ready-for-agent`, add `blocked`, set Blocked, and comment with the precise
 missing prerequisite and next action. Add `needs-info` for missing information or
 `ready-for-human` for a human decision/physical step. On promotion, verify the

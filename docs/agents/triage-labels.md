@@ -26,9 +26,9 @@ physical work normally combines `blocked`, `ready-for-human` and
 `requires-hardware`. Missing credentials/asset permissions are blockers, not
 permission to select a substitute provider or publish private data.
 
-On claim, keep the applicable readiness role for its specification provenance
-but move the card to In progress; dispatch must check both status and claims.
-On release, return to Ready only if still unblocked, otherwise Blocked. On closure,
+On claim, remove `ready-for-agent` and move the card to In progress; dispatch must
+check both status and claims. On release, restore `ready-for-agent` and Ready only
+if the issue is still specified and unblocked; otherwise use Blocked. On closure,
 remove active readiness/blocker labels that no longer apply. Record cancellation
 or not-planned disposition honestly rather than presenting it as delivered work.
 
