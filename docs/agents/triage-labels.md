@@ -27,8 +27,11 @@ physical work normally combines `blocked`, `ready-for-human` and
 permission to select a substitute provider or publish private data.
 
 On claim, remove `ready-for-agent` and move the card to In progress; dispatch must
-check both status and claims. On release, restore `ready-for-agent` and Ready only
-if the issue is still specified and unblocked; otherwise use Blocked. On closure,
+check both status and claims. Releasing ownership does not itself change stage:
+Review and Done retain their statuses. For unfinished In progress work being
+returned to the queue, use Blocked for a named unresolved prerequisite, Backlog
+plus `needs-triage` if the scope needs respecification, or restore Ready plus
+`ready-for-agent` when specified and unblocked. On closure,
 remove active readiness/blocker labels that no longer apply. Record cancellation
 or not-planned disposition honestly rather than presenting it as delivered work.
 
