@@ -79,7 +79,7 @@ and not a robot simulator. Existing hardware evidence remains authoritative.
 
 The paired [Simulation Lab workflow](../../.github/workflows/simulation-lab.yml)
 defines an isolated Docker worker for this bounded native subset on GitHub;
-hosted verification of that boundary remains pending. Completing #4 still
+hosted boundary evidence is recorded below for the explicitly tested revision. Completing #4 still
 requires broader locked media checks and honest treatment of AVR and legacy
 build prerequisites, plus actual CI run evidence. Independent review
 is required before any merge. Deleting this directory rolls back the tooling;
@@ -113,8 +113,8 @@ pre-existing compiler warning; the strict production workflow is unchanged.
 The `fault_allows_fresh_begin` mutation was rejected independently by both paths:
 the default STOP-first run failed at `exact-next BEGIN after STOP rejected`, and
 a recovery-first ordering failed at `exact-next fresh-session BEGIN cannot clear
-fault`. These are offline fixture results, not physical qualification. The new
-hosted strict gate remains pending; this supplemental run is not a hosted pass.
+fault`. These are offline fixture results, not physical qualification. This supplemental run is not a hosted pass; the separate strict GCC evidence
+below identifies its tested revision.
 
 ## Workflow isolation correction — 2026-10-30
 
@@ -123,7 +123,14 @@ read-only source copy, a non-root user, no network, dropped capabilities and an
 empty credential environment. It mounts no host home, sockets or hardware
 devices. A trusted inline preflight must verify the boundary and print its pass
 marker before candidate execution; the compiler must report GCC 13.3.0. Hosted
-verification remains pending. Any earlier hosted pass using only `env -i`
+verification passed at tested revision
+`4ac97649a6db15456f23ea72ea96accba92ae768`: [run 40943263390,
+job 123691864792](https://github.com/patchwerks/furbomek/actions/runs/40943263390/job/123691864792)
+logged `PASS: offline worker isolation boundary`, then passed the unchanged strict
+GCC 13.3.0 warning gate, all 829 scenario checks, the existing Guard suite, 93
+diagnostic checks and six runner tests. This evidence applies to that tested
+revision, not subsequent documentation commits, and establishes neither full
+issue #4 acceptance nor hardware qualification. Any earlier hosted pass using only `env -i`
 established test behavior, not isolation, and is superseded as isolation evidence
 by this required boundary verification. The 829-check supplemental Clang result
 and independently rejected STOP/recovery mutations above remain distinct from
