@@ -173,6 +173,8 @@ def analyze(snapshot: dict, *, now: datetime | None = None, max_age_hours: int =
             if kind != "issues" or item["state"] != "open":
                 continue
             labels = set(item["labels"])
+            terminal_disposition = "wontfix" in labels
+            ready = "ready-for-agent" in labels and not terminal_disposition
             body = clean(item.get("body"))
             blockers, prose_gate = section_blockers(body, repo)
             native = item.get("blockers", [])
@@ -183,6 +185,9 @@ def analyze(snapshot: dict, *, now: datetime | None = None, max_age_hours: int =
             # Claims never expire based on our local clock. Release needs human reconciliation.
             claim_comments = [c for c in item.get("comments", []) if has_claim(clean(c.get("body")))]
             reasons, gates = [], []
+            if terminal_disposition:
+                gates.append("terminal-disposition-needs-review")
+                reasons.append("Canonical wontfix label observed; disposition needs reconciliation before work")
             if stale:
                 gates.append("stale-or-future-snapshot")
             if item.get("body_truncated"):
@@ -205,13 +210,13 @@ def analyze(snapshot: dict, *, now: datetime | None = None, max_age_hours: int =
                 gates.append("existing-owner-or-claim-needs-reconciliation")
             if labels.intersection({"needs-info", "ready-for-human", "needs-triage"}):
                 gates.append("triage-or-human-gate")
-            if "ready-for-agent" in labels:
+            if ready:
                 reasons.append("Canonical ready-for-agent label observed; not an authority grant")
             if "area:verification" in labels:
                 reasons.append("Verification work can improve evidence for dependent slices")
             if not reasons:
                 reasons.append("Open canonical issue; scope and acceptance need review")
-            score = (20 if "ready-for-agent" in labels else 0) + (10 if "area:verification" in labels else 0)
+            score = (20 if ready else 0) + (10 if "area:verification" in labels else 0)
             recommendations.append({"issue": url, "title": title, "priority_score": score,
                 "disposition": "gated-review" if gates else "candidate-for-human-review", "gates": sorted(set(gates)),
                 "reasons": reasons, "blocker_evidence": sorted(blockers),

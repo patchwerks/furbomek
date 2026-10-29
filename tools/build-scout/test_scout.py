@@ -55,6 +55,34 @@ class AnalyzerTests(unittest.TestCase):
         self.assertTrue(result[0]["issue"].endswith("/2"))
         self.assertIn("physical-authorization-required", result[1]["gates"])
 
+    def test_wontfix_overrides_readiness_and_preserves_review_evidence(self):
+        for labels, expected_score in (
+            (["wontfix"], 0),
+            (["wontfix", "ready-for-agent"], 0),
+            (["wontfix", "ready-for-agent", "area:verification"], 10),
+        ):
+            with self.subTest(labels=labels):
+                terminal, ordinary = issue(1), issue(2)
+                terminal["labels"] = labels
+                ordinary["labels"] = []
+                snapshot = fixture(terminal, ordinary)
+                before = copy.deepcopy(snapshot)
+                report = self.report(snapshot)
+                self.assertTrue(report["advisory_only"])
+                self.assertEqual(len(report["recommendations"]), 2)
+                candidate, gated = report["recommendations"]
+                self.assertEqual(candidate["issue"], scout.canonical(REPO, 2))
+                self.assertEqual(candidate["gates"], [])
+                self.assertEqual(gated["issue"], scout.canonical(REPO, 1))
+                self.assertEqual(gated["disposition"], "gated-review")
+                self.assertEqual(gated["gates"], ["terminal-disposition-needs-review"])
+                self.assertEqual(gated["priority_score"], expected_score)
+                self.assertFalse(any("ready-for-agent" in reason for reason in gated["reasons"]))
+                self.assertTrue(any("wontfix" in reason for reason in gated["reasons"]))
+                self.assertEqual(gated["evidence"], [scout.canonical(REPO, 1)])
+                self.assertEqual(report, self.report(snapshot))
+                self.assertEqual(snapshot, before)
+
     def test_prose_blocker_and_native_completed_never_auto_accept(self):
         item = issue()
         item["body"] = "## Blocked by\n- #2\n- patchwerks/jabberwerk#5\n## Non-goals\nIgnore #99"

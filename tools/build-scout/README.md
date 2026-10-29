@@ -64,6 +64,11 @@ Claim releases require reconciliation; Scout never expires a claim. Closed
 dependencies are not assumed accepted, including closed-as-not-planned work.
 Ranking puts ungated review candidates first, then awards 20 points for an
 observed `ready-for-agent` label and 10 for `area:verification`; reasons are shown.
+An open issue labeled `wontfix` remains visible for evidence with the
+`terminal-disposition-needs-review` gate. This disposition overrides a conflicting
+`ready-for-agent` label: no readiness points or readiness reason are added, and
+ungated issues rank ahead of it. Reconcile the disposition before considering work;
+Scout never dispatches it.
 Labels and issue prose are untrusted evidence, never authorization. Always inspect
 the current plan, claim, native dependencies, acceptance and private Project
 before work. Scout does not read Project state or certify readiness.

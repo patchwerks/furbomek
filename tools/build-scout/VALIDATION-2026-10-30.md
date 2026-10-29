@@ -45,7 +45,10 @@ overlap between governance-adoption PRs was reported only as a heuristic candida
 it did not close, assign or otherwise change anything. Private repository counts,
 titles, bodies and collection outputs are deliberately absent from this record.
 
-## Verified source hashes (SHA-256)
+## Historical verified source hashes (SHA-256)
+
+These hashes identify the earlier 30-test revision, before the review corrections
+below. They do not identify or validate the corrected revision.
 
 | File | Hash |
 |---|---|
@@ -65,3 +68,18 @@ No hardware, live media, deployment, merge or repository write was performed by
 Scout. Independent review and hosted verification of the final branch remain
 separate gates. This tool has no persistent daemon or configuration installation;
 rollback is to stop invoking it and return to the previously reviewed source.
+
+## Review corrections — 2026-10-30
+
+Observed local offline verification passed all 31 tests after the review fix:
+explicit `wontfix` disposition overrides readiness signals. The earlier 30-test
+record and source hashes remain historical evidence only.
+
+The corrected workflow uses an immutable, digest-pinned Docker image, a sanitized
+read-only source copy, a non-root user, no network, dropped capabilities and an
+empty credential environment. It mounts no host home, sockets or hardware
+devices. A trusted inline preflight must verify the boundary and print its pass
+marker before candidate tests execute. Hosted verification of this corrected
+workflow remains pending; no hosted pass is claimed. Any earlier hosted pass
+using only `env -i` established test behavior, not isolation, and is superseded
+as isolation evidence by this required boundary verification.
