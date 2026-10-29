@@ -68,3 +68,27 @@ with offline mode and the same helper-owned cache, and confirms it uses the
 environment prepared by the helper. These fixtures
 must themselves run in a credential-free network-denied boundary; they do not
 qualify registry egress or full Docker containment.
+
+## Correction verification — 2026-10-30
+
+At helper revision `b04523abf79f22b750a3cdb579f2169a717e1b38`, all **14**
+helper tests passed with **zero skips** using exact uv 0.11.7 and the pinned
+Python 3.12.11 Linux image. The test-only workflow revision was
+`ce87ee3964a1c2fefc5a28e08e07516b3ae56f1a`;
+[run 40952027806, job 123722330403](https://github.com/patchwerks/furbomek/actions/runs/40952027806/job/123722330403)
+records both the original vulnerable marker characterization and the corrected
+helper regressions. The original `.venv` and `.python-version` probes created
+their markers; the corrected helper passed the hostile interpreter/configuration,
+startup `.pth`, fresh-state, symlink and offline script-cache tests.
+
+These synthetic fixtures ran as an unprivileged user in a read-only,
+network-none container, with no host home, credentials, devices or Docker socket
+mounted. Independent advisory source review found no blocking defect in this
+scoped correction. Local input/proxy tests also passed (8); local uv 0.13.6
+correctly skipped the exact-version class and is not the qualifying evidence.
+Shell syntax and whitespace checks passed.
+
+This establishes the bounded interpreter-selection correction, not operational
+acceptance of the full worker. The full Docker/proxy provisioning path, registry
+routing/denials and unchanged product checks still require the separate acceptance
+sequence above. No helper was activated, trust pin changed or PR merged.
