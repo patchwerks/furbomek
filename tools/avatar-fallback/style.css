@@ -1,0 +1,13 @@
+:root { color-scheme: dark; font-family: ui-monospace, 'SFMono-Regular', Consolas, monospace; color: #f0f0e9; }
+* { box-sizing: border-box; }
+html, body { margin: 0; width: 100%; height: 100%; overflow: hidden; background: transparent; }
+[hidden] { display: none !important; }
+#avatar { width: min(92vw, 960px); position: absolute; bottom: 5vh; left: 4vw; display: grid; grid-template-columns: minmax(120px, 34%) 1fr; gap: 4%; align-items: end; }
+#character { width: 100%; display: block; }
+.identity { background: #151715; border-top: 3px solid #d5ed85; padding: clamp(16px, 2.5vw, 32px); min-width: 0; }
+#mode { font-size: clamp(10px, 1.3vw, 14px); letter-spacing: .12em; color: #d5ed85; }
+#title { font-family: system-ui, sans-serif; font-size: clamp(20px, 3.6vw, 44px); line-height: 1.1; font-weight: 650; letter-spacing: -.04em; margin: 16px 0; overflow-wrap: anywhere; }
+#caption { font-size: clamp(13px, 1.5vw, 18px); line-height: 1.45; overflow-wrap: anywhere; margin: 0; }
+#status { display: inline-block; margin-top: 20px; font-size: 12px; text-transform: uppercase; letter-spacing: .12em; color: #b7bdb3; }
+#avatar[data-state='offline'] .identity { border-color: #939b8f; }
+@media (max-width: 480px) { #avatar { grid-template-columns: 1fr; } #character { width: 42%; } }
