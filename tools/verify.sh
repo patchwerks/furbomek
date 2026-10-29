@@ -40,7 +40,10 @@ require_vendor_inputs() {
 verify_component() (
   set -e
   case "$1" in
-    dispatcher) require_tool python3; python3 tools/tests/test_verify.py ;;
+    dispatcher)
+      require_tool python3
+      python3 tools/tests/test_verify.py
+      python3 tools/tests/test_dependency_proxy.py ;;
     media)
       require_tool uv
       [[ -x ${FURBOMEK_GODOT:-/data/furbomek-media/godot/godot} ]] || {
