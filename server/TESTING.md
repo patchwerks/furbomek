@@ -1,5 +1,5 @@
 ---
-created: 2026-10-29T17:30:00Z
+created: 2026-10-29T17:25:39Z
 branch: codex/13-express-parser-fix
 author: Codex
 status: active
@@ -34,6 +34,10 @@ The direct server requirement moves from Express `^4.19.2` to `^4.22.3`; the loc
 
 The parser update addresses the published [body-parser compressed-body advisory](https://github.com/expressjs/body-parser/security/advisories/GHSA-27r3-jxmh-p828). Its regression shape is informed by the [upstream JSON parser tests](https://github.com/expressjs/body-parser/blob/1.20.9/test/json.js); no external reproducer is executed.
 
-On Node.js 26.7.0, the identical trailing-frame test against the original lockfile reproduced an unhandled Gunzip error and child exit 1. With this lockfile, all six tests passed and the child served a subsequent request. Validation used an empty environment and a worker denying user-home/device reads, source writes and TCP/IP networking, with only temporary-directory writes and Unix sockets permitted. Dependencies were installed separately with lifecycle scripts disabled.
+On both Node.js 22.16.0 and 26.7.0, the identical trailing-frame test against the original lockfile reproduced an unhandled Gunzip error and child exit 1. With this lockfile, all six tests passed and the child served a subsequent request. Validation used an empty environment and a worker denying user-home/device reads, source writes and TCP/IP networking, with only temporary-directory writes and Unix sockets permitted. Dependencies were installed separately with lifecycle scripts disabled.
 
 CodeQL/hosted checks must be inspected at the final PR head before acceptance. No merge, deployment, real provider test or installed-service qualification is implied. Rollback restores the preceding server manifest/lock; the proxy runtime source has not changed.
+
+## Changelog
+
+- 2026-10-30: Confirmed six passing tests and the original-lockfile failure on checksum-verified official Node.js 22.16.0; corrected creation timestamp to the file creation record.
