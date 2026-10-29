@@ -1,0 +1,27 @@
+name: Simulation Lab offline checks
+on:
+  pull_request:
+    paths:
+      - 'tools/simulation-lab/**'
+      - 'firmware/freenove-guard/**'
+      - 'firmware/robot-safety/**'
+      - '.github/workflows/simulation-lab.yml'
+  push:
+    branches: ['work/4-simulation-lab']
+    paths:
+      - 'tools/simulation-lab/**'
+      - '.github/workflows/simulation-lab.yml'
+permissions:
+  contents: read
+jobs:
+  offline:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - name: Run deterministic native fixtures without credentials
+        run: env -i PATH=/usr/bin:/bin HOME="$RUNNER_TEMP" python3 tools/simulation-lab/run.py --cxx g++
+      - name: Verify runner failure reporting
+        run: env -i PATH=/usr/bin:/bin HOME="$RUNNER_TEMP" PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s tools/simulation-lab -p 'test_*.py' -v
