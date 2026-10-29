@@ -1,0 +1,22 @@
+[
+  {"name":"cancellation paraphrase", "left":"Verify offline character broker cancellation", "right":"Test offline character broker abort", "candidate":true, "why":"Same broker and offline scope; verification and cancellation wording differ.", "baseline_candidate":false},
+  {"name":"timeout phrase", "left":"Fix camera capture timeout", "right":"Repair camera capture timed out", "candidate":true, "why":"Same capture timeout defect, with a phrase and task verb change.", "baseline_candidate":false},
+  {"name":"reconnection inflection", "left":"Test camera stream reconnection", "right":"Verify camera stream reconnecting", "candidate":true, "why":"Same camera stream reconnection verification."},
+  {"name":"retry inflection", "left":"Fix broker queue retries", "right":"Repair broker queue retry", "candidate":true, "why":"Same broker queue retry defect."},
+  {"name":"literal overlap", "left":"Verify offline character broker cancellation", "right":"Verify offline character broker cancellation handling", "candidate":true, "why":"Existing meaningful literal overlap remains advisory."},
+  {"name":"punctuation and case", "left":"TEST: Camera-stream cancellation", "right":"Test camera stream cancellation", "candidate":true, "why":"Case and punctuation do not alter lexical scope."},
+  {"name":"distinct platforms", "left":"Fix camera stream reconnection on Linux", "right":"Fix camera stream reconnection on Windows", "candidate":false, "why":"Separate platform scopes despite high overlap.", "baseline_candidate":true},
+  {"name":"distinct components", "left":"Verify broker queue cancellation", "right":"Verify renderer queue cancellation", "candidate":false, "why":"Broker and renderer are different targets.", "baseline_candidate":true},
+  {"name":"opposite behavior", "left":"Enable camera stream reconnect retry", "right":"Disable camera stream reconnect retry", "candidate":false, "why":"Opposite desired behavior.", "baseline_candidate":true},
+  {"name":"negated behavior", "left":"Camera stream should reconnect after timeout", "right":"Camera stream should not reconnect after timeout", "candidate":false, "why":"Negation changes desired behavior.", "baseline_candidate":true},
+  {"name":"contraction", "left":"Camera stream reconnects after timeout", "right":"Camera stream doesn't reconnect after timeout", "candidate":false, "why":"A contraction must not lose negation."},
+  {"name":"versions", "left":"Verify camera stream protocol v1 cancellation", "right":"Verify camera stream protocol v2 cancellation", "candidate":false, "why":"Different explicit protocol versions."},
+  {"name":"one sided platform", "left":"Fix camera stream cancellation", "right":"Fix camera stream cancellation on Linux", "candidate":false, "why":"General scope versus explicitly platform limited scope needs manual investigation."},
+  {"name":"generic exact", "left":"Fix issue handling behavior", "right":"Fix issue handling behavior", "candidate":false, "why":"Generic wording supplies no useful target anchors.", "baseline_candidate":true},
+  {"name":"generic short", "left":"Fix bug", "right":"Fix bug", "candidate":false, "why":"No meaningful target evidence."},
+  {"name":"different direction", "left":"Increase camera stream retry timeout", "right":"Decrease camera stream retry timeout", "candidate":false, "why":"Opposite requested changes."},
+  {"name":"different actions", "left":"Add camera stream reconnect retry", "right":"Remove camera stream reconnect retry", "candidate":false, "why":"Adding and removing behavior are separate changes."},
+  {"name":"different targets and verbs", "left":"Repair microphone capture timeout", "right":"Fix camera capture timeout", "candidate":false, "why":"Synonymous repair wording does not erase the distinct target."},
+  {"name":"unrelated", "left":"Fix camera capture timeout", "right":"Verify robot battery voltage", "candidate":false, "why":"Unrelated targets and outcomes."},
+  {"name":"unsupported paraphrase", "left":"Keep pending messages after restart", "right":"Persist queued events across reboot", "candidate":false, "why":"Known recall limit: arbitrary semantic paraphrases are not inferred."}
+]
