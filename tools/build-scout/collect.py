@@ -11,7 +11,7 @@ import re
 import subprocess
 import sys
 
-from scout import REPOSITORIES, SCHEMA, canonical, clean, write_private
+from scout import ISSUE_URL, REPOSITORIES, SCHEMA, canonical, clean, write_private
 
 PAGE_SIZE = 30
 MAX_RESPONSE_BYTES = 4 * 1024 * 1024
@@ -93,6 +93,11 @@ def issue_record(raw: dict) -> dict:
     number = raw.get("number")
     if type(number) is not int or number < 1 or raw.get("state") not in ("open", "closed"):
         raise ValueError("Invalid issue record")
+    if not isinstance(raw.get("title"), str) or (raw.get("body") is not None and not isinstance(raw["body"], str)):
+        raise ValueError("Invalid issue text")
+    for field, key in (("labels", "name"), ("assignees", "login")):
+        if not isinstance(raw.get(field), list) or any(not isinstance(x, dict) or not isinstance(x.get(key), str) for x in raw[field]):
+            raise ValueError("Invalid issue ownership or labels")
     return {"number": number, "node_id": clean(raw.get("node_id"), 128),
             "title": clean(raw.get("title"), 512), "body": clean(raw.get("body")),
             "body_truncated": isinstance(raw.get("body"), str) and len(raw["body"]) > 20000,
@@ -112,7 +117,7 @@ def collect(reader: GitHubReadOnly, repositories: list[str], max_pages: int = 2)
         coverage = data["coverage"]
         try:
             meta = reader.get(base, {})
-            if not isinstance(meta, dict) or meta.get("full_name", "").lower() != repo:
+            if not isinstance(meta, dict) or not isinstance(meta.get("full_name"), str) or meta["full_name"].lower() != repo:
                 raise ReadFailure("invalid-repository-metadata")
             data["metadata"] = {"id": meta.get("id"), "private": meta.get("private"),
                                 "default_branch": clean(meta.get("default_branch"), 256), "archived": meta.get("archived")}
@@ -133,7 +138,12 @@ def collect(reader: GitHubReadOnly, repositories: list[str], max_pages: int = 2)
                     if kind == "runs":
                         if type(item.get("id")) is not int or item["id"] < 1:
                             raise ValueError("Invalid run")
-                        data[kind].append({name: item.get(name) for name in ("id", "status", "conclusion", "head_sha", "head_branch", "updated_at")})
+                        fields = {"status": 64, "conclusion": 64, "head_sha": 64, "head_branch": 256, "updated_at": 64}
+                        if any(item.get(name) is not None and not isinstance(item[name], str) for name in fields):
+                            raise ValueError("Invalid workflow metadata")
+                        data[kind].append({"id": item["id"], **{
+                            name: clean(item[name], limit) if item.get(name) is not None else None
+                            for name, limit in fields.items()}})
                     else:
                         record = issue_record(item)
                         if kind == "pulls":
@@ -148,13 +158,22 @@ def collect(reader: GitHubReadOnly, repositories: list[str], max_pages: int = 2)
             number = issue["number"]
             for name, suffix in (("comments", "comments"), ("blockers", "dependencies/blocked_by")):
                 raw, coverage[f"issue:{number}:{name}"] = pages(reader, f"{base}/issues/{number}/{suffix}", max_pages=max_pages)
-                if name == "comments":
-                    issue[name] = [{"id": c.get("id"), "body": clean(c.get("body")),
-                                    "body_truncated": isinstance(c.get("body"), str) and len(c["body"]) > 20000,
-                                    "updated_at": clean(c.get("updated_at"), 64)} for c in raw]
-                else:
-                    issue[name] = [{"url": clean(c.get("html_url"), 1024), "state": clean(c.get("state"), 64),
-                                    "state_reason": clean(c.get("state_reason"), 64)} for c in raw]
+                issue[name] = []
+                for entry in raw:
+                    if name == "comments":
+                        if type(entry.get("id")) is not int or entry["id"] < 1 or not isinstance(entry.get("body"), str):
+                            coverage[f"issue:{number}:{name}"] = {"status": "partial", "reason": "malformed-comment"}
+                            continue
+                        issue[name].append({"id": entry["id"], "body": clean(entry["body"]),
+                                            "body_truncated": len(entry["body"]) > 20000,
+                                            "updated_at": clean(entry.get("updated_at"), 64)})
+                    else:
+                        url = clean(entry.get("html_url"), 1024)
+                        if not ISSUE_URL.fullmatch(url) or entry.get("state") not in ("open", "closed"):
+                            coverage[f"issue:{number}:{name}"] = {"status": "partial", "reason": "malformed-blocker"}
+                            continue
+                        issue[name].append({"url": url, "state": entry["state"],
+                                            "state_reason": clean(entry.get("state_reason"), 64)})
     snapshot["collection_finished_at"] = datetime.now(timezone.utc).isoformat()
     return snapshot
 

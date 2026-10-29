@@ -45,6 +45,8 @@ bounded recently updated issues and PRs (open and closed), PR head revisions,
 recent workflow runs, and native blockers/comments for collected open issues.
 Each source has complete, partial or unavailable coverage. A full final page is
 conservatively partial; the tool does not pretend a cap proves exhaustion.
+Malformed issue, ownership, comment or dependency records make the affected
+source partial rather than silently turning missing evidence into an empty list.
 Default limits are 30 records/page, two pages/source and 120 requests total;
 maximums are five pages/source and 200 requests. GitHub issues pages include PRs,
 which are filtered from the issue collection. Collection is not an atomic view.
@@ -52,6 +54,12 @@ which are filtered from the issue collection. Collection is not an atomic view.
 Recommendations link to canonical issues. Unavailable coverage, truncated bodies,
 snapshots older than 24 hours or over five minutes in the future, native/prose
 blockers, physical labels, assignees and claim comments gate recommendations.
+Plain, heading and bold CLAIM/HANDOFF markers are recognized in issue bodies and
+comments. Ordinary "Claim and closeout" instructions are not live claims.
+Explicit "None" followed by ordinary explanatory prose does not manufacture a
+blocker. Qualifiers such as waiting, approval or unavailable access, and other
+unresolved prose, receive `dependency-section-needs-review`; linked/native
+dependencies and the canonical blocked label receive a distinct acceptance gate.
 Claim releases require reconciliation; Scout never expires a claim. Closed
 dependencies are not assumed accepted, including closed-as-not-planned work.
 Ranking puts ungated review candidates first, then awards 20 points for an
@@ -67,8 +75,11 @@ This is an explainable heuristic, not semantic identity, proof of implementation
 or a reason to close anything automatically.
 
 CI output names observed failed/cancelled workflow run URLs and their head SHAs.
-It does not equate latest runs with current PR heads or enumerate all required
-checks, external statuses, reviews, branch policy or security alerts. No green
+Each collected PR also reports its observed head and any bounded workflow runs
+with that exact nonempty SHA. No matching run means not observed, never success.
+The same SHA does not prove the right workflow, event or acceptance context.
+Scout does not enumerate all required checks, external statuses, reviews, branch
+policy or security alerts. No green
 merge/deploy verdict is emitted. Code contents, attachments and logs are not read.
 
 Snapshots/reports are local private data even for a public repository: arbitrary
@@ -98,9 +109,17 @@ Observed verification on 2026-10-29: all 22 offline tests passed under Python
 network/devices/host-home access, read-only source and temporary-only writes.
 The actual invocation from the repository root was
 `python3 -m unittest discover -s tools/build-scout -p 'test_*.py' -v`.
-The credential-bearing live collector has not been exercised. Provider API
-qualification and independent review remain pending; passing mocked transport
-tests does not prove access or acceptance against a live repository.
+Follow-up verification on 2026-10-30: all 30 offline tests passed in the same
+isolation boundary. Actual GitHub collection and offline analysis then completed
+through a separate credential-holding GET-only bridge: 48 bounded API requests
+succeeded, with complete source-page coverage for the explicitly selected
+repositories. The original credential-bearing `gh` subprocess was not run
+directly inside the candidate worker. This validates actual provider responses
+and collection/analysis behavior without giving candidate code credentials;
+it does not qualify every operator's local CLI/authentication environment.
+See [the dated validation record](VALIDATION-2026-10-30.md) for source hashes,
+public-safe observations, the corrected prose-blocker case and remaining limits.
+Independent review remains required.
 
 API references: [GitHub CLI GET arguments](https://cli.github.com/manual/gh_api),
 [native issue dependencies](https://docs.github.com/en/rest/issues/issue-dependencies).

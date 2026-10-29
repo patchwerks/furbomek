@@ -16,6 +16,8 @@ MAX_FILE_BYTES = 16 * 1024 * 1024
 TOKEN = re.compile(r"(?:gh[pousr]_[A-Za-z0-9_]{12,}|github_pat_[A-Za-z0-9_]{12,}|sk-[A-Za-z0-9_-]{12,}|Bearer\s+\S+)", re.I)
 ASSIGNMENT = re.compile(r"\b(token|password|secret|api[_-]?key)\s*[:=]\s*\S+", re.I)
 STOPWORDS = frozenset("a an and are as at be by for from in into is of on or the to with".split())
+ISSUE_URL = re.compile(r"https://github\.com/[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+/issues/[1-9]\d*")
+SHA = re.compile(r"[0-9a-fA-F]{40}")
 
 
 def clean(value: object, limit: int = 20000) -> str:
@@ -92,23 +94,41 @@ def validate(snapshot: dict) -> None:
                 items = item.get(kind, [])
                 if not isinstance(items, list) or len(items) > 200 or any(not isinstance(x, dict) for x in items):
                     raise ValueError("Invalid issue detail collection")
+                for entry in items:
+                    if kind == "comments" and (type(entry.get("id")) is not int or entry["id"] < 1 or not isinstance(entry.get("body"), str)):
+                        raise ValueError("Invalid claim evidence")
+                    if kind == "blockers" and (not isinstance(entry.get("url"), str) or not ISSUE_URL.fullmatch(entry["url"]) or entry.get("state") not in ("open", "closed")):
+                        raise ValueError("Invalid dependency evidence")
 
 
 def section_blockers(body: str, repo: str) -> tuple[set[str], bool]:
     """Parse only an explicit Blocked by heading; prose remains untrusted evidence."""
-    match = re.search(r"(?im)^#{1,6}\s+Blocked by\s*$([\s\S]*?)(?=^#{1,6}\s|\Z)", body)
+    match = re.search(r"(?im)^#{1,6}[ \t]+Blocked by[ \t]*:?[ \t]*$([\s\S]*?)(?=^#{1,6}[ \t]+|\Z)", body)
     if not match:
         return set(), False
     section = match.group(1).strip()
-    if not section or re.fullmatch(r"None[.!]?", section, re.I):
-        return set(), False
-    links = set(re.findall(r"https://github\.com/([\w-]+/[\w.-]+)/issues/(\d+)", section))
+    links = set(re.findall(r"https://github\.com/([\w-]+/[\w.-]+)/issues/([1-9]\d{0,9})(?!\d)", section))
     urls = {f"https://github.com/{owner}/issues/{number}" for owner, number in links}
     # Qualified references first, then standalone local # references.
-    qualified = re.findall(r"([\w.-]+/[\w.-]+)#(\d+)", section)
+    qualified = re.findall(r"([\w.-]+/[\w.-]+)#([1-9]\d{0,9})(?!\d)", section)
     urls.update(f"https://github.com/{owner}/issues/{number}" for owner, number in qualified)
-    urls.update(canonical(repo, int(number)) for number in re.findall(r"(?<![\w/])#(\d+)", section))
-    return urls, True
+    urls.update(canonical(repo, int(number)) for number in re.findall(r"(?<![\w/])#([1-9]\d{0,9})(?!\d)", section))
+    if urls:
+        return urls, False
+    none = re.match(r"None\b", section, re.I)
+    unresolved = re.search(r"\b(?:blocked by|waiting (?:on|for)|pending|requires?|needs?|approval|authorization|unavailable|unresolved|missing|until|access|licen[cs]e)\b", section, re.I)
+    # Free prose is review evidence, not proof of an unresolved native dependency.
+    return set(), not none or bool(unresolved)
+
+
+def has_claim(text: str) -> bool:
+    """Recognize claim markers, not the standard 'Claim and closeout' instructions."""
+    for line in text.splitlines():
+        line = re.sub(r"^[ \t]*(?:#{1,6}[ \t]+)?", "", line).strip()
+        line = re.sub(r"[*_`]+", "", line).strip()
+        if re.match(r"^(?:CLAIM|HANDOFF)(?:[ \t]*$|[ \t]*[:—-])", line, re.I):
+            return True
+    return False
 
 
 def analyze(snapshot: dict, *, now: datetime | None = None, max_age_hours: int = 24) -> dict:
@@ -130,8 +150,21 @@ def analyze(snapshot: dict, *, now: datetime | None = None, max_age_hours: int =
                 run_id = run.get("id")
                 if type(run_id) is int and run_id > 0:
                     failures.append({"url": canonical(repo) + f"/actions/runs/{run_id}", "head_sha": clean(run.get("head_sha"), 64), "conclusion": run["conclusion"]})
+        pull_observations = []
+        for pull in sorted(data["pulls"], key=lambda p: p["number"]):
+            head = clean(pull.get("head_sha"), 64)
+            matches = []
+            if SHA.fullmatch(head):
+                for run in data["runs"]:
+                    if clean(run.get("head_sha"), 64).lower() == head.lower() and type(run.get("id")) is int and run["id"] > 0:
+                        matches.append({"url": canonical(repo) + f"/actions/runs/{run['id']}",
+                                        "status": clean(run.get("status"), 64), "conclusion": clean(run.get("conclusion"), 64)})
+            pull_observations.append({"url": canonical(repo, pull["number"], "pull"), "title": clean(pull.get("title"), 512),
+                                      "state": pull["state"], "head_sha": head, "same_sha_workflow_observations": matches,
+                                      "ci_relation": "same-sha-observed" if matches else "not-observed-in-bounded-runs"})
         repository_summary.append({"repository": repo, "evidence": canonical(repo), "incomplete_sources": incomplete,
-                                   "ci_failures_observed": failures, "ci_note": "Workflow observations only; not a required-check or current-PR-head verdict."})
+                                   "pull_requests": pull_observations, "ci_failures_observed": failures,
+                                   "ci_note": "Workflow observations only; not a required-check or current-PR-head verdict. Same SHA does not prove the required workflow, event or acceptance context."})
         for item in data["issues"] + data["pulls"]:
             kind = "pull" if item in data["pulls"] else "issues"
             url = canonical(repo, item["number"], kind)
@@ -145,10 +178,10 @@ def analyze(snapshot: dict, *, now: datetime | None = None, max_age_hours: int =
             native = item.get("blockers", [])
             for blocker in native:
                 link = blocker.get("url", "")
-                if re.fullmatch(r"https://github\.com/[\w.-]+/[\w.-]+/issues/[1-9]\d*", link):
+                if ISSUE_URL.fullmatch(link):
                     blockers.add(link)
             # Claims never expire based on our local clock. Release needs human reconciliation.
-            claim_comments = [c for c in item.get("comments", []) if re.search(r"(?im)^\s*(?:CLAIM|HANDOFF)\b", clean(c.get("body")))]
+            claim_comments = [c for c in item.get("comments", []) if has_claim(clean(c.get("body")))]
             reasons, gates = [], []
             if stale:
                 gates.append("stale-or-future-snapshot")
@@ -164,9 +197,11 @@ def analyze(snapshot: dict, *, now: datetime | None = None, max_age_hours: int =
                     break
             if "requires-hardware" in labels:
                 gates.append("physical-authorization-required")
-            if blockers or prose_gate or "blocked" in labels:
+            if blockers or "blocked" in labels:
                 gates.append("dependency-or-explicit-blocker-needs-acceptance")
-            if item["assignees"] or claim_comments:
+            if prose_gate:
+                gates.append("dependency-section-needs-review")
+            if item["assignees"] or claim_comments or has_claim(body):
                 gates.append("existing-owner-or-claim-needs-reconciliation")
             if labels.intersection({"needs-info", "ready-for-human", "needs-triage"}):
                 gates.append("triage-or-human-gate")
