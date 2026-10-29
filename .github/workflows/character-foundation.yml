@@ -1,0 +1,61 @@
+name: Character foundation offline checks
+on:
+  pull_request:
+    paths:
+      - 'services/hermes-activity/**'
+      - 'tools/kinect2/godot/**'
+      - '.github/workflows/character-foundation.yml'
+  push:
+    branches: ['work/2-character-foundation']
+    paths:
+      - 'services/hermes-activity/**'
+      - 'tools/kinect2/godot/**'
+      - '.github/workflows/character-foundation.yml'
+permissions:
+  contents: read
+jobs:
+  offline:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - uses: astral-sh/setup-uv@37802adc94f370d6bfd71619e3f0bf239e1f3b78
+        with:
+          version: '0.13.6'
+          python-version: '3.12.16'
+          enable-cache: false
+      - name: Prepare pinned headless Godot and locked Python wheels
+        shell: bash
+        run: |
+          mkdir -p "$RUNNER_TEMP/character-home" "$RUNNER_TEMP/godot"
+          curl --fail --location --retry 2 --max-time 120 \
+            https://github.com/godotengine/godot/releases/download/4.7-stable/Godot_v4.7-stable_linux.x86_64.zip \
+            --output "$RUNNER_TEMP/godot.zip"
+          echo "0b1a6c54c2c619c12e169fe9241edda4b81080b519451cec2984bf0d2c6cb73c  $RUNNER_TEMP/godot.zip" | sha256sum --check
+          unzip -q "$RUNNER_TEMP/godot.zip" -d "$RUNNER_TEMP/godot"
+          env -i PATH="$PATH" HOME="$RUNNER_TEMP/character-home" \
+            UV_PYTHON_INSTALL_DIR="$RUNNER_TEMP/python" UV_CACHE_DIR="$RUNNER_TEMP/uv-cache" \
+            UV_PROJECT_ENVIRONMENT="$RUNNER_TEMP/activity-env" \
+            uv sync --project services/hermes-activity --python 3.12.16 --frozen --no-build --no-install-project
+      - name: Verify broker and actual Godot consumer without network or credentials
+        shell: bash
+        run: |
+          # Drop back to the runner UID inside a new network namespace before candidate execution.
+          sudo unshare --net -- setpriv --reuid="$(id -u)" --regid="$(id -g)" --init-groups \
+            env -i PATH="$RUNNER_TEMP/activity-env/bin:$PATH" HOME="$RUNNER_TEMP/character-home" \
+            UV_PYTHON_INSTALL_DIR="$RUNNER_TEMP/python" UV_CACHE_DIR="$RUNNER_TEMP/uv-cache" \
+            UV_PROJECT_ENVIRONMENT="$RUNNER_TEMP/activity-env" UV_NO_SYNC=1 UV_OFFLINE=1 \
+            PYTHONDONTWRITEBYTECODE=1 FURBOMEK_GODOT="$RUNNER_TEMP/godot/Godot_v4.7-stable_linux.x86_64" \
+            bash -eu <<'CHECKS'
+          cd services/hermes-activity
+          uv run --frozen pytest -q -s -p no:cacheprovider
+          uv run --frozen ruff check --no-cache .
+          uv run --frozen ruff format --check .
+          uv run --frozen basedpyright
+          uv lock --check --offline
+          cd ../..
+          "$FURBOMEK_GODOT" --headless --path tools/kinect2/godot --check-only --script res://activity_fixture_runner.gd
+          "$FURBOMEK_GODOT" --headless --path tools/kinect2/godot --script res://activity_fixture_runner.gd
+          CHECKS
