@@ -1,3 +1,10 @@
+---
+timestamp: 2026-10-29T18:10:22Z
+branch: codex/13-remove-unused-playht-sdk
+author: Codex security subagent
+status: independently source-reviewed; draft proposal; not deployed
+---
+
 # Legacy PlayHT SDK removal evidence — 2026-10-30
 
 This is one bounded dependency-reduction slice of #13, based on published main
