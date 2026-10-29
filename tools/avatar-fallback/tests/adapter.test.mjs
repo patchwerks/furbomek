@@ -77,3 +77,17 @@ test('incoming event cannot bypass a newly detected backwards clock', () => {
  time(START-59000); assert.equal(a.apply_event(event({seq:3,observedAt:new Date(START-59000).toISOString()})),false);
  assert.equal(a.snapshot().seq,1);
 });
+
+test('non-string timestamps reject without throwing, mutation or TTL extension', () => {
+ const {adapter:a,time,frames}=setup(); assert.equal(a.apply_event(event()),true);
+ time(START+500); const before=a.snapshot(); const count=frames.length;
+ const invalid=[{toString:null,valueOf:null},START,null,[new Date(START).toISOString()]];
+ for (const method of ['apply_snapshot','apply_event']) {
+   for (const observedAt of invalid) {
+     assert.equal(a[method](event({seq:2,ttlMs:30000,observedAt})),false);
+     assert.deepEqual(a.snapshot(),before); assert.equal(frames.length,count);
+   }
+ }
+ time(START+1000); assert.equal(a.snapshot().state,'offline');
+ assert.equal(a.snapshot().caption,'Activity unavailable'); assert.equal(a.snapshot().seq,1);
+});

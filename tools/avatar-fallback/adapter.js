@@ -17,6 +17,7 @@
     if (!event || event.schemaVersion !== 'furbomek.character.v1' || event.kind !== 'agent.activity' ||
         event.source !== 'hermes-adapter' || event.audience !== 'public' || event.sensitivity !== 'public' ||
         !integer(event.seq) || !integer(event.ttlMs) || event.ttlMs < 1 || event.ttlMs > 30000 ||
+        typeof event.observedAt !== 'string' ||
         !/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/.test(event.observedAt)) return null;
     const at = Date.parse(event.observedAt);
     if (!Number.isFinite(at) || new Date(at).toISOString() !== event.observedAt || at > now || now >= at + event.ttlMs) return null;

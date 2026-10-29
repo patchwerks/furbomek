@@ -125,3 +125,10 @@ Three added regressions reproduced both defects before correction. The adapter
 now uses codepoint counts and the fail-closed clock policy above. All 11 boundary
 tests and the real-browser fixture check passed after correction in the restricted
 QA worker. Private OBS acceptance and Stream Director integration remain pending.
+
+A further malformed-input review found that an object timestamp could throw during
+regular-expression coercion. The adapter now requires a string timestamp before
+parsing it. A regression covers object, number, null and array timestamps through
+both input methods, preserving accepted state and its original expiry. All 12 Node
+boundary tests passed in the restricted offline worker. This correction adds no
+browser or OBS acceptance evidence.
