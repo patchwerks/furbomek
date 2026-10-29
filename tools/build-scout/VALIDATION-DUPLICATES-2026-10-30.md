@@ -56,9 +56,35 @@ inside the isolated worker. All 20 cases matched their expected outcomes:
   paraphrase remains missed, as documented.
 
 This deliberately designed synthetic corpus is not a real-world precision/recall
-benchmark. Independent review found no blocking issues. Hosted verification is
-not yet recorded for this change; earlier hosted results in the historical
-validation record do not establish verification of this new matcher.
+benchmark. Independent review found no blocking issues.
+
+## Observed hosted verification and combined rehearsal
+
+The parent inspected hosted logs for Scout code revision
+`ca06d81bda071de24b70eb638f0f9798f3c47cb2`:
+
+- [Exact-branch run 40967768051, job 123776510947](https://github.com/patchwerks/furbomek/actions/runs/40967768051/job/123776510947)
+  recorded the isolation PASS marker followed by all 35 tests passing.
+- [PR merge-ref run 40967777133, job 123776542233](https://github.com/patchwerks/furbomek/actions/runs/40967777133/job/123776542233)
+  also passed all 35 tests. This is merge-ref evidence, distinct from the
+  exact-branch result above.
+
+A separate test-only combined branch at
+`8387a9f5863dd08dae0de53bb6f817d674053b27` merged that Scout revision with the
+unchanged simulation input identified by revision prefix `7d03`. Combined source
+paths were byte-identical to their respective inputs. The parent inspected
+[run 40967795757](https://github.com/patchwerks/furbomek/actions/runs/40967795757):
+
+- [Scout job 123776607491](https://github.com/patchwerks/furbomek/actions/runs/40967795757/job/123776607491)
+  passed isolation verification and all 35 tests.
+- [Simulation job 123776607913](https://github.com/patchwerks/furbomek/actions/runs/40967795757/job/123776607913)
+  passed strict GCC 13.3 isolation verification, 829 scenarios, Guard checks,
+  93 diagnostics and six runner tests.
+
+The combined rehearsal establishes coexistence of these unchanged test surfaces;
+it is not application integration, robot, PCM or live-system qualification. No CI
+helper activation was performed. These results identify the tested revisions,
+not later documentation-only commits.
 
 Synthetic results do not establish precision/recall on the user's live tracker.
 No live collection, provider call, runtime integration, hardware operation or
