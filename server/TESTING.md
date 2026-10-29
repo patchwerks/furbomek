@@ -6,7 +6,7 @@ status: active
 ---
 # Offline proxy verification
 
-References [issue 13](https://github.com/patchwerks/furbomek/issues/13). This is the bounded Express 4 request-parser maintenance slice; it does not complete the broader dependency-security backlog.
+References [issue 13](https://github.com/patchwerks/furbomek/issues/13). This covers bounded Express 4 request-parser and proxy-address dependency maintenance; it does not complete the broader dependency-security backlog.
 
 ## Run
 
@@ -37,6 +37,33 @@ The parser update addresses the published [body-parser compressed-body advisory]
 On both Node.js 22.16.0 and 26.7.0, the identical trailing-frame test against the original lockfile reproduced an unhandled Gunzip error and child exit 1. With this lockfile, all six tests passed and the child served a subsequent request. Validation used an empty environment and a worker denying user-home/device reads, source writes and TCP/IP networking, with only temporary-directory writes and Unix sockets permitted. Dependencies were installed separately with lifecycle scripts disabled.
 
 CodeQL/hosted checks must be inspected at the final PR head before acceptance. No merge, deployment, real provider test or installed-service qualification is implied. Rollback restores the preceding server manifest/lock; the proxy runtime source has not changed.
+
+## Proxy-address follow-up (2026-10-30)
+
+**Observed:** Only the `proxy-addr` lock entry changes from 2.0.7 to 2.0.8,
+within Express's existing `~2.0.7` requirement. All other package entries,
+both manifests and the independent root lock remain unchanged; no override is
+needed. The [advisory](https://github.com/advisories/GHSA-jqcg-44mw-7w3h)
+affects `>=1.1.0, <2.0.8`; see the [2.0.8 release](https://github.com/jshttp/proxy-addr/releases/tag/v2.0.8)
+and [upstream fix](https://github.com/jshttp/proxy-addr/commit/780911d).
+
+Seven additional offline tests use the installed dependency and Express request
+getters on synthetic requests. Short mapped IPv6 `/8` and zero-leading `::/1`
+trust subnets must not trust arbitrary IPv4 peers, including mapped client forms;
+both single and multiple-subnet paths are covered. Plain IPv4 `/8` and correctly
+mapped `/104` controls retain allowed/rejected peers. The default Express policy
+ignores forwarded address claims. On Node.js 22.16.0, the prior 2.0.7 dependency
+fails all four problematic-subnet cases while the three controls pass; 2.0.8
+passes all 13 tests, including the six unchanged actual-proxy tests above.
+
+Preparation used a registry tarball checked against its SHA-512 integrity and a
+locked offline install with hooks disabled. Tests used an empty environment in a
+worker denying user-home/device reads and TCP, permitting temporary writes and
+private Unix sockets. The runtime proxy does not configure `trust proxy` or use
+`req.ip` for authorization: these fixtures demonstrate the dependency defect,
+not exploitation of the deployed service. No runtime policy, live provider,
+listener configuration or deployment changes are included. Other dependency
+findings remain outside this slice; rollback restores the preceding server lock.
 
 ## Changelog
 
