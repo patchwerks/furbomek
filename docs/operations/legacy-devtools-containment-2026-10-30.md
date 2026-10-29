@@ -10,7 +10,7 @@ References [issue 13](https://github.com/patchwerks/furbomek/issues/13). The leg
 Nuxt configuration now disables DevTools by default. This is a configuration
 containment slice; installed dependency versions and the wider security backlog
 are unchanged. It follows the disablement option in the published
-[upstream advisory](https://github.com/nuxt/devtools/security/advisories/GHSA-279x-mwfv-vcqv).
+[upstream advisory](https://github.com/nuxt/nuxt/security/advisories/GHSA-279x-mwfv-vcqv).
 
 ## Observed verification
 
