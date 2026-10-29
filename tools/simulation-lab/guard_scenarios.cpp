@@ -69,6 +69,17 @@ struct Fixture {
 void report(const char* name, unsigned before) {
   std::printf("%s: %u checks passed\n", name, checks - before);
 }
+void require_terminal(Fixture& f, uint32_t time, uint32_t sequence,
+                      uint8_t fault, unsigned executions) {
+  const Snapshot snapshot = f.dispatcher.snapshot(time);
+  require(snapshot.state == State::Fault, "recovery attempt preserves terminal Fault");
+  require(snapshot.fault == fault, "recovery attempt preserves fault reason");
+  require(snapshot.sequence == sequence, "recovery attempt preserves accepted sequence");
+  require(!snapshot.busy && !snapshot.deadlines_active, "terminal fault has no active work or lease");
+  require(f.dispatcher.owner() == LinkOwner::None, "recovery attempt cannot acquire ownership");
+  require(f.motion.executions == executions, "recovery attempt never executes or auto-resumes");
+  require(f.motion.disarms == 0U, "terminal fault never invokes normal disarm");
+}
 void stop_and_cancellation() {
   const unsigned before = checks;
   for (uint32_t cancelled_at : {1U, 249U, 499U, 500U}) {
@@ -88,11 +99,22 @@ void stop_and_cancellation() {
                 f.replies.stop_callbacks_at_ack == f.motion.stops, "safe callback precedes STOP ACK");
     require(f.dispatcher.owner() == LinkOwner::None, "STOP releases ownership");
     const unsigned executions = f.motion.executions;
+    require_terminal(f, cancelled_at + 1U, 2U, 4U, executions);
     f.dispatcher.operation_done();  // Late completion after cancellation.
+    require_terminal(f, cancelled_at + 1U, 2U, 4U, executions);
     f.deliver(frame(kExecute, 3U), cancelled_at + 2U);
-    f.deliver(frame(kBegin, 4U, 0U, 2U), cancelled_at + 3U);
-    require(f.motion.executions == executions, "late work cannot restart cancelled operation");
-    require(f.dispatcher.snapshot(cancelled_at + 3U).state == State::Fault, "repeated STOP/reconnect remain faulted");
+    require(f.replies.last.result == Result::WrongState, "late execute rejected in Fault");
+    require_terminal(f, cancelled_at + 2U, 2U, 4U, executions);
+    // Rejected commands do not consume sequence 3. Use the exact next sequence
+    // and a fresh session so a sequence/session error cannot mask Fault recovery.
+    f.deliver(frame(kBegin, 3U, 0U, 2U), cancelled_at + 3U);
+    require(f.replies.last.result == Result::WrongState, "exact-next BEGIN after STOP rejected");
+    require_terminal(f, cancelled_at + 3U, 2U, 4U, executions);
+    f.deliver(frame(kDisarm, 3U), cancelled_at + 4U);
+    require(f.replies.last.result == Result::WrongState, "exact-next DISARM after STOP rejected");
+    require_terminal(f, cancelled_at + 4U, 2U, 4U, executions);
+    f.dispatcher.tick(cancelled_at + 1000U);
+    require_terminal(f, cancelled_at + 1000U, 2U, 4U, executions);
   }
   report("stop-cancellation-late-completion", before);
 }
@@ -204,9 +226,17 @@ void recovery_boundaries() {
   Fixture fault;
   fault.start();
   fault.dispatcher.external_fault(10U);
+  require_terminal(fault, 10U, 1U, 3U, 0U);
   fault.deliver(frame(kDisarm, 2U), 11U);
-  fault.deliver(frame(kBegin, 3U, 0U, 2U), 12U);
-  require(fault.dispatcher.snapshot(12U).state == State::Fault, "transport fault cannot recover by disarm or begin");
+  require(fault.replies.last.result == Result::WrongState, "DISARM cannot clear transport fault");
+  require_terminal(fault, 11U, 1U, 3U, 0U);
+  // DISARM was rejected: last accepted is still 1, so BEGIN must try 2.
+  fault.deliver(frame(kBegin, 2U, 0U, 2U), 12U);
+  require(fault.replies.last.result == Result::WrongState, "exact-next fresh-session BEGIN cannot clear fault");
+  require_terminal(fault, 12U, 1U, 3U, 0U);
+  fault.dispatcher.operation_done();
+  fault.dispatcher.tick(1000U);
+  require_terminal(fault, 1000U, 1U, 3U, 0U);
   Fixture fresh;  // A new in-memory process, never a hardware reset.
   require(fresh.dispatcher.snapshot(0U).state == State::Boot, "new fixture starts booted");
   require(fresh.motion.executions == 0U, "new fixture never resumes prior work");

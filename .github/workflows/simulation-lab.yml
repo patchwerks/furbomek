@@ -16,12 +16,82 @@ permissions:
 jobs:
   offline:
     runs-on: ubuntu-24.04
-    timeout-minutes: 5
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
         with:
           persist-credentials: false
-      - name: Run deterministic native fixtures without credentials
-        run: env -i PATH=/usr/bin:/bin HOME="$RUNNER_TEMP" python3 tools/simulation-lab/run.py --cxx g++
-      - name: Verify runner failure reporting
-        run: env -i PATH=/usr/bin:/bin HOME="$RUNNER_TEMP" PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s tools/simulation-lab -p 'test_*.py' -v
+      - name: Pull immutable worker image (trusted setup)
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker pull gcc:13.3.0@sha256:50e85821c43ea2fd683bf5ae41f5d6981c41bab0641e7640962759291ceb7f78
+      - name: Verify isolation and run offline fixtures
+        shell: bash
+        run: |
+          set -euo pipefail
+          source_copy="$(mktemp -d "$RUNNER_TEMP/offline-source.XXXXXX")"
+          canary="$(mktemp "$RUNNER_TEMP/offline-host-canary.XXXXXX")"
+          trap 'rm -rf "$source_copy"; rm -f "$canary"' EXIT
+          printf 'host-only boundary canary\n' > "$canary"
+          tar --exclude=.git --exclude=.venv --exclude=venv --exclude=__pycache__ --exclude=.pytest_cache -cf - tools/simulation-lab firmware/freenove-guard/include firmware/freenove-guard/src firmware/freenove-guard/tests firmware/robot-safety/include firmware/robot-safety/src firmware/robot-safety/tests | tar -xf - -C "$source_copy"
+          chmod -R a+rX "$source_copy"
+          docker run --rm -i --pull never \
+            --network none --read-only --cap-drop ALL --security-opt no-new-privileges \
+            --user 65534:65534 --cpus 2 --memory 2g --pids-limit 128 \
+            --tmpfs /tmp:rw,exec,nosuid,nodev,size=512m \
+            --mount "type=bind,src=$source_copy,dst=/workspace,readonly" \
+            --workdir /workspace \
+            gcc:13.3.0@sha256:50e85821c43ea2fd683bf5ae41f5d6981c41bab0641e7640962759291ceb7f78 \
+            /usr/bin/env -i PATH=/usr/local/bin:/usr/bin:/bin HOME=/tmp/home \
+            PYTHONNOUSERSITE=1 PYTHONDONTWRITEBYTECODE=1 \
+            /bin/bash -euo pipefail -s -- "$canary" "$HOME" <<'WORKER'
+          set -euo pipefail
+          # Trusted inline probe runs before any candidate repository code.
+          python3 -I - "$@" <<'PROBE'
+          import errno
+          import os
+          from pathlib import Path
+          import socket
+          import stat
+          import sys
+
+          assert os.getuid() == os.geteuid() == 65534, "worker must be non-root"
+          status = dict(line.split(":", 1) for line in Path("/proc/self/status").read_text().splitlines())
+          assert int(status["CapEff"].strip(), 16) == 0
+          assert int(status["CapBnd"].strip(), 16) == 0
+          assert status["NoNewPrivs"].strip() == "1"
+          assert set(os.environ) <= {"PATH", "HOME", "PYTHONNOUSERSITE", "PYTHONDONTWRITEBYTECODE", "PWD", "SHLVL", "_", "LC_CTYPE"}, "unexpected environment"
+          assert {name for _, name in socket.if_nameindex()} == {"lo"}, "external interface"
+          assert len(Path("/proc/net/route").read_text().splitlines()) == 1, "IPv4 route"
+          assert all(line.split()[-1] == "lo" for line in Path("/proc/net/ipv6_route").read_text().splitlines()), "external IPv6 route"
+          with socket.socket() as connection:
+              connection.settimeout(1)
+              assert connection.connect_ex(("192.0.2.1", 443)) != 0, "external connection"
+          for hidden in (sys.argv[1], sys.argv[2], "/var/run/docker.sock", "/run/docker.sock", "/run/podman/podman.sock"):
+              assert not Path(hidden).exists(), "host path exposed: " + hidden
+          allowed = {"null", "zero", "full", "random", "urandom", "tty", "ptmx"}
+          for directory, _, files in os.walk("/dev"):
+              for name in files:
+                  path = Path(directory) / name
+                  mode = path.lstat().st_mode
+                  assert not stat.S_ISBLK(mode), "block device exposed"
+                  if stat.S_ISCHR(mode):
+                      assert str(path) in {"/dev/" + item for item in allowed} | {"/dev/pts/ptmx"}, "device exposed: " + str(path)
+          mounts = [line.split() for line in Path("/proc/self/mountinfo").read_text().splitlines()]
+          assert any(fields[4] == "/workspace" and "ro" in fields[5].split(",") for fields in mounts), "source mount is not read-only"
+          try:
+              Path("/workspace/.isolation-write-probe").write_text("must fail")
+          except OSError as error:
+              assert error.errno in (errno.EROFS, errno.EACCES), "unexpected write failure"
+          else:
+              raise AssertionError("source is writable")
+          Path("/tmp/write-probe").write_text("temporary storage works")
+          Path("/tmp/write-probe").unlink()
+          print("PASS: offline worker isolation boundary", flush=True)
+          PROBE
+          mkdir -p "$HOME"
+          test "$(g++ -dumpfullversion)" = "13.3.0"
+          python3 tools/simulation-lab/run.py --cxx g++
+          python3 -m unittest discover -s tools/simulation-lab -p 'test_*.py' -v
+          WORKER

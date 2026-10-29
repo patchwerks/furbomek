@@ -52,7 +52,7 @@ evidence outside the checkout; inspect it before publication.
 | Latency and loss | Guard deadlines with explicit virtual milliseconds | 499 ms heartbeat arrives in time; 500/501 ms is too late; lost next heartbeat expires exactly; 32-bit time wrap preserves boundary |
 | Lost query ACK | Actual KEEP query replay | Retry reports fresh remaining lease and does not renew it |
 | Independent operation limit | Guard operation deadline | Healthy 100 ms heartbeat stream cannot keep a stalled operation alive past 3,000 ms |
-| Recovery | Guard normal DISARM and terminal Fault | Normal completion needs next sequence/new session; Fault cannot clear through reconnect, BEGIN or DISARM; fresh fixture never auto-resumes |
+| Recovery | Guard normal DISARM and terminal Fault | Normal completion needs next sequence/new session; Fault rejects exact-next BEGIN with a fresh session and exact-next DISARM; rejected attempts preserve fault, sequence, released ownership and callback counts; no auto-resume |
 
 The fixtures call the production entrypoints with in-memory encoded RF/USB
 messages. They use test-only sinks to count callbacks, not motors or radio
@@ -78,7 +78,8 @@ The diagnostic suite's capability bitmap is zero; it is not the installed Guard
 and not a robot simulator. Existing hardware evidence remains authoritative.
 
 The paired [Simulation Lab workflow](../../.github/workflows/simulation-lab.yml)
-runs this bounded native subset on an isolated GitHub runner. Completing #4 still
+defines an isolated Docker worker for this bounded native subset on GitHub;
+hosted verification of that boundary remains pending. Completing #4 still
 requires broader locked media checks and honest treatment of AVR and legacy
 build prerequisites, plus actual CI run evidence. Independent review
 is required before any merge. Deleting this directory rolls back the tooling;
@@ -99,3 +100,32 @@ files and an existing diagnostic test index conversion as errors under the
 unchanged strict warning flags. These production files were not changed and
 warnings were not disabled. The GCC CI run is the native behavior gate; do not
 count local compilation failure as a scenario pass.
+
+Recovery fixture correction (2026-10-30): rejected DISARM/EXECUTE attempts do not
+advance the accepted sequence. The transport-fault case now attempts BEGIN 2
+after rejected DISARM 2; the STOP case attempts BEGIN 3 after rejected EXECUTE 3,
+both with a fresh session ID. STOP also tests exact-next DISARM 3. Each boundary
+checks the fault reason, accepted sequence, released ownership, inactive work
+and unchanged execution/disarm callbacks, including a later virtual-time tick.
+Supplemental isolated-worker Clang verification passed all 829 baseline scenario
+checks. This supplemental run used `-Wno-error=sign-conversion` for the
+pre-existing compiler warning; the strict production workflow is unchanged.
+The `fault_allows_fresh_begin` mutation was rejected independently by both paths:
+the default STOP-first run failed at `exact-next BEGIN after STOP rejected`, and
+a recovery-first ordering failed at `exact-next fresh-session BEGIN cannot clear
+fault`. These are offline fixture results, not physical qualification. The new
+hosted strict gate remains pending; this supplemental run is not a hosted pass.
+
+## Workflow isolation correction — 2026-10-30
+
+The corrected workflow uses an immutable, digest-pinned Docker image, a sanitized
+read-only source copy, a non-root user, no network, dropped capabilities and an
+empty credential environment. It mounts no host home, sockets or hardware
+devices. A trusted inline preflight must verify the boundary and print its pass
+marker before candidate execution; the compiler must report GCC 13.3.0. Hosted
+verification remains pending. Any earlier hosted pass using only `env -i`
+established test behavior, not isolation, and is superseded as isolation evidence
+by this required boundary verification. The 829-check supplemental Clang result
+and independently rejected STOP/recovery mutations above remain distinct from
+this strict GCC gate; `-Wno-error=sign-conversion` applies only to that supplemental
+run.
