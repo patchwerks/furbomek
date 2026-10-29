@@ -12,7 +12,7 @@ on:
       - '.github/ci/**'
       - '.github/workflows/character-foundation.yml'
   push:
-    branches: ['work/2-character-foundation']
+    branches: ['work/2-character-foundation', 'work/13-compatibility-review']
     paths: ['services/**', 'tools/**', '.github/ci/**', '.github/workflows/character-foundation.yml']
 permissions:
   contents: read

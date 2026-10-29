@@ -64,3 +64,37 @@ uv lock --check
 `bash tools/verify-media.sh` from repository root also runs the actual Godot
 consumer fixtures and the locked supervisor checks. Real Hermes/OBS acceptance
 is separately recorded in `docs/operations/media-integration-2026-10-19.md`.
+
+### Pillow compatibility, 2026-10-30
+
+The dependency is updated from 12.3.0 to 13.0.0 for [issue #13](https://github.com/patchwerks/furbomek/issues/13).
+Upstream identifies 13.0.0 as the fix for the
+[JPEG thumbnail decoder overflow](https://github.com/python-pillow/Pillow/security/advisories/GHSA-8g5g-8vmr-9782)
+(affected through 12.3.0) and the
+[JPEG comment/ICC encoder overflow](https://github.com/python-pillow/Pillow/security/advisories/GHSA-g7cr-3p24-7wf7)
+(9.4.0–12.3.0). These advisories do not establish exploitability here: production
+code does not load arbitrary image files or preserve supplied ICC metadata.
+The capture helper uses ImageGrab, RGB conversion, thumbnail resizing and JPEG
+encoding; live capture remains blocked by the CLI.
+
+The [13.0.0 release notes](https://pillow.readthedocs.io/en/stable/releasenotes/13.0.0.html)
+remove Python 3.10 support and several unused APIs. This module targets Python
+3.12 and does not use those removed APIs. Its conversion to RGB precedes resizing,
+so the changed RGBA/LA resize optimization is not used. The lock was regenerated
+with the existing uv 0.11.7, preserving lock revision 3 and every non-Pillow package
+record, including pytest. No runtime source or capture policy changed.
+
+Observed offline on macOS ARM64/Python 3.12.14: the original 60 tests passed on
+12.3.0; adding six synthetic-image cases yielded 66 passes on both versions.
+The new cases cover RGB/RGBA/grayscale conversion, aspect-ratio bounds, no upscaling,
+full decoding of generated JPEGs, byte-limit equality, quality fallback and
+oversize rejection. They never call ImageGrab or capture_frame; the existing
+capture-denial fixture and CLI rejection tests remain in force. Locked lint,
+format, types and lock checks also passed. Test execution used an empty
+environment with network, private-home/device reads and source writes denied;
+dependency preparation used wheels only, without source builds.
+
+This is API compatibility evidence, not an exploit reproduction, Linux/OBS
+qualification, desktop-privacy acceptance or confirmation that GitHub alerts have
+closed. Those require their respective later checks. Rollback reverts this pin
+and lock together, restoring the old advisory exposure; it does not enable capture.
