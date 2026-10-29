@@ -65,8 +65,8 @@ before work. A workflow with the same SHA does not prove the required workflow,
 event, review, branch protection or acceptance context.
 
 No hardware, live media, deployment, merge or repository write was performed by
-Scout. Independent review and hosted verification of the final branch remain
-separate gates. This tool has no persistent daemon or configuration installation;
+Scout. Independent review remains a separate gate; hosted evidence below applies only
+to its explicitly tested revision. This tool has no persistent daemon or configuration installation;
 rollback is to stop invoking it and return to the previously reviewed source.
 
 ## Review corrections — 2026-10-30
@@ -79,7 +79,11 @@ The corrected workflow uses an immutable, digest-pinned Docker image, a sanitize
 read-only source copy, a non-root user, no network, dropped capabilities and an
 empty credential environment. It mounts no host home, sockets or hardware
 devices. A trusted inline preflight must verify the boundary and print its pass
-marker before candidate tests execute. Hosted verification of this corrected
-workflow remains pending; no hosted pass is claimed. Any earlier hosted pass
+marker before candidate tests execute. Hosted verification passed at tested revision
+`638acec8b96ec7a1b7dc5ddf9891531bd9958cec`: [run 40943252413,
+job 123691828321](https://github.com/patchwerks/furbomek/actions/runs/40943252413/job/123691828321)
+logged `PASS: offline worker isolation boundary` before all 31 tests passed.
+This evidence identifies that tested revision, not subsequent documentation
+commits. Any earlier hosted pass
 using only `env -i` established test behavior, not isolation, and is superseded
 as isolation evidence by this required boundary verification.
