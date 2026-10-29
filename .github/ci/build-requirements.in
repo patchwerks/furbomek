@@ -1,6 +1,7 @@
 # Build-only tooling for offline editable installs in the media verification job.
 # Existing locked runtime/dev packages must not be upgraded during preparation.
 hatchling==1.27.0
+editables==0.5
 packaging==26.3
 pathspec==0.12.1
 pluggy==1.7.0
