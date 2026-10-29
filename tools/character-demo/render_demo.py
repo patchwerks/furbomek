@@ -19,7 +19,7 @@ sys.path.insert(0, str(ROOT / "services/hermes-activity"))
 from runtime import ActivityBroker, RunConfig  # noqa: E402
 
 
-def run(godot: Path, output: Path) -> None:
+def run(godot: Path, output: Path, *, full_canvas: bool = False) -> None:
     output.mkdir(mode=0o700)
     private = output / "private"
     private.mkdir(mode=0o700)
@@ -40,6 +40,9 @@ def run(godot: Path, output: Path) -> None:
     process = subprocess.Popen(
         [
             str(godot),
+            "--windowed",
+            "--resolution",
+            "1280x720",
             "--path",
             str(ROOT / "tools/kinect2/godot"),
             "--rendering-method",
@@ -51,6 +54,7 @@ def run(godot: Path, output: Path) -> None:
             "--",
             str(public),
             str(captures),
+            "full" if full_canvas else "focus",
         ],
         stdout=log,
         stderr=subprocess.STDOUT,
@@ -135,7 +139,12 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--godot", required=True, type=Path)
     parser.add_argument("--output", required=True, type=Path)
+    parser.add_argument(
+        "--full-canvas",
+        action="store_true",
+        help="Show the native broadcast layout instead of the readable status preview",
+    )
     args = parser.parse_args()
     if not args.godot.is_absolute() or not args.godot.is_file():
         parser.error("--godot must be an existing absolute executable path")
-    run(args.godot, args.output.resolve())
+    run(args.godot, args.output.resolve(), full_canvas=args.full_canvas)

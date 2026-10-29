@@ -15,7 +15,10 @@ python tools/character-demo/render_demo.py --godot /absolute/path/to/godot --out
 
 The renderer needs a graphical session; `--headless` is intentionally rejected
 because it cannot certify pixels. It uses a 1920x1080 render target displayed in
-a 960x540 window. No desktop screenshot permission is used: captured PNGs come
+a 1280x720 window. The default preview enlarges and clips the shipped NOW panel
+for readability, with an explicit fixture caption. `--full-canvas` preserves the
+native broadcast layout for comparison. Neither changes the production Control.
+No desktop screenshot permission is used: captured PNGs come
 only from the fixture's own viewport after `RenderingServer.frame_post_draw`.
 
 The six inputs show idle, thinking, speaking, interruption, a rejected attempt to

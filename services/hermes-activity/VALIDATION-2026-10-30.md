@@ -64,3 +64,52 @@ pending and is not included in the local pass count above.
 - Real Hermes lifecycle, shared PCM/cancellation integration, OBS, private soak
   and deployment remain separate dependent work. No live producer, robot,
   physical audibility, public broadcast or hardware behavior was tested.
+
+## Rendered demonstration and full media gate follow-up
+
+**Observed and measured, 2026-10-30 (Asia/Bangkok):** the fixture runner in
+[`tools/character-demo`](../../tools/character-demo/README.md) exercised the actual
+broker and the shipped Godot Control with a real OpenGL renderer. Xeno is the
+creator; Furbomek is the character/robot represented by this fixture.
+
+The unchanged broadcast layout was captured at 1920x1080. Its status panel
+occupies a narrow left column, so the demonstration now defaults to an enlarged
+preview of that same panel in a 1280x720 window. `--full-canvas` retains the native
+layout. The production Control and broadcast composition were not modified.
+
+Frames were read back only from the fixture's own viewport after
+`RenderingServer.frame_post_draw`; no desktop, camera or OBS capture was used.
+Actual PNG text was checked with OCR and rendered frames were visually inspected.
+Producer arrivals varied relative to the 120ms broker and 125ms consumer polls.
+
+| Input | Native layout, first matching captured pixels | Enlarged preview, first matching captured pixels |
+| --- | ---: | ---: |
+| Idle | 63 ms | 47 ms |
+| Thinking | 224 ms | 218 ms |
+| Speaking | 111 ms | 160 ms |
+| Interrupted | 173 ms | 171 ms |
+| Error | 116 ms | 160 ms |
+
+All measured transitions were below one second in these two local fixture runs.
+During the additional cancelled-speaking replay interval, every captured frame
+remained interrupted. That is a rejection observation, not a new-state latency
+measurement. The timestamps bound producer-to-rendered-frame capture, including
+polling/readback and approximately 100ms sampling; they exclude physical display
+scanout, OBS output and audio. This is not a general latency SLA or production
+host qualification. The exported video preserves captured timing, with no audio.
+Raw PNGs, timestamps, hashes and the video remain local artifacts outside Git.
+
+The full, unchanged `tools/verify-media.sh` gate passed on hosted Linux for
+`a8c01317fa739c29cec90060edf92056974b01b0`:
+[run 40929646695](https://github.com/patchwerks/furbomek/actions/runs/40929646695/job/123644364679).
+It passed 121 gateway tests, 121 activity tests, 18 supervisor tests and 3 camera
+snapshot tests (263 total), each module's lint/format/types/lock checks, shell
+syntax and the existing Godot activity fixtures. The renderer fixture also
+passed parser validation. A dedicated unprivileged worker used isolated
+mount/PID/network namespaces, synthetic PTYs and loopback only. Local build
+backends ran after isolation; build-only requirements were hash-pinned.
+
+This supersedes the earlier pending full-media-gate and pixels-only evidence
+limitations above. Formal independent acceptance remains pending, including
+review of the measured rendered-frame boundary against issue #2. Nothing was
+merged, installed on the production host, flashed, moved or publicly streamed.

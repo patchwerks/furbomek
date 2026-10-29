@@ -17,20 +17,42 @@ func _init() -> void:
 
 func _run() -> void:
 	var arguments := OS.get_cmdline_user_args()
-	if arguments.size() != 2 or DisplayServer.get_name() == "headless":
+	if arguments.size() != 3 or arguments[2] not in ["full", "focus"] or DisplayServer.get_name() == "headless":
 		printerr("Expected public snapshot and capture directories, with a real renderer")
 		quit(2)
 		return
 	destination = arguments[1]
 	root.mode = Window.MODE_WINDOWED
 	root.borderless = false
-	root.size = Vector2i(960, 540)
+	root.size = Vector2i(1280, 720)
 	root.content_scale_size = Vector2i(1920, 1080)
 	root.content_scale_mode = Window.CONTENT_SCALE_MODE_VIEWPORT
-	root.title = "Xeno offline character fixture"
+	root.title = "Furbomek offline character fixture"
 	RenderingServer.set_default_clear_color(Color("050204"))
 	view = ActivityPorts.new()
-	root.add_child(view)
+	if arguments[2] == "focus":
+		var crop := Control.new()
+		crop.position = Vector2(240, 330)
+		crop.size = Vector2(1440, 372)
+		crop.clip_contents = true
+		root.add_child(crop)
+		crop.add_child(view)
+		view.scale = Vector2(3, 3)
+		view.position = Vector2(-48, -1278)
+		var title := Label.new()
+		title.text = "FURBOMEK / OFFLINE CHARACTER TEST"
+		title.position = Vector2(240, 210)
+		title.add_theme_font_size_override("font_size", 36)
+		title.add_theme_color_override("font_color", Color("c69a9a"))
+		root.add_child(title)
+		var subtitle := Label.new()
+		subtitle.text = "Actual display. Synthetic events."
+		subtitle.position = Vector2(240, 265)
+		subtitle.add_theme_font_size_override("font_size", 26)
+		subtitle.add_theme_color_override("font_color", Color("895158"))
+		root.add_child(subtitle)
+	else:
+		root.add_child(view)
 	view.size = Vector2(1920, 1080)
 	view.configure(arguments[0])
 	records = FileAccess.open(destination.path_join("frames.jsonl"), FileAccess.WRITE)
