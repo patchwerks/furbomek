@@ -92,3 +92,28 @@ This establishes the bounded interpreter-selection correction, not operational
 acceptance of the full worker. The full Docker/proxy provisioning path, registry
 routing/denials and unchanged product checks still require the separate acceptance
 sequence above. No helper was activated, trust pin changed or PR merged.
+
+
+## Node compatibility pin — 2026-10-30
+
+The legacy worker now pins the official `node:26.7.0-bookworm` image at index
+digest `sha256:e929171d35b9df7773a3ec5b068e387fa109441dc90f91e6560af5d39b7e9bf1`.
+This replaces Node 22.16.0, which is below the pending [Nuxt 4 upgrade's](https://github.com/patchwerks/furbomek/pull/28)
+engine requirement (`^22.22.3 || ^24.15.0 || >=26.0.0`). Node 26.7.0 satisfies
+that range and matches the version used for that upgrade's local checks.
+
+**Observed:** the [Docker official Node registry manifest](https://registry-1.docker.io/v2/library/node/manifests/26.7.0-bookworm)
+returned that index digest; the response body's SHA-256 matched. Its Linux amd64
+manifest is `sha256:158304f335472bdd3fe88be1c4d37e5d83f3d1fd57da656863c24e7d889e4dea`;
+the referenced image configuration declares `NODE_VERSION=26.7.0`. Manifest and
+configuration body hashes matched their referenced digests. The index also
+contains Linux arm64/v8 and ppc64le images. These are registry metadata checks,
+not execution of the image.
+
+The Python helper, Python image and all container/network/proxy boundaries are
+unchanged. Local credential-free, network-denied proxy/input tests passed (8),
+as did shell syntax and whitespace checks. No local Docker runtime was available,
+so this pin has not qualified the full Docker/proxy path or Nuxt build in that
+image. The existing Python correction's exact-version regression evidence above
+is unchanged; this Node-only update does not repeat or extend it. Independent
+review and the separate acceptance sequence still apply before activation.

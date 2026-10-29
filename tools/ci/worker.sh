@@ -7,7 +7,7 @@ candidate=$(cd "$2" && pwd -P)
 trusted=$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd -P)
 [[ $candidate != "$trusted" ]] || { echo 'Trusted helpers must be separate from candidate source' >&2; exit 2; }
 python_image=python:3.12.11-bookworm@sha256:1b48a1b13ec678be8d84974541cc007d4367aaf01f985231daad1a940106efc0
-node_image=node:22.16.0-bookworm@sha256:a676f1268cf25605dbee49dcc3c73497311288da421855bdf19f25b8da6a95df
+node_image=node:26.7.0-bookworm@sha256:e929171d35b9df7773a3ec5b068e387fa109441dc90f91e6560af5d39b7e9bf1
 image=$python_image
 if [[ $mode == legacy ]]; then image=$node_image; fi
 ci_id="furbomek-${mode}-$$"
