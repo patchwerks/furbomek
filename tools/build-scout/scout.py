@@ -18,6 +18,71 @@ ASSIGNMENT = re.compile(r"\b(token|password|secret|api[_-]?key)\s*[:=]\s*\S+", r
 STOPWORDS = frozenset("a an and are as at be by for from in into is of on or the to with".split())
 ISSUE_URL = re.compile(r"https://github\.com/[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+/issues/[1-9]\d*")
 SHA = re.compile(r"[0-9a-fA-F]{40}")
+# Deliberately finite vocabulary: unknown words retain their identity. These are
+# lexical hints, not a language model or evidence that two tasks are equivalent.
+TITLE_GROUPS = {
+    "verify": "verify verifies verifying verification test tests testing validate validation",
+    "fix": "fix fixes fixing repair repairs repairing",
+    "cancel": "cancel cancels cancelled canceled cancelling canceling cancellation abort aborted",
+    "reconnect": "reconnect reconnects reconnecting reconnection",
+    "timeout": "timeout timeouts",
+    "retry": "retry retries retrying",
+    "crash": "crash crashes crashing",
+    "duplicate": "duplicate duplicates duplicated",
+    "enable": "enable enables enabling enabled",
+    "disable": "disable disables disabling disabled",
+    "add": "add adds adding",
+    "remove": "remove removes removing removal",
+    "start": "start starts starting",
+    "stop": "stop stops stopping",
+    "increase": "increase increases increasing",
+    "decrease": "decrease decreases decreasing",
+}
+TITLE_ALIASES = {word: concept for concept, words in TITLE_GROUPS.items() for word in words.split()}
+TITLE_GENERIC = frozenset("fix verify add remove enable disable start stop increase decrease update improve implement support issue bug problem feature task work handling behavior".split())
+TITLE_ACTIONS = frozenset("enable disable add remove start stop increase decrease".split())
+TITLE_NEGATION = frozenset("no not never without cannot can't don't doesn't won't shouldn't".split())
+TITLE_PLATFORMS = frozenset("linux windows macos android ios ubuntu arch".split())
+
+
+def title_evidence(title: str) -> dict:
+    raw = set(re.findall(r"[a-z0-9]+", title.lower())) - STOPWORDS
+    words = re.findall(r"[a-z0-9]+(?:'[a-z]+)?", title.casefold().replace("’", "'"))
+    # Only an exact phrase rewrite; no stemming or dropping unknown qualifiers.
+    joined = " ".join(words)
+    words = re.sub(r"\btimed out\b", "timeout", joined).split()
+    mappings = {word: TITLE_ALIASES.get(word, word) for word in words if word not in STOPWORDS}
+    if re.search(r"\btimed out\b", joined):
+        mappings["timed out"] = "timeout"
+    concepts = set(mappings.values())
+    return {"raw": raw, "concepts": concepts, "mappings": mappings,
+            "anchors": concepts - TITLE_GENERIC - TITLE_NEGATION,
+            "actions": concepts & TITLE_ACTIONS,
+            "negation": concepts & TITLE_NEGATION,
+            "scope": (concepts & TITLE_PLATFORMS) | {x for x in concepts if any(c.isdigit() for c in x)}}
+
+
+def title_match(left: dict, right: dict) -> dict | None:
+    a, b = left["concepts"], right["concepts"]
+    common, union = a & b, a | b
+    score = len(common) / len(union) if union else 0
+    # Task verbs (fix/test) are not behavioral opposites. Directional actions,
+    # negation and explicit platform/version scope must agree, even one-sided.
+    if any(left[key] != right[key] for key in ("actions", "negation", "scope")):
+        return None
+    anchors_a, anchors_b = left["anchors"], right["anchors"]
+    if anchors_a - anchors_b and anchors_b - anchors_a:
+        return None
+    if len(common) < 3 or len(anchors_a & anchors_b) < 2 or score < 0.6:
+        return None
+    raw_common, raw_union = left["raw"] & right["raw"], left["raw"] | right["raw"]
+    return {"title_jaccard": round(len(raw_common) / len(raw_union), 3) if raw_union else 0,
+            "shared_terms": sorted(raw_common), "normalized_title_jaccard": round(score, 3),
+            "shared_concepts": sorted(common),
+            "title_normalizations": {side: [{"term": term, "concept": concept}
+                for term, concept in sorted(evidence["mappings"].items()) if term != concept]
+                for side, evidence in (("left", left), ("right", right))},
+            "reason": "Normalized title overlap with matching action, negation and explicit scope hints; inspect full scope, dependencies and implementation before deciding. Title-only lexical heuristic, not semantic identity."}
 
 
 def clean(value: object, limit: int = 20000) -> str:
@@ -221,17 +286,14 @@ def analyze(snapshot: dict, *, now: datetime | None = None, max_age_hours: int =
                 "disposition": "gated-review" if gates else "candidate-for-human-review", "gates": sorted(set(gates)),
                 "reasons": reasons, "blocker_evidence": sorted(blockers),
                 "evidence": [url] + ([url + "#issuecomment-" + str(c["id"]) for c in claim_comments if type(c.get("id")) is int])})
-    for index, (left, title, state, kind) in enumerate(sorted(all_items)):
-        a = set(re.findall(r"[a-z0-9]+", title.lower())) - STOPWORDS
-        for right, other, other_state, other_kind in sorted(all_items)[index + 1:]:
+    prepared = [(url, title_evidence(title), state, kind) for url, title, state, kind in sorted(all_items)]
+    for index, (left, a, state, kind) in enumerate(prepared):
+        for right, b, other_state, other_kind in prepared[index + 1:]:
             if state == other_state == "closed":
                 continue
-            b = set(re.findall(r"[a-z0-9]+", other.lower())) - STOPWORDS
-            union, common = a | b, a & b
-            similarity = len(common) / len(union) if union else 0
-            if len(common) >= 3 and similarity >= 0.6:
-                duplicates.append({"left": left, "right": right, "title_jaccard": round(similarity, 3),
-                    "shared_terms": sorted(common), "reason": "Title overlap only; inspect scope, dependencies and implementation before deciding.",
+            match = title_match(a, b)
+            if match:
+                duplicates.append({"left": left, "right": right, **match,
                     "kind": "issue-pr-overlap" if kind != other_kind else "possible-duplicate"})
     recommendations.sort(key=lambda r: (bool(r["gates"]), -r["priority_score"], r["issue"]))
     return {"schema": "xeno.build-scout.report.v1", "observed_at": snapshot["observed_at"],

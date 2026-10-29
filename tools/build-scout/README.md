@@ -73,11 +73,35 @@ Labels and issue prose are untrusted evidence, never authorization. Always inspe
 the current plan, claim, native dependencies, acceptance and private Project
 before work. Scout does not read Project state or certify readiness.
 
-Duplicate candidates use case-folded title word overlap, excluding common words:
-at least three shared terms and Jaccard similarity >= 0.6. Reports show shared
-terms and the score, including issue/PR overlaps. Closed/closed pairs are skipped.
-This is an explainable heuristic, not semantic identity, proof of implementation
-or a reason to close anything automatically.
+Duplicate candidates use a small, explicit title vocabulary for lexical variants
+(for example test/verify, abort/cancellation, and timed out/timeout). Unknown words
+retain their identity. A candidate needs at least three shared normalized concepts,
+two shared non-generic target terms, and normalized Jaccard similarity >= 0.6.
+Differing directional actions, negation, explicit platforms or numeric/version
+tokens suppress a pair. Unmatched target terms on both sides also suppress it,
+so high overlap does not erase broker/renderer or camera/microphone differences.
+These guards apply even to high literal overlap. Generic task verbs such as
+fix/test are not classified as opposite desired behavior. Bodies, comments and
+labels cannot add duplicate evidence or override a title mismatch.
+
+Existing `title_jaccard` and `shared_terms` remain literal title overlap, with
+their previous tokenization. Added `normalized_title_jaccard`, `shared_concepts`
+and per-side `title_normalizations` explain lexical matches; the normalized score
+is not a probability or semantic confidence. Issue/PR pairs remain
+`issue-pr-overlap`, never proof that the PR implements the issue. Pairs are sorted
+by canonical URLs; closed/closed pairs are skipped. No ranking or gate changes
+follow from a duplicate candidate.
+
+This favors precision over recall: arbitrary paraphrases, unknown inflections,
+different negation wording, and general-versus-platform-specific titles can be
+missed. One-sided unknown qualifiers can still produce false positives. Exact
+titles can hide different body scopes, and word sets cannot establish the roles
+of subjects and objects. Review full scope, dependencies and implementation;
+these are advisory candidates, never semantic identity or automatic closure.
+The readable synthetic [duplicate corpus](duplicate-corpus.json) records intended
+positives, hard negatives, baseline sensitivity cases and a known recall limit.
+The [duplicate validation record](VALIDATION-DUPLICATES-2026-10-30.md) records
+35 passing local offline tests and the remaining qualification limits.
 
 CI output names observed failed/cancelled workflow run URLs and their head SHAs.
 Each collected PR also reports its observed head and any bounded workflow runs
