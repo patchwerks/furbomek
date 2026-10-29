@@ -78,8 +78,8 @@ closure without changing the imported utility. Direct Deepgram 3.5.0, OpenAI
 PlayHT 0.9.8; the combined follow-up below removes that unused npm SDK. The Nuxt
 upgrade refreshed transitive dependencies, including HTTP, WebSocket and helper
 packages; the provider
-dependency graphs are not unchanged. Nuxt ESLint 0.4.0 remains, with a nested Nuxt
-kit 3.21.11 alongside framework kit 4.6.3. The lock also contains nested vue-tsc
+dependency graphs are not unchanged. The initial qualification retained Nuxt ESLint 0.4.0; the follow-up below updates
+that parent to 0.7.6. Nested Nuxt kit 3.21.11 remains alongside framework kit 4.6.3. The lock also contains nested vue-tsc
 3.3.14 in addition to direct 3.3.9. This is not a claim that every security alert
 has been remediated.
 
@@ -149,6 +149,80 @@ both the preserved #28 rerun and combined run recorded `[false, true]`, compared
 with the earlier `[true, true]` Nuxt candidate sample. Focus return is not an
 acceptance assertion. The Node/platform and independent
 maintainer/hosted-check limits above still apply to this combined candidate.
+
+## ESLint parent compatibility follow-up
+
+Starting from combined PR #28 head
+`330ff80111a9eaad84929d6d15527ec7cc93eec7`, the root Nuxt ESLint module is pinned
+to 0.7.6. This is the first published parent accepting inspector 1.x while retaining
+ESLint 8 support. The resolved inspector moves from 0.5.6 to 1.3.0 and its nested
+esbuild from 0.24.2 to 0.25.12; the separate esbuild 0.28.2 remains unchanged.
+No overrides or forced peer resolution are used. The 0.5.x inspector series has
+no release using patched esbuild. See the official
+[Nuxt ESLint release](https://github.com/nuxt/eslint/releases/tag/v0.7.6),
+[parent metadata](https://registry.npmjs.org/@nuxt%2feslint/0.7.6), and
+[inspector metadata](https://registry.npmjs.org/@eslint%2fconfig-inspector/1.3.0).
+This removes the affected version gap for
+[GHSA-67mh-4wv8-2f99](https://github.com/advisories/GHSA-67mh-4wv8-2f99);
+the advisory requires esbuild's development serving API. Its use was not
+established in the inspected inspector build/watch path. No development server
+or inspector listener was started for qualification. Inspector 1.3.0 is a conscious
+lock selection within the parent's supported `^1.0.0` range: its esbuild `^0.25.9`
+range avoids the newer Windows serving regression
+[GHSA-g7r4-m6w7-qqqr](https://github.com/advisories/GHSA-g7r4-m6w7-qqqr).
+Normal npm registry resolution produced the package objects; the final manifest
+has no direct inspector dependency or override. `npm ci` preserves this selection;
+a future `npm update` may select inspector 1.5.0/esbuild 0.27.x again and must be
+reaudited. This is not an all-advisories-cleared claim.
+
+Lockfile SHA256:
+`cf1ea75c24516aff2173f01b86e604111faaeb9a8fcaff361b4c734d32af1df4`.
+The graph changes 64 retained package records, adds 48 and removes 164 paths.
+Changes are the lint dependency closure plus deduplication: 28 removed helper
+paths outside that closure resolve to hoisted copies with identical versions and
+integrity hashes. Direct Nuxt, Vue, router, Bootstrap, provider SDKs, TypeScript
+and root ESLint 8.57.1 remain unchanged. No application/configuration source changed.
+
+Fresh offline script-disabled install, production build with configured types,
+direct vue-tsc, configuration/Settings/boundary checks and offline browser smoke
+pass on the same Node 26.7.0/macOS arm64 worker. Eleven shared public output files
+remain byte-identical to the combined baseline; only build metadata changes.
+All browser functional assertions pass with zero page/console errors, unknown
+requests or missing assets. Focus-return samples remain diagnostic, not a guaranteed behavior or acceptance
+assertion.
+
+The module remains enabled and generates usable `.nuxt/eslint.config.mjs`.
+ESLint 8 loads the real generated config, calculates the Vue configuration, and
+reports an expected fatal parse diagnostic for a malformed synthetic Vue/TS input.
+Native `unrs-resolver` also resolves Vue with Node/require/default conditions after
+the script-disabled install. Baseline and candidate app lint both report 11 errors
+and 20 warnings with no fatal errors: existing lint debt, not a clean-lint claim.
+The upstream TypeScript ruleset changes from 204 to 209 rules, replacing older
+rules such as ban-types/no-var-requires with their successor rules. No project
+rules are disabled or source suppressed to obtain this result. Independent review,
+exact new-head hosted checks and maintainer acceptance remain separate gates.
+
+## Remaining dependency finding for maintainer disposition
+
+A fresh metadata audit of the final graph reports no moderate, high or critical
+findings. Its eight low package entries trace to one underlying advisory,
+[deepmerge GHSA-gcqx-w48m-w2h4](https://github.com/advisories/GHSA-gcqx-w48m-w2h4).
+Deepmerge 4.3.1 remains through the active Deepgram SDK and build-time Rollup
+node-resolve plugin; no compatible patched release is identified. This finding
+is unresolved, not accepted risk or an alert dismissal.
+
+The [upstream report](https://github.com/TehShrike/deepmerge/issues/273) describes
+attacker-controlled merge inputs/target shapes producing inherited properties;
+downstream use of those properties is necessary for impact. The active SDK merges
+client configuration with built-in defaults. Static inspection did not find merges
+over provider transcript/response bodies. Normal settings have fixed fields, but
+same-origin localStorage restoration lacks runtime schema validation, so malformed
+persisted configuration cannot be ruled out. No unauthenticated remote storage
+writer or application exploit was established; this is not a complete taint proof.
+The inspected Rollup call merges only hardcoded defaults; plugin options use object
+spread. A separate settings-validation boundary or parent replacement would need
+its own security/compatibility review. No advisory-evading downgrade, fork or
+removal of the active provider is included. Maintainer disposition remains required.
 
 The portable Settings regression is
 `node tools/legacy-compat/settings-regression.cjs`. It compiles the real SFC and
