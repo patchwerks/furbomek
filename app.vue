@@ -81,11 +81,11 @@
       </div>
     </BContainer>
   </BContainer>
-  <BModal id="settings-modal" noCloseOnBackdrop size="xl">
+  <BModal v-model="settingsModalVisible" id="settings-modal" noCloseOnBackdrop size="xl">
     <template #title><h4>Settings</h4></template>
     <SettingsComponent v-model="settings"/>
   </BModal>
-  <BModal id="warning-modal" noCloseOnBackdrop size="md" title="Out of credits">
+  <BModal v-model="warningModalVisible" id="warning-modal" noCloseOnBackdrop title="Out of credits">
     <p>PlayHT API is out of credits. Please upgrade your plan or use another account.</p>
   </BModal>
 </template>
@@ -178,8 +178,10 @@ const {
     settings
 );
 
-const {show: showSettingsModal} = useModal('settings-modal')
-const {show: showWarningModal} = useModal('warning-modal')
+const settingsModalVisible = ref(false)
+const warningModalVisible = ref(false)
+const showSettingsModal = () => { settingsModalVisible.value = true }
+const showWarningModal = () => { warningModalVisible.value = true }
 
 function useDevices() {
   const audioInputDevices = ref<AudioDeviceSelectInterface[]>([{

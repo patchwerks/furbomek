@@ -177,7 +177,8 @@ const emit = defineEmits(['update:modelValue']);
 
 const model = ref<Settings>(mergeDeep(defaultSettings, modelValue));
 
-watch(modelValue, (modelValue) => {
+watch(() => modelValue, (modelValue) => {
+  if (modelValue === model.value) return;
   model.value = mergeDeep(defaultSettings, modelValue) as Settings
 }, {deep: true});
 
