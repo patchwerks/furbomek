@@ -3,7 +3,11 @@
   'use strict';
   const ASSET = 'furbomek-static-plate-v1';
   const MAX_BYTES = 8192;
-  const text = (value, min, max) => typeof value === 'string' && value.length >= min && value.length <= max;
+  const text = (value, min, max) => {
+    if (typeof value !== 'string') return false;
+    const length = [...value].length; // Match the Python producer's Unicode codepoint bounds.
+    return length >= min && length <= max;
+  };
   const integer = value => Number.isSafeInteger(value) && value >= 0;
 
   function project(raw, now) {
@@ -24,10 +28,18 @@
 
   function createAdapter({render, now = Date.now, fixture = false}) {
     if (typeof render !== 'function') throw new TypeError('render is required');
-    let loaded = false, visible = true, stopped = false, latest = null, lastSeq = -1;
+    let loaded = false, visible = true, stopped = false, latest = null, lastSeq = -1, clockHighWater = -1;
     const capabilities = () => Object.freeze({version: 1, assets: [ASSET], formats: ['svg'], expressions: [], visemes: [], audio: false, capture: 'transparent-browser', transport: 'none'});
+    const readClock = () => {
+      const current = now();
+      // Fail closed until wall time catches up; retaining the sequence prevents replay.
+      if (!integer(current) || current < clockHighWater) { latest = null; return null; }
+      clockHighWater = current;
+      return current;
+    };
     const snapshot = () => {
-      if (latest !== null && now() >= latest.expires) latest = null;
+      const current = readClock();
+      if (latest !== null && (current === null || current >= latest.expires)) latest = null;
       const fresh = latest !== null;
       return Object.freeze({asset: loaded ? ASSET : null, visible: visible && loaded && !stopped,
         fixture, state: stopped ? 'offline' : fresh ? 'present' : 'offline',
@@ -38,7 +50,9 @@
     const paint = () => { const state = snapshot(); render(state); return state; };
     function apply(raw) {
       if (stopped || !loaded) return false;
-      const value = project(raw, now());
+      const current = readClock();
+      if (current === null) { paint(); return false; }
+      const value = project(raw, current);
       if (!value || value.seq <= lastSeq) return false;
       latest = value; lastSeq = value.seq; paint(); return true;
     }

@@ -52,9 +52,13 @@ from `services/hermes-activity/activity_models.py`, not a new character broker.
 Only title, summary and status reach the DOM. Screen, filenames, timeline and extra
 fields are ignored. The consumer requires `hermes-adapter`, public audience and
 sensitivity, safe integer sequence, UTC millisecond timestamp, 1–30000 ms TTL,
-maximum 8192 bytes and existing text-field limits. Invalid, expired, future, duplicate
-and older sequence inputs cannot update state or extend TTL. Once observed expired,
-state cannot return after a wall-clock rollback. Strictly newer full snapshots
+maximum 8192 bytes and existing text-field limits counted as Unicode code points,
+matching the Python producer rather than JavaScript UTF-16 code units. Invalid, expired, future, duplicate
+and older sequence inputs cannot update state or extend TTL. Any observed backward wall-clock shift clears the current caption immediately,
+including before TTL expiry. Inputs remain rejected until wall time reaches its
+previous high-water mark. The last accepted sequence is retained; old state never
+resurrects when time catches up. A new, fresh, higher-sequence projection is required
+to restore presence. Strictly newer full snapshots
 converge; sequence reset requires a new adapter instance, not an inferred session.
 
 The fixture uses the same envelope with permanently separate fixture provenance.
@@ -113,3 +117,11 @@ No existing launch command, service configuration, media destination, root packa
 workflow or shared contract has changed. Future OBS acceptance must remove only
 its owned source/scene and restore the saved configuration. Do not close #5 or claim
 its ten-minute gate from these offline results.
+
+## Review corrections, 2026-10-30 (Asia/Bangkok)
+
+Independent review found UTF-16 length mismatch and pre-expiry clock rollback.
+Three added regressions reproduced both defects before correction. The adapter
+now uses codepoint counts and the fail-closed clock policy above. All 11 boundary
+tests and the real-browser fixture check passed after correction in the restricted
+QA worker. Private OBS acceptance and Stream Director integration remain pending.

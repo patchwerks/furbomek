@@ -49,3 +49,31 @@ test('text is passed as text; no markup interpretation in model', () => {
  const {adapter:a}=setup(); const payload=JSON.parse(event()).payload; payload.summary='<img src=x onerror=alert(1)>';
  assert.equal(a.apply_event(event({payload})),true); assert.equal(a.snapshot().caption,payload.summary);
 });
+
+test('text bounds match producer Unicode codepoint counts, not UTF-16 units', () => {
+ const {adapter:a}=setup();
+ const payload={title:'🦊'.repeat(180),summary:'🦊'.repeat(100),status:'🦊'.repeat(24),tool:'🦊'.repeat(12)};
+ assert.equal(a.apply_event(event({payload})),true);
+ assert.equal(a.snapshot().caption,payload.summary);
+ for (const [field,limit] of [['title',180],['summary',180],['status',24],['tool',12]]) {
+   const boundary={...payload,[field]:'🦊'.repeat(limit)};
+   assert.equal(a.apply_event(event({seq:a.snapshot().seq+1,payload:boundary})),true,field+' at limit');
+   assert.equal(a.apply_event(event({seq:a.snapshot().seq+1,payload:{...boundary,[field]:'🦊'.repeat(limit+1)}})),false,field+' over limit');
+ }
+});
+test('clock rollback before expiry immediately clears presentation and cannot resurrect it', () => {
+ const {adapter:a,time,frames}=setup(); assert.equal(a.apply_event(event()),true);
+ time(START+100); a.tick(); time(START-60000); a.tick();
+ assert.equal(frames.at(-1).caption,'Activity unavailable'); assert.equal(a.health(),'degraded');
+ assert.equal(a.snapshot().state,'offline');
+ time(START+101); a.tick(); assert.equal(a.snapshot().state,'offline');
+ assert.equal(a.apply_event(event()),false); assert.equal(a.snapshot().state,'offline');
+ assert.equal(a.apply_event(event({seq:2,observedAt:new Date(START+101).toISOString()})),true);
+});
+test('incoming event cannot bypass a newly detected backwards clock', () => {
+ const {adapter:a,time,frames}=setup(); a.apply_event(event()); time(START-60000);
+ const incoming=event({seq:2,observedAt:new Date(START-60000).toISOString()});
+ assert.equal(a.apply_event(incoming),false); assert.equal(frames.at(-1).state,'offline');
+ time(START-59000); assert.equal(a.apply_event(event({seq:3,observedAt:new Date(START-59000).toISOString()})),false);
+ assert.equal(a.snapshot().seq,1);
+});
