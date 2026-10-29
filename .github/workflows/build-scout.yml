@@ -1,0 +1,23 @@
+name: Build Scout offline checks
+on:
+  pull_request:
+    paths:
+      - 'tools/build-scout/**'
+      - '.github/workflows/build-scout.yml'
+  push:
+    branches: ['work/14-build-scout']
+    paths:
+      - 'tools/build-scout/**'
+      - '.github/workflows/build-scout.yml'
+permissions:
+  contents: read
+jobs:
+  offline:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - name: Run deterministic fixtures without collector credentials
+        run: env -i PATH=/usr/bin:/bin HOME="$RUNNER_TEMP" PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s tools/build-scout -p 'test_*.py' -v
