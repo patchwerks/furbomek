@@ -1,0 +1,7 @@
+# Build-only tooling for offline editable installs in the media verification job.
+# Existing locked runtime/dev packages must not be upgraded during preparation.
+hatchling==1.27.0
+packaging==26.3
+pathspec==0.12.1
+pluggy==1.7.0
+trove-classifiers==2025.3.19.19
