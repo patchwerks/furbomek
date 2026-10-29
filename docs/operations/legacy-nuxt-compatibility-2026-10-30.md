@@ -9,9 +9,12 @@ status: active
 References [issue 13](https://github.com/patchwerks/furbomek/issues/13). This
 candidate moves the legacy browser application onto Nuxt 4 while retaining its
 root directory layout, SPA mode, disabled DevTools, existing settings schema and
-provider interfaces. It is stacked on unmerged PR #23 at
+provider interfaces. It was built on the unmerged PR #23 candidate at
 `016e577e6c5be0f9dea86025e938c91d3eaf60ce`; published main was verified at
-`9347304e866ca90e8eec2d85f3bd3c41002d9a42`. Separate PR #24's unused PlayHT SDK
+`9347304e866ca90e8eec2d85f3bd3c41002d9a42`. Draft PR #28 targets main so the
+repository's existing default CodeQL checks run. Its ancestry includes PR #23's
+already reviewed containment changes, still pending independent maintainer
+acceptance; this does not imply that #23 is merged. Separate PR #24's unused PlayHT SDK
 removal is not included and needs lockfile reconciliation before eventual merge.
 The separate CI/bootstrap proposals #18/#22 pin a Node 22.16.0 legacy worker,
 which is below this candidate's 22.22.3 floor. Their runtime pin needs an
