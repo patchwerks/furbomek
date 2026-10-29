@@ -8,7 +8,7 @@ permissions:
 jobs:
   probe:
     runs-on: ubuntu-24.04
-    timeout-minutes: 5
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
         with:
@@ -75,4 +75,47 @@ jobs:
               print('MARKER_CONFIRMED' if executed else 'MARKER_ABSENT_LIMITED_OUTCOME', mode, flush=True)
           print('This synthetic offline probe does not activate or qualify the helper, proxy, or provisioning network.', flush=True)
           sys.exit(0 if all(observed) else 1)
+          PY
+      - name: Check out exact corrected helper candidate for fixture tests
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          ref: 'b04523abf79f22b750a3cdb579f2169a717e1b38'
+          path: helper-candidate
+          persist-credentials: false
+      - name: Copy only helper source and tests to a sanitized directory
+        shell: bash
+        run: |
+          git -C helper-candidate rev-parse HEAD
+          helper_source=$(mktemp -d "$RUNNER_TEMP/helper-fixture-source.XXXXXXXX")
+          mkdir -p "$helper_source/tools"
+          cp -R helper-candidate/tools/ci "$helper_source/tools/ci"
+          cp -R helper-candidate/tools/tests "$helper_source/tools/tests"
+          chmod -R a+rX "$helper_source"
+          echo "HELPER_FIXTURE_SOURCE=$helper_source" >> "$GITHUB_ENV"
+      - name: Test corrected helper fixtures with exact uv and no network
+        shell: bash
+        run: |
+          docker run --rm -i --network none --read-only --user 65534:65534 \
+            --cap-drop ALL --security-opt no-new-privileges --pids-limit 128 \
+            --cpus 2 --memory 1g \
+            --tmpfs /tmp:rw,exec,nosuid,nodev,size=256m \
+            --mount "type=bind,src=$PROBE_TOOLS,dst=/tools,readonly" \
+            --mount "type=bind,src=$HELPER_FIXTURE_SOURCE,dst=/candidate,readonly" \
+            --workdir /candidate \
+            python:3.12.11-bookworm@sha256:1b48a1b13ec678be8d84974541cc007d4367aaf01f985231daad1a940106efc0 \
+            env -i PATH=/tools:/usr/local/bin:/usr/bin:/bin HOME=/tmp/home \
+            UV_OFFLINE=1 UV_PYTHON_DOWNLOADS=never UV_CACHE_DIR=/tmp/cache \
+            PYTHONDONTWRITEBYTECODE=1 \
+            /bin/bash -eu -c 'umask 077; mkdir -p "$HOME"; exec python -I -' <<'PY'
+          import sys
+          import unittest
+
+          suite = unittest.defaultTestLoader.discover('tools/tests', pattern='test_*.py')
+          result = unittest.TextTestRunner(verbosity=2).run(suite)
+          print('Fixture test count:', result.testsRun, flush=True)
+          print('Skipped fixtures:', result.skipped, flush=True)
+          qualified = result.wasSuccessful() and not result.skipped and result.testsRun >= 14
+          if not qualified:
+              print('Fixture verification incomplete: failures, skips, or insufficient test count.', flush=True)
+          sys.exit(0 if qualified else 1)
           PY
