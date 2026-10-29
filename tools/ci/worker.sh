@@ -3,8 +3,8 @@
 set -euo pipefail
 case ${1:-} in media|legacy) mode=$1 ;; *) echo 'usage: worker.sh media|legacy CANDIDATE_DIRECTORY' >&2; exit 2 ;; esac
 [[ $# == 2 && -n $2 && -d $2 ]] || { echo 'Explicit candidate directory is required' >&2; exit 2; }
-candidate=$(cd "$2" && pwd)
-trusted=$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)
+candidate=$(cd "$2" && pwd -P)
+trusted=$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd -P)
 [[ $candidate != "$trusted" ]] || { echo 'Trusted helpers must be separate from candidate source' >&2; exit 2; }
 python_image=python:3.12.11-bookworm@sha256:1b48a1b13ec678be8d84974541cc007d4367aaf01f985231daad1a940106efc0
 node_image=node:22.16.0-bookworm@sha256:a676f1268cf25605dbee49dcc3c73497311288da421855bdf19f25b8da6a95df
@@ -49,6 +49,7 @@ worker=(docker run --rm --read-only --cap-drop ALL --security-opt no-new-privile
   --tmpfs /tmp:rw,exec,nosuid,size=512m
   --mount "type=bind,source=$candidate,target=/source,readonly"
   --mount "type=volume,source=$volume,target=/scratch"
+  --mount "type=bind,source=$trusted/tools/ci/provision-python.sh,target=/trusted/provision-python.sh,readonly"
   --workdir /scratch --env XDG_CACHE_HOME=/scratch/cache
   --env UV_CACHE_DIR=/scratch/uv-cache --env UV_PYTHON_DOWNLOADS=never
   --env PYTHONUNBUFFERED=1 --env PYTHONDONTWRITEBYTECODE=1
@@ -70,17 +71,13 @@ proxy_env=(--env HTTPS_PROXY=http://dependency-proxy:3128 --env HTTP_PROXY=http:
 '
 if [[ $mode == media ]]; then
   "${worker[@]}" --network "$network" "${proxy_env[@]}" "$image" bash -euc '
-    python -m venv /scratch/bootstrap
+    /usr/local/bin/python3 -I -m venv /scratch/bootstrap
     /scratch/bootstrap/bin/pip install --only-binary=:all: --no-deps uv==0.11.7
-    export PATH=/scratch/bootstrap/bin:$PATH
-    # No candidate build backend executes while provisioning has registry egress.
-    for service in embodiment-gateway hermes-activity stream-supervisor; do
-      uv sync --frozen --no-install-project --no-build --project /scratch/source/services/$service
-    done
-    uv sync --frozen --no-build --script /scratch/source/services/camera-capture/tests/test_snapshot.py
-    # Cache the existing hatchling build backend and wheel dependencies for the
-    # later offline editable-project install, without executing a build hook.
-    uv pip install --only-binary=:all: --target /scratch/build-inputs hatchling==1.27.0
+    bash /trusted/provision-python.sh /scratch/source /scratch/python-envs \
+      /scratch/uv-cache /scratch/bootstrap/bin/uv /usr/local/bin/python3
+    # Explicit base interpreter: never discover or re-query a dependency env.
+    /scratch/bootstrap/bin/uv --no-config pip install --python /usr/local/bin/python3 \
+      --only-binary=:all: --target /scratch/build-inputs hatchling==1.27.0
   '
   # Fixed, hash-verified tool download is outside candidate execution.
   ci_tools=$(mktemp -d)
@@ -92,6 +89,15 @@ if [[ $mode == media ]]; then
     --mount "type=bind,source=$ci_tools,target=/tools,readonly" "$image" bash -euc '
     export PATH=/scratch/bootstrap/bin:$PATH
     export FURBOMEK_GODOT=/tools/Godot_v4.7.2-stable_linux.x86_64
+    # Candidate paths are replaced only after network-none begins. The helper
+    # validated project directories during provisioning; no candidate ran since.
+    for service in embodiment-gateway hermes-activity stream-supervisor; do
+      project=/scratch/source/services/$service
+      resolved=$(cd "$project" && pwd -P)
+      case "$resolved" in /scratch/source/*) ;; *) exit 1 ;; esac
+      rm -rf -- "$project/.venv"
+      ln -s "/scratch/python-envs/$service" "$project/.venv"
+    done
     cd /scratch/source
     git -c safe.directory=/scratch/source diff --exit-code HEAD -- .
     bash tools/verify.sh dispatcher media

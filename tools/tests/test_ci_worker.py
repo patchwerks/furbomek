@@ -37,6 +37,13 @@ class WorkerInputTests(unittest.TestCase):
         for mode in ("media", "legacy"):
             self.rejected([mode, ROOT], "Trusted helpers must be separate")
 
+    def test_symlink_alias_of_trusted_checkout_is_rejected(self):
+        with tempfile.TemporaryDirectory() as directory:
+            alias = Path(directory) / "candidate"
+            alias.symlink_to(ROOT, target_is_directory=True)
+            for mode in ("media", "legacy"):
+                self.rejected([mode, alias], "Trusted helpers must be separate")
+
 
 if __name__ == "__main__":
     unittest.main()
