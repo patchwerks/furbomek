@@ -1,0 +1,90 @@
+name: CI scratch tmpfs lifetime probe
+on:
+  push:
+    branches: ['work/4-ci-scratch-qualification']
+    paths: ['.github/workflows/ci-scratch-lifetime-probe.yml']
+permissions:
+  contents: read
+jobs:
+  storage-primitive:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - name: Characterize tmpfs lifetime with and without a keeper
+        shell: bash
+        run: |
+          set -euo pipefail
+          # Fixed inline storage probe only: no checkout or candidate execution.
+          image=python:3.12.11-bookworm@sha256:1b48a1b13ec678be8d84974541cc007d4367aaf01f985231daad1a940106efc0
+          version=$(docker version --format '{{.Server.Version}}')
+          [[ $version =~ ^([0-9]+)\.[0-9]+\.[0-9]+$ ]] || {
+            echo 'FAIL: a stable Docker server version is required' >&2
+            exit 1
+          }
+          (( BASH_REMATCH[1] >= 28 )) || {
+            echo 'FAIL: Docker server 28 or newer is required' >&2
+            exit 1
+          }
+          printf 'PASS: Docker server %s is stable and >=28\n' "$version"
+          [[ $GITHUB_RUN_ID =~ ^[0-9]+$ && $GITHUB_RUN_ATTEMPT =~ ^[0-9]+$ ]]
+          prefix="scratch-lifetime-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+          volume="$prefix-volume"
+          keeper="$prefix-keeper"
+          probe="$prefix-probe"
+          # Refuse collisions before registering cleanup for these owned names.
+          for name in "$keeper" "$probe"; do
+            if docker container inspect "$name" >/dev/null 2>&1; then
+              echo 'FAIL: probe container name already exists' >&2
+              exit 1
+            fi
+          done
+          if docker volume inspect "$volume" >/dev/null 2>&1; then
+            echo 'FAIL: probe volume name already exists' >&2
+            exit 1
+          fi
+          cleanup() {
+            docker rm -f "$probe" "$keeper" >/dev/null 2>&1 || true
+            docker volume rm "$volume" >/dev/null 2>&1 || true
+          }
+          trap 'status=$?; cleanup; exit "$status"' EXIT
+          docker pull "$image"
+          docker volume create --driver local --opt type=tmpfs --opt device=tmpfs \
+            --opt o=size=4g,uid=1000,gid=1000,mode=0700 "$volume" >/dev/null
+          worker=(docker run --rm --name "$probe" --pull never
+            --network none --read-only --user 1000:1000
+            --cap-drop ALL --security-opt no-new-privileges
+            --memory 64m --cpus 0.1 --pids-limit 16
+            --mount "type=volume,source=$volume,target=/scratch")
+          "${worker[@]}" "$image" /bin/sh -eu -c '
+            test "$(id -u)" = 1000
+            test ! -e /scratch/marker
+            printf "%s\n" without-keeper > /scratch/marker
+            test "$(cat /scratch/marker)" = without-keeper
+          '
+          "${worker[@]}" "$image" /bin/sh -eu -c 'test ! -e /scratch/marker'
+          echo 'PASS: without keeper, marker disappears between ephemeral workers (expected failure mode)'
+          docker run -d --name "$keeper" --pull never \
+            --network none --read-only --user 1000:1000 \
+            --cap-drop ALL --security-opt no-new-privileges \
+            --memory 32m --cpus 0.1 --pids-limit 8 \
+            --mount "type=volume,source=$volume,target=/scratch" \
+            "$image" /bin/sleep infinity >/dev/null
+          test "$(docker inspect --format '{{.State.Running}}' "$keeper")" = true
+          "${worker[@]}" "$image" /bin/sh -eu -c '
+            test ! -e /scratch/marker
+            printf "%s\n" with-keeper > /scratch/marker
+          '
+          "${worker[@]}" "$image" /bin/sh -eu -c 'test "$(cat /scratch/marker)" = with-keeper'
+          test "$(docker inspect --format '{{.State.Running}}' "$keeper")" = true
+          echo 'PASS: with keeper, marker persists between ephemeral workers'
+          docker rm -f "$keeper" >/dev/null
+          "${worker[@]}" "$image" /bin/sh -eu -c 'test ! -e /scratch/marker'
+          echo 'PASS: removing the last keeper discards tmpfs contents'
+          docker volume rm "$volume" >/dev/null
+          volumes=$(docker volume ls --format '{{.Name}}')
+          if printf '%s\n' "$volumes" | grep -Fxq -- "$volume"; then
+            echo 'FAIL: owned volume still exists after removal' >&2
+            exit 1
+          fi
+          echo 'PASS: owned volume removed and absence verified'
+          echo 'PASS: storage primitive only; no helper, product or policy acceptance claimed'
