@@ -251,3 +251,18 @@ a green result. After acceptance/publication, rerun the full media and legacy
 jobs and record their exact helper/candidate revisions. No trust selection,
 workflow activation, merge, runtime deployment or physical access is authorized
 by these tests.
+
+The exact corrected helper at `fb93566ffbaf4cfb1b8b52716522ae6c86aae67b`
+also passed **30 Linux fixture tests with zero skips**, using pinned Python
+3.12.11 and exact uv 0.13.6 in a non-root, read-only, network-none container
+without Docker socket access:
+[run 41028713745](https://github.com/patchwerks/furbomek/actions/runs/41028713745),
+test-only workflow `cbc46f63a83ae8991a8c25ab7b4424655d909f42`. These include
+nine worker, fifteen proxy and six provisioning regressions. Integration of
+accepted main `26f4bdb` leaves those helper/test source files unchanged.
+
+## Changelog
+
+- 2026-10-30: corrected scratch mount lifetime for issue #4 / PR #31; recorded
+  the observed product-run failure, fixed storage probe and 30-test Linux fixture
+  evidence. Full worker qualification still requires independent acceptance.

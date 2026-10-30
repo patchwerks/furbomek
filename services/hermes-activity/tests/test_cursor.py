@@ -5,7 +5,7 @@ import sys
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from cursor import CursorSnapshot, IncrementalSpoolReader
+from cursor import MAX_POLL_BYTES, CursorSnapshot, IncrementalSpoolReader
 from hermes_feed import SpoolEvent
 
 
@@ -138,3 +138,23 @@ def test_oversize_cursor_restart_before_newline_does_not_replay(tmp_path: Path) 
     final_reader = IncrementalSpoolReader(spool, consumed.cursor)
     assert final_reader.poll().events == ()
     final_reader.close()
+
+
+def test_large_rotated_spool_drains_in_bounded_polls_without_losing_events(tmp_path: Path) -> None:
+    spool = tmp_path / "events.jsonl"
+    expected = [str(index) for index in range(600)]
+    spool.write_bytes(b"".join(line(call) for call in expected))
+    reader = IncrementalSpoolReader(spool, CursorSnapshot(None, 0))
+    first = reader.poll()
+    assert first.cursor.offset <= MAX_POLL_BYTES
+    assert len(first.events) < len(expected)
+    seen = [event.call for event in first.events]
+    spool.rename(tmp_path / "old.jsonl")
+    spool.write_bytes(line("new"))
+    for _ in range(20):
+        result = reader.poll()
+        seen.extend(event.call for event in result.events)
+        if seen[-1] == "new":
+            break
+    assert seen == [*expected, "new"]
+    reader.close()
