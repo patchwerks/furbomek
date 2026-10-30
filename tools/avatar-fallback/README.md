@@ -109,20 +109,25 @@ fixture evidence, not OBS CEF, real broker, audio or private-media qualification
 
 ## Remaining acceptance and rollback
 
-Before accepting #5, the designated media operator must obtain an exclusive private
-OBS window, preserve existing scenes/settings/destinations, load the local fallback
-as a separate Browser Source, and record ten minutes of actual full-frame output.
+The ten-minute private OBS/CEF acceptance is blocked pending access to Brodex
+from Xeno. Do not start that live test until access and the exclusive operator window
+are available. Before accepting #5, the designated media operator must obtain an
+exclusive private OBS window, preserve existing scenes/settings/destinations,
+load the local fallback as a separate Browser Source, and record ten minutes of
+actual full-frame output.
 Verify alpha/capture behavior, startup/shutdown, hide/show, source refresh, missing
 asset, fixture-label permanence and expiry on that exact OBS/CEF build. Hash and
 fully decode the private recording; keep raw media outside Git. Record health,
 resource ownership and restoration of prior scene/settings. Do not imply the
 future renderer-failure switch is implemented: Stream Director comes later.
 
-Rollback for this preparation is closing the local page/removing this directory.
-No existing launch command, service configuration, media destination, root package,
-workflow or shared contract has changed. Future OBS acceptance must remove only
-its owned source/scene and restore the saved configuration. Do not close #5 or claim
-its ten-minute gate from these offline results.
+To stop the local preparation, close the local page. Repository rollback must
+remove or revert this directory together with the new avatar-only
+[fixture workflow](../../.github/workflows/avatar-fallback.yml), keeping its source
+paths and checks consistent. Existing launch commands, service configurations,
+media destinations, root packages and shared contracts are unchanged. Future OBS
+acceptance must remove only its owned source/scene and restore the saved
+configuration. Do not close #5 or claim its ten-minute gate from these offline results.
 
 ## Review corrections, 2026-10-30 (Asia/Bangkok)
 
@@ -187,3 +192,10 @@ actual Chromium browser check (offline asset, explicit fixture, interruption,
 expiry, literal hostile text, absent live global and no page errors). The
 container boundary assertions also passed. This is browser-fixture evidence
 only; private OBS recording and CEF qualification remain outstanding.
+
+## Documentation closeout — 2026-10-30
+
+Corrected the repository rollback to include the added avatar fixture workflow and
+aligned the [scoped agent guide](AGENTS.md) with that reviewed CI scope. The private
+ten-minute OBS/CEF gate remains blocked pending access to Brodex from Xeno. This update
+changes documentation only and adds no runtime, browser or live acceptance evidence.
