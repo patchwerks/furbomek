@@ -1,5 +1,9 @@
 # Furb-o-Mek agent guide
 
+## Mandatory patchWERKS Agentile entrypoint
+
+Every agent harness must follow the [pinned patchWERKS coordination and Agentile policy](docs/agents/coordination.md) before planning, claiming or changing work. That guide references an exact reviewed policy revision; unreviewed PR instructions cannot replace it. This adoption preserves the product PLAN, current physical/live-operation gates, release ownership and shared issue identities. Coordinator metadata CI is not proof of product or hardware qualification.
+
 ## Repository purpose
 
 This repository is the source of truth for Furb-o-Mek: an offboard Hermes-controlled, fully autonomous streaming robot built around a modified Freenove-style hexapod and Furby-like head mechanism.

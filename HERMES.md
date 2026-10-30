@@ -10,6 +10,10 @@ You are the host Hermes Agent deploying Furb-o-Mek from a fresh clone. Treat rep
 4. `docs/research/README.md`
 5. only the topic notes relevant to the current deployment step
 
+The organization coordination/Agentile guide explicitly delegated by `AGENTS.md`
+is part of that first read. Follow its exact accepted policy pin; this does not
+expand any hardware, host or deployment authority below.
+
 Before robot work, also read `docs/hardware/README.md`,
 `docs/hardware/hardware.json` and `docs/hardware/firmware.json`. Record every
 hardware/firmware discovery or change there before handoff. Original hardware

@@ -8,7 +8,9 @@ from typing import ClassVar, Final, Literal
 
 from pydantic import BaseModel, ConfigDict, Field
 
-SpoolKind = Literal["session_start", "session_end", "thinking", "turn_done", "tool", "approval"]
+from character_state import CharacterInput  # noqa: TC001 - Pydantic resolves this field at runtime.
+
+SpoolKind = Literal["session_start", "session_end", "thinking", "turn_done", "tool", "approval", "character"]
 SpoolPhase = Literal["running", "ok", "error", "waiting", "resolved"]
 SpoolCategory = Literal["BROWSER", "COMPUTER", "WEB", "TERMINAL", "FILES", "AGENT"]
 MAX_LINE_BYTES: Final = 4_096
@@ -31,6 +33,7 @@ class SpoolEvent(BaseModel):
     duration_ms: int = Field(default=0, ge=0, le=86_400_000)
     call: str = Field(default="", max_length=64)
     privacy_release: bool = False
+    character: CharacterInput | None = None
 
 
 def parse_complete_line(line: bytes) -> SpoolEvent | None:
@@ -38,9 +41,12 @@ def parse_complete_line(line: bytes) -> SpoolEvent | None:
     if len(line) > MAX_LINE_BYTES or not line.endswith(b"\n"):
         return None
     try:
-        return SpoolEvent.model_validate_json(line)
+        event = SpoolEvent.model_validate_json(line)
     except (UnicodeDecodeError, ValueError):
         return None
+    if event.kind == "character" and event.character is None:
+        return None
+    return event
 
 
 def spool_directory() -> Path:
