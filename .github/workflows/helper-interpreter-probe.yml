@@ -28,13 +28,13 @@ jobs:
       - name: Check out exact corrected helper candidate for fixture tests
         uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
         with:
-          ref: '267d68f248c78f0e9fbe4a72625f6b527f3a2916'
+          ref: '71a0b0cb1f59361df26fb550e4cf8a8e689387f1'
           path: helper-candidate
           persist-credentials: false
       - name: Copy only helper source and tests to a sanitized directory
         shell: bash
         run: |
-          test "$(git -C helper-candidate rev-parse HEAD)" = 267d68f248c78f0e9fbe4a72625f6b527f3a2916
+          test "$(git -C helper-candidate rev-parse HEAD)" = 71a0b0cb1f59361df26fb550e4cf8a8e689387f1
           helper_source=$(mktemp -d "$RUNNER_TEMP/helper-fixture-source.XXXXXXXX")
           mkdir -p "$helper_source/tools"
           cp -R helper-candidate/tools/ci "$helper_source/tools/ci"
