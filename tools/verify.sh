@@ -32,10 +32,14 @@ done
 
 require_tool() { command -v "$1" >/dev/null || { printf 'Missing prerequisite: %s\n' "$1" >&2; return 125; }; }
 require_file() { [[ -f $1 ]] || { printf 'Missing prerequisite: %s\n' "$1" >&2; return 125; }; }
+require_env() { [[ -n ${!1:-} ]] || { printf 'Missing prerequisite: %s\n' "$1" >&2; return 125; }; }
 require_vendor_inputs() {
-  require_file "${FNHR_DIR:-/tmp/opencode/fnhr/FNHR}/src/FNHRBasic.cpp"
-  require_file "${FREENOVE_ROOT:-/tmp/opencode/freenove-hermes}/ArduinoLibraries/FNHR.zip"
-  require_file "${ARDUINO_CORE_DIR:-/tmp/opencode/ArduinoCore-avr-1.8.6}/cores/arduino/Arduino.h"
+  require_env FNHR_DIR
+  require_env FREENOVE_ROOT
+  require_env ARDUINO_CORE_DIR
+  require_file "$FNHR_DIR/src/FNHRBasic.cpp"
+  require_file "$FREENOVE_ROOT/ArduinoLibraries/FNHR.zip"
+  require_file "$ARDUINO_CORE_DIR/cores/arduino/Arduino.h"
 }
 verify_component() (
   set -e
@@ -46,7 +50,8 @@ verify_component() (
       python3 tools/tests/test_dependency_proxy.py ;;
     media)
       require_tool uv
-      [[ -x ${FURBOMEK_GODOT:-/data/furbomek-media/godot/godot} ]] || {
+      require_env FURBOMEK_GODOT
+      [[ -x $FURBOMEK_GODOT ]] || {
         printf 'Missing prerequisite: FURBOMEK_GODOT executable (Godot 4.7)\n' >&2
         exit 125
       }

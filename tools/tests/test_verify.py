@@ -17,12 +17,20 @@ class VerificationCliTests(unittest.TestCase):
         self.script("bin/rg", "exit 0\n")
         self.script("bin/uv", "exit 0\n")
         self.script("bin/godot", "exit 0\n")
+        self.script("bin/g++", "exit 0\n")
+        self.script("bin/sha256sum", "exit 0\n")
 
-    def run_cli(self, *args):
+    def run_cli(self, *args, environment=None):
+        env = {"PATH": str(self.root / "bin") + ":/usr/bin:/bin", "TMPDIR": str(self.root),
+               "FURBOMEK_GODOT": str(self.root / "bin/godot")}
+        for key, value in (environment or {}).items():
+            if value is None:
+                env.pop(key, None)
+            else:
+                env[key] = value
         return subprocess.run(
             ["/bin/bash", str(self.root / "tools/verify.sh"), *args],
-            env={"PATH": str(self.root / "bin") + ":/usr/bin:/bin", "TMPDIR": str(self.root),
-                 "FURBOMEK_GODOT": str(self.root / "bin/godot")},
+            env=env,
             text=True, capture_output=True, check=False,
         )
 
@@ -78,6 +86,67 @@ class VerificationCliTests(unittest.TestCase):
         self.assertEqual(result.returncode, 1)
         self.assertIn("FAIL robot-native (exit 9)", result.stdout)
         self.assertNotIn("must-not-run", result.stdout)
+
+    def vendor_environment(self):
+        env = {}
+        for key, relative in (
+            ("FNHR_DIR", "src/FNHRBasic.cpp"),
+            ("FREENOVE_ROOT", "ArduinoLibraries/FNHR.zip"),
+            ("ARDUINO_CORE_DIR", "cores/arduino/Arduino.h"),
+        ):
+            directory = self.root / (key + " with spaces")
+            path = directory / relative
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.touch()
+            env[key] = str(directory)
+        self.script("AVR with spaces/usr/bin/avr-g++", "exit 0\n")
+        env["AVR_ROOT"] = str(self.root / "AVR with spaces")
+        return env
+
+    def test_each_missing_vendor_variable_blocks_guard_commands(self):
+        env = self.vendor_environment()
+        self.script("firmware/freenove-guard/test.sh", "echo must-not-run\n")
+        self.script("firmware/freenove-guard/build.sh", "echo must-not-run\n")
+        for component in ("guard-native", "guard-avr"):
+            for key in ("FNHR_DIR", "FREENOVE_ROOT", "ARDUINO_CORE_DIR"):
+                for absent in (None, ""):
+                    with self.subTest(component=component, missing=key, value=absent):
+                        result = self.run_cli(component, environment={**env, key: absent})
+                        self.assertEqual(result.returncode, 2, result.stderr)
+                        self.assertIn("Missing prerequisite: " + key, result.stderr)
+                        self.assertIn("UNAVAILABLE " + component, result.stdout)
+                        self.assertNotIn("must-not-run", result.stdout)
+
+    def test_explicit_vendor_paths_with_spaces_run_guard_commands(self):
+        env = self.vendor_environment()
+        self.script("firmware/freenove-guard/test.sh", "echo guarded-native-ran\n")
+        self.script("firmware/freenove-guard/build.sh", "echo guarded-avr-ran\n")
+        result = self.run_cli("guard-native", "guard-avr", environment=env)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertIn("PASS guard-native", result.stdout)
+        self.assertIn("PASS guard-avr", result.stdout)
+        self.assertIn("guarded-native-ran", result.stdout)
+        self.assertIn("guarded-avr-ran", result.stdout)
+
+    def test_missing_godot_variable_blocks_media_command(self):
+        self.script("tools/verify-media.sh", "echo must-not-run\n")
+        for absent in (None, ""):
+            with self.subTest(value=absent):
+                result = self.run_cli("media", environment={"FURBOMEK_GODOT": absent})
+                self.assertEqual(result.returncode, 2, result.stderr)
+                self.assertIn("Missing prerequisite: FURBOMEK_GODOT", result.stderr)
+                self.assertIn("UNAVAILABLE media", result.stdout)
+                self.assertNotIn("must-not-run", result.stdout)
+
+    def test_explicit_godot_path_with_spaces_runs_media_command(self):
+        self.script("Godot with spaces/godot", "exit 0\n")
+        self.script("tools/verify-media.sh", "echo explicit-media-ran\n")
+        result = self.run_cli("media", environment={
+            "FURBOMEK_GODOT": str(self.root / "Godot with spaces/godot"),
+        })
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertIn("PASS media", result.stdout)
+        self.assertIn("explicit-media-ran", result.stdout)
 
 
 if __name__ == "__main__":
