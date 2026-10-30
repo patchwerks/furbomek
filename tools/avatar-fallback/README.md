@@ -33,7 +33,13 @@ operational emblem fits this slice better. No third-party model, image or font s
 ## Narrow adapter
 
 `adapter.js` exposes `FurbomekStatic.createAdapter({render, now, fixture})`.
-`view.js` binds it to text-only DOM updates as `window.FurbomekAvatar`.
+`view.js` exposes only the pure `FurbomekView.createView(...)` factory, which
+binds a new adapter to text-only DOM updates. `boot.js` owns the ordinary page's
+instance privately; `fixture.js` owns its separate opt-in instance in a closure.
+No live adapter is published as `window.FurbomekAvatar`. The pure factories carry
+no current renderer state and provide no transport or privileged capability.
+Classic scripts preserve ordinary `file://` loading without a server, module-CORS
+overrides or a generated bundle.
 
 | Method | Behavior |
 |---|---|
@@ -132,3 +138,48 @@ parsing it. A regression covers object, number, null and array timestamps throug
 both input methods, preserving accepted state and its original expiry. All 12 Node
 boundary tests passed in the restricted offline worker. This correction adds no
 browser or OBS acceptance evidence.
+
+
+## Private view-instance correction — 2026-10-30
+
+The normal page no longer exports its live adapter. The browser regression now
+observes rendered DOM state and checks that `window.FurbomekAvatar` is absent on
+the default, demonstration and hostile-text pages. The separate test-only
+`tests/hostile.html` uses the same view factory and a literal hostile-caption
+fixture; it is never loaded by the normal page. Thinking, interruption-label,
+expiry, fixture provenance and text-only rendering checks remain covered.
+
+Observed: all **15 Node tests** passed in the existing credential-free worker
+with network, device/private-home reads and source writes denied. The three new
+view tests execute the actual classic scripts with synthetic DOM/timers and
+cover private-instance absence, honest offline startup, single fixture startup,
+interruption/expiry, pagehide timer cleanup and missing-asset shutdown. They do
+not establish browser/CEF behavior. This correction's real-browser check awaits
+the separate Linux CI run; earlier browser evidence above remains historical.
+No browser, OBS, provider, transport or device was started for this correction.
+
+## Automated browser fixture check
+
+[The avatar workflow](../../.github/workflows/avatar-fallback.yml) runs for pull
+requests targeting `main` and pushes to `main` that change this directory or the
+workflow; manual dispatch is also available. It pins the official Playwright
+`v1.64.1-noble` image at
+`sha256:47b510dd9230bf0b9bfc9b20102241e577ea7a99334ab4c3ca19f19770e9b8ea`
+and both `playwright` and `playwright-core` packages at 1.64.1 with explicit
+SHA-512 tarball checks in the workflow. Preparation downloads and verifies those
+inputs without running candidate code. Node tests and the actual Chromium
+`file://` fixture check then run as an unprivileged user in a read-only,
+network-none, resource-bounded container with dropped capabilities, no privilege
+regain and an empty inherited environment. Only this public static-fixture source
+and the verified browser libraries are mounted; no runner home, credentials,
+Docker socket or host device mount is supplied.
+
+Playwright defaults Chromium's inner sandbox to off. The mandatory outer
+container restrictions provide this job's execution boundary; the test must not
+be copied into an unrestricted credential-bearing runner. Browser success checks
+these local fixtures and the absence of a global live adapter, not OBS CEF,
+private recording, a live broker or Stream Director acceptance. Because the
+workflow and assertions are editable in a pull request, its result is advisory
+and requires review of the exact revision; it is not independent trust approval.
+Linux execution of this new workflow is pending and is not claimed by the local
+Node-only results above.

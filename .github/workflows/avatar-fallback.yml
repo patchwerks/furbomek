@@ -1,0 +1,58 @@
+name: Offline avatar browser fixtures
+on:
+  pull_request:
+    branches: [main]
+    paths: ['tools/avatar-fallback/**', '.github/workflows/avatar-fallback.yml']
+  push:
+    branches: [main]
+    paths: ['tools/avatar-fallback/**', '.github/workflows/avatar-fallback.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: avatar-fixtures-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  browser:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - name: Prepare pinned browser and library without candidate execution
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker pull mcr.microsoft.com/playwright:v1.64.1-noble@sha256:47b510dd9230bf0b9bfc9b20102241e577ea7a99334ab4c3ca19f19770e9b8ea
+          mkdir -p "$RUNNER_TEMP/avatar-tools/node_modules/playwright" "$RUNNER_TEMP/avatar-tools/node_modules/playwright-core"
+          curl --fail --location --retry 3 https://registry.npmjs.org/playwright/-/playwright-1.64.1.tgz -o "$RUNNER_TEMP/playwright.tgz"
+          curl --fail --location --retry 3 https://registry.npmjs.org/playwright-core/-/playwright-core-1.64.1.tgz -o "$RUNNER_TEMP/playwright-core.tgz"
+          printf '%s  %s\n' 1c2ad5847af9410bb0628b301141936fb806a79db6c9f95bbff493f27178b05586b8b8d00add7b43f12e6e918648d2989f5b6c4c23d9c6a1e11c27d5511bbb50 "$RUNNER_TEMP/playwright.tgz" | sha512sum --check
+          printf '%s  %s\n' 042e2cf32e9211503a435ad2c594eda3c848d4a508df15e51c6660bc6a8fe08a8f748fdae855fd1f6f480cdcfbbcaa3d976d5be8b7d8a2c49c3cbe8cdf1c720d "$RUNNER_TEMP/playwright-core.tgz" | sha512sum --check
+          tar -xzf "$RUNNER_TEMP/playwright.tgz" --strip-components=1 -C "$RUNNER_TEMP/avatar-tools/node_modules/playwright"
+          tar -xzf "$RUNNER_TEMP/playwright-core.tgz" --strip-components=1 -C "$RUNNER_TEMP/avatar-tools/node_modules/playwright-core"
+          chmod -R a+rX "$RUNNER_TEMP/avatar-tools"
+      - name: Run actual browser fixtures in a disposable offline container
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker run --rm --init --network none --read-only --user 1000:1000 \
+            --cap-drop ALL --security-opt no-new-privileges \
+            --cpus 2 --memory 2g --pids-limit 256 --shm-size 256m \
+            --tmpfs /tmp:rw,exec,nosuid,nodev,size=512m \
+            --mount "type=bind,source=$GITHUB_WORKSPACE/tools/avatar-fallback,target=/candidate,readonly" \
+            --mount "type=bind,source=$RUNNER_TEMP/avatar-tools,target=/tools,readonly" \
+            --workdir /candidate \
+            mcr.microsoft.com/playwright:v1.64.1-noble@sha256:47b510dd9230bf0b9bfc9b20102241e577ea7a99334ab4c3ca19f19770e9b8ea \
+            env -i PATH=/usr/local/bin:/usr/bin:/bin HOME=/tmp/avatar-home TMPDIR=/tmp \
+            PLAYWRIGHT_BROWSERS_PATH=/ms-playwright FURBOMEK_PLAYWRIGHT=/tools/node_modules/playwright \
+            bash -euc '
+              mkdir -m 700 "$HOME"
+              test "$(id -u)" = 1000
+              test ! -e /var/run/docker.sock
+              test ! -e /candidate/.git
+              test "$(wc -l < /proc/net/route)" -eq 1
+              node --test tests/*.test.mjs
+              node tests/browser-check.cjs
+            '
