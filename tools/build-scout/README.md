@@ -1,0 +1,154 @@
+# Build Scout
+
+Read-only GitHub intelligence for [issue 14](https://github.com/patchwerks/furbomek/issues/14).
+Scout creates an evidence-linked advisory report; GitHub Issues and the shared
+Project retain task identity, acceptance and dispatch authority. This is tooling
+for inspecting the work in [PLAN.md](../../PLAN.md), not another work queue.
+
+## Two separate boundaries
+
+1. A trusted operator reviews `collect.py`, then explicitly collects selected
+   repositories using an existing GitHub CLI login. Every request uses an
+   allowlisted `github.com` REST path, explicit GET, a 30-second timeout, bounded
+   pages and a global request budget. It never invokes a shell or follows URLs
+   supplied by an issue. No GitHub writes are implemented.
+2. `scout.py` analyzes the snapshot offline with standard-library Python 3.10+.
+   Run candidate code and tests on disposable credential-free workers with no
+   network, host-home or device access. A clean environment alone is not device
+   isolation. The analyzer does not import the collector or execute issue text.
+
+An agent operating the trusted collector can use these commands after selecting
+an existing private output directory outside every Git checkout. Output paths
+must be new; exclusive file creation uses mode 0600 and refuses overwrites and
+existing symlinks. These example paths are operator-chosen placeholders, not
+instructions to use a live host or private service:
+
+```sh
+python3 tools/build-scout/collect.py --repo patchwerks/furbomek \
+  --repo patchwerks/patchwerks --max-pages 2 --max-requests 120 \
+  --output /private-output/scout-snapshot.json
+python3 tools/build-scout/scout.py /private-output/scout-snapshot.json \
+  --output /private-output/scout-report.json
+```
+
+`--repo patchwerks/jabberwerk` is also supported when explicitly selected and
+authorized. Repository existence/readability is never inferred from a failed
+request. A 404 can mean missing source or unavailable access. No credential is
+accepted as a command-line argument. CLI stderr is reduced to fixed error
+categories; raw errors are never saved. Credentials remain with the trusted
+collector, never the offline worker.
+
+## Evidence and limits
+
+The snapshot records collection start/end, repository IDs/default branch/privacy,
+bounded recently updated issues and PRs (open and closed), PR head revisions,
+recent workflow runs, and native blockers/comments for collected open issues.
+Each source has complete, partial or unavailable coverage. A full final page is
+conservatively partial; the tool does not pretend a cap proves exhaustion.
+Malformed issue, ownership, comment or dependency records make the affected
+source partial rather than silently turning missing evidence into an empty list.
+Default limits are 30 records/page, two pages/source and 120 requests total;
+maximums are five pages/source and 200 requests. GitHub issues pages include PRs,
+which are filtered from the issue collection. Collection is not an atomic view.
+
+Recommendations link to canonical issues. Unavailable coverage, truncated bodies,
+snapshots older than 24 hours or over five minutes in the future, native/prose
+blockers, physical labels, assignees and claim comments gate recommendations.
+Plain, heading and bold CLAIM/HANDOFF markers are recognized in issue bodies and
+comments. Ordinary "Claim and closeout" instructions are not live claims.
+Explicit "None" followed by ordinary explanatory prose does not manufacture a
+blocker. Qualifiers such as waiting, approval or unavailable access, and other
+unresolved prose, receive `dependency-section-needs-review`; linked/native
+dependencies and the canonical blocked label receive a distinct acceptance gate.
+Claim releases require reconciliation; Scout never expires a claim. Closed
+dependencies are not assumed accepted, including closed-as-not-planned work.
+Ranking puts ungated review candidates first, then awards 20 points for an
+observed `ready-for-agent` label and 10 for `area:verification`; reasons are shown.
+An open issue labeled `wontfix` remains visible for evidence with the
+`terminal-disposition-needs-review` gate. This disposition overrides a conflicting
+`ready-for-agent` label: no readiness points or readiness reason are added, and
+ungated issues rank ahead of it. Reconcile the disposition before considering work;
+Scout never dispatches it.
+Labels and issue prose are untrusted evidence, never authorization. Always inspect
+the current plan, claim, native dependencies, acceptance and private Project
+before work. Scout does not read Project state or certify readiness.
+
+Duplicate candidates use a small, explicit title vocabulary for lexical variants
+(for example test/verify, abort/cancellation, and timed out/timeout). Unknown words
+retain their identity. A candidate needs at least three shared normalized concepts,
+two shared non-generic target terms, and normalized Jaccard similarity >= 0.6.
+Differing directional actions, negation, explicit platforms or numeric/version
+tokens suppress a pair. Unmatched target terms on both sides also suppress it,
+so high overlap does not erase broker/renderer or camera/microphone differences.
+These guards apply even to high literal overlap. Generic task verbs such as
+fix/test are not classified as opposite desired behavior. Bodies, comments and
+labels cannot add duplicate evidence or override a title mismatch.
+
+Existing `title_jaccard` and `shared_terms` remain literal title overlap, with
+their previous tokenization. Added `normalized_title_jaccard`, `shared_concepts`
+and per-side `title_normalizations` explain lexical matches; the normalized score
+is not a probability or semantic confidence. Issue/PR pairs remain
+`issue-pr-overlap`, never proof that the PR implements the issue. Pairs are sorted
+by canonical URLs; closed/closed pairs are skipped. No ranking or gate changes
+follow from a duplicate candidate.
+
+This favors precision over recall: arbitrary paraphrases, unknown inflections,
+different negation wording, and general-versus-platform-specific titles can be
+missed. One-sided unknown qualifiers can still produce false positives. Exact
+titles can hide different body scopes, and word sets cannot establish the roles
+of subjects and objects. Review full scope, dependencies and implementation;
+these are advisory candidates, never semantic identity or automatic closure.
+The readable synthetic [duplicate corpus](duplicate-corpus.json) records intended
+positives, hard negatives, baseline sensitivity cases and a known recall limit.
+The [duplicate validation record](VALIDATION-DUPLICATES-2026-10-30.md) records
+35 passing local offline tests and the remaining qualification limits.
+
+CI output names observed failed/cancelled workflow run URLs and their head SHAs.
+Each collected PR also reports its observed head and any bounded workflow runs
+with that exact nonempty SHA. No matching run means not observed, never success.
+The same SHA does not prove the right workflow, event or acceptance context.
+Scout does not enumerate all required checks, external statuses, reviews, branch
+policy or security alerts. No green
+merge/deploy verdict is emitted. Code contents, attachments and logs are not read.
+
+Snapshots/reports are local private data even for a public repository: arbitrary
+issue text can contain private information. Common credential patterns are
+removed, but this is not a comprehensive secret scanner or publication filter.
+Do not commit snapshots/reports or automatically post them to public issues.
+Re-read provider evidence after collection before any independently authorized
+action. No speech engine, Hermes planner, OBS controller, robot adapter or new
+runtime authority is introduced.
+
+## Offline verification
+
+Inside the isolated worker, from this directory:
+
+```sh
+python3 -m unittest -v test_scout.py
+```
+
+The synthetic suite exercises pagination, partial/unavailable sources, request
+budget, endpoint/method restrictions, error redaction, dependencies, physical and
+claim gates, stale data, duplicate explanations, hostile text, CI provenance,
+private output permissions and an actual offline CLI round trip. No provider or
+live integration qualification is implied. Independent review is required.
+
+Observed verification on 2026-10-29: all 22 offline tests passed under Python
+3.14.7 in a worker with a temporary HOME, no credential environment, denied
+network/devices/host-home access, read-only source and temporary-only writes.
+The actual invocation from the repository root was
+`python3 -m unittest discover -s tools/build-scout -p 'test_*.py' -v`.
+Follow-up verification on 2026-10-30: all 30 offline tests passed in the same
+isolation boundary. Actual GitHub collection and offline analysis then completed
+through a separate credential-holding GET-only bridge: 48 bounded API requests
+succeeded, with complete source-page coverage for the explicitly selected
+repositories. The original credential-bearing `gh` subprocess was not run
+directly inside the candidate worker. This validates actual provider responses
+and collection/analysis behavior without giving candidate code credentials;
+it does not qualify every operator's local CLI/authentication environment.
+See [the dated validation record](VALIDATION-2026-10-30.md) for source hashes,
+public-safe observations, the corrected prose-blocker case and remaining limits.
+Independent review remains required.
+
+API references: [GitHub CLI GET arguments](https://cli.github.com/manual/gh_api),
+[native issue dependencies](https://docs.github.com/en/rest/issues/issue-dependencies).

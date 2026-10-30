@@ -5,7 +5,7 @@ description = "Fail-closed Hermes public activity adapter"
 requires-python = ">=3.12,<3.13"
 dependencies = [
     "click>=8.1,<8.3",
-    "pillow==12.3.0",
+    "pillow==13.0.0",
     "pydantic==2.12.3",
     "psutil>=6,<7",
     "typer==0.21.1",
@@ -14,7 +14,7 @@ dependencies = [
 [dependency-groups]
 dev = [
     "basedpyright>=1.31,<2",
-    "pytest>=8.3,<9",
+    "pytest>=9.0.3,<10",
     "ruff>=0.14,<0.15",
 ]
 
@@ -22,7 +22,7 @@ dev = [
 typeCheckingMode = "all"
 pythonVersion = "3.12"
 pythonPlatform = "All"
-include = ["broker.py", "cli.py", "publisher.py", "reducer.py", "runtime.py", "hermes_feed.py", "cursor.py", "activity_models.py", "privacy.py", "screen.py", "persistence.py", "plugin", "tests"]
+include = ["broker.py", "cli.py", "publisher.py", "reducer.py", "runtime.py", "hermes_feed.py", "cursor.py", "activity_models.py", "character_state.py", "privacy.py", "screen.py", "persistence.py", "plugin", "tests"]
 extraPaths = ["plugin"]
 exclude = ["**/__pycache__", "**/.venv"]
 reportUnusedCallResult = "none"

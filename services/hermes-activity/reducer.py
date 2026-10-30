@@ -18,6 +18,9 @@ def apply_event(state: BrokerState, event: SpoolEvent, now_ms: int) -> BrokerSta
     """Reduce one event using its producer timestamp for timeline ages."""
     event_ms = event_time(event, now_ms)
     match event.kind:
+        case "character":
+            # Only ActivityBroker's opt-in, authorized path may consume this input.
+            return state
         case "session_start":
             return replace(
                 state,
@@ -60,30 +63,7 @@ def apply_event(state: BrokerState, event: SpoolEvent, now_ms: int) -> BrokerSta
                 shutter=state.shutter or event.shutter,
             )
         case "approval":
-            match event.phase:
-                case "waiting":
-                    return replace(
-                        state,
-                        phase="awaiting approval",
-                        title="Awaiting approval",
-                        summary="Waiting for the operator to approve an action",
-                        tool="AGENT",
-                        last_event_ms=event_ms,
-                        shutter=state.shutter or event.shutter,
-                    )
-                case "resolved":
-                    return replace(
-                        state,
-                        title="Approval resolved",
-                        summary="Continuing",
-                        tool="AGENT",
-                        last_event_ms=event_ms,
-                        shutter=state.shutter or event.shutter,
-                    )
-                case "running" | "ok" | "error":
-                    return state
-                case unreachable:
-                    assert_never(unreachable)
+            return _apply_approval(state, event, event_ms)
         case "tool":
             return replace(
                 state,
@@ -97,6 +77,29 @@ def apply_event(state: BrokerState, event: SpoolEvent, now_ms: int) -> BrokerSta
             )
         case unreachable:
             assert_never(unreachable)
+
+
+def _apply_approval(state: BrokerState, event: SpoolEvent, event_ms: int) -> BrokerState:
+    if event.phase == "waiting":
+        return replace(
+            state,
+            phase="awaiting approval",
+            title="Awaiting approval",
+            summary="Waiting for the operator to approve an action",
+            tool="AGENT",
+            last_event_ms=event_ms,
+            shutter=state.shutter or event.shutter,
+        )
+    if event.phase == "resolved":
+        return replace(
+            state,
+            title="Approval resolved",
+            summary="Continuing",
+            tool="AGENT",
+            last_event_ms=event_ms,
+            shutter=state.shutter or event.shutter,
+        )
+    return state
 
 
 def idle_state(state: BrokerState, now_ms: int) -> BrokerState:
