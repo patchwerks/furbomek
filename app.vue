@@ -81,11 +81,11 @@
       </div>
     </BContainer>
   </BContainer>
-  <BModal v-model="settingsModalVisible" id="settings-modal" noCloseOnBackdrop size="xl">
+  <BModal id="settings-modal" v-model="settingsModalVisible" noCloseOnBackdrop size="xl">
     <template #title><h4>Settings</h4></template>
     <SettingsComponent v-model="settings"/>
   </BModal>
-  <BModal v-model="warningModalVisible" id="warning-modal" noCloseOnBackdrop title="Out of credits">
+  <BModal id="warning-modal" v-model="warningModalVisible" noCloseOnBackdrop title="Out of credits">
     <p>PlayHT API is out of credits. Please upgrade your plan or use another account.</p>
   </BModal>
 </template>

@@ -117,8 +117,9 @@ Initial Nuxt-only package-lock SHA256:
 `50d74907c6c51b6f32e7ce7fac085861d67398fec4eb3a3bd095ff522243f81a`.
 Compared by package path with the baseline: 489 added, 348 removed and 399 retained
 paths changed version. These are dependency graph counts, not advisory counts.
-No Linux/Windows runtime, alternate Node version or live provider acceptance is
-claimed. Hosted checks and maintainer acceptance remain separate.
+Those initial local results did not qualify Linux/Windows, an alternate Node
+version or live providers. The later reviewer-reported Linux qualification is
+recorded below; hosted checks and maintainer acceptance remain separate.
 
 ## Combined unused PlayHT SDK removal
 
@@ -194,21 +195,26 @@ The module remains enabled and generates usable `.nuxt/eslint.config.mjs`.
 ESLint 8 loads the real generated config, calculates the Vue configuration, and
 reports an expected fatal parse diagnostic for a malformed synthetic Vue/TS input.
 Native `unrs-resolver` also resolves Vue with Node/require/default conditions after
-the script-disabled install. Baseline and candidate app lint both report 11 errors
-and 20 warnings with no fatal errors: existing lint debt, not a clean-lint claim.
+the script-disabled install. The earlier claim of matching baseline/candidate
+app lint counts was incorrect: the reviewer measured main at 11 errors/18 warnings
+and PR #28 at 11 errors/20 warnings before the attribute-order correction below.
+Repository-wide counts were main 31 errors/23 warnings versus PR #28 33 errors/25
+warnings. These are existing debt plus candidate differences, not a clean-lint claim.
 The upstream TypeScript ruleset changes from 204 to 209 rules, replacing older
 rules such as ban-types/no-var-requires with their successor rules. No project
 rules are disabled or source suppressed to obtain this result. Independent review,
 exact new-head hosted checks and maintainer acceptance remain separate gates.
 
-## Remaining dependency finding for maintainer disposition
+## Remaining dependency finding and maintainer disposition
 
 A fresh metadata audit of the final graph reports no moderate, high or critical
 findings. Its eight low package entries trace to one underlying advisory,
 [deepmerge GHSA-gcqx-w48m-w2h4](https://github.com/advisories/GHSA-gcqx-w48m-w2h4).
 Deepmerge 4.3.1 remains through the active Deepgram SDK and build-time Rollup
 node-resolve plugin; no compatible patched release is identified. This finding
-is unresolved, not accepted risk or an alert dismissal.
+remains unpatched. The maintainer has accepted this residual risk for the
+application-controlled configuration use here, as recorded in the review below;
+that disposition does not remove the vulnerability or dismiss the advisory.
 
 The [upstream report](https://github.com/TehShrike/deepmerge/issues/273) describes
 attacker-controlled merge inputs/target shapes producing inherited properties;
@@ -221,7 +227,8 @@ writer or application exploit was established; this is not a complete taint proo
 The inspected Rollup call merges only hardcoded defaults; plugin options use object
 spread. A separate settings-validation boundary or parent replacement would need
 its own security/compatibility review. No advisory-evading downgrade, fork or
-removal of the active provider is included. Maintainer disposition remains required.
+removal of the active provider is included. The maintainer's scoped risk acceptance
+does not establish safety for arbitrary attacker-controlled merge inputs.
 
 The portable Settings regression is
 `node tools/legacy-compat/settings-regression.cjs`. It compiles the real SFC and
@@ -254,8 +261,8 @@ Unix IPC is permitted. Chromium's inner sandbox is disabled because nested
 sandbox startup fails, while the mandatory outer OS restrictions remain active
 and are probed. Private logs and security inventory are not part of this change.
 
-Independent review, final-head hosted checks, maintainer acceptance and subsequent
-alert verification remain required. Roll back by restoring this candidate's
+Independent review is recorded below; final-head hosted checks, merge acceptance
+and subsequent alert verification remain separate gates. Roll back by restoring this candidate's
 manifest, lock and compatibility source changes together to its PR #23 base;
 retain DevTools disabled. No service or device has been changed by this work.
 
@@ -314,13 +321,40 @@ exercise warning display, default sizing at both widths, backdrop non-dismissal,
 Escape/close and reopening. AudioContext remains inert and the POST never leaves
 request interception; the real provider/out-of-credits path is unqualified.
 
-**Merge/CI gate:** PR #28 must land after independently accepted PR #22 supplies
-the Node 26.7.0 worker; PR #18's Node 22.16.0 does not meet the declared floor. No
-workflow or engine-floor change is made here. Existing hosted CodeQL results are
-not a Linux CI build/type/browser qualification. That worker qualification,
-maintainer UI acceptance and exact changed-head checks remain outstanding.
+## Independent Linux review and disposition
 
-**Proposed follow-up under issue #13:** migrate the root lint runtime to a
+**Reviewer-reported, not locally reproduced:** `pysol-dev` reviewed head
+`18b9c85` in [review 5708251395](https://github.com/patchwerks/furbomek/pull/28#pullrequestreview-5708251395)
+on Debian 13 with Node 26.7.0 and npm 10.9.2. The reviewer reported successful
+`npm ci`, production build, direct vue-tsc, Settings regression, all six renderer
+fixtures and headless UI verification. UI checks covered every Settings tab,
+modal buttons, Escape/Enter, closing/reopening, persistence after reload and
+send-enable behavior; focus return improved. These results qualify that reviewed
+Linux application fixture surface, not live providers or deployment.
+
+The review identified two added `vue/attributes-order` warnings in the modal
+declarations. This follow-up places `id` before `v-model` on both modals without
+changing their behavior. A fresh local run with Node 26.7.0 and this exact lock confirmed app
+counts of 11 errors/18 warnings and repository-wide counts of 33 errors/23
+warnings, with zero fatal errors. Nuxt prepare and the Settings regression also
+passed in a disposable copy under the network-denied, credential-free macOS
+boundary; dependency installation used disabled lifecycle scripts. The two additional
+repository-wide errors remain outside this attribute-order correction.
+
+The maintainer accepted the remaining deepmerge GHSA-gcqx-w48m-w2h4 risk for the
+application-controlled configuration path described above. This is a scoped risk
+decision, not a finding that the dependency is free of vulnerabilities. The
+separate ESLint migration is tracked in [issue #30](https://github.com/patchwerks/furbomek/issues/30).
+
+**Merge/CI gate:** PR #22 has now supplied the accepted Node 26.7.0 worker on
+main (`9aa7546`). PR #18 is being updated to consume that helper; its older
+Node 22.16.0 copy did not meet the declared floor. No
+workflow or engine-floor change is made here. Existing hosted CodeQL results are
+not themselves a Linux CI build/type/browser qualification. The reviewer-reported
+Linux checks above cover head `18b9c85`; full Docker/proxy worker qualification,
+merge acceptance and exact changed-head checks remain separate gates.
+
+**Separate follow-up in issue #30:** migrate the root lint runtime to a
 currently maintained ESLint major (9+ compatibility scope, select a supported
 release at implementation time) with a compatible Nuxt ESLint parent. ESLint 8 is
 EOL; the nested ESLint 10.13.0 tooling copy does not upgrade the root 8.57.1
@@ -332,8 +366,8 @@ and [Nuxt ESLint flat-config
 documentation](https://eslint.nuxt.com/packages/module) (accessed 2026-10-30).
 
 That separate slice must inventory peer/engine requirements, preserve generated
-Vue/TypeScript rules, compare baseline diagnostics (11 errors/20 warnings in the
-prior app qualification), exercise malformed Vue/TS parsing and native resolver
+Vue/TypeScript rules, compare the corrected baseline diagnostics (main app
+11 errors/18 warnings; repository-wide 31 errors/23 warnings), exercise malformed Vue/TS parsing and native resolver
 behavior, then run build/types and the accepted Linux worker. Reaudit inspector
 and both esbuild paths while preserving the explicit 1.3.0 selection until a
 replacement is qualified. Do not disable rules, suppress existing debt, or force
