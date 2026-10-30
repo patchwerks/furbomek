@@ -1,6 +1,6 @@
 ---
 timestamp: 2026-10-30
-branch: codex/13-certifi
+branch: codex/13-update-mcp-sdk
 author: Codex security subagent
 status: proposed; not deployed
 ---
@@ -9,8 +9,14 @@ status: proposed; not deployed
 
 **Observed:** this #13 follow-up to PR #26 changes only the certifi package
 record in `services/embodiment-gateway/uv.lock`, from 2026.7.22 to
-**2026.10.19**. Base revision: `575030bb27e882a6af6c1ddd355e3f94ca3ba662`.
-No source, manifest, test, HTTP transport, or other dependency version changes.
+**2026.10.19**. Incremental certifi base revision:
+`575030bb27e882a6af6c1ddd355e3f94ca3ba662`, which already includes MCP 1.30.0.
+This follow-up is on PR #26's `codex/13-update-mcp-sdk` branch; the original PR
+base is `9347304e866ca90e8eec2d85f3bd3c41002d9a42`. The complete PR changes
+both MCP and certifi, as distinguished in the
+[MCP maintenance record](gateway-mcp-update-2026-10-30.md).
+Within this incremental certifi delta, there are no source, manifest, test,
+HTTP transport, or other dependency version changes.
 The existing MCP stdio entrypoints and all robot policy boundaries are preserved.
 
 ## Advisory and release selection
