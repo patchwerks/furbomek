@@ -118,3 +118,23 @@ record. Independent review binds to the candidate commit. Reference #7 in this
 preparation PR without a closing keyword: documentation cannot close the full
 integration issue. No merge, deployment, live service activation, hardware access
 or public stream is authorized by this document.
+
+## Accepted-source checkpoint — 2026-10-30
+
+**Observed, source inspection:** accepted main
+`26f4bdb89633f0296fd42ba75d62618219e942b9` now includes the Build Scout (#15),
+Simulation Lab (#17), local character foundation (#21) and pinned Agentile
+coordination (#12) PRs. This updates the integration reference point while
+preserving the historical baseline above. Of the eleven cited implementation,
+policy and verification files compared with `9aa7546`, only the activity model,
+reducer and publisher changed. The [accepted character seam](https://github.com/patchwerks/furbomek/blob/26f4bdb89633f0296fd42ba75d62618219e942b9/services/hermes-activity/CHARACTER.md)
+adds explicit opt-in local-authorized session input, ordered character state and
+durable cancellation evidence; the publisher projects bounded phase labels onto
+the existing public activity/Godot port. The supervisor does not enable it, the
+Godot parser remains unchanged, and publication timestamps remain freshness
+metadata rather than a PCM clock. Later #7 work should consume this accepted seam
+instead of duplicating it. These merged source foundations do not establish real
+Hermes lifecycle, speech playback/cancellation, private OBS recording or completed
+#7/#8 integration. Existing issue dependencies, runtime acceptance and physical
+gates remain in force; the newly adopted pinned coordination policy changes none
+of those permissions. This checkpoint supplies no new runtime test evidence.
