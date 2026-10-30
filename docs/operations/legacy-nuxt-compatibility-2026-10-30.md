@@ -53,9 +53,8 @@ removed `md` value. See the official
 [modal API](https://bootstrap-vue-next.github.io/bootstrap-vue-next/docs/components/modal).
 
 Vue 3.5 requires a getter when watching a destructured prop. The settings watcher
-now uses that getter and ignores its own identical-reference v-model echo before
-merging externally replaced settings. This prevents a fresh-object feedback loop
-while retaining deep updates. See [Vue's prop guidance](https://vuejs.org/guide/components/props).
+uses that getter. The initial identity guard was superseded by detached snapshots
+and a content guard in the maintainer follow-up below. See [Vue's prop guidance](https://vuejs.org/guide/components/props).
 
 TypeScript 5.5 cannot parse current dependency declarations or the generated
 `libReplacement` option ([introduced in 5.8](https://www.typescriptlang.org/docs/handbook/release-notes/typescript-5-8.html)).
@@ -226,26 +225,29 @@ removal of the active provider is included. Maintainer disposition remains requi
 
 The portable Settings regression is
 `node tools/legacy-compat/settings-regression.cjs`. It compiles the real SFC and
-settings defaults, exercises local edits, an externally replaced prop and a
-second edit, and checks exactly three bounded emissions with cleanup.
+settings defaults and checks detached provider snapshots, deep parent updates,
+complete/partial/reordered replacements and default-array immutability, including an equivalent-normalized partial replacement. The
+expanded sequence expects six bounded emissions with cleanup.
 
 `node tools/legacy-compat/render-spa.mjs .output > rendered.html` renders the
 built SPA in process without opening a listener. A test-only transport stub
 intercepts the node-server preset's import-time listen call; it does not alter
 generated HTML or application assets. The renderer checks the generated
-Nitro accessor and fails if that build format changes.
+Nitro accessor and fails if that build format changes. It restores the original
+listener in `finally`, including import, fetch and assertion failures; run
+`node --test tools/legacy-compat/render-spa.test.mjs` for six no-socket fixtures.
 
 `tools/legacy-compat/browser-smoke.cjs` takes a rendered SPA HTML file and its
 matching production public directory. Playwright is external test tooling;
 `PLAYWRIGHT_MODULE` and `CHROMIUM_EXECUTABLE` can identify an existing installation.
 Run only in a restricted worker. It serves files through interception, supplies
-explicit empty local provider fixtures, asserts blank credential headers, aborts
+explicit local provider fixtures (including an inert warning-only voice), asserts blank credential headers, aborts
 unknown requests and stubs media devices/AudioContext/WebSockets before app load.
 It checks blank-provider send guards, input mode, all four settings tabs, modal
 open/close/reopen, backdrop non-dismissal, repeated persisted edits and errors.
 
-Existing startup attempts to list assistants/voices and read subscription state
-are fulfilled locally; they are not live provider tests. No microphone, audio
+Existing startup attempts to list assistants/voices and read subscription state,
+and the explicit synthetic out-of-credits fixture, are fulfilled locally; they are not live provider tests. No microphone, audio
 output, hardware, OBS, production service or deployment is exercised. The test
 worker denies TCP/IP and user-home/device data access; Chrome-owned temporary
 Unix IPC is permitted. Chromium's inner sandbox is disabled because nested
@@ -256,3 +258,84 @@ Independent review, final-head hosted checks, maintainer acceptance and subseque
 alert verification remain required. Roll back by restoring this candidate's
 manifest, lock and compatibility source changes together to its PR #23 base;
 retain DevTools disabled. No service or device has been changed by this work.
+
+
+## Maintainer review follow-up (2026-10-30)
+
+**Observed:** the previous guard emitted the child's reactive object directly.
+After the first v-model echo, a second child edit mutated the previous parent
+snapshot before Vue's next tick. Parent deep edits leaked immediately into the
+child, and an array edit after partial-default completion could mutate
+`defaultSettings`. That breaks `app.vue`'s previous/new provider-setting
+comparison.
+
+The child now JSON-clones normalized inputs/defaults and outgoing snapshots.
+Sorted object keys make the content guard insensitive to property insertion order;
+array order remains significant. This uses the existing JSON-persisted Settings
+contract, not a new validation/schema boundary. Complete parent replacements and
+deep parent changes synchronize without an unnecessary emission; incomplete
+external replacements emit completed defaults once, even when their normalized
+content equals the current child state. Local changes replace the parent's object
+and preserve previous provider values. No provider implementation or persistence
+schema changed.
+
+The Vue manifest floor is now `^3.5.0`, matching the reactive destructured prop
+behavior used by the SFC. Only root manifest/lock metadata changed: every
+installed package record, including Vue 3.5.44, is identical to `ef06a8c`.
+Nuxt/provider versions, inspector 1.3.0 selection and the unresolved deepmerge
+finding remain as recorded above.
+
+**Observed validation:** strict credential-free macOS arm64 worker, Node 26.7.0
+and the existing npm 10.9.2-installed dependency tree: production build including
+types, direct vue-tsc, expanded compiled Settings regression and six renderer
+success/failure tests pass. The expanded Settings test fails against the prior
+source on shared-reference ownership; five renderer error-path cleanup tests fail
+against the prior renderer and pass with `finally`. Home/device read and loopback
+TCP-denial probes pass. Dependency records did not change; this follow-up reused
+the previously qualified install rather than claiming a new clean install.
+
+The production browser fixture also verifies that two successive ElevenLabs
+stability edits each invoke the parent's provider watcher and refresh empty local
+voice fixtures, with blank credentials throughout. Settings keyboard Enter/open,
+Enter/close, Escape/close, transition-settled focus return, backdrop non-dismissal
+and 1280/390 viewport screenshots and scroll-to-footer reachability are checked.
+The fixture sees no page errors, unexpected console errors, missing assets or
+unknown requests. The browser resource diagnostic for the intentional 403 on the
+exact intercepted PlayHT stream URL is expected. This is agent-operated fixture
+validation and visual inspection, not human manual acceptance or live-provider
+qualification. The earlier focus variability was reproduced when the test
+interacted after visibility but before BModal's enter-transition focus-trap
+activation. Its trap then remembered an in-modal target, leaving focus on BODY
+after close. The final harness waits for the modal's initial focus before
+interacting, then asserts the Settings button receives focus after pointer close
+and keyboard Escape/Enter. No product focus override or disabled-trap workaround
+was added. A synthetic PlayHT voice and intercepted 403 `OUT_OF_CREDITS` fixture
+exercise warning display, default sizing at both widths, backdrop non-dismissal,
+Escape/close and reopening. AudioContext remains inert and the POST never leaves
+request interception; the real provider/out-of-credits path is unqualified.
+
+**Merge/CI gate:** PR #28 must land after independently accepted PR #22 supplies
+the Node 26.7.0 worker; PR #18's Node 22.16.0 does not meet the declared floor. No
+workflow or engine-floor change is made here. Existing hosted CodeQL results are
+not a Linux CI build/type/browser qualification. That worker qualification,
+maintainer UI acceptance and exact changed-head checks remain outstanding.
+
+**Proposed follow-up under issue #13:** migrate the root lint runtime to a
+currently maintained ESLint major (9+ compatibility scope, select a supported
+release at implementation time) with a compatible Nuxt ESLint parent. ESLint 8 is
+EOL; the nested ESLint 10.13.0 tooling copy does not upgrade the root 8.57.1
+runtime. The repository already uses flat config via `eslint.config.mjs` and the
+generated `.nuxt/eslint.config.mjs`; this is a runtime/plugin compatibility
+upgrade, not a pending conversion from `.eslintrc`. See the official [ESLint
+support notice](https://eslint.org/blog/2024/09/eslint-v8-eol-version-support/)
+and [Nuxt ESLint flat-config
+documentation](https://eslint.nuxt.com/packages/module) (accessed 2026-10-30).
+
+That separate slice must inventory peer/engine requirements, preserve generated
+Vue/TypeScript rules, compare baseline diagnostics (11 errors/20 warnings in the
+prior app qualification), exercise malformed Vue/TS parsing and native resolver
+behavior, then run build/types and the accepted Linux worker. Reaudit inspector
+and both esbuild paths while preserving the explicit 1.3.0 selection until a
+replacement is qualified. Do not disable rules, suppress existing debt, or force
+peer/major overrides to make the migration pass. This is a documented plan, not an
+implemented migration or an accepted long-term ESLint 8 support decision.

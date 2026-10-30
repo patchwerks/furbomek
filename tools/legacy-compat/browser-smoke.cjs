@@ -9,7 +9,8 @@ const providerFixtures = {
   'https://api.openai.com/v1/assistants': {object: 'list', data: [], has_more: false},
   'http://localhost:3500/proxy/elevenlabs/voices': {voices: []},
   'http://localhost:3500/proxy/elevenlabs/subscription': {character_count: 0, character_limit: 1},
-  'http://localhost:3500/proxy/playht/voices': [],
+  'http://localhost:3500/proxy/playht/voices': [{id: 'fixture-voice', name: 'Offline fixture', voice_engine: 'PlayHT2.0'}],
+  'http://localhost:3500/proxy/playht/stream': {error_id: 'OUT_OF_CREDITS'},
   'http://localhost:3500/proxy/playht/cloned-voices': [],
 };
 
@@ -27,21 +28,22 @@ const providerFixtures = {
     const focusReturned = [];
     page.on('pageerror', error => pageErrors.push(error.message));
     page.on('console', message => {
-      if (message.type() === 'error') consoleErrors.push(message.text());
+      if (message.type() === 'error' && !(message.location().url === 'http://localhost:3500/proxy/playht/stream' && message.text().includes('403'))) consoleErrors.push(message.text());
     });
     await page.route('**/*', async route => {
       const url = new URL(route.request().url());
       if (url.origin !== 'https://fixture.invalid') {
         const key = url.origin + url.pathname;
         if (key in providerFixtures) {
-          assert.equal(route.request().method(), 'GET');
+          const creditFixture = key.endsWith('/playht/stream');
+          assert.equal(route.request().method(), creditFixture ? 'POST' : 'GET');
           const headers = route.request().headers();
           for (const name of ['authorization', 'xi-api-key', 'x-user-id']) {
             if (name in headers) assert.equal(headers[name].replace(/^Bearer\s*/, ''), '',
               'fixture credentials must be blank');
           }
           fixtures.push({method: route.request().method(), url: key});
-          return route.fulfill({status: 200, contentType: 'application/json',
+          return route.fulfill({status: creditFixture ? 403 : 200, contentType: 'application/json',
             body: JSON.stringify(providerFixtures[key])});
         }
         externalRequests.push(url.origin);
@@ -65,6 +67,8 @@ const providerFixtures = {
         getUserMedia: async () => new MediaStream(), enumerateDevices: async () => [],
       }});
       window.AudioContext = class {
+        close() {}
+        async suspend() {}
         createMediaStreamSource() { return {connect() {}}; }
         createAnalyser() { return {frequencyBinCount: 128, getByteFrequencyData(data) {data.fill(0);}}; }
       };
@@ -84,10 +88,18 @@ const providerFixtures = {
     assert(await send.isDisabled());
 
     const modal = page.locator('#settings-modal');
+    // BModal activates its focus trap after the enter transition, later than
+    // visibility. Interacting earlier changes the trap's captured return target.
+    const waitForSettingsFocus = () => page.waitForFunction(() =>
+      document.activeElement === document.querySelector('#settings-modal'));
+    const waitForReturnedFocus = () => page.waitForFunction(() =>
+      [...document.querySelectorAll('button')].some(button =>
+        button.textContent.trim() === 'Settings' && button === document.activeElement));
     const number = page.locator('#settings-modal input[type="number"]').first();
     for (const value of ['900', '1200']) {
       await settings.click();
       await modal.waitFor({state: 'visible'});
+    await waitForSettingsFocus();
       for (const name of ['OpenAI', 'Deepgram', '11labs', 'Play.ht']) {
         const tab = page.getByRole('tab', {name, exact: true});
         await tab.click();
@@ -105,17 +117,92 @@ const providerFixtures = {
         JSON.parse(localStorage.getItem('settings')).deepgram.utterance === expected, Number(value));
       await page.locator('#settings-modal .btn-close').click();
       await modal.waitFor({state: 'hidden'});
+      await waitForReturnedFocus();
       focusReturned.push(await settings.evaluate(element => element === document.activeElement));
     }
+    // Repeated provider configuration edits must reach the parent's provider
+    // watcher, not merely persist in localStorage. All requests stay local fixtures.
+    await settings.click();
+    await modal.waitFor({state: 'visible'});
+    await waitForSettingsFocus();
+    await page.getByRole('tab', {name: '11labs', exact: true}).click();
+    const stability = page.locator('#settings-modal input[type="number"]:visible').first();
+    for (const value of ['0.6', '0.7']) {
+      const before = fixtures.filter(item => item.url.endsWith('/elevenlabs/voices')).length;
+      await stability.fill(value);
+      await page.waitForFunction(expected =>
+        JSON.parse(localStorage.getItem('settings')).elevenlabs.stability === expected, Number(value));
+      await page.waitForTimeout(300);
+      assert(fixtures.filter(item => item.url.endsWith('/elevenlabs/voices')).length > before,
+        'each provider settings edit must refresh fixture voices');
+    }
+    const screenshots = process.env.SCREENSHOT_DIRECTORY;
+    if (screenshots) fs.mkdirSync(screenshots, {recursive: true});
+    for (const width of [1280, 390]) {
+      await page.setViewportSize({width, height: 844});
+      await page.getByRole('tab', {name: 'Deepgram', exact: true}).click();
+      await page.waitForTimeout(400);
+      await number.waitFor({state: 'visible'});
+      if (screenshots) await page.screenshot({path: path.join(screenshots, `settings-${width}.png`)});
+      const footerButton = modal.locator('.modal-footer button').last();
+      await footerButton.scrollIntoViewIfNeeded();
+      const footerBox = await footerButton.boundingBox();
+      assert(footerBox && footerBox.y >= 0 && footerBox.y + footerBox.height <= 844,
+        'modal footer must be reachable inside viewport');
+      if (screenshots) await page.screenshot({path: path.join(screenshots, `settings-${width}-bottom.png`)});
+      await page.locator('#settings-modal .btn-close').scrollIntoViewIfNeeded();
+      await page.locator('#settings-modal .btn-close').focus();
+      await page.keyboard.press('Tab');
+      assert(await modal.evaluate(element => element.contains(document.activeElement)),
+        'keyboard focus must stay inside settings modal');
+    }
+    await page.keyboard.press('Escape');
+    await modal.waitFor({state: 'hidden'});
+    await page.waitForTimeout(400);
+    await waitForReturnedFocus();
+    const escapeFocus = await settings.evaluate(element => ({returned: element === document.activeElement,
+      activeTag: document.activeElement?.tagName, activeText: document.activeElement?.textContent?.slice(0, 60)}));
+    await settings.focus();
+    await page.keyboard.press('Enter');
+    await modal.waitFor({state: 'visible'});
+    await waitForSettingsFocus();
+    await page.locator('#settings-modal .btn-close').focus();
+    await page.keyboard.press('Enter');
+    await modal.waitFor({state: 'hidden'});
+    await waitForReturnedFocus();
+    // Synthetic provider error only: the request never leaves route interception.
+    await page.setViewportSize({width: 1280, height: 844});
+    const fixtureVoice = page.locator('select').filter({has: page.locator('option', {hasText: 'Offline fixture'})});
+    await fixtureVoice.selectOption({label: 'Offline fixture'});
+    await toggle.click(); // Return to the original bot input mode.
+    const warning = page.locator('#warning-modal');
+    for (const width of [1280, 390]) {
+      await page.setViewportSize({width, height: 844});
+      await page.getByPlaceholder('Write your message here...').fill('Offline warning fixture.');
+      await send.click();
+      await warning.waitFor({state: 'visible'});
+      await page.waitForTimeout(400);
+      assert(await warning.getByText('PlayHT API is out of credits.', {exact: false}).isVisible());
+      const warningBox = await warning.locator('.modal-dialog').boundingBox();
+      assert(warningBox && warningBox.width <= width, 'warning default size fits viewport');
+      if (width === 1280) assert(warningBox.width <= 500, 'warning uses default medium width');
+      await page.mouse.click(2, 2);
+      assert(await warning.isVisible(), 'warning backdrop dismissal stays disabled');
+      if (screenshots) await page.screenshot({path: path.join(screenshots, `warning-${width}.png`)});
+      await page.keyboard.press('Escape');
+      await warning.waitFor({state: 'hidden'});
+    }
+    assert.equal(fixtures.filter(item => item.url.endsWith('/playht/stream')).length, 2);
     assert.deepEqual(externalRequests, []);
     assert.deepEqual(pageErrors, []);
     assert.deepEqual(missingAssets, []);
     assert.deepEqual(consoleErrors, []);
     console.log(JSON.stringify({result: 'PASS',
       checks: ['SPA mount', 'blank-provider send guards', 'message input', 'USER/bot toggle',
-        'modal open/close/reopen', 'all four tabs', 'backdrop dismissal disabled', 'repeated persisted form edits'],
+        'modal open/close/reopen', 'all four tabs', 'backdrop dismissal disabled', 'repeated persisted form edits',
+        'repeated provider watcher callbacks', 'desktop/mobile modal and reachable footer', 'synthetic out-of-credits warning default size/backdrop/Escape/reopen', 'keyboard open/close/Escape and transition-settled focus return'],
       unmockedExternalRequests: externalRequests, localProviderFixtures: fixtures,
-      pageErrors, consoleErrors, missingAssets, focusReturned}));
+      pageErrors, consoleErrors, missingAssets, focusReturned, escapeFocus}));
   } finally {
     await browser.close();
   }

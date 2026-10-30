@@ -32,12 +32,15 @@ Server.prototype.listen = function () {
   interceptedServers.push(this);
   return this;
 };
-const runtime = await import(pathToFileURL(filename));
-assert.equal(typeof runtime[name], 'function', 'Nitro app accessor must be exported');
-const response = await runtime[name]().localFetch('/');
-assert.equal(response.status, 200);
-const html = await response.text();
-assert(html.includes('id="__nuxt"'), 'expected SPA shell');
-assert(interceptedServers.every(server => !server.listening), 'no server may listen');
-Server.prototype.listen = originalListen;
-process.stdout.write(html);
+try {
+  const runtime = await import(pathToFileURL(filename));
+  assert.equal(typeof runtime[name], 'function', 'Nitro app accessor must be exported');
+  const response = await runtime[name]().localFetch('/');
+  assert.equal(response.status, 200);
+  const html = await response.text();
+  assert(html.includes('id="__nuxt"'), 'expected SPA shell');
+  assert(interceptedServers.every(server => !server.listening), 'no server may listen');
+  process.stdout.write(html);
+} finally {
+  Server.prototype.listen = originalListen;
+}
