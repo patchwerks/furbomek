@@ -82,11 +82,30 @@ Observed offline on macOS ARM64/Python 3.12.14: the original 60 tests passed on
 12.3.0; adding six synthetic-image cases yielded 66 passes on both versions.
 The new cases cover RGB/RGBA/grayscale conversion, aspect-ratio bounds, no upscaling,
 full decoding of generated JPEGs, byte-limit equality, quality fallback and
-oversize rejection. They never call ImageGrab or capture_frame; the existing
+oversize rejection. Those original cases never called ImageGrab or capture_frame; the existing
 capture-denial fixture and CLI rejection tests remain in force. Locked lint,
 format, types and lock checks also passed. Test execution used an empty
 environment with network, private-home/device reads and source writes denied;
 dependency preparation used wheels only, without source builds.
+
+Review follow-up replaces the duplicated conversion/thumbnail test operations
+with the actual `capture_frame` path. An explicit synthetic fixture replaces
+only `ImageGrab.grab` after the suite's capture-denial guard is installed; it
+returns a generated in-memory image. The test checks returned dimensions,
+decoded JPEG pixels and unchanged source mode, dimensions and bytes. No desktop
+capture is performed, and the CLI rejection remains unchanged. The original
+results above describe the earlier test revision. The revised suite passed all
+66 cases in 4.05 seconds in a separately prepared combined Pillow 13.0.0 /
+pytest 9.1.1 environment; this is cross-update compatibility evidence, not a run
+against this branch's own frozen lock. Ruff check/format passed and basedpyright
+reported zero errors, warnings or notes with that environment's interpreter.
+A separate run against this branch's unchanged frozen lock (Pillow 13.0.0,
+pytest 8.4.2, Python 3.12.16) passed all 66 tests in 5.66 seconds, Ruff check/format,
+basedpyright (zero errors/warnings/notes), and offline lock validation.
+All execution used the restricted offline runner. In disposable source copies,
+removing thumbnail resizing failed both oversized-image cases; removing RGB
+conversion failed all three cases (source mutation, unsupported RGBA encoding,
+and grayscale output). The capture-denial fixture remained byte-identical.
 
 This is API compatibility evidence, not an exploit reproduction, Linux/OBS
 qualification, desktop-privacy acceptance or confirmation that GitHub alerts have

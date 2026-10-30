@@ -1,4 +1,4 @@
-"""Synthetic pixels only; never invoke capture or read external image files."""
+"""Synthetic pixels only; never invoke desktop ImageGrab or read image files."""
 
 from __future__ import annotations
 
@@ -11,11 +11,27 @@ from PIL import Image
 
 import screen
 
-# Exercise the pure encoder without entering the unqualified capture entrypoint.
 from screen import _encode_jpeg  # pyright: ignore[reportPrivateUsage]
 
 if TYPE_CHECKING:
-    from collections.abc import Iterator
+    from collections.abc import Callable, Iterator
+
+
+@pytest.fixture
+def enable_synthetic_grab(
+    monkeypatch: pytest.MonkeyPatch, forbid_real_desktop_capture: None
+) -> Callable[[Image.Image], None]:
+    # Explicit dependency installs the capture-denial guard before this opt-in.
+    _ = forbid_real_desktop_capture
+
+    def enable(source: Image.Image) -> None:
+        def grab(*, xdisplay: str) -> Image.Image:
+            assert xdisplay == ":20"
+            return source
+
+        monkeypatch.setattr("screen.ImageGrab.grab", grab)
+
+    return enable
 
 
 @pytest.mark.parametrize(
@@ -32,13 +48,17 @@ def test_synthetic_conversion_thumbnail_and_jpeg(
     color: int | tuple[int, ...],
     expected_size: tuple[int, int],
     expected_pixel: tuple[int, int, int],
+    enable_synthetic_grab: Callable[[Image.Image], None],
 ) -> None:
-    # Match the helper's image operations without invoking ImageGrab/capture_frame.
-    with Image.new(mode, size, color) as source, source.convert("RGB") as image:
-        image.thumbnail(screen.SCREEN_SIZE)
-        encoded = _encode_jpeg(image)
+    with Image.new(mode, size, color) as source:
+        original_pixels = source.tobytes()
+        enable_synthetic_grab(source)
+        frame = screen.capture_frame({"DISPLAY": ":20", "XAUTHORITY": "synthetic-unused-authority"})
+        encoded = frame.data
+        assert (frame.width, frame.height) == expected_size
         assert source.size == size
-        assert image.size == expected_size
+        assert source.mode == mode
+        assert source.tobytes() == original_pixels
     assert 0 < len(encoded) <= screen.SCREEN_MAX_BYTES
     with Image.open(BytesIO(encoded), formats=["JPEG"]) as decoded:
         decoded.load()
