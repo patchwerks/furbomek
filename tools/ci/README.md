@@ -204,6 +204,8 @@ The subsequent build-input target installation now explicitly uses
 `--link-mode copy`. Separate build-input files avoid sharing cache hardlinks
 with service environments, which can cause the later offline copy to fail
 because source and destination are the same file. The fake-worker argv test
-requires this flag. The Linux evidence above predates this final flag; a fresh
-immutable Linux fixture rerun is pending at the updated helper revision.
+requires this flag. A fresh immutable Linux fixture rerun at final code revision
+`71a0b0cb1f59361df26fb550e4cf8a8e689387f1` passed all **28 tests with zero skips**:
+[run 40986264572, job 123837909390](https://github.com/patchwerks/furbomek/actions/runs/40986264572/job/123837909390).
+Test-only workflow revision: `b71ac458a8bc50796695072310da78babb672981`.
 No workflow/helper activation or full-worker acceptance follows from it.
