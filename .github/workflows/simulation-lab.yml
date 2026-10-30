@@ -7,9 +7,11 @@ on:
       - 'firmware/robot-safety/**'
       - '.github/workflows/simulation-lab.yml'
   push:
-    branches: ['work/4-simulation-lab']
+    branches: ['main', 'work/4-simulation-lab']
     paths:
       - 'tools/simulation-lab/**'
+      - 'firmware/freenove-guard/**'
+      - 'firmware/robot-safety/**'
       - '.github/workflows/simulation-lab.yml'
 permissions:
   contents: read
