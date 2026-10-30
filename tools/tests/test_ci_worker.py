@@ -45,5 +45,113 @@ class WorkerInputTests(unittest.TestCase):
                 self.rejected([mode, alias], "Trusted helpers must be separate")
 
 
+class WorkerOrchestrationTests(unittest.TestCase):
+    def run_fake(self, mode="legacy", version="28.0.0", failure=""):
+        import json
+        import os
+        import sys
+        with tempfile.TemporaryDirectory() as directory:
+            scratch = Path(directory)
+            candidate = scratch / "candidate"
+            candidate.mkdir()
+            (candidate / "tools").mkdir()
+            (candidate / "tools/verify.sh").write_text('exit 98\n')
+            log = scratch / "calls.jsonl"
+            # Every external action is a recorder; no candidate/container code,
+            # network, image, download, checksum, or unzip operation is executed.
+            recorder = scratch / "recorder"
+            recorder.write_text("#!" + sys.executable + '\n' + r'''
+import json, os, pathlib, sys
+name = pathlib.Path(sys.argv[0]).name
+args = sys.argv[1:]
+with open(os.environ["CALL_LOG"], "a") as stream:
+    stream.write(json.dumps([name, *args]) + "\n")
+if name == "mktemp":
+    folder = pathlib.Path(os.environ["TMPDIR"]) / "fake-ci-tools"
+    folder.mkdir()
+    print(folder)
+if name == "docker":
+    if args[0] == "version":
+        if os.environ["FAILURE"] == "version": sys.exit(1)
+        print(os.environ["VERSION"])
+    elif args[0] == "inspect": print("172.29.4.2")
+    elif args[0] == "exec" and os.environ["FAILURE"] == "ready": sys.exit(1)
+''')
+            recorder.chmod(0o700)
+            for name in ("docker", "curl", "sha256sum", "unzip", "sleep", "mktemp"):
+                (scratch / name).symlink_to(recorder)
+            result = subprocess.run(
+                ["/bin/bash", str(WORKER), mode, str(candidate)],
+                env={"PATH": f"{scratch}:/usr/bin:/bin", "CALL_LOG": str(log),
+                     "VERSION": version, "FAILURE": failure, "HOME": str(scratch),
+                     "TMPDIR": str(scratch)},
+                capture_output=True, text=True, timeout=10)
+            calls = [json.loads(line) for line in log.read_text().splitlines()] if log.exists() else []
+            return result, calls, str(candidate)
+
+    def test_unsupported_unknown_and_prerelease_versions_fail_before_mutation(self):
+        for version, failure in (("27.5.1", ""), ("", ""), ("nonsense", ""),
+                                 ("28.0.0-rc.1", ""), ("28.0.0", "version")):
+            with self.subTest(version=version, failure=failure):
+                result, calls, _ = self.run_fake(version=version, failure=failure)
+                self.assertEqual(result.returncode, 2, result.stderr)
+                self.assertEqual(calls, [["docker", "version", "--format", "{{.Server.Version}}"]])
+
+    def test_supported_versions_and_both_modes_preserve_boundaries(self):
+        for mode, version in (("legacy", "28.0.0"), ("legacy", "28.5.2"), ("media", "29.0.0")):
+            with self.subTest(mode=mode, version=version):
+                result, calls, candidate = self.run_fake(mode, version)
+                self.assertEqual(result.returncode, 0, result.stderr)
+                self.assertEqual(calls[0][1], "version")
+                proxy_index = next(i for i, c in enumerate(calls) if c[:3] == ["docker", "run", "-d"])
+                launch = calls[proxy_index]
+                internal = launch[launch.index("--network") + 1]
+                self.assertTrue(internal.endswith("-net"))
+                self.assertEqual(launch[launch.index("--network-alias") + 1], "dependency-proxy")
+                self.assertIn('--bind-address "$(python -I -c "import socket; print(socket.gethostbyname(socket.gethostname()))")"', launch[-1])
+                # Parse the actual launch shell with -n, never execute it.
+                syntax = subprocess.run(["/bin/sh", "-n", "-c", launch[-1]], capture_output=True)
+                self.assertEqual(syntax.returncode, 0, syntax.stderr)
+                inspect_index = next(i for i, c in enumerate(calls) if c[:2] == ["docker", "inspect"])
+                self.assertIn(internal, calls[inspect_index][3])
+                ready_index = next(i for i, c in enumerate(calls) if c[:2] == ["docker", "exec"])
+                self.assertEqual(calls[ready_index][-1], "172.29.4.2")
+                connect_index = next(i for i, c in enumerate(calls) if c[:3] == ["docker", "network", "connect"])
+                self.assertEqual(calls[connect_index][3], "bridge")
+                self.assertLess(proxy_index, inspect_index)
+                self.assertLess(inspect_index, ready_index)
+                self.assertLess(ready_index, connect_index)
+                workers = [c for c in calls if c[:3] == ["docker", "run", "--rm"]]
+                self.assertTrue(workers)
+                for worker in [launch, *workers]:
+                    self.assertIn("--read-only", worker)
+                    self.assertEqual(worker[worker.index("--cap-drop") + 1], "ALL")
+                    self.assertEqual(worker[worker.index("--user") + 1], "1000:1000")
+                    self.assertEqual(worker[worker.index("--security-opt") + 1], "no-new-privileges")
+                    self.assertNotIn("--publish", worker)
+                    self.assertNotIn("--privileged", worker)
+                for worker in workers:
+                    for name in ("bootstrap-requirements.txt", "build-requirements.txt"):
+                        self.assertIn(f"type=bind,source={ROOT}/tools/ci/{name},target=/trusted/{name},readonly", worker)
+                    self.assertIn(f"type=bind,source={candidate},target=/source,readonly", worker)
+                self.assertEqual(workers[-1][workers[-1].index("--network") + 1], "none")
+                for worker in workers[:-1]:
+                    self.assertEqual(worker[worker.index("--network") + 1], internal)
+                if mode == "media":
+                    provision = workers[1][-1]
+                    self.assertIn("pip --isolated install --proxy http://dependency-proxy:3128 --require-hashes --only-binary=:all: --no-deps -r /trusted/bootstrap-requirements.txt", provision)
+                    self.assertIn("--require-hashes --no-deps --target /scratch/build-inputs -r /trusted/build-requirements.txt", provision)
+                    self.assertNotIn("/source/.github", provision)
+                    self.assertIn("--python /usr/local/bin/python3", provision)
+
+    def test_readiness_failure_never_attaches_egress_or_runs_candidate(self):
+        result, calls, _ = self.run_fake(failure="ready")
+        self.assertEqual(result.returncode, 1, result.stderr)
+        self.assertEqual(len([c for c in calls if c[:2] == ["docker", "exec"]]), 15)
+        self.assertFalse(any(c[:3] == ["docker", "network", "connect"] for c in calls))
+        self.assertFalse(any(c[:3] == ["docker", "run", "--rm"] for c in calls))
+        self.assertTrue(any(c[:3] == ["docker", "rm", "-f"] for c in calls))
+
+
 if __name__ == "__main__":
     unittest.main()

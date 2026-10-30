@@ -17,7 +17,7 @@ The candidate must supply `tools/verify.sh` and its existing lockfiles/product c
 
 `provision-python.sh SOURCE ENV_ROOT CACHE UV PYTHON` is mounted read-only from
 that same accepted helper checkout. The production caller fixes the interpreter
-to `/usr/local/bin/python3` and uv to `/scratch/bootstrap/bin/uv` (0.11.7).
+to `/usr/local/bin/python3` and uv to `/scratch/bootstrap/bin/uv` (0.13.6).
 Explicit paths also permit controlled offline regression fixtures. They are
 trusted caller arguments, never candidate-selected settings.
 
@@ -57,7 +57,7 @@ bash -n tools/ci/worker.sh tools/ci/provision-python.sh
 
 These check exact registry authorities, private-address rejection before connection, and malformed worker inputs before any Docker call. Run in a credential-free restricted worker. They do not establish Docker networking, package installation, Godot execution or product verification. No local Docker runtime was available for this preparation. No hardware, OBS, Hermes or live service is part of this bootstrap. Rollback before activation removes these standalone files; any later activation needs its own reviewed rollback.
 
-The provisioning regressions require exact uv 0.11.7 and otherwise skip with an
+The provisioning regressions require exact uv 0.13.6 and otherwise skip with an
 explicit version message. They invoke the actual trusted helper on synthetic
 empty locked projects, hostile interpreter/configuration/startup markers, reused
 state and escaping symlinks. A local wheel containing a startup `.pth` proves
@@ -117,3 +117,75 @@ so this pin has not qualified the full Docker/proxy path or Nuxt build in that
 image. The existing Python correction's exact-version regression evidence above
 is unchanged; this Node-only update does not repeat or extend it. Independent
 review and the separate acceptance sequence still apply before activation.
+
+## Review corrections — 2026-10-30
+
+The current helper requires a stable **Docker Engine server 28.0.0 or newer**.
+Docker's [28.0.0 release notes](https://docs.docker.com/engine/release-notes/28/#2800)
+introduce `gateway_mode_ipv4=isolated` for internal bridge networks. The helper
+checks the server version before pulls, resource creation, or cleanup registration;
+unavailable, malformed, prerelease and older versions fail closed. This minimum
+is a feature prerequisite, not operational qualification of every Docker version.
+
+The proxy starts attached only to the isolated worker network. Its trusted
+launcher resolves its own container hostname to a numeric IPv4 address and the
+proxy requires an explicit validated private, non-loopback `--bind-address`.
+Readiness probes use the Docker-inspected address on that exact internal network.
+Only after readiness succeeds does the helper attach the default bridge for
+registry egress. The listener remains bound to its original internal address;
+there is no wildcard listener, published port or fixed subnet allocation. This
+removes the listener from the egress interface; it does not claim that a
+privileged Docker host cannot access container addresses.
+
+Tunnels now expire after 120 seconds without successfully forwarded bytes, with
+a separate 900-second maximum lifetime. Successful traffic resets only the idle
+clock. Each blocking operation is limited by its remaining idle/maximum budget
+and the existing 15-second I/O ceiling. These bounds accommodate active transfers
+beyond the former absolute two-minute cutoff while limiting connection lifetime;
+they are not a measured registry throughput guarantee.
+
+Current bootstrap uv is **0.13.6**. The preceding 0.11.7 evidence remains historical
+and does not qualify the new version. PyPI metadata for 0.11.7 reports
+[wheel executable overwrite](https://github.com/astral-sh/uv/security/advisories/GHSA-4gg8-gxpx-9rph)
+and [compromised vendored CA trust](https://github.com/astral-sh/uv/security/advisories/GHSA-hq85-5cpj-mr62)
+advisories, fixed in 0.11.15 and 0.13.4 respectively. Exact-version regression
+fixtures now require 0.13.6.
+
+Both `bootstrap-requirements.txt` and `build-requirements.txt` are mounted from the
+trusted helper checkout and installed with `--require-hashes`, `--no-deps` and
+`--only-binary=:all:`. Candidate requirement files cannot select these tools.
+The build manifest preserves the existing verified six-package set (hatchling
+1.27.0, editables 0.5 and four pinned dependencies), copied from the previously
+reviewed build manifest at revision
+`a8c01317fa739c29cec90060edf92056974b01b0`; its file SHA-256 is
+`3da3b9055958e002237bcd51cbd3f627487677ce129b103db070592e13245602`.
+All artifact hashes were checked against official PyPI version metadata on
+2026-10-30: [uv](https://pypi.org/pypi/uv/0.13.6/json),
+[editables](https://pypi.org/pypi/editables/0.5/json),
+[hatchling](https://pypi.org/pypi/hatchling/1.27.0/json),
+[packaging](https://pypi.org/pypi/packaging/26.3/json),
+[pathspec](https://pypi.org/pypi/pathspec/0.12.1/json),
+[pluggy](https://pypi.org/pypi/pluggy/1.7.0/json) and
+[trove-classifiers](https://pypi.org/pypi/trove-classifiers/2025.3.19.19/json).
+The uv manifest includes Linux x86_64 and arm64 wheels, but the existing Godot
+artifact remains x86_64; this does not establish arm64 product support.
+
+New synthetic tests execute the production relay with fake sockets/clock, mock
+listener construction, and run the worker against an argument-recording fake
+Docker/download toolchain. They cover timeout renewal and ceilings, invalid
+binding rejection, version rejection before mutations, internal bind/readiness
+before external attachment, trusted manifest mounts, and final network-none
+execution. Faked downloads/checksums do not qualify real downloads or installer
+hash rejection. All real Docker networking, proxy reachability/denials, registry
+installation and unchanged product checks remain in the separate acceptance
+sequence. No workflow or accepted helper pin is activated by these changes.
+
+Observed locally for these corrections: **22 tests passed** (15 proxy/relay/bind,
+7 input/fake-runtime orchestration) under the existing credential-free macOS
+boundary denying network, private-home/device reads and source writes, using
+Python 3.12.16. Shell syntax and whitespace checks passed. The attempted full
+28-test run with exact uv 0.13.6 reached the existing Linux-only `realpath -e`
+command and failed four provisioning cases on macOS; two provisioning rejection
+cases passed. This is an explicit local platform limitation, not a successful
+new-version provisioning qualification. A Linux run using the pinned Python
+3.12.11 image is still required for all exact-version regressions.

@@ -22,11 +22,11 @@ class PythonProvisionTests(unittest.TestCase):
     def setUpClass(cls):
         executable = shutil.which("uv")
         if not executable:
-            raise unittest.SkipTest("Exact uv 0.11.7 unavailable; provisioning regression not exercised")
+            raise unittest.SkipTest("Exact uv 0.13.6 unavailable; provisioning regression not exercised")
         cls.uv = str(Path(executable).resolve())
         result = subprocess.run([cls.uv, "--version"], capture_output=True, text=True, check=True)
-        if result.stdout.split()[:2] != ["uv", "0.11.7"]:
-            raise unittest.SkipTest("Requires exact uv 0.11.7; found " + result.stdout.strip())
+        if result.stdout.split()[:2] != ["uv", "0.13.6"]:
+            raise unittest.SkipTest("Requires exact uv 0.13.6; found " + result.stdout.strip())
         cls.python = str(Path(sys.executable).resolve())
 
     def setUp(self):
