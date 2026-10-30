@@ -205,6 +205,7 @@ jobs:
             --frozen --no-build --script "$gate/repo/services/camera-capture/tests/test_snapshot.py"
           # Never query a populated dependency interpreter while online.
           uv --no-config pip install --python "$python" --target "$gate/build-inputs" \
+            --link-mode copy \
             --default-index https://pypi.org/simple --require-hashes --no-deps --only-binary :all: \
             -r "$gate/repo/.github/ci/build-requirements.txt"
           PREP
