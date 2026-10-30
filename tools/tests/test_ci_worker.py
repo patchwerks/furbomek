@@ -140,7 +140,7 @@ if name == "docker":
                 if mode == "media":
                     provision = workers[1][-1]
                     self.assertIn("pip --isolated install --proxy http://dependency-proxy:3128 --require-hashes --only-binary=:all: --no-deps -r /trusted/bootstrap-requirements.txt", provision)
-                    self.assertIn("--require-hashes --no-deps --target /scratch/build-inputs -r /trusted/build-requirements.txt", provision)
+                    self.assertIn("--require-hashes --no-deps --link-mode copy --target /scratch/build-inputs -r /trusted/build-requirements.txt", provision)
                     self.assertNotIn("/source/.github", provision)
                     self.assertIn("--python /usr/local/bin/python3", provision)
 

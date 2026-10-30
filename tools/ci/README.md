@@ -189,3 +189,21 @@ command and failed four provisioning cases on macOS; two provisioning rejection
 cases passed. This is an explicit local platform limitation, not a successful
 new-version provisioning qualification. A Linux run using the pinned Python
 3.12.11 image is still required for all exact-version regressions.
+
+
+## Exact-version Linux fixture — 2026-10-30
+
+At helper revision `267d68f248c78f0e9fbe4a72625f6b527f3a2916`, the hosted Linux fixture passed **28 tests with
+zero skips**, using exact uv 0.13.6 and the pinned Python 3.12.11 image:
+[run 40985799560, job 123836400297](https://github.com/patchwerks/furbomek/actions/runs/40985799560/job/123836400297).
+This supplies the new-version Linux provisioning regression evidence missing
+from the local macOS attempt above. It does not qualify the full worker,
+registry routing, proxy containment or product checks.
+
+The subsequent build-input target installation now explicitly uses
+`--link-mode copy`. Separate build-input files avoid sharing cache hardlinks
+with service environments, which can cause the later offline copy to fail
+because source and destination are the same file. The fake-worker argv test
+requires this flag. The Linux evidence above predates this final flag; a fresh
+immutable Linux fixture rerun is pending at the updated helper revision.
+No workflow/helper activation or full-worker acceptance follows from it.

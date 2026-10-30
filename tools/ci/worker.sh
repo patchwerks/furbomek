@@ -91,7 +91,7 @@ if [[ $mode == media ]]; then
       /scratch/uv-cache /scratch/bootstrap/bin/uv /usr/local/bin/python3
     # Explicit base interpreter: never discover or re-query a dependency env.
     /scratch/bootstrap/bin/uv --no-config pip install --python /usr/local/bin/python3 \
-      --only-binary=:all: --require-hashes --no-deps --target /scratch/build-inputs -r /trusted/build-requirements.txt
+      --only-binary=:all: --require-hashes --no-deps --link-mode copy --target /scratch/build-inputs -r /trusted/build-requirements.txt
   '
   # Fixed, hash-verified tool download is outside candidate execution.
   ci_tools=$(mktemp -d)
