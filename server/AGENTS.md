@@ -31,4 +31,8 @@ Routes:
 
 ## Verification
 
-There is no meaningful server test suite yet; `npm test` is a placeholder. At minimum, syntax-check changed JavaScript and exercise affected routes with stubbed upstreams. Add tests before expanding this boundary.
+Run `npm test` on Node.js 22 or later after a locked dependency install with lifecycle scripts disabled. The tests execute the actual proxy script in child processes on private Unix sockets with synthetic provider responses; no real provider or TCP listener is used. See `TESTING.md` for coverage, isolation and the dependency-update evidence. Syntax-check changed JavaScript as well.
+
+## Changelog
+
+- 2026-10-30: Replace the placeholder test guidance with the offline proxy/parser regression suite.
