@@ -5,7 +5,7 @@ on:
       - 'tools/build-scout/**'
       - '.github/workflows/build-scout.yml'
   push:
-    branches: ['work/14-build-scout']
+    branches: ['main', 'work/14-build-scout']
     paths:
       - 'tools/build-scout/**'
       - '.github/workflows/build-scout.yml'
