@@ -34,34 +34,78 @@ if TYPE_CHECKING:
 def test_startup_child_failure_restarts_within_readiness_deadline(tmp_path: Path) -> None:
     kinect = tmp_path / "kinect"
     kinect.mkdir()
+    restarted = tmp_path / "restarted.marker"
+    observed_ready = tmp_path / "observed-ready.json"
+    paths = RuntimePaths.from_environment(
+        tmp_path,
+        {
+            "FURBOMEK_MEDIA_ROOT": str(tmp_path / "media"),
+            "FURBOMEK_KINECT_DIR": str(kinect),
+            "FURBOMEK_ACTIVITY_SPOOL": str(tmp_path / "spool"),
+        },
+    )
     stable = command("import time; time.sleep(30)")
     crash_once = command(
         f"""import time
 from pathlib import Path
 marker=Path({str(tmp_path / "crash.marker")!r})
-time.sleep(.1)
-if marker.exists(): time.sleep(30)
+if marker.exists():
+    Path({str(restarted)!r}).write_text('restarted')
+    time.sleep(30)
 marker.write_text('x')
+raise SystemExit(1)"""
+    )
+    # No producer data exists until capture has actually crashed and restarted.
+    # Keep the original 600 ms tracking TTL fresh throughout real restart timing.
+    tracker = command(
+        f"""import time
+from pathlib import Path
+from tests.helpers import fresh_artifacts
+directory=Path({str(kinect)!r})
+staging=directory/'staging'
+staging.mkdir()
+deadline=time.monotonic()+10
+while time.monotonic()<deadline:
+    if Path({str(restarted)!r}).exists():
+        fresh_artifacts(staging)
+        for name in ('tracking.json', 'activity.json'):
+            (staging/name).replace(directory/name)
+    time.sleep(.05)
+raise SystemExit(1)"""
+    )
+    viewer = command(
+        f"""import json, time
+from pathlib import Path
+health=Path({str(paths.health)!r})
+deadline=time.monotonic()+10
+while time.monotonic()<deadline:
+    if health.exists():
+        raw=health.read_text()
+        if json.loads(raw)['ready']:
+            Path({str(observed_ready)!r}).write_text(raw)
+            raise SystemExit(0)
+    time.sleep(.01)
 raise SystemExit(1)"""
     )
     workers = (
         WorkerDefinition("capture", crash_once, "capture.log"),
-        WorkerDefinition("tracker", producer_command(kinect), "tracker.log"),
+        WorkerDefinition("tracker", tracker, "tracker.log"),
         WorkerDefinition("broker", stable, "broker.log"),
-        WorkerDefinition("viewer", stable, "viewer.log", presentation=True),
+        WorkerDefinition("viewer", viewer, "viewer.log", presentation=True),
         WorkerDefinition("obs", stable, "obs.log", presentation=True, starts_after_configure=True),
-    )
-    paths = RuntimePaths.from_environment(
-        tmp_path,
-        {"FURBOMEK_MEDIA_ROOT": str(tmp_path / "media"), "FURBOMEK_KINECT_DIR": str(kinect)},
     )
     deps = Dependencies(
         lambda settings, resolved: workers, always_configure, never_bot, SystemClock()
     )
     result = run_session(RuntimeSettings(readiness_timeout_s=3), paths, {}, deps)
-    assert result == 0
     health = HealthDocument.model_validate_json(paths.health.read_bytes())
+    assert result == 0, health.model_dump_json()
     assert health.stop_reason == "viewer closed by operator"
+    assert restarted.is_file()
+    ready = HealthDocument.model_validate_json(observed_ready.read_bytes())
+    assert ready.ready
+    assert ready.workers["capture"].restarts_in_window >= 1
+    assert ready.workers["capture"].last_exit == "exit 1"
 
 
 def test_immediate_obs_exit_never_publishes_ready(tmp_path: Path) -> None:
