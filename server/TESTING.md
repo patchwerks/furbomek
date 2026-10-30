@@ -10,7 +10,9 @@ References [issue 13](https://github.com/patchwerks/furbomek/issues/13). This co
 
 ## Run
 
-Use Node.js 22 or later on a Unix host. Run in an isolated, credential-free checkout without production network/device access. Installation and execution are separate steps:
+Use Node.js 22 or later on a Unix host. The server package declares this minimum
+in `engines.node`; npm normally warns about incompatible versions unless
+`engine-strict` is enabled. Run in an isolated, credential-free checkout without production network/device access. Installation and execution are separate steps:
 
 ```sh
 npm ci --prefix server --ignore-scripts --no-audit --no-fund
