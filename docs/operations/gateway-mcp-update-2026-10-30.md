@@ -26,13 +26,22 @@ experimental task handler, new tool, authorization bypass, or device enrollment
 is added. Existing STOP/cancellation, action allowlist, mutation non-retry,
 normal DISARM, and operator-local settings boundaries remain unchanged.
 
-The lock was regenerated with **uv 0.11.7**, matching the established project
+For the original MCP-only delta, the lock was regenerated with **uv 0.11.7**, matching the established project
 validation tooling, using `uv lock --upgrade-package mcp`. Lock revision 3 is
 preserved. The resolver adds four Python-version/platform resolution markers.
 Only the MCP package changes version/artifacts; **zero other package objects
 change**, zero packages are added/removed, and project metadata changes only
 the exact MCP requirement. Pytest remains **9.1.1**. No bulk refresh or constraint
 relaxation was used.
+
+That package comparison describes the original MCP-only commit, not the final
+PR #26 delta. The same `codex/13-update-mcp-sdk` branch subsequently adds the
+[certifi security update](gateway-certifi-update-2026-10-30.md), from 2026.7.22
+to 2026.10.19. Relative to the original PR base
+`9347304e866ca90e8eec2d85f3bd3c41002d9a42`, the final PR therefore changes both
+MCP and certifi package records. The certifi note records its incremental base
+and separate verification; the MCP-only compatibility results below remain
+historical evidence for that original slice.
 
 ## Executed offline compatibility checks
 

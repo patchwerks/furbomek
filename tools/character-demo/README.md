@@ -40,5 +40,25 @@ for readability but must preserve captured timing and identify fixture input.
 The broader `.github/workflows/character-foundation.yml` runs the unchanged
 `tools/verify-media.sh` in a disposable Linux worker. Its isolated loopback and
 synthetic PTYs support gateway tests, with no external network or physical
-devices. Online preparation excludes local build backends; pinned editable
-builds happen only after the privilege and namespace boundary is installed.
+devices. It runs on pull requests and on matching pushes to `main` and the
+feature branch, with uv 0.13.6, Python 3.12.16 and hash-verified Godot 4.7.2.
+
+Online preparation runs under a separate UID with a fresh home and hidden runner
+home, runtime sockets and devices. Preparation retains a read-only copy of
+trusted resolver data for DNS, including Ubuntu resolver paths under `/run`;
+no runtime sockets are restored. A trusted inline TOML validator admits only
+PyPI registry packages and hashed HTTPS artifacts from `files.pythonhosted.org`;
+it rejects custom sources, indexes, workspaces, local dependency paths and
+symlinked metadata or project directories. Every
+online uv call disables configuration discovery and selects the explicit trusted
+Python interpreter. Fresh service environments and build inputs live outside
+candidate source; populated dependency interpreters are never queried online.
+This applies uv's [configuration controls](https://docs.astral.sh/uv/configuration/files/)
+and [dependency source model](https://docs.astral.sh/uv/concepts/projects/dependencies/).
+
+Editable builds and candidate execution begin only after the separate network
+namespace is installed. Build inputs are copied into service environments there,
+and the unchanged media gate uses offline mode. This remains an inline workflow:
+it does not activate or fetch an unpublished shared helper. Changes to the
+workflow or its input validator require independent review under the repository's
+trust policy before they are treated as accepted enforcement.

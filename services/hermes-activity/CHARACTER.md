@@ -36,6 +36,14 @@ without character state may retain read-only group/other bits, as may legacy
 output directories; checkpoint files are rewritten mode 0600 without changing
 directory permissions. Group/other write access is always rejected. Once a
 character session is bound, both directory and checkpoint require private modes.
+This compatibility exception is implemented by [`persistence.load_checkpoint`](persistence.py)
+(reject group/other writes) and [`runtime._require_private_character_state`](runtime.py)
+(require private modes). A legacy activity-only checkpoint contains activity
+recovery state; a bound checkpoint also carries durable character session and
+cancellation evidence. Removing read-only legacy bits automatically would change
+existing output-directory access, while accepting them for bound state would
+weaken its private-file boundary. The exception therefore ends at session binding
+and does not authorize group/other writes or relax character input admission.
 Create the private spool before activating character mode; missing input is a
 continuity failure, not permission to start with invented history.
 
