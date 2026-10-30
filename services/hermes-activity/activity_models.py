@@ -8,6 +8,7 @@ from typing import TYPE_CHECKING, ClassVar, Literal
 from pydantic import BaseModel, ConfigDict, Field
 
 if TYPE_CHECKING:
+    from character_state import CharacterState
     from hermes_feed import SpoolEvent
 
 TimelineStatus = Literal["ok", "error", "running"]
@@ -89,6 +90,7 @@ class BrokerState:
     shutter: bool
     session_open: bool
     last_event_ms: int
+    character: CharacterState | None = None
 
     @classmethod
     def initial(cls, now_ms: int) -> BrokerState:

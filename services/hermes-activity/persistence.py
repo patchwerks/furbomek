@@ -4,17 +4,21 @@ from __future__ import annotations
 
 import os
 import re
+import stat
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, ClassVar
+from typing import TYPE_CHECKING, ClassVar, Self
 
 if TYPE_CHECKING:
     from pathlib import Path
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, ValidationInfo, model_validator
 
 from activity_models import BrokerState, TimelineEntry, TimelineStatus
+from character_state import CharacterState
 from cursor import CursorSnapshot
 from privacy import HoldKey, PrivacyState
+
+MAX_CHECKPOINT_BYTES = 262_144
 
 
 class TimelineCheckpoint(BaseModel):
@@ -43,6 +47,19 @@ class BrokerCheckpoint(BaseModel):
     shutter: bool
     session_open: bool
     last_event_ms: int
+    character: CharacterState | None = None
+
+    @model_validator(mode="after")
+    def require_complete_character(self, info: ValidationInfo) -> Self:
+        """Reject persisted authority that reconstructs missing cancellation fields from defaults."""
+        if (
+            info.mode == "json"
+            and self.character is not None
+            and self.character.model_fields_set != set(CharacterState.model_fields)
+        ):
+            msg = "persisted character state requires every authority field"
+            raise ValueError(msg)
+        return self
 
 
 class HoldCheckpoint(BaseModel):
@@ -74,7 +91,7 @@ class Checkpoint(BaseModel):
 
     model_config: ClassVar[ConfigDict] = ConfigDict(frozen=True)
 
-    version: int = Field(default=1, ge=1, le=1)
+    version: int = Field(default=2, ge=1, le=2)
     cursor_inode: int | None
     cursor_offset: int = Field(ge=0)
     publication_seq: int = Field(ge=0)
@@ -97,7 +114,15 @@ class RuntimeSnapshot:
 def load_checkpoint(path: Path) -> Checkpoint | None:
     """Load a checkpoint only when its complete typed document is valid."""
     try:
-        return Checkpoint.model_validate_json(path.read_text(encoding="utf-8"))
+        descriptor = os.open(path, os.O_RDONLY | os.O_NOFOLLOW | os.O_NONBLOCK)
+        with os.fdopen(descriptor, "rb") as stream:
+            metadata = os.fstat(stream.fileno())
+            if not stat.S_ISREG(metadata.st_mode) or metadata.st_uid != os.getuid() or metadata.st_mode & 0o022:
+                return None
+            raw = stream.read(MAX_CHECKPOINT_BYTES + 1)
+        if len(raw) > MAX_CHECKPOINT_BYTES:
+            return None
+        return Checkpoint.model_validate_json(raw)
     except (OSError, UnicodeDecodeError, ValueError):
         return None
 
@@ -106,7 +131,10 @@ def save_checkpoint(path: Path, snapshot: RuntimeSnapshot) -> None:
     """Atomically replace the single durable runtime checkpoint."""
     checkpoint = _checkpoint(snapshot)
     pending = path.with_name(f".{path.name}.{os.getpid()}.pending")
-    pending.write_text(checkpoint.model_dump_json(), encoding="utf-8")
+    descriptor = os.open(pending, os.O_WRONLY | os.O_CREAT | os.O_TRUNC | os.O_NOFOLLOW, 0o600)
+    with os.fdopen(descriptor, "w", encoding="utf-8") as stream:
+        os.fchmod(stream.fileno(), 0o600)
+        stream.write(checkpoint.model_dump_json())
     pending.replace(path)
 
 
@@ -133,6 +161,7 @@ def restore_snapshot(checkpoint: Checkpoint) -> RuntimeSnapshot:
         checkpoint.broker.shutter,
         checkpoint.broker.session_open,
         checkpoint.broker.last_event_ms,
+        checkpoint.broker.character,
     )
     privacy = PrivacyState(
         checkpoint.privacy.latched,
@@ -184,6 +213,7 @@ def _checkpoint(snapshot: RuntimeSnapshot) -> Checkpoint:
         shutter=snapshot.broker.shutter,
         session_open=snapshot.broker.session_open,
         last_event_ms=snapshot.broker.last_event_ms,
+        character=snapshot.broker.character,
     )
     privacy = PrivacyCheckpoint(
         latched=snapshot.privacy.latched,

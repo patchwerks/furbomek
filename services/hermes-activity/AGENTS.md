@@ -7,6 +7,11 @@ not a second planner, raw tool surface, complete A2UI engine or speech stack.
 - Preserve cursor/checkpoint consistency, original event time, monotonic publication
   sequence, TTL, redaction and failure truthfulness. Never invent tasks to fill the HUD.
 - Hooks return no directives and start no desktop/services. Never expand their authority.
+- The opt-in local character input is owned by this same broker. Preserve its
+  current-UID/private-file admission, session binding, durable cancellation
+  evidence and default-off behavior. Read `CHARACTER.md`; fixture speaking state
+  is not evidence of real Hermes speech or a PCM clock. Never discard retirement
+  evidence on disable/re-enable or silently replace a session in its output root.
 - Live desktop screenshot policy is unqualified and rejected before activation.
   Default off is supported; do not bypass it through helper functions or timeouts.
 - Preserve safe-key/URL projection; no raw arguments, results, paths, secrets or pixels
