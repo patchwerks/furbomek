@@ -56,15 +56,29 @@ jobs:
           unzip -q "$gate/godot.zip" -d "$gate/godot"
           sudo useradd --uid 2001 --user-group --no-create-home --shell /usr/sbin/nologin xeno-media-check
           sudo chown -R 2001:2001 "$gate"
+          # Preserve only trusted resolver data, not any runner runtime sockets.
+          sudo cp -L /etc/resolv.conf "$gate/resolv.conf"
+          sudo chown root:root "$gate/resolv.conf"
+          sudo chmod 0444 "$gate/resolv.conf"
           # Preparation gets no runner home, runtime sockets, devices or inherited env.
           # Its network is available only for validated public-registry wheel inputs.
           sudo unshare --mount --pid --fork --mount-proc \
             bash -euo pipefail -s -- "$gate" "$python" <<'PREP_ISOLATE'
           gate=$1
           python=$2
+          resolver_target=$(readlink -f /etc/resolv.conf)
+          case "$resolver_target" in /etc/resolv.conf|/run/*) ;; *) exit 1 ;; esac
+          test -f "$resolver_target"
           mount --make-rprivate /
           mount -t tmpfs -o mode=0700 tmpfs /home/runner
           mount -t tmpfs -o mode=0755 tmpfs /run
+          # Ubuntu may link /etc/resolv.conf into /run/systemd/resolve.
+          # Restore that one data file within this private mount namespace.
+          case "$resolver_target" in
+            /run/*) mkdir -p "$(dirname "$resolver_target")"; touch "$resolver_target" ;;
+          esac
+          mount --bind "$gate/resolv.conf" "$resolver_target"
+          mount -o remount,bind,ro "$resolver_target"
           mount -t tmpfs -o mode=0755 tmpfs /dev
           mknod -m 666 /dev/null c 1 3
           mknod -m 666 /dev/zero c 1 5

@@ -44,7 +44,9 @@ devices. It runs on pull requests and on matching pushes to `main` and the
 feature branch, with uv 0.13.6, Python 3.12.16 and hash-verified Godot 4.7.2.
 
 Online preparation runs under a separate UID with a fresh home and hidden runner
-home, runtime sockets and devices. A trusted inline TOML validator admits only
+home, runtime sockets and devices. Preparation retains a read-only copy of
+trusted resolver data for DNS, including Ubuntu resolver paths under `/run`;
+no runtime sockets are restored. A trusted inline TOML validator admits only
 PyPI registry packages and hashed HTTPS artifacts from `files.pythonhosted.org`;
 it rejects custom sources, indexes, workspaces, local dependency paths and
 symlinked metadata or project directories. Every
