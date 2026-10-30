@@ -88,3 +88,70 @@ jobs:
           fi
           echo 'PASS: owned volume removed and absence verified'
           echo 'PASS: storage primitive only; no helper, product or policy acceptance claimed'
+  helper-fixtures:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: astral-sh/setup-uv@37802adc94f370d6bfd71619e3f0bf239e1f3b78
+        with:
+          version: '0.13.6'
+          enable-cache: false
+      - name: Prepare trusted uv and pinned image
+        shell: bash
+        run: |
+          set -euo pipefail
+          probe_tools=$(mktemp -d /tmp/uv-probe-tools.XXXXXXXX)
+          cp "$(command -v uv)" "$probe_tools/uv"
+          chmod 755 "$probe_tools" "$probe_tools/uv"
+          echo "PROBE_TOOLS=$probe_tools" >> "$GITHUB_ENV"
+          docker pull python:3.12.11-bookworm@sha256:1b48a1b13ec678be8d84974541cc007d4367aaf01f985231daad1a940106efc0
+      - name: Check out exact helper candidate as fixture input
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          ref: 'fb93566ffbaf4cfb1b8b52716522ae6c86aae67b'
+          path: helper-candidate
+          persist-credentials: false
+      - name: Copy only helper source and tests into sanitized input
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git -C helper-candidate rev-parse HEAD)" = fb93566ffbaf4cfb1b8b52716522ae6c86aae67b
+          helper_source=$(mktemp -d "$RUNNER_TEMP/helper-fixture-source.XXXXXXXX")
+          mkdir -p "$helper_source/tools"
+          cp -R helper-candidate/tools/ci "$helper_source/tools/ci"
+          cp -R helper-candidate/tools/tests "$helper_source/tools/tests"
+          chmod -R a+rX "$helper_source"
+          echo "HELPER_FIXTURE_SOURCE=$helper_source" >> "$GITHUB_ENV"
+      - name: Qualify exact helper fixtures offline without Docker access
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker run --rm -i --pull never --network none --read-only --user 65534:65534 \
+            --cap-drop ALL --security-opt no-new-privileges --pids-limit 128 \
+            --cpus 2 --memory 1g \
+            --tmpfs /tmp:rw,exec,nosuid,nodev,size=256m \
+            --mount "type=bind,src=$PROBE_TOOLS,dst=/tools,readonly" \
+            --mount "type=bind,src=$HELPER_FIXTURE_SOURCE,dst=/candidate,readonly" \
+            --workdir /candidate \
+            python:3.12.11-bookworm@sha256:1b48a1b13ec678be8d84974541cc007d4367aaf01f985231daad1a940106efc0 \
+            env -i PATH=/tools:/usr/local/bin:/usr/bin:/bin HOME=/tmp/home \
+            UV_OFFLINE=1 UV_PYTHON_DOWNLOADS=never UV_CACHE_DIR=/tmp/cache \
+            PYTHONDONTWRITEBYTECODE=1 \
+            /bin/bash -eu -c 'umask 077; mkdir -p "$HOME"; exec python -I -' <<'PY'
+          from pathlib import Path
+          import sys
+          import unittest
+
+          assert not Path('/var/run/docker.sock').exists()
+          assert not Path('/run/docker.sock').exists()
+          suite = unittest.defaultTestLoader.discover('tools/tests', pattern='test_*.py')
+          result = unittest.TextTestRunner(verbosity=2).run(suite)
+          print('Fixture test count:', result.testsRun, flush=True)
+          print('Skipped fixtures:', result.skipped, flush=True)
+          qualified = result.wasSuccessful() and not result.skipped and result.testsRun == 30
+          if qualified:
+              print('PASS: 30 isolated helper fixtures, zero skips; no policy activation or full worker qualification.', flush=True)
+          else:
+              print('FAIL: fixture failures, skips, or test count other than 30.', flush=True)
+          sys.exit(0 if qualified else 1)
+          PY
