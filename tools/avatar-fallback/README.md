@@ -154,9 +154,9 @@ with network, device/private-home reads and source writes denied. The three new
 view tests execute the actual classic scripts with synthetic DOM/timers and
 cover private-instance absence, honest offline startup, single fixture startup,
 interruption/expiry, pagehide timer cleanup and missing-asset shutdown. They do
-not establish browser/CEF behavior. This correction's real-browser check awaits
-the separate Linux CI run; earlier browser evidence above remains historical.
-No browser, OBS, provider, transport or device was started for this correction.
+not establish browser/CEF behavior. The separate Linux CI run below now qualifies this correction's real-browser
+fixtures; earlier browser evidence above remains historical. No OBS, provider,
+transport or device was started for this correction.
 
 ## Automated browser fixture check
 
@@ -181,5 +181,9 @@ these local fixtures and the absence of a global live adapter, not OBS CEF,
 private recording, a live broker or Stream Director acceptance. Because the
 workflow and assertions are editable in a pull request, its result is advisory
 and requires review of the exact revision; it is not independent trust approval.
-Linux execution of this new workflow is pending and is not claimed by the local
-Node-only results above.
+**Observed Linux evidence:** [run 41027253714](https://github.com/patchwerks/furbomek/actions/runs/41027253714)
+at `14e42629ab9d6abd3d1ba26f18d8004daaebbba1` passed all 15 Node tests and the
+actual Chromium browser check (offline asset, explicit fixture, interruption,
+expiry, literal hostile text, absent live global and no page errors). The
+container boundary assertions also passed. This is browser-fixture evidence
+only; private OBS recording and CEF qualification remain outstanding.
