@@ -25,6 +25,7 @@ Never turn a candidate or implementation claim into a deployment fact without up
 | Swarms and tooling | [`agent-swarms-and-tooling.md`](agent-swarms-and-tooling.md) | OpenGolem source inventory, browser/computer use, orchestration references and exclusions |
 | Legacy-link inventory | [`legacy-notes-source-inventory.md`](legacy-notes-source-inventory.md) | Every external pointer from the supplied legacy notes, with review status and disposition |
 | Dated synthesis | [`runtime-ui-stack-2026-09-21.md`](runtime-ui-stack-2026-09-21.md) | Snapshot of the decision pass that established the initial runtime boundaries |
+| Stream Director preparation | [`stream-director-integration-2026-10-29.md`](stream-director-integration-2026-10-29.md) | Existing seams, issue dependencies, shared PCM/cancellation requirements and unexecuted acceptance matrix |
 | Live visual effects and cameras | [`linux-live-visuals-touchdesigner-alternatives-2026-10-01.md`](linux-live-visuals-touchdesigner-alternatives-2026-10-01.md) | Linux FOSS TouchDesigner alternatives, C922x and Kinect v2 capabilities, exact-video effect gates and cost evidence |
 
 ## Update contract
