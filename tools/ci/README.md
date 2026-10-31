@@ -264,8 +264,9 @@ accepted main `26f4bdb` leaves those helper/test source files unchanged.
 ## Changelog
 
 - 2026-11-01: added the bounded Godot staging-permissions correction and offline
-  executable preflight; recorded the observed failure separately from pending
-  Linux permission-probe and full media qualification evidence.
+  executable preflight; recorded the observed failure, successful fixed Linux
+  permission probe, Linux worker fixtures and local mutation regression.
+  Full media qualification remains a separate gate.
 - 2026-10-30: corrected scratch mount lifetime for issue #4 / PR #31; recorded
   the observed product-run failure, fixed storage probe and 30-test Linux fixture
   evidence. Full worker qualification still requires independent acceptance.
@@ -334,9 +335,17 @@ verified the pinned Godot download hash and passed 26 dispatcher tests, then
 stopped because Godot was unavailable. These partial results are not a full
 media verification pass.
 
-**Hypothesis pending a Linux probe:** `mktemp -d` creates the host staging
-directory with mode 0700. Binding that directory read-only at `/tools` does not
-give the UID 1000 worker permission to traverse it. The correction applies mode
+**Measured in the fixed Linux probe:** the pinned Godot archive checksum passed,
+and the original mode 0700 staging directory denied access to UID 1000. After
+changing only the directory and exact Godot binary to 0755, the worker executed
+`4.7.2.stable.official.ed1daf0bf`. The probe used the same pinned Python image,
+network none and a read-only root and tool mount; the mounted file remained
+non-writable. Evidence: [run 41240801639, job 124654098968](https://github.com/patchwerks/furbomek/actions/runs/41240801639/job/124654098968),
+code head `2b651c8a46f5fcd32323e3504df1ced284df6f5c` against accepted base
+`fb7e25e`. This qualifies the bounded permissions behavior on that Linux probe,
+not the complete worker or media product.
+
+The correction applies mode
 0755 only to the exact staging directory and the exact pinned Godot executable,
 after checksum verification and extraction. It does not recursively change
 permissions. An explicit `test -x` inside the network-none worker fails with a
@@ -350,11 +359,20 @@ an unrelated sentinel must remain 0600. The fixture invokes the actual chmod,
 but no candidate code, real Docker command, network request or Godot executable.
 **Measured locally:** all nine worker tests passed with Python 3.12.16 in a
 credential-free sandbox denying network access, private-home/device reads and
-source writes. This is local fixture evidence; the Linux permission probe and
-full media qualification remain pending.
+source writes. A session-local mutation harness also passed: removing the exact
+chmod line caused the expected assertion failure for observed directory/binary
+modes 0700/0700 instead of required 0755/0755, with no errors or skips. This
+establishes that the regression detects the omitted permission correction.
+At the same code head `2b651c8a46f5fcd32323e3504df1ced284df6f5c`, the separate
+[Linux worker-fixture job 124654099145](https://github.com/patchwerks/furbomek/actions/runs/41240801639/job/124654099145)
+passed all **9 tests with zero skips**. The existing storage probe and nine-worker
+fixture also passed [run 41240801572](https://github.com/patchwerks/furbomek/actions/runs/41240801572),
+and [CodeQL run 41240799459](https://github.com/patchwerks/furbomek/actions/runs/41240799459)
+passed. These results qualify the scoped permission correction and regressions;
+full media qualification remains pending.
 
 All image/download pins, UID 1000, dropped capabilities, no-new-privileges,
 read-only mounts and network-none candidate execution remain unchanged.
-Accepted-base helper selection remains mandatory. Linux probe evidence and
-independent exact-revision acceptance are still pending; the correction must be
+Accepted-base helper selection remains mandatory. Independent exact-revision
+acceptance is still pending; the correction must be
 accepted and published before a separate full media run can qualify it.
