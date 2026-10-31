@@ -62,7 +62,7 @@ jobs:
           from pathlib import Path
           root = Path("/scratch/evidence")
           suffixes = ["ci.log", "audit.json", "versions.txt", "prepare.log", "build.log", "types.log", "full-ci.log", "app-lint.json", "repo-lint.json", "dependency-paths.json", "status.txt", "vue-config.json", "ts-config.json", "malformed.json"]
-          allowed = {f"{v}-{s}" for v in ["baseline", "candidate"] for s in suffixes} | {"package-lock.json", "lock-resolution.log", "comparison.json", "lock-mode.txt"}
+          allowed = {f"{v}-{s}" for v in ["baseline", "candidate"] for s in suffixes} | {"package-lock.json", "lock-resolution.log", "comparison.json", "lock-mode.txt", "direct-versions.json", "transitive-delta.json", "resolution-eresolve.txt"}
           total = 0
           paths = list(root.iterdir())
           assert len(paths) <= 40
@@ -155,10 +155,91 @@ jobs:
             for variant in baseline candidate; do
               cd /scratch/source/$variant
               if [[ $variant == candidate ]] && ! node --input-type=module -e "import fs from \"node:fs\"; const a=JSON.parse(fs.readFileSync(\"package.json\")); const b=JSON.parse(fs.readFileSync(\"package-lock.json\")).packages[\"\"]; process.exit(JSON.stringify(a.dependencies)===JSON.stringify(b.dependencies)&&JSON.stringify(a.devDependencies)===JSON.stringify(b.devDependencies)?0:1)"; then
-                printf "generated\n" > /scratch/evidence/lock-mode.txt
-                npm update @nuxt/eslint eslint @eslint/config-inspector --package-lock-only --ignore-scripts --no-audit --no-fund > /scratch/evidence/lock-resolution.log 2>&1
+                printf "fresh-pinned-directs\n" > /scratch/evidence/lock-mode.txt
+                # Trusted JSON-only transformation; no candidate module is loaded.
+                node --input-type=module <<"PIN"
+          import fs from "node:fs";
+          import assert from "node:assert/strict";
+          const read = p => JSON.parse(fs.readFileSync(p, "utf8"));
+          const base = read("../baseline/package.json");
+          const oldLock = read("../baseline/package-lock.json");
+          const bytes = fs.readFileSync("package.json");
+          const candidate = JSON.parse(bytes);
+          const expected = structuredClone(base);
+          expected.dependencies["@nuxt/eslint"] = "1.17.0";
+          expected.devDependencies.eslint = "10.14.0";
+          expected.devDependencies["@eslint/config-inspector"] = "3.2.0";
+          assert.deepEqual(candidate, expected, "unauthorized manifest change");
+          const selected = new Set(["@nuxt/eslint", "eslint", "@eslint/config-inspector"]);
+          const before = {};
+          for (const group of ["dependencies", "devDependencies"]) {
+            for (const [name, range] of Object.entries(candidate[group] || {})) {
+              if (selected.has(name)) continue;
+              assert.equal(range, base[group][name]);
+              const version = oldLock.packages[`node_modules/${name}`]?.version;
+              assert.match(version, /^\d+\.\d+\.\d+/);
+              before[name] = {group, range, version};
+              candidate[group][name] = version;
+            }
+          }
+          fs.writeFileSync("/scratch/original-candidate-package.json", bytes);
+          fs.writeFileSync("/scratch/direct-before.json", JSON.stringify(before));
+          fs.writeFileSync("package.json", JSON.stringify(candidate, null, 2) + "\n");
+          fs.unlinkSync("package-lock.json");
+          PIN
+                resolve_lock() {
+                  if npm install --package-lock-only --ignore-scripts --no-audit --no-fund >> /scratch/evidence/lock-resolution.log 2>&1; then return; fi
+                  node --input-type=module <<"REPORT"
+          import fs from "node:fs";
+          const root = "/scratch/npm-cache/_logs/";
+          const names = fs.readdirSync(root).filter(n => /^\d{4}-\d{2}-\d{2}T[\d_.TZ-]+-eresolve-report\.txt$/.test(n)).sort();
+          if (names.length) {
+            const path = root + names.at(-1);
+            const st = fs.lstatSync(path);
+            if (!st.isFile() || st.size > 8 * 1024 * 1024) throw Error("invalid resolver report");
+            fs.copyFileSync(path, "/scratch/evidence/resolution-eresolve.txt");
+          }
+          REPORT
+                  return 1
+                }
+                resolve_lock
+                cp /scratch/original-candidate-package.json package.json
+                resolve_lock
               elif [[ $variant == candidate ]]; then
                 printf "persisted\n" > /scratch/evidence/lock-mode.txt
+              fi
+              if [[ $variant == candidate ]]; then
+                # Recheck the real restored manifest and all non-lint direct pins.
+                node --input-type=module <<"CHECK_LOCK"
+          import fs from "node:fs";
+          import assert from "node:assert/strict";
+          const read = p => JSON.parse(fs.readFileSync(p, "utf8"));
+          const base = read("../baseline/package.json");
+          const oldLock = read("../baseline/package-lock.json");
+          const manifest = read("package.json");
+          const lock = read("package-lock.json");
+          for (const group of ["dependencies", "devDependencies"]) assert.deepEqual(lock.packages[""][group], manifest[group]);
+          const selected = new Set(["@nuxt/eslint", "eslint", "@eslint/config-inspector"]);
+          const direct = {};
+          for (const group of ["dependencies", "devDependencies"]) {
+            for (const name of Object.keys(base[group] || {})) {
+              if (selected.has(name)) continue;
+              const before = oldLock.packages[`node_modules/${name}`]?.version;
+              const after = lock.packages[`node_modules/${name}`]?.version;
+              assert.equal(after, before, `non-lint direct changed: ${name}`);
+              direct[name] = {before, after, range: manifest[group][name]};
+            }
+          }
+          const delta = [];
+          for (const path of new Set([...Object.keys(oldLock.packages), ...Object.keys(lock.packages)])) {
+            if (!path) continue;
+            const before = oldLock.packages[path]?.version ?? null;
+            const after = lock.packages[path]?.version ?? null;
+            if (before !== after) delta.push({path, before, after});
+          }
+          fs.writeFileSync("/scratch/evidence/direct-versions.json", JSON.stringify(direct, null, 2));
+          fs.writeFileSync("/scratch/evidence/transitive-delta.json", JSON.stringify(delta, null, 2));
+          CHECK_LOCK
               fi
               if [[ $variant == candidate ]]; then cp package-lock.json /scratch/evidence/package-lock.json; fi
               npm ci --ignore-scripts --no-audit --no-fund > /scratch/evidence/$variant-ci.log 2>&1

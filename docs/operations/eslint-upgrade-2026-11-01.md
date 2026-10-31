@@ -86,3 +86,17 @@ single-major failure. No lockfile is accepted or imported by this correction.
 
 - 2026-11-01: recorded the first hosted failure and bounded targeted-resolution
   correction; all runtime qualification gates remain open.
+
+## Fresh-resolution strategy awaiting review
+
+The targeted update also failed in run
+[41241726222](https://github.com/patchwerks/furbomek/actions/runs/41241726222),
+against the same obsolete locked lint graph. Incremental attempts stopped.
+The next separately reviewed strategy discards only the disposable candidate
+lock after validating the three authorized manifest changes and temporarily
+pinning every other direct dependency to its accepted baseline resolved version.
+Normal script-disabled npm resolution builds a fresh graph; the original manifest
+bytes are restored and normal resolution reconciles its ranges. Validation then
+rejects any changed non-lint direct version or mismatched lock root metadata and
+exports the transitive version delta. No peer constraints are edited or bypassed.
+This strategy has not run and does not qualify a candidate lock.
