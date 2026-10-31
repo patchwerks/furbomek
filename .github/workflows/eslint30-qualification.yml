@@ -75,7 +75,7 @@ jobs:
           import os, stat
           from pathlib import Path
           root = Path("/scratch/evidence")
-          suffixes = ["ci.log", "audit.json", "versions.txt", "prepare.log", "build.log", "types.log", "full-ci.log", "app-lint.json", "repo-lint.json", "dependency-paths.json", "status.txt", "vue-config.json", "ts-config.json", "malformed.json"]
+          suffixes = ["ci.log", "audit.json", "versions.txt", "prepare.log", "build.log", "types.log", "full-ci.log", "app-lint.json", "repo-lint.json", "dependency-paths.json", "status.txt", "vue-config.json", "ts-config.json", "malformed.json", "enforcement.json"]
           allowed = {f"{v}-{s}" for v in ["baseline", "candidate"] for s in suffixes} | {"package-lock.json", "lock-resolution.log", "comparison.json", "lock-mode.txt", "direct-versions.json", "transitive-delta.json", "resolution-eresolve.txt", "candidate-inspector-build.log"}
           total = 0
           paths = list(root.iterdir())
@@ -315,6 +315,14 @@ jobs:
               set -e
               test "$malformed_result" = 1
               rm eslint30-malformed.vue src/eslint30-malformed.ts
+              printf "<script setup lang=\"ts\">import \"./eslint30-self.vue\"; while (true) { /* fixture */ }</script>\n" > eslint30-self.vue
+              printf "import \"./eslint30-self.ts\"; while (true) { /* fixture */ }\n" > src/eslint30-self.ts
+              set +e
+              ./node_modules/.bin/eslint eslint30-self.vue src/eslint30-self.ts --format json > /scratch/evidence/$variant-enforcement.json
+              enforcement_result=$?
+              set -e
+              test "$enforcement_result" = 1
+              rm eslint30-self.vue src/eslint30-self.ts
               if [[ $variant == candidate ]]; then
                 ./node_modules/.bin/eslint-config-inspector build > /scratch/evidence/candidate-inspector-build.log 2>&1
                 test -s dist/__eslint-config-inspector/index.html
@@ -335,6 +343,8 @@ jobs:
               }
               const malformed = read(`${variant}-malformed.json`);
               if (malformed.length !== 2 || malformed.some(row => row.fatalErrorCount !== 1)) throw Error("malformed parsing not rejected");
+              const enforcement = read(`${variant}-enforcement.json`);
+              if (enforcement.length !== 2 || enforcement.some(row => row.fatalErrorCount !== 0 || !["import/no-self-import", "no-constant-condition"].every(rule => row.messages.some(m => m.ruleId === rule && m.severity === 2)))) throw Error("lost self-import/constant-loop enforcement");
               read(`${variant}-audit.json`);
               read(`${variant}-dependency-paths.json`);
             }
@@ -352,6 +362,7 @@ jobs:
               result.ruleChanges[kind] = Object.keys(a).filter(k => severity(a[k]) > 0 && JSON.stringify(a[k]) !== JSON.stringify(b[k])).map(k => ({rule:k,before:a[k],after:b[k] ?? null,weakened:severity(b[k]) < severity(a[k])}));
             }
             fs.writeFileSync(dir + "comparison.json", JSON.stringify(result,null,2));
+            if (Object.values(result.ruleChanges).some(rows => rows.some(row => row.weakened))) throw Error("an enabled baseline rule lost severity");
             console.log(JSON.stringify(result));
           '
           # Export inert data only; it is not sourced or executed by the credentialed runner.

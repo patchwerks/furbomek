@@ -136,3 +136,41 @@ manifest `sha256:46e94f8cf91baab69a2deb3153e74eeffd73c20c7cc1d8432f5b96469eaa032
 Candidate inspector qualification additionally runs its documented
 [static build](https://github.com/eslint/config-inspector#static-build), without
 starting a listener. These runtime results are pending.
+
+## Successful version qualification and enforcement correction
+
+Both fixed jobs in [run 41242812117](https://github.com/patchwerks/furbomek/actions/runs/41242812117)
+passed at `ea07010fd5b2807feb7dbbc1fd2977eeded2c7cf`: persisted-lock install,
+production build with configured type checks, vue-tsc, offline full npm ci,
+clean candidate dependency tree, malformed Vue/TS rejection, and inspector
+static build. Both preserved app.vue 11 errors/18 warnings and repository
+36 errors/23 warnings, zero fatal. Lint exits remained 1; job success is not a
+claim of clean lint. Inspector loaded 19 config items and 735 rules and wrote
+the static snapshot without a listener. Both exported locks matched the committed
+artifact. Node 22.22.3/npm 10.9.8 and Node 26.7.0/npm 11.19.0 were measured.
+
+Effective-config review found a real dropped rule: Nuxt no longer enables
+`import/no-self-import`, although the same import-x 4.17.1 plugin remains loaded.
+The wrapper restores its error severity. A second semantic gap was found by
+reading the exact published ESLint
+[8.57.1 source archive](https://registry.npmjs.org/eslint/-/eslint-8.57.1.tgz) and
+[10.14.0 source archive](https://registry.npmjs.org/eslint/-/eslint-10.14.0.tgz):
+`no-constant-condition` formerly defaults to `checkLoops: true`, but now defaults
+to `allExceptWhileTrue`. The wrapper explicitly selects `checkLoops: 'all'` to
+retain the earlier check on `while (true)`.
+
+Of the other 17 printed option differences, 15 expose equivalent existing default
+behavior: no-cond-assign, no-empty, no-empty-pattern, no-extra-boolean-cast,
+no-fallthrough, no-global-assign, no-invalid-regexp, no-irregular-whitespace,
+no-misleading-character-class, no-self-assign, no-unsafe-optional-chaining,
+no-useless-escape, use-isnan, prefer-const and TypeScript no-unused-expressions.
+The TypeScript plugin itself remains 8.72.1. The new relational-comparison flag
+in no-constant-binary-expression is false, preserving the earlier scope; the new
+reportGlobalThis flag in no-shadow-restricted-names is true, strengthening checks.
+
+The next qualification adds temporary, offline-only Vue and TypeScript fixtures
+that each self-import and contain `while (true)`. Both versions must report the
+actual import/no-self-import and no-constant-condition rule IDs at error severity,
+with no fatal parsing error. It also rejects any decrease in an enabled baseline
+rule severity. These focused correction results are pending; application source
+remains unchanged.
