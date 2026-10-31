@@ -166,7 +166,7 @@ export class PlayHtTTSStream extends EventTarget implements TTSStreamInterface {
     await this.audioContext.suspend();
   }
 
-  private createAudioBuffer(arrayBuffer: ArrayBuffer, length: number, offset = 0) {
+  private createAudioBuffer(arrayBuffer: ArrayBufferLike, length: number, offset = 0) {
     const data = new DataView(arrayBuffer, offset);
 
     const audioBuffer = this.audioContext.createBuffer(1, length / 2, 44100);

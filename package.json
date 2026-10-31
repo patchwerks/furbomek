@@ -1,6 +1,7 @@
 {
   "name": "nuxt-app",
   "private": true,
+  "engines": {"node": "^22.22.3 || ^24.15.0 || >=26.0.0"},
   "type": "module",
   "scripts": {
     "build": "nuxt build",
@@ -13,20 +14,19 @@
   "main": "index.js",
   "dependencies": {
     "@deepgram/sdk": "^3.3.1",
-    "@nuxt/eslint": "^0.4.0",
-    "nuxt": "^3.12.4",
+    "@nuxt/eslint": "0.7.6",
+    "nuxt": "4.6.3",
     "openai": "^4.52.1",
-    "playht": "^0.9.8",
-    "vue": "^3.4.34",
-    "vue-tsc": "^2.0.29",
-    "vue-router": "^4.4.0",
-    "unocss": "0.61.6"
+    "vue": "^3.5.0",
+    "vue-tsc": "3.3.9",
+    "vue-router": "5.4.0",
+    "@unocss/core": "0.61.6"
   },
   "devDependencies": {
-    "@bootstrap-vue-next/nuxt": "^0.24.2",
+    "@bootstrap-vue-next/nuxt": "1.0.0",
     "bootstrap": "^5.3.3",
-    "bootstrap-vue-next": "^0.24.2",
+    "bootstrap-vue-next": "1.2.2",
     "concurrently": "^8.2.2",
-    "typescript": "^5.5.3"
+    "typescript": "5.9.3"
   }
 }
