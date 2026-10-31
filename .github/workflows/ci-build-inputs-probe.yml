@@ -117,11 +117,13 @@ jobs:
               uv --no-config lock --offline
               sed -i "s/hatchling==1.27.0/absent-probe-backend==0.0.1/" pyproject.toml
               export UV_NO_SYNC=1
-              uv run --frozen python -I -c "import fixed_probe; assert fixed_probe.VALUE == 731; print(\"OFFLINE_EDITABLE_IMPORT_PASSED\")"
+              uv run --frozen python -I -B -c "import fixed_probe; assert fixed_probe.VALUE == 731; print(\"OFFLINE_EDITABLE_IMPORT_PASSED\")"
               # Prove the successful import used the installed editable project.
-              printf "VALUE = 732\n" > fixed_probe/__init__.py
-              uv run --frozen python -I -c "import fixed_probe; assert fixed_probe.VALUE == 732; print(\"NO_SYNC_EDITABLE_CHANGE_PASSED\")"
-              if env -u UV_NO_SYNC uv run --frozen python -I -c "import fixed_probe" > /scratch/sync-control.log 2>&1; then
+              # -I ignores PYTHONDONTWRITEBYTECODE; pass -B explicitly and change
+              # source size so same-second mtime caching cannot mask this edit.
+              printf "VALUE = 73200\n" > fixed_probe/__init__.py
+              uv run --frozen python -I -B -c "import fixed_probe; assert fixed_probe.VALUE == 73200; print(\"NO_SYNC_EDITABLE_CHANGE_PASSED\")"
+              if env -u UV_NO_SYNC uv run --frozen python -I -B -c "import fixed_probe" > /scratch/sync-control.log 2>&1; then
                 echo "Automatic-sync negative control unexpectedly passed" >&2
                 exit 1
               fi

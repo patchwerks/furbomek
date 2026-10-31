@@ -444,3 +444,17 @@ Independent exact-head review and publication of this helper revision must prece
 PR #18 consuming it. A subsequent accepted-base full media run must record its
 actual result and remaining failures. Dates in this section use the operator's
 Asia/Bangkok date; Actions logs use UTC (2026-10-31), the same operational session.
+
+
+### Probe determinism follow-up
+
+The evidence-only head `1fe8099b234451fc30674ff4e1cf973f9a3b0054`
+triggered a fresh [probe run 41243528798](https://github.com/patchwerks/furbomek/actions/runs/41243528798/job/124662142466).
+Its missing-Hatchling control and first editable import passed, but the second
+same-size source-edit import failed its assertion. The fixed fixture used
+`python -I`, which ignores `PYTHONDONTWRITEBYTECODE`; rewriting a same-size module
+within one timestamp interval can therefore reuse stale bytecode. The earlier
+passing run remains recorded, but is not evidence that this fixture was deterministic.
+The proposed probe correction passes `-B` explicitly and changes the edited
+module's size. Production helper code and all isolation/build-input controls are
+unchanged. A fresh corrected-head probe is required; no pass is claimed yet.
