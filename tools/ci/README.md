@@ -266,3 +266,37 @@ accepted main `26f4bdb` leaves those helper/test source files unchanged.
 - 2026-10-30: corrected scratch mount lifetime for issue #4 / PR #31; recorded
   the observed product-run failure, fixed storage probe and 30-test Linux fixture
   evidence. Full worker qualification still requires independent acceptance.
+
+## Scratch permissions investigation — 2026-10-31
+
+**Observed:** after accepting the keeper correction on main `c80e1bee`,
+PR #18's media and legacy workers both stop at `cp -R /source/. /scratch/source`
+with permission denied, before candidate execution. The earlier storage probe
+omitted the production worker's `--workdir /scratch`; its passing result did not
+qualify that launch configuration.
+
+**Hypothesis, not yet measured:** Docker's default empty-volume copy-up can
+replace the tmpfs root ownership/mode with those of the image mountpoint created
+for the working directory. The proposed correction sets `volume-nocopy` on both
+the keeper and every worker scratch mount, retaining the volume's explicit
+UID/GID 1000 and mode 0700. It changes no user, capability, privilege, host mount,
+network, accepted-helper selection or candidate execution boundary.
+
+The fixed inline `ci-scratch-permissions.yml` probe checks both pinned Python and
+Node worker images with production `--workdir /scratch`. Each gets fresh default
+and nocopy volumes, the pinned Python keeper, ownership/mode diagnostics, and
+write/read checks across worker phases. A default-mount control must reproduce
+a write failure; nocopy must preserve 1000:1000 mode 700 and retain the marker.
+All containers are non-root, read-only, network-none and resource-bounded. No
+checkout, candidate helper, credentials, host directory or Docker socket enters
+them. Resource removal is checked. A different result fails the hypothesis test;
+this text must be updated with actual run evidence before claiming root cause.
+
+The argv regression checks both scratch mounts and production working directory;
+it does not establish Docker behavior. A separate workflow job requires all nine
+worker fixtures with zero skips in the pinned Python container, using a clean
+environment, network none, a read-only root and only the worker/test files bound
+read-only. No candidate code executes on the Docker host. No new runtime test result is claimed in
+this draft. Even a passing fixed probe qualifies only the storage primitive.
+Independent acceptance of the helper must precede another PR #18 product run
+using accepted-base helpers; full media/Nuxt qualification remains separate.

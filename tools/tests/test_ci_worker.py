@@ -133,7 +133,7 @@ if name == "docker":
                 self.assertTrue(keeper_name.endswith("-scratch-keeper"))
                 volume_index = next(i for i, c in enumerate(calls) if c[:3] == ["docker", "volume", "create"])
                 volume = calls[volume_index][-1]
-                mount = f"type=volume,source={volume},target=/scratch"
+                mount = f"type=volume,source={volume},target=/scratch,volume-nocopy"
                 self.assertLess(volume_index, keeper_index)
                 self.assertLess(keeper_index, proxy_index)
                 self.assertEqual(keeper[keeper.index("--network") + 1], "none")
@@ -160,7 +160,9 @@ if name == "docker":
                 for worker in workers:
                     self.assertLess(keeper_index, calls.index(worker))
                     self.assertLess(calls.index(worker), cleanup_index)
-                    self.assertIn(mount, worker)
+                    self.assertEqual([worker[i + 1] for i, arg in enumerate(worker)
+                                      if arg == "--mount" and worker[i + 1].startswith("type=volume,")], [mount])
+                    self.assertEqual(worker[worker.index("--workdir") + 1], "/scratch")
                     for name in ("bootstrap-requirements.txt", "build-requirements.txt"):
                         self.assertIn(f"type=bind,source={ROOT}/tools/ci/{name},target=/trusted/{name},readonly", worker)
                     self.assertIn(f"type=bind,source={candidate},target=/source,readonly", worker)
