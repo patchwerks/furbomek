@@ -156,7 +156,7 @@ jobs:
               cd /scratch/source/$variant
               if [[ $variant == candidate ]] && ! node --input-type=module -e "import fs from \"node:fs\"; const a=JSON.parse(fs.readFileSync(\"package.json\")); const b=JSON.parse(fs.readFileSync(\"package-lock.json\")).packages[\"\"]; process.exit(JSON.stringify(a.dependencies)===JSON.stringify(b.dependencies)&&JSON.stringify(a.devDependencies)===JSON.stringify(b.devDependencies)?0:1)"; then
                 printf "generated\n" > /scratch/evidence/lock-mode.txt
-                npm install --package-lock-only --ignore-scripts --no-audit --no-fund > /scratch/evidence/lock-resolution.log 2>&1
+                npm update @nuxt/eslint eslint @eslint/config-inspector --package-lock-only --ignore-scripts --no-audit --no-fund > /scratch/evidence/lock-resolution.log 2>&1
               elif [[ $variant == candidate ]]; then
                 printf "persisted\n" > /scratch/evidence/lock-mode.txt
               fi
@@ -227,7 +227,7 @@ jobs:
               read(`${variant}-dependency-paths.json`);
             }
             const lock = read("package-lock.json");
-            const versions = Object.entries(lock.packages).filter(([p]) => p.endsWith("/eslint")).map(([,v]) => v.version);
+            const versions = Object.entries(lock.packages).filter(([p]) => p === "node_modules/eslint" || p.endsWith("/node_modules/eslint")).map(([,v]) => v.version);
             if (!versions.length || versions.some(v => !v.startsWith("10."))) throw Error("not a single supported ESLint major");
             if (lock.packages["node_modules/@eslint/config-inspector"].version !== "3.2.0") throw Error("unexpected inspector");
             result.eslintVersions = versions;

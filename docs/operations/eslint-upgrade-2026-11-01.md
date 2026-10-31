@@ -65,3 +65,24 @@ Independent review, exact-head checks, inspector replacement qualification and
 resolved lock generation remain required. Reverting the manifest and matching
 lock restores the former toolchain, including its documented unsupported ESLint
 8 runtime. No deployment, provider call, device or live service is involved.
+
+## First hosted checkpoint
+
+Run [41241461518](https://github.com/patchwerks/furbomek/actions/runs/41241461518)
+for `c3419a875252e2c33aee0a1e644b1093c6365c67` installed the baseline root
+(912 packages) and server (70 packages) with scripts disabled. Its fresh audit
+reported 43 affected entries: 40 moderate, 3 low, no high/critical. Both the
+glob and minimatch advisories remain; esbuild had no direct audit entry.
+
+Candidate lock resolution failed with ERESOLVE referencing locked Nuxt ESLint
+0.7.6 versus requested 1.17.0. No source build or lint ran. The next attempt uses
+standard targeted npm update for the three selected dependencies, with the same
+script-disabled registry boundary and no peer bypass. The advisory checker also
+now distinguishes the actual eslint package from the scoped @nuxt/eslint module.
+A data fixture excludes the scoped module while retaining nested ESLint 8 as a
+single-major failure. No lockfile is accepted or imported by this correction.
+
+## Changelog
+
+- 2026-11-01: recorded the first hosted failure and bounded targeted-resolution
+  correction; all runtime qualification gates remain open.
