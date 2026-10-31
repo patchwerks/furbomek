@@ -23,10 +23,12 @@ ci_id="furbomek-${mode}-$$"
 network="$ci_id-net"
 volume="$ci_id-work"
 proxy="$ci_id-proxy"
+keeper="$ci_id-scratch-keeper"
 cleanup() {
   local result=${1:-$?}
   if [[ $result != 0 ]]; then docker logs "$proxy" 2>&1 || true; fi
   docker rm -f "$proxy" >/dev/null 2>&1 || true
+  docker rm -f "$keeper" >/dev/null 2>&1 || true
   docker volume rm -f "$volume" >/dev/null 2>&1 || true
   docker network rm "$network" >/dev/null 2>&1 || true
 }
@@ -36,6 +38,13 @@ if [[ $image != "$python_image" ]]; then docker pull "$image"; fi
 docker network create --internal --opt com.docker.network.bridge.gateway_mode_ipv4=isolated "$network" >/dev/null
 docker volume create --driver local --opt type=tmpfs --opt device=tmpfs \
   --opt o=size=4g,uid=1000,gid=1000,mode=0700 "$volume" >/dev/null
+# A tmpfs-backed local volume loses its contents when its last mount closes.
+# Keep this trusted, network-none mount alive across every disposable worker.
+docker run -d --name "$keeper" --network none --read-only \
+  --cap-drop ALL --security-opt no-new-privileges --user 1000:1000 \
+  --cpus 0.1 --memory 32m --pids-limit 8 \
+  --mount "type=volume,source=$volume,target=/scratch" \
+  "$python_image" sleep infinity >/dev/null
 docker run -d --name "$proxy" --network "$network" --network-alias dependency-proxy --read-only --cap-drop ALL --security-opt no-new-privileges \
   --user 1000:1000 --cpus 1 --memory 128m --pids-limit 64 \
   --mount "type=bind,source=$trusted/tools/ci/dependency-proxy.py,target=/proxy.py,readonly" \

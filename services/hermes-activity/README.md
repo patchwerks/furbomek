@@ -25,6 +25,12 @@ without relabelling old events as new activity.
 increasing publication sequences and bounded TTL. It is a reduced public
 projection, not an implementation of the complete future character/A2UI bus.
 
+An explicit `--character-session OPAQUE_ID` enables a bounded local-authorized
+character input on the same spool and broker. It is off by default and is not
+enabled by the media supervisor. Read [CHARACTER.md](CHARACTER.md) for its strict
+input, private-file authorization, cancellation/checkpoint semantics and offline
+qualification limits. It does not establish real Hermes or speech integration.
+
 ## Privacy and observer contract
 
 The standard-library-only plugin is under `plugin/furbomek_stream/`. Install only

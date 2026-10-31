@@ -209,3 +209,60 @@ requires this flag. A fresh immutable Linux fixture rerun at final code revision
 [run 40986264572, job 123837909390](https://github.com/patchwerks/furbomek/actions/runs/40986264572/job/123837909390).
 Test-only workflow revision: `b71ac458a8bc50796695072310da78babb672981`.
 No workflow/helper activation or full-worker acceptance follows from it.
+
+## Scratch lifetime correction — 2026-10-30
+
+**Observed:** the first accepted-base product run for PR #18 at
+`69e32e017b29bbdb604a4a871fab97533322deb3`, using accepted helpers from main
+`9aa7546`, passed direct-egress denial, forbidden-proxy-host rejection and the
+allowed PyPI request. Media also installed hash-pinned uv successfully. Both
+media and legacy then failed because `/scratch/source` had disappeared:
+[run 41027114292](https://github.com/patchwerks/furbomek/actions/runs/41027114292).
+The tmpfs-backed local Docker volume was unmounted when the last ephemeral
+worker exited; a later mount started with empty contents. No product-test pass
+is implied by the successful networking/bootstrap steps.
+
+The correction keeps one dedicated trusted container holding the bounded 4 GiB
+scratch mount throughout the disposable worker phases. It runs only `sleep
+infinity` from the existing pinned Python image: UID/GID 1000, network none,
+read-only root, all capabilities dropped, no privilege regain, 0.1 CPU, 32 MiB
+memory and eight processes. It receives only the scratch volume, with no source,
+credentials, host paths, socket, proxy network or candidate command. Cleanup
+removes it before removing the volume. Actual candidate provisioning/execution
+boundaries and all dependency pins are unchanged.
+
+**Measured:** all nine input/fake-Docker orchestration tests passed in the local
+credential-free, network-denied sandbox. They verify keeper creation before any
+worker, the same scratch mount across phases, resource restrictions, cleanup
+ordering, and failure handling. They do not execute real Docker.
+
+A separate fixed inline Linux storage probe at
+`31ca9436088761d2b70435ce706fafac6814f9e0` passed
+[run 41028202341](https://github.com/patchwerks/furbomek/actions/runs/41028202341):
+without a keeper the marker disappears, with the keeper it survives between
+workers, removing the final keeper discards it, and volume removal is verified.
+That test uses the same image, mount options and container restrictions, without
+checking out or running candidate helpers. It qualifies the storage primitive,
+not the revised full helper or media/Nuxt products.
+
+This is a new helper revision requiring independent acceptance. PR #18 continues
+to select accepted-base helpers and must not substitute this candidate to obtain
+a green result. After acceptance/publication, rerun the full media and legacy
+jobs and record their exact helper/candidate revisions. No trust selection,
+workflow activation, merge, runtime deployment or physical access is authorized
+by these tests.
+
+The exact corrected helper at `fb93566ffbaf4cfb1b8b52716522ae6c86aae67b`
+also passed **30 Linux fixture tests with zero skips**, using pinned Python
+3.12.11 and exact uv 0.13.6 in a non-root, read-only, network-none container
+without Docker socket access:
+[run 41028713745](https://github.com/patchwerks/furbomek/actions/runs/41028713745),
+test-only workflow `cbc46f63a83ae8991a8c25ab7b4424655d909f42`. These include
+nine worker, fifteen proxy and six provisioning regressions. Integration of
+accepted main `26f4bdb` leaves those helper/test source files unchanged.
+
+## Changelog
+
+- 2026-10-30: corrected scratch mount lifetime for issue #4 / PR #31; recorded
+  the observed product-run failure, fixed storage probe and 30-test Linux fixture
+  evidence. Full worker qualification still requires independent acceptance.

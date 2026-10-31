@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import os
+import stat
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, BinaryIO
 
@@ -10,6 +11,8 @@ if TYPE_CHECKING:
     from pathlib import Path
 
 from hermes_feed import MAX_LINE_BYTES, SpoolEvent, parse_complete_line
+
+MAX_POLL_BYTES = 65_536
 
 
 @dataclass(frozen=True, slots=True)
@@ -122,7 +125,8 @@ class IncrementalSpoolReader:
         if self._fd is None:
             return False
         try:
-            return self.path.stat().st_ino != self._inode
+            # Drain an old generation over bounded polls before switching paths.
+            return self._read_offset >= os.fstat(self._fd.fileno()).st_size and self.path.stat().st_ino != self._inode
         except OSError:
             self._poll_uncertain = True
             return False
@@ -160,7 +164,7 @@ class IncrementalSpoolReader:
                 self._poll_gap = True
                 self._poll_uncertain = True
             self._fd.seek(self._read_offset)
-            chunk = self._fd.read()
+            chunk = self._fd.read(MAX_POLL_BYTES)
         except OSError:
             self._poll_uncertain = True
             return
@@ -191,7 +195,29 @@ class IncrementalSpoolReader:
             self._pending = self._pending[newline + 1 :]
             self._offset += len(line)
             event = parse_complete_line(line)
-            if event is None:
+            if event is None or (event.kind == "character" and not self._character_source_authorized()):
                 self._poll_uncertain = True
             else:
                 events.append(event)
+
+    def _character_source_authorized(self) -> bool:
+        """Admit character rows only from a current-UID private regular spool."""
+        if self._fd is None:
+            return False
+        try:
+            source = os.fstat(self._fd.fileno())
+            current = self.path.lstat()
+            parent = self.path.parent.lstat()
+        except OSError:
+            return False
+        return (
+            stat.S_ISREG(source.st_mode)
+            and stat.S_ISREG(current.st_mode)
+            and stat.S_ISDIR(parent.st_mode)
+            and source.st_ino == current.st_ino
+            and source.st_dev == current.st_dev
+            and source.st_uid == os.getuid()
+            and parent.st_uid == os.getuid()
+            and not (source.st_mode & 0o077)
+            and not (parent.st_mode & 0o077)
+        )

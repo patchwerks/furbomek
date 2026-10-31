@@ -1,0 +1,322 @@
+#!/usr/bin/env python3
+"""Offline, advisory analysis of bounded GitHub metadata; never dispatches work."""
+from __future__ import annotations
+
+import argparse
+from datetime import datetime, timezone
+import json
+import os
+from pathlib import Path
+import re
+import sys
+
+SCHEMA = "xeno.build-scout.v1"
+REPOSITORIES = ("patchwerks/patchwerks", "patchwerks/furbomek", "patchwerks/jabberwerk")
+MAX_FILE_BYTES = 16 * 1024 * 1024
+TOKEN = re.compile(r"(?:gh[pousr]_[A-Za-z0-9_]{12,}|github_pat_[A-Za-z0-9_]{12,}|sk-[A-Za-z0-9_-]{12,}|Bearer\s+\S+)", re.I)
+ASSIGNMENT = re.compile(r"\b(token|password|secret|api[_-]?key)\s*[:=]\s*\S+", re.I)
+STOPWORDS = frozenset("a an and are as at be by for from in into is of on or the to with".split())
+ISSUE_URL = re.compile(r"https://github\.com/[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+/issues/[1-9]\d*")
+SHA = re.compile(r"[0-9a-fA-F]{40}")
+# Deliberately finite vocabulary: unknown words retain their identity. These are
+# lexical hints, not a language model or evidence that two tasks are equivalent.
+TITLE_GROUPS = {
+    "verify": "verify verifies verifying verification test tests testing validate validation",
+    "fix": "fix fixes fixing repair repairs repairing",
+    "cancel": "cancel cancels cancelled canceled cancelling canceling cancellation abort aborted",
+    "reconnect": "reconnect reconnects reconnecting reconnection",
+    "timeout": "timeout timeouts",
+    "retry": "retry retries retrying",
+    "crash": "crash crashes crashing",
+    "duplicate": "duplicate duplicates duplicated",
+    "enable": "enable enables enabling enabled",
+    "disable": "disable disables disabling disabled",
+    "add": "add adds adding",
+    "remove": "remove removes removing removal",
+    "start": "start starts starting",
+    "stop": "stop stops stopping",
+    "increase": "increase increases increasing",
+    "decrease": "decrease decreases decreasing",
+}
+TITLE_ALIASES = {word: concept for concept, words in TITLE_GROUPS.items() for word in words.split()}
+TITLE_GENERIC = frozenset("fix verify add remove enable disable start stop increase decrease update improve implement support issue bug problem feature task work handling behavior".split())
+TITLE_ACTIONS = frozenset("enable disable add remove start stop increase decrease".split())
+TITLE_NEGATION = frozenset("no not never without cannot can't don't doesn't won't shouldn't".split())
+TITLE_PLATFORMS = frozenset("linux windows macos android ios ubuntu arch".split())
+
+
+def title_evidence(title: str) -> dict:
+    raw = set(re.findall(r"[a-z0-9]+", title.lower())) - STOPWORDS
+    words = re.findall(r"[a-z0-9]+(?:'[a-z]+)?", title.casefold().replace("’", "'"))
+    # Only an exact phrase rewrite; no stemming or dropping unknown qualifiers.
+    joined = " ".join(words)
+    words = re.sub(r"\btimed out\b", "timeout", joined).split()
+    mappings = {word: TITLE_ALIASES.get(word, word) for word in words if word not in STOPWORDS}
+    if re.search(r"\btimed out\b", joined):
+        mappings["timed out"] = "timeout"
+    concepts = set(mappings.values())
+    return {"raw": raw, "concepts": concepts, "mappings": mappings,
+            "anchors": concepts - TITLE_GENERIC - TITLE_NEGATION,
+            "actions": concepts & TITLE_ACTIONS,
+            "negation": concepts & TITLE_NEGATION,
+            "scope": (concepts & TITLE_PLATFORMS) | {x for x in concepts if any(c.isdigit() for c in x)}}
+
+
+def title_match(left: dict, right: dict) -> dict | None:
+    a, b = left["concepts"], right["concepts"]
+    common, union = a & b, a | b
+    score = len(common) / len(union) if union else 0
+    # Task verbs (fix/test) are not behavioral opposites. Directional actions,
+    # negation and explicit platform/version scope must agree, even one-sided.
+    if any(left[key] != right[key] for key in ("actions", "negation", "scope")):
+        return None
+    anchors_a, anchors_b = left["anchors"], right["anchors"]
+    if anchors_a - anchors_b and anchors_b - anchors_a:
+        return None
+    if len(common) < 3 or len(anchors_a & anchors_b) < 2 or score < 0.6:
+        return None
+    raw_common, raw_union = left["raw"] & right["raw"], left["raw"] | right["raw"]
+    return {"title_jaccard": round(len(raw_common) / len(raw_union), 3) if raw_union else 0,
+            "shared_terms": sorted(raw_common), "normalized_title_jaccard": round(score, 3),
+            "shared_concepts": sorted(common),
+            "title_normalizations": {side: [{"term": term, "concept": concept}
+                for term, concept in sorted(evidence["mappings"].items()) if term != concept]
+                for side, evidence in (("left", left), ("right", right))},
+            "reason": "Normalized title overlap with matching action, negation and explicit scope hints; inspect full scope, dependencies and implementation before deciding. Title-only lexical heuristic, not semantic identity."}
+
+
+def clean(value: object, limit: int = 20000) -> str:
+    """Best-effort credential pattern removal, not a publication/privacy guarantee."""
+    text = value if isinstance(value, str) else ""
+    text = TOKEN.sub("[REDACTED]", text)
+    text = ASSIGNMENT.sub(lambda m: m.group(1) + "=[REDACTED]", text)
+    return "".join(c for c in text if c in "\n\t" or ord(c) >= 32)[:limit]
+
+
+def canonical(repo: str, number: int | None = None, kind: str = "issues") -> str:
+    if repo not in REPOSITORIES or kind not in ("issues", "pull"):
+        raise ValueError("Unsupported repository or evidence kind")
+    if number is not None and (type(number) is not int or number < 1):
+        raise ValueError("Invalid issue number")
+    return f"https://github.com/{repo}" + (f"/{kind}/{number}" if number is not None else "")
+
+
+def write_private(path: Path, value: dict) -> None:
+    """Exclusive creation avoids overwrites and symlink following; outputs are private."""
+    data = json.dumps(value, indent=2, sort_keys=True, ensure_ascii=True) + "\n"
+    if len(data.encode()) > MAX_FILE_BYTES:
+        raise ValueError("Output exceeds snapshot size bound")
+    descriptor = os.open(path, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600)
+    with os.fdopen(descriptor, "w", encoding="utf-8") as stream:
+        stream.write(data)
+
+
+def load_snapshot(path: Path) -> dict:
+    with path.open("rb") as stream:
+        data = stream.read(MAX_FILE_BYTES + 1)
+    if len(data) > MAX_FILE_BYTES:
+        raise ValueError("Snapshot exceeds size bound")
+    snapshot = json.loads(data)
+    validate(snapshot)
+    return snapshot
+
+
+def validate(snapshot: dict) -> None:
+    if not isinstance(snapshot, dict) or snapshot.get("schema") != SCHEMA:
+        raise ValueError("Unsupported snapshot schema")
+    sources = snapshot.get("repositories")
+    if not isinstance(sources, dict) or not 1 <= len(sources) <= len(REPOSITORIES):
+        raise ValueError("Invalid repository collection")
+    if not isinstance(snapshot.get("observed_at"), str):
+        raise ValueError("Invalid observation time")
+    stamp = datetime.fromisoformat(snapshot["observed_at"].replace("Z", "+00:00"))
+    if stamp.tzinfo is None:
+        raise ValueError("Snapshot requires timezone")
+    for repo, data in sources.items():
+        canonical(repo)
+        if not isinstance(data, dict) or not isinstance(data.get("coverage"), dict):
+            raise ValueError("Invalid repository record")
+        if any(not isinstance(v, dict) or v.get("status") not in ("complete", "partial", "unavailable") for v in data["coverage"].values()):
+            raise ValueError("Invalid source coverage")
+        for kind in ("issues", "pulls", "runs"):
+            if not isinstance(data.get(kind), list) or len(data[kind]) > 200:
+                raise ValueError("Invalid bounded item collection")
+            if any(not isinstance(item, dict) for item in data[kind]):
+                raise ValueError("Invalid item")
+        seen = set()
+        for item in data["issues"] + data["pulls"]:
+            canonical(repo, item.get("number"))
+            if item.get("number") is None or item["number"] in seen:
+                raise ValueError("Missing or duplicate item identity")
+            seen.add(item["number"])
+            if item.get("state") not in ("open", "closed"):
+                raise ValueError("Invalid item state")
+            if not isinstance(item.get("labels"), list) or not all(isinstance(x, str) for x in item["labels"]):
+                raise ValueError("Invalid labels")
+            if not isinstance(item.get("assignees"), list):
+                raise ValueError("Invalid assignees")
+            for kind in ("comments", "blockers"):
+                items = item.get(kind, [])
+                if not isinstance(items, list) or len(items) > 200 or any(not isinstance(x, dict) for x in items):
+                    raise ValueError("Invalid issue detail collection")
+                for entry in items:
+                    if kind == "comments" and (type(entry.get("id")) is not int or entry["id"] < 1 or not isinstance(entry.get("body"), str)):
+                        raise ValueError("Invalid claim evidence")
+                    if kind == "blockers" and (not isinstance(entry.get("url"), str) or not ISSUE_URL.fullmatch(entry["url"]) or entry.get("state") not in ("open", "closed")):
+                        raise ValueError("Invalid dependency evidence")
+
+
+def section_blockers(body: str, repo: str) -> tuple[set[str], bool]:
+    """Parse only an explicit Blocked by heading; prose remains untrusted evidence."""
+    match = re.search(r"(?im)^#{1,6}[ \t]+Blocked by[ \t]*:?[ \t]*$([\s\S]*?)(?=^#{1,6}[ \t]+|\Z)", body)
+    if not match:
+        return set(), False
+    section = match.group(1).strip()
+    links = set(re.findall(r"https://github\.com/([\w-]+/[\w.-]+)/issues/([1-9]\d{0,9})(?!\d)", section))
+    urls = {f"https://github.com/{owner}/issues/{number}" for owner, number in links}
+    # Qualified references first, then standalone local # references.
+    qualified = re.findall(r"([\w.-]+/[\w.-]+)#([1-9]\d{0,9})(?!\d)", section)
+    urls.update(f"https://github.com/{owner}/issues/{number}" for owner, number in qualified)
+    urls.update(canonical(repo, int(number)) for number in re.findall(r"(?<![\w/])#([1-9]\d{0,9})(?!\d)", section))
+    if urls:
+        return urls, False
+    none = re.match(r"None\b", section, re.I)
+    unresolved = re.search(r"\b(?:blocked by|waiting (?:on|for)|pending|requires?|needs?|approval|authorization|unavailable|unresolved|missing|until|access|licen[cs]e)\b", section, re.I)
+    # Free prose is review evidence, not proof of an unresolved native dependency.
+    return set(), not none or bool(unresolved)
+
+
+def has_claim(text: str) -> bool:
+    """Recognize claim markers, not the standard 'Claim and closeout' instructions."""
+    for line in text.splitlines():
+        line = re.sub(r"^[ \t]*(?:#{1,6}[ \t]+)?", "", line).strip()
+        line = re.sub(r"[*_`]+", "", line).strip()
+        if re.match(r"^(?:CLAIM|HANDOFF)(?:[ \t]*$|[ \t]*[:—-])", line, re.I):
+            return True
+    return False
+
+
+def analyze(snapshot: dict, *, now: datetime | None = None, max_age_hours: int = 24) -> dict:
+    validate(snapshot)
+    now = now or datetime.now(timezone.utc)
+    observed = datetime.fromisoformat(snapshot["observed_at"].replace("Z", "+00:00"))
+    age = (now - observed).total_seconds()
+    stale = age < -300 or age > max_age_hours * 3600
+    recommendations, duplicates, repository_summary = [], [], []
+    all_items = []
+    for repo, data in sorted(snapshot["repositories"].items()):
+        coverage = data["coverage"]
+        incomplete = sorted(key for key, value in coverage.items() if not isinstance(value, dict) or value.get("status") != "complete")
+        if not all(k in coverage for k in ("metadata", "issues", "pulls", "runs")):
+            incomplete.append("missing-core-source")
+        failures = []
+        for run in data["runs"]:
+            if run.get("conclusion") in ("failure", "timed_out", "cancelled", "action_required"):
+                run_id = run.get("id")
+                if type(run_id) is int and run_id > 0:
+                    failures.append({"url": canonical(repo) + f"/actions/runs/{run_id}", "head_sha": clean(run.get("head_sha"), 64), "conclusion": run["conclusion"]})
+        pull_observations = []
+        for pull in sorted(data["pulls"], key=lambda p: p["number"]):
+            head = clean(pull.get("head_sha"), 64)
+            matches = []
+            if SHA.fullmatch(head):
+                for run in data["runs"]:
+                    if clean(run.get("head_sha"), 64).lower() == head.lower() and type(run.get("id")) is int and run["id"] > 0:
+                        matches.append({"url": canonical(repo) + f"/actions/runs/{run['id']}",
+                                        "status": clean(run.get("status"), 64), "conclusion": clean(run.get("conclusion"), 64)})
+            pull_observations.append({"url": canonical(repo, pull["number"], "pull"), "title": clean(pull.get("title"), 512),
+                                      "state": pull["state"], "head_sha": head, "same_sha_workflow_observations": matches,
+                                      "ci_relation": "same-sha-observed" if matches else "not-observed-in-bounded-runs"})
+        repository_summary.append({"repository": repo, "evidence": canonical(repo), "incomplete_sources": incomplete,
+                                   "pull_requests": pull_observations, "ci_failures_observed": failures,
+                                   "ci_note": "Workflow observations only; not a required-check or current-PR-head verdict. Same SHA does not prove the required workflow, event or acceptance context."})
+        for item in data["issues"] + data["pulls"]:
+            kind = "pull" if item in data["pulls"] else "issues"
+            url = canonical(repo, item["number"], kind)
+            title = clean(item.get("title"), 512)
+            all_items.append((url, title, item["state"], kind))
+            if kind != "issues" or item["state"] != "open":
+                continue
+            labels = set(item["labels"])
+            terminal_disposition = "wontfix" in labels
+            ready = "ready-for-agent" in labels and not terminal_disposition
+            body = clean(item.get("body"))
+            blockers, prose_gate = section_blockers(body, repo)
+            native = item.get("blockers", [])
+            for blocker in native:
+                link = blocker.get("url", "")
+                if ISSUE_URL.fullmatch(link):
+                    blockers.add(link)
+            # Claims never expire based on our local clock. Release needs human reconciliation.
+            claim_comments = [c for c in item.get("comments", []) if has_claim(clean(c.get("body")))]
+            reasons, gates = [], []
+            if terminal_disposition:
+                gates.append("terminal-disposition-needs-review")
+                reasons.append("Canonical wontfix label observed; disposition needs reconciliation before work")
+            if stale:
+                gates.append("stale-or-future-snapshot")
+            if item.get("body_truncated"):
+                gates.append("truncated-issue-body")
+            if any(c.get("body_truncated") for c in item.get("comments", [])):
+                gates.append("truncated-claim-evidence")
+            if incomplete:
+                gates.append("incomplete-repository-coverage")
+            for source in (f"issue:{item['number']}:comments", f"issue:{item['number']}:blockers"):
+                if coverage.get(source, {}).get("status") != "complete":
+                    gates.append("missing-claim-or-dependency-evidence")
+                    break
+            if "requires-hardware" in labels:
+                gates.append("physical-authorization-required")
+            if blockers or "blocked" in labels:
+                gates.append("dependency-or-explicit-blocker-needs-acceptance")
+            if prose_gate:
+                gates.append("dependency-section-needs-review")
+            if item["assignees"] or claim_comments or has_claim(body):
+                gates.append("existing-owner-or-claim-needs-reconciliation")
+            if labels.intersection({"needs-info", "ready-for-human", "needs-triage"}):
+                gates.append("triage-or-human-gate")
+            if ready:
+                reasons.append("Canonical ready-for-agent label observed; not an authority grant")
+            if "area:verification" in labels:
+                reasons.append("Verification work can improve evidence for dependent slices")
+            if not reasons:
+                reasons.append("Open canonical issue; scope and acceptance need review")
+            score = (20 if ready else 0) + (10 if "area:verification" in labels else 0)
+            recommendations.append({"issue": url, "title": title, "priority_score": score,
+                "disposition": "gated-review" if gates else "candidate-for-human-review", "gates": sorted(set(gates)),
+                "reasons": reasons, "blocker_evidence": sorted(blockers),
+                "evidence": [url] + ([url + "#issuecomment-" + str(c["id"]) for c in claim_comments if type(c.get("id")) is int])})
+    prepared = [(url, title_evidence(title), state, kind) for url, title, state, kind in sorted(all_items)]
+    for index, (left, a, state, kind) in enumerate(prepared):
+        for right, b, other_state, other_kind in prepared[index + 1:]:
+            if state == other_state == "closed":
+                continue
+            match = title_match(a, b)
+            if match:
+                duplicates.append({"left": left, "right": right, **match,
+                    "kind": "issue-pr-overlap" if kind != other_kind else "possible-duplicate"})
+    recommendations.sort(key=lambda r: (bool(r["gates"]), -r["priority_score"], r["issue"]))
+    return {"schema": "xeno.build-scout.report.v1", "observed_at": snapshot["observed_at"],
+        "stale": stale, "advisory_only": True, "repositories": repository_summary,
+        "recommendations": recommendations, "duplicate_candidates": duplicates,
+        "limits": ["No dispatch, claims, writes, closure, merge or runtime authority.",
+                   "Coverage is bounded and non-atomic; re-read issues, claims and accepted dependencies before work.",
+                   "Closed dependencies are not assumed accepted. Private metadata must remain local.",
+                   "Projects, reviews, full CI checks, issue attachments and code contents are not collected."]}
+
+
+def main(argv: list[str] | None = None) -> int:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("snapshot", type=Path)
+    parser.add_argument("--output", required=True, type=Path)
+    args = parser.parse_args(argv)
+    try:
+        write_private(args.output, analyze(load_snapshot(args.snapshot)))
+    except (OSError, ValueError, TypeError, KeyError, RecursionError):
+        print("Scout could not analyze input or create a new private report; no source text was logged.", file=sys.stderr)
+        return 2
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
