@@ -76,6 +76,10 @@ if name == "docker":
         print(os.environ["VERSION"])
     elif args[0] == "inspect": print("172.29.4.2")
     elif args[0] == "exec" and os.environ["FAILURE"] == "ready": sys.exit(1)
+    elif args[:2] == ["run", "-d"] and "--name" in args:
+        if args[args.index("--name") + 1].endswith("-scratch-keeper") and os.environ["FAILURE"] == "keeper":
+            sys.exit(1)
+    elif args[:2] == ["run", "--rm"] and os.environ["FAILURE"] == "worker": sys.exit(7)
 ''')
             recorder.chmod(0o700)
             for name in ("docker", "curl", "sha256sum", "unzip", "sleep", "mktemp"):
@@ -103,7 +107,7 @@ if name == "docker":
                 result, calls, candidate = self.run_fake(mode, version)
                 self.assertEqual(result.returncode, 0, result.stderr)
                 self.assertEqual(calls[0][1], "version")
-                proxy_index = next(i for i, c in enumerate(calls) if c[:3] == ["docker", "run", "-d"])
+                proxy_index = next(i for i, c in enumerate(calls) if c[:3] == ["docker", "run", "-d"] and "--network-alias" in c)
                 launch = calls[proxy_index]
                 internal = launch[launch.index("--network") + 1]
                 self.assertTrue(internal.endswith("-net"))
@@ -123,7 +127,30 @@ if name == "docker":
                 self.assertLess(ready_index, connect_index)
                 workers = [c for c in calls if c[:3] == ["docker", "run", "--rm"]]
                 self.assertTrue(workers)
-                for worker in [launch, *workers]:
+                keeper_index = next(i for i, c in enumerate(calls) if c[:3] == ["docker", "run", "-d"] and "--network-alias" not in c)
+                keeper = calls[keeper_index]
+                keeper_name = keeper[keeper.index("--name") + 1]
+                self.assertTrue(keeper_name.endswith("-scratch-keeper"))
+                volume_index = next(i for i, c in enumerate(calls) if c[:3] == ["docker", "volume", "create"])
+                volume = calls[volume_index][-1]
+                mount = f"type=volume,source={volume},target=/scratch"
+                self.assertLess(volume_index, keeper_index)
+                self.assertLess(keeper_index, proxy_index)
+                self.assertEqual(keeper[keeper.index("--network") + 1], "none")
+                self.assertEqual(keeper[keeper.index("--cpus") + 1], "0.1")
+                self.assertEqual(keeper[keeper.index("--memory") + 1], "32m")
+                self.assertEqual(keeper[keeper.index("--pids-limit") + 1], "8")
+                self.assertEqual([keeper[i + 1] for i, arg in enumerate(keeper) if arg == "--mount"], [mount])
+                self.assertNotIn("--env", keeper)
+                self.assertNotIn("--env-file", keeper)
+                self.assertEqual(keeper[-3:], [
+                    "python:3.12.11-bookworm@sha256:1b48a1b13ec678be8d84974541cc007d4367aaf01f985231daad1a940106efc0",
+                    "sleep", "infinity",
+                ])
+                cleanup_index = calls.index(["docker", "rm", "-f", keeper_name])
+                volume_cleanup = calls.index(["docker", "volume", "rm", "-f", volume])
+                self.assertLess(cleanup_index, volume_cleanup)
+                for worker in [launch, keeper, *workers]:
                     self.assertIn("--read-only", worker)
                     self.assertEqual(worker[worker.index("--cap-drop") + 1], "ALL")
                     self.assertEqual(worker[worker.index("--user") + 1], "1000:1000")
@@ -131,6 +158,9 @@ if name == "docker":
                     self.assertNotIn("--publish", worker)
                     self.assertNotIn("--privileged", worker)
                 for worker in workers:
+                    self.assertLess(keeper_index, calls.index(worker))
+                    self.assertLess(calls.index(worker), cleanup_index)
+                    self.assertIn(mount, worker)
                     for name in ("bootstrap-requirements.txt", "build-requirements.txt"):
                         self.assertIn(f"type=bind,source={ROOT}/tools/ci/{name},target=/trusted/{name},readonly", worker)
                     self.assertIn(f"type=bind,source={candidate},target=/source,readonly", worker)
@@ -151,6 +181,33 @@ if name == "docker":
         self.assertFalse(any(c[:3] == ["docker", "network", "connect"] for c in calls))
         self.assertFalse(any(c[:3] == ["docker", "run", "--rm"] for c in calls))
         self.assertTrue(any(c[:3] == ["docker", "rm", "-f"] for c in calls))
+
+    def test_keeper_failure_prevents_proxy_and_candidate_execution(self):
+        for mode in ("media", "legacy"):
+            with self.subTest(mode=mode):
+                result, calls, _ = self.run_fake(mode, failure="keeper")
+                self.assertEqual(result.returncode, 1, result.stderr)
+                self.assertFalse(any("--network-alias" in c for c in calls))
+                self.assertFalse(any(c[:3] == ["docker", "run", "--rm"] for c in calls))
+                keeper = next(c for c in calls if c[:3] == ["docker", "run", "-d"])
+                name = keeper[keeper.index("--name") + 1]
+                cleanup = calls.index(["docker", "rm", "-f", name])
+                volume_cleanup = next(i for i, c in enumerate(calls) if c[:3] == ["docker", "volume", "rm"])
+                self.assertLess(cleanup, volume_cleanup)
+
+    def test_worker_failure_still_cleans_keeper_before_volume(self):
+        for mode in ("media", "legacy"):
+            with self.subTest(mode=mode):
+                result, calls, _ = self.run_fake(mode, failure="worker")
+                self.assertEqual(result.returncode, 7, result.stderr)
+                workers = [i for i, c in enumerate(calls) if c[:3] == ["docker", "run", "--rm"]]
+                self.assertEqual(len(workers), 1)
+                keeper = next(c for c in calls if c[:3] == ["docker", "run", "-d"] and "--network-alias" not in c)
+                name = keeper[keeper.index("--name") + 1]
+                cleanup = calls.index(["docker", "rm", "-f", name])
+                volume_cleanup = next(i for i, c in enumerate(calls) if c[:3] == ["docker", "volume", "rm"])
+                self.assertLess(workers[0], cleanup)
+                self.assertLess(cleanup, volume_cleanup)
 
 
 if __name__ == "__main__":
