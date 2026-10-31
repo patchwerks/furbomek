@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" role="img" aria-labelledby="title desc">
+<title id="title">Furb-o-Mek static fallback emblem</title>
+<desc id="desc">Original abstract six-legged mechanical character, two upright ears and no bow. A schematic emblem, not a model of the physical robot.</desc>
+<g fill="none" stroke="#d5ed85" stroke-width="14" stroke-linejoin="miter">
+<path d="M150 230 87 194 28 220 M147 267 71 267 28 310 M159 296 108 340 70 373 M250 230 313 194 372 220 M253 267 329 267 372 310 M241 296 292 340 330 373"/>
+</g>
+<path fill="#151715" stroke="#f0f0e9" stroke-width="7" d="M113 80 95 20 160 66 240 66 305 20 287 80 304 145 280 220 270 295 200 332 130 295 120 220 96 145Z"/>
+<path fill="#f0f0e9" d="M121 120 178 113 175 162 129 158Z M222 113 279 120 271 158 225 162Z"/>
+<path fill="#151715" d="M151 122h17v30h-17z M232 122h17v30h-17z"/>
+<path fill="#d5ed85" d="M176 176 224 176 200 201Z"/>
+<path fill="none" stroke="#f0f0e9" stroke-width="7" d="M162 244h76 M162 268h76"/>
+</svg>
