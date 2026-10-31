@@ -1,4 +1,4 @@
-"""FastMCP v1.27.1 registration for the gateway service."""
+"""FastMCP registration for the gateway service."""
 
 from mcp.server.fastmcp import FastMCP
 from mcp.types import ToolAnnotations
