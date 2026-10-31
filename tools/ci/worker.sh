@@ -108,10 +108,16 @@ if [[ $mode == media ]]; then
   curl -fL --retry 3 https://github.com/godotengine/godot-builds/releases/download/4.7.2-stable/Godot_v4.7.2-stable_linux.x86_64.zip -o "$ci_tools/godot.zip"
   printf '%s  %s\n' cadd3204e728a35d3f13adb7fd0d7902636b79f6b95c40c265eb73b6c35329e4 "$ci_tools/godot.zip" | sha256sum --check
   unzip -q "$ci_tools/godot.zip" -d "$ci_tools"
+  # mktemp is private by default; the uid 1000 worker needs traversal and execute.
+  chmod 0755 "$ci_tools" "$ci_tools/Godot_v4.7.2-stable_linux.x86_64"
   "${worker[@]}" --network none --env UV_OFFLINE=1 \
     --mount "type=bind,source=$ci_tools,target=/tools,readonly" "$image" bash -euc '
     export PATH=/scratch/bootstrap/bin:$PATH
     export FURBOMEK_GODOT=/tools/Godot_v4.7.2-stable_linux.x86_64
+    test -x "$FURBOMEK_GODOT" || {
+      echo "Godot is not executable by the offline worker: $FURBOMEK_GODOT" >&2
+      exit 1
+    }
     # Candidate paths are replaced only after network-none begins. The helper
     # validated project directories during provisioning; no candidate ran since.
     for service in embodiment-gateway hermes-activity stream-supervisor; do
