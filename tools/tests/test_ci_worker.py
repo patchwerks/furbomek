@@ -57,20 +57,35 @@ class WorkerOrchestrationTests(unittest.TestCase):
             (candidate / "tools").mkdir()
             (candidate / "tools/verify.sh").write_text('exit 98\n')
             log = scratch / "calls.jsonl"
-            # Every external action is a recorder; no candidate/container code,
-            # network, image, download, checksum, or unzip operation is executed.
+            # External services are recorders. Only private temporary staging,
+            # a fixed fake extraction and the real chmod touch the filesystem;
+            # no candidate/container code, network or downloaded code executes.
             recorder = scratch / "recorder"
             recorder.write_text("#!" + sys.executable + '\n' + r'''
-import json, os, pathlib, sys
+import json, os, pathlib, stat, sys, tempfile
 name = pathlib.Path(sys.argv[0]).name
 args = sys.argv[1:]
 with open(os.environ["CALL_LOG"], "a") as stream:
     stream.write(json.dumps([name, *args]) + "\n")
 if name == "mktemp":
-    folder = pathlib.Path(os.environ["TMPDIR"]) / "fake-ci-tools"
-    folder.mkdir()
+    folder = pathlib.Path(tempfile.mkdtemp(dir=os.environ["TMPDIR"]))
+    with open(os.environ["CALL_LOG"], "a") as stream:
+        stream.write(json.dumps(["staging-mode", stat.S_IMODE(folder.stat().st_mode)]) + "\n")
     print(folder)
+if name == "unzip":
+    folder = pathlib.Path(args[args.index("-d") + 1])
+    binary = folder / "Godot_v4.7.2-stable_linux.x86_64"
+    binary.write_text("#!/bin/sh\nexit 97\n")
+    binary.chmod(0o700)
+    (folder / "private-sentinel").write_text("keep private\n")
 if name == "docker":
+    if args[:2] == ["run", "--rm"] and "--network" in args and args[args.index("--network") + 1] == "none":
+        for arg in args:
+            if arg.startswith("type=bind,source=") and arg.endswith(",target=/tools,readonly"):
+                folder = pathlib.Path(arg.removeprefix("type=bind,source=").removesuffix(",target=/tools,readonly"))
+                paths = [folder, folder / "Godot_v4.7.2-stable_linux.x86_64", folder / "private-sentinel"]
+                with open(os.environ["CALL_LOG"], "a") as stream:
+                    stream.write(json.dumps(["mounted-tool-modes", *[stat.S_IMODE(p.stat().st_mode) for p in paths]]) + "\n")
     if args[0] == "version":
         if os.environ["FAILURE"] == "version": sys.exit(1)
         print(os.environ["VERSION"])
@@ -89,7 +104,7 @@ if name == "docker":
                 env={"PATH": f"{scratch}:/usr/bin:/bin", "CALL_LOG": str(log),
                      "VERSION": version, "FAILURE": failure, "HOME": str(scratch),
                      "TMPDIR": str(scratch)},
-                capture_output=True, text=True, timeout=10)
+                capture_output=True, text=True, timeout=10, umask=0o077)
             calls = [json.loads(line) for line in log.read_text().splitlines()] if log.exists() else []
             return result, calls, str(candidate)
 
@@ -170,6 +185,14 @@ if name == "docker":
                 for worker in workers[:-1]:
                     self.assertEqual(worker[worker.index("--network") + 1], internal)
                 if mode == "media":
+                    self.assertIn(["staging-mode", 0o700], calls)
+                    self.assertIn(["mounted-tool-modes", 0o755, 0o755, 0o600], calls)
+                    offline = workers[-1][-1]
+                    preflight = 'test -x "$FURBOMEK_GODOT"'
+                    self.assertIn(preflight, offline)
+                    self.assertIn("Godot is not executable by the offline worker:", offline)
+                    self.assertLess(offline.index(preflight), offline.index("for service in"))
+                    self.assertLess(offline.index(preflight), offline.index("bash tools/verify.sh"))
                     provision = workers[1][-1]
                     self.assertIn("pip --isolated install --proxy http://dependency-proxy:3128 --require-hashes --only-binary=:all: --no-deps -r /trusted/bootstrap-requirements.txt", provision)
                     self.assertIn("--require-hashes --no-deps --link-mode copy --target /scratch/build-inputs -r /trusted/build-requirements.txt", provision)

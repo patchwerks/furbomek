@@ -1,0 +1,131 @@
+name: Fixed Godot staging access probe
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - .github/workflows/ci-godot-access-probe.yml
+      - tools/ci/worker.sh
+      - tools/tests/test_ci_worker.py
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/ci-godot-access-probe.yml
+      - tools/ci/worker.sh
+      - tools/tests/test_ci_worker.py
+permissions:
+  contents: read
+jobs:
+  godot-access:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - name: Reproduce private staging denial and verify explicit access
+        shell: bash
+        run: |
+          set -euo pipefail
+          # Fixed probe: no checkout or candidate helper execution.
+          python_image=python:3.12.11-bookworm@sha256:1b48a1b13ec678be8d84974541cc007d4367aaf01f985231daad1a940106efc0
+          umask 077
+          stage=$(mktemp -d)
+          cleanup() {
+            local rc=$?
+            trap - EXIT
+            rm -rf -- "$stage"
+            test ! -e "$stage" || exit 1
+            exit "$rc"
+          }
+          trap cleanup EXIT
+          test "$(stat -c %a "$stage")" = 700
+          test "$(stat -c %u "$stage")" != 1000
+          curl -fL --retry 3 https://github.com/godotengine/godot-builds/releases/download/4.7.2-stable/Godot_v4.7.2-stable_linux.x86_64.zip -o "$stage/godot.zip"
+          printf '%s  %s\n' cadd3204e728a35d3f13adb7fd0d7902636b79f6b95c40c265eb73b6c35329e4 "$stage/godot.zip" | sha256sum --check
+          unzip -q "$stage/godot.zip" -d "$stage"
+          rm -- "$stage/godot.zip"
+          binary="$stage/Godot_v4.7.2-stable_linux.x86_64"
+          test -f "$binary"
+          test ! -L "$binary"
+          test "$(stat -c %a "$stage")" = 700
+          docker pull "$python_image"
+          worker=(docker run --rm --network none --read-only
+                  --cap-drop ALL --security-opt no-new-privileges
+                  --user 1000:1000 --cpus 2 --memory 1g --pids-limit 128
+                  --tmpfs /tmp:rw,exec,nosuid,size=256m,uid=1000,gid=1000,mode=0700
+                  --mount "type=bind,source=$stage,target=/tools,readonly"
+                  --workdir /tmp "$python_image"
+                  env -i PATH=/usr/local/bin:/usr/bin:/bin HOME=/tmp TMPDIR=/tmp)
+          # A successful container must observe denial; startup failure is failure.
+          "${worker[@]}" sh -ec '
+            test "$(id -u):$(id -g)" = 1000:1000
+            test ! -e /var/run/docker.sock
+            test "$(stat -c %a /tools)" = 700
+            test ! -w /tools
+            test ! -x /tools/Godot_v4.7.2-stable_linux.x86_64
+            echo GODOT_PRIVATE_STAGING_DENIED
+          '
+          chmod 0755 "$stage" "$binary"
+          test "$(stat -c %a "$stage")" = 755
+          test "$(stat -c %a "$binary")" = 755
+          "${worker[@]}" sh -ec '
+            test "$(id -u):$(id -g)" = 1000:1000
+            test ! -e /var/run/docker.sock
+            test "$(stat -c %a /tools)" = 755
+            test ! -w /tools
+            test -x /tools/Godot_v4.7.2-stable_linux.x86_64
+            version=$(/tools/Godot_v4.7.2-stable_linux.x86_64 --headless --version)
+            printf "%s\n" "$version"
+            case "$version" in 4.7.2.stable.*) ;; *) exit 1 ;; esac
+            echo GODOT_EXPLICIT_ACCESS_PASSED
+          '
+
+  worker-fixtures:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - name: Run candidate worker fixtures inside disposable boundary
+        shell: bash
+        run: |
+          set -euo pipefail
+          python_image=python:3.12.11-bookworm@sha256:1b48a1b13ec678be8d84974541cc007d4367aaf01f985231daad1a940106efc0
+          umask 077
+          fixture=$(mktemp -d)
+          cleanup() {
+            local rc=$?
+            trap - EXIT
+            rm -rf -- "$fixture"
+            test ! -e "$fixture" || exit 1
+            exit "$rc"
+          }
+          trap cleanup EXIT
+          # Copy only the two fixture inputs, rejecting links and special files.
+          # No checkout metadata, credentials, home, source tree or socket is bound.
+          for directory in tools tools/ci tools/tests; do
+            test -d "$directory"
+            test ! -L "$directory"
+          done
+          for source in tools/ci/worker.sh tools/tests/test_ci_worker.py; do
+            test -f "$source"
+            test ! -L "$source"
+          done
+          mkdir -p "$fixture/tools/ci" "$fixture/tools/tests"
+          cp -- tools/ci/worker.sh "$fixture/tools/ci/worker.sh"
+          cp -- tools/tests/test_ci_worker.py "$fixture/tools/tests/test_ci_worker.py"
+          chmod 0755 "$fixture" "$fixture/tools" "$fixture/tools/ci" "$fixture/tools/tests"
+          chmod 0644 "$fixture/tools/ci/worker.sh" "$fixture/tools/tests/test_ci_worker.py"
+          docker pull "$python_image"
+          docker run --rm --network none --read-only --user 65534:65534 \
+            --cap-drop ALL --security-opt no-new-privileges \
+            --cpus 2 --memory 512m --pids-limit 64 \
+            --tmpfs /tmp:rw,exec,nosuid,size=128m,uid=65534,gid=65534,mode=0700 \
+            --mount "type=bind,source=$fixture,target=/work,readonly" \
+            --workdir /work "$python_image" \
+            env -i PATH=/usr/local/bin:/usr/bin:/bin HOME=/tmp TMPDIR=/tmp \
+            python -B -c '
+          import sys, unittest
+          suite = unittest.defaultTestLoader.discover("tools/tests", pattern="test_ci_worker.py")
+          result = unittest.TextTestRunner(verbosity=2).run(suite)
+          if result.testsRun != 9 or result.skipped or not result.wasSuccessful():
+              sys.exit(1)
+          '
