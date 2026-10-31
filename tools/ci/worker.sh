@@ -43,7 +43,7 @@ docker volume create --driver local --opt type=tmpfs --opt device=tmpfs \
 docker run -d --name "$keeper" --network none --read-only \
   --cap-drop ALL --security-opt no-new-privileges --user 1000:1000 \
   --cpus 0.1 --memory 32m --pids-limit 8 \
-  --mount "type=volume,source=$volume,target=/scratch" \
+  --mount "type=volume,source=$volume,target=/scratch,volume-nocopy" \
   "$python_image" sleep infinity >/dev/null
 docker run -d --name "$proxy" --network "$network" --network-alias dependency-proxy --read-only --cap-drop ALL --security-opt no-new-privileges \
   --user 1000:1000 --cpus 1 --memory 128m --pids-limit 64 \
@@ -69,7 +69,7 @@ worker=(docker run --rm --read-only --cap-drop ALL --security-opt no-new-privile
   --user 1000:1000 --cpus 2 --memory 4g --pids-limit 256
   --tmpfs /tmp:rw,exec,nosuid,size=512m
   --mount "type=bind,source=$candidate,target=/source,readonly"
-  --mount "type=volume,source=$volume,target=/scratch"
+  --mount "type=volume,source=$volume,target=/scratch,volume-nocopy"
   --mount "type=bind,source=$trusted/tools/ci/provision-python.sh,target=/trusted/provision-python.sh,readonly"
   --mount "type=bind,source=$trusted/tools/ci/bootstrap-requirements.txt,target=/trusted/bootstrap-requirements.txt,readonly"
   --mount "type=bind,source=$trusted/tools/ci/build-requirements.txt,target=/trusted/build-requirements.txt,readonly"

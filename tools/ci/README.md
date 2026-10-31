@@ -266,3 +266,60 @@ accepted main `26f4bdb` leaves those helper/test source files unchanged.
 - 2026-10-30: corrected scratch mount lifetime for issue #4 / PR #31; recorded
   the observed product-run failure, fixed storage probe and 30-test Linux fixture
   evidence. Full worker qualification still requires independent acceptance.
+- 2026-10-31: measured scratch ownership/write failure with default copy-up and
+  successful `volume-nocopy` preservation under production working-directory
+  settings; recorded the fixed Docker probe and nine-worker-fixture evidence.
+  Full media/Nuxt product qualification remains separate.
+
+## Scratch permissions investigation — 2026-10-31
+
+**Observed:** after accepting the keeper correction on main `c80e1bee`,
+PR #18's media and legacy workers both stop at `cp -R /source/. /scratch/source`
+with permission denied, before candidate execution. The earlier storage probe
+omitted the production worker's `--workdir /scratch`; its passing result did not
+qualify that launch configuration.
+
+**Measured in the fixed probe:** on Docker Engine **28.0.4**, both pinned
+Python 3.12.11 and Node 26.7.0 worker images with production
+`--workdir /scratch` observed UID/GID **0:0**, mode **755**, and
+`MARKER_WRITE_DENIED` for a fresh default-copy-up volume despite its explicit
+1000:1000/mode 0700 tmpfs options. With `volume-nocopy` on both the pinned Python
+keeper and worker mount, both images observed UID/GID **1000:1000**, mode **700**,
+`MARKER_WRITTEN` and `CROSS_PHASE_MARKERS_PRESERVED`. All probe containers and
+volumes were removed and cleanup was verified. This demonstrates the default
+copy-up ownership failure and nocopy correction for this Docker version, pinned
+image pair and working-directory configuration; it is not a claim about every
+Docker version or image.
+
+The correction changes only the two scratch mount options in the worker. User,
+capability, privilege, host-mount, network, accepted-helper selection and candidate
+execution boundaries are unchanged. The fixed inline storage job checks fresh
+volumes and marker write/read persistence across disposable phases without
+checking out or executing candidate code. All probe containers are non-root,
+read-only, network-none and resource-bounded, with no credentials, host directory
+or Docker socket mounted.
+
+Evidence: [run 41214876308](https://github.com/patchwerks/furbomek/actions/runs/41214876308),
+[storage job 124577220132](https://github.com/patchwerks/furbomek/actions/runs/41214876308/job/124577220132),
+for source head `fab5c3071df85f2be2e3e2ecac7abe978be904c3` and tested PR merge
+`ec1f62897b4567a7c0d0657ad5bb9b4efd23aa43` into accepted main
+`c80e1bee0144c1844047e78c46e32f855b22d309`. The same run's separate worker-fixture
+job passed **9 tests with zero skips**. It executes the argv regressions inside
+the pinned Python container with a clean environment, network none, a read-only
+root and only the worker/test files bound read-only. Candidate test code receives
+no Docker socket or host home and never executes on the Docker host. Those
+fixtures check both scratch mounts, production working directory and existing
+orchestration boundaries; the fixed storage job supplies the actual Docker
+behavior evidence. Current-head CodeQL checks also passed.
+
+Local Docker was unavailable. The local confined test attempt stopped at
+`sandbox_apply: Operation not permitted` before Python started, so no local
+runtime or unit-test pass is claimed. Shell syntax, Python parsing and whitespace
+checks passed. The hosted results above are tied to their recorded revisions;
+this evidence-only documentation update does not itself obtain fresh approval.
+
+The publishing account's advisory review is not independent maintainer
+acceptance. Independent exact-head acceptance and publication on accepted main
+must precede another PR #18 product run using accepted-base helpers. These
+results qualify the bounded storage correction and worker fixtures, not full
+media/Nuxt products, registry provisioning, live integration or deployment.
