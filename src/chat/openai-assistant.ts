@@ -3,13 +3,13 @@ import type {APIPromise} from "openai/core";
 import type {AssistantStream, RunCreateParamsBaseStream} from "openai/lib/AssistantStream";
 import type {Settings} from "~/src/settings";
 import {AbstractChat, ChatCreatedEvent, ChatDeltaEvent, ChatMessageEvent} from "~/src/chat/abstractChat";
-// @ts-ignore
-import {MessageStreamEvent, Thread} from "openai/resources/beta";
+import type {Thread} from "openai/resources/beta/threads/threads";
+import type {Message} from "openai/resources/beta/threads/messages";
 
 export class OpenAIAssistantChat extends AbstractChat {
   protected client: OpenAI;
   private thread: Thread | null = null;
-  private preMessage: APIPromise<MessageStreamEvent> | null = null;
+  private preMessage: APIPromise<Message> | null = null;
   private currentRun: AssistantStream | null = null;
   protected settings: Settings
   private assistantId: string = ''
