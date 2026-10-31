@@ -8,8 +8,8 @@ status: active
 
 Tracks [issue 30](https://github.com/patchwerks/furbomek/issues/30), based on
 `fb7e25e9982f53a1f12e6c63955420ac476d8294`. This is preparation, not accepted
-qualification. The candidate lockfile has not yet been generated in the required
-Linux worker. Application source and the generated-config wrapper are unchanged.
+qualification. The candidate lockfile was generated in the required Linux worker and imported
+for persisted-lock qualification; it is not accepted yet. Application source and the generated-config wrapper are unchanged.
 
 ## Observed metadata and proposed versions
 
@@ -100,3 +100,39 @@ bytes are restored and normal resolution reconciles its ranges. Validation then
 rejects any changed non-lint direct version or mismatched lock root metadata and
 exports the transitive version delta. No peer constraints are edited or bypassed.
 This strategy has not run and does not qualify a candidate lock.
+
+## Imported candidate and two-version qualification
+
+Run [41242150906](https://github.com/patchwerks/furbomek/actions/runs/41242150906),
+source `2c5add537e15fed3af631589de6717ca2a8f1935`, resolved and installed the
+fresh candidate graph successfully. The exact imported lockfile SHA-256 is
+`5cdc4b0cf102c30d3a8693e0584802c252f75d7f5bed81d0a13340ac158e73d0`.
+All 12 non-lint direct resolved versions stayed unchanged. The graph has one
+ESLint 10.14.0, inspector 3.2.0 and one esbuild 0.28.2; the former inspector
+esbuild 0.25.x path is absent. This is not a lint-only transitive change: 458
+package-path version differences comprise 247 removals, 133 changes and 78
+additions, including hoisting, toolchain/plugin changes and refreshed Rollup/ws
+transitives. The bounded transitive-delta artifact remains review evidence.
+Candidate audit reported 38 moderate and 3 low entries, zero high/critical;
+glob/minimatch and the inspector-to-ESLint advisory chain remain unresolved.
+
+Baseline prepare, production build, vue-tsc and offline full npm ci passed on
+Node 26.7.0/npm 11.19.0. The root postinstall executed; npm 11 separately warned
+that dependency install scripts for esbuild and unrs-resolver were not approved
+under its default policy. This does not prove every dependency hook executed.
+Actual app.vue diagnostics were 11 errors/18 warnings; app.vue plus src was
+33/23, while repository-wide diagnostics were 36/23, including three newer
+avatar-fallback no-undef errors. All had zero fatal errors.
+
+The run stopped at baseline npm ls exit 1: vite-plugin-checker requires ESLint
+>=9.39.4 but npm reports baseline ESLint 8.57.1 invalid. The harness now accepts
+only that exact baseline problem, retaining it as evidence, and requires a clean
+candidate dependency tree. App-only comparison now targets app.vue explicitly.
+
+The next fixed two-job matrix tests immutable Node 26.7.0 and the declared
+Node 22.22.3 floor, asserts each runtime version, requires persisted lock mode,
+and checks the lock remains unchanged. The floor image uses official Linux amd64
+manifest `sha256:46e94f8cf91baab69a2deb3153e74eeffd73c20c7cc1d8432f5b96469eaa0322`.
+Candidate inspector qualification additionally runs its documented
+[static build](https://github.com/eslint/config-inspector#static-build), without
+starting a listener. These runtime results are pending.

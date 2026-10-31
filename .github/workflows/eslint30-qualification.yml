@@ -9,6 +9,20 @@ jobs:
   qualification:
     runs-on: ubuntu-24.04
     timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      max-parallel: 2
+      matrix:
+        include:
+          - name: node26
+            version: v26.7.0
+            image: node:26.7.0-bookworm@sha256:e929171d35b9df7773a3ec5b068e387fa109441dc90f91e6560af5d39b7e9bf1
+          - name: node22
+            version: v22.22.3
+            image: node:22.22.3-bookworm@sha256:46e94f8cf91baab69a2deb3153e74eeffd73c20c7cc1d8432f5b96469eaa0322
+    env:
+      QUALIFICATION_NODE_IMAGE: ${{ matrix.image }}
+      QUALIFICATION_NODE_VERSION: ${{ matrix.version }}
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
         with:
@@ -38,7 +52,7 @@ jobs:
           done
           chmod -R a+rX "$candidate"
           python_image=python:3.12.11-bookworm@sha256:1b48a1b13ec678be8d84974541cc007d4367aaf01f985231daad1a940106efc0
-          node_image=node:26.7.0-bookworm@sha256:e929171d35b9df7773a3ec5b068e387fa109441dc90f91e6560af5d39b7e9bf1
+          node_image=$QUALIFICATION_NODE_IMAGE
           image=$node_image
           mode=eslint30
           # Check the daemon before any mutation, including registering cleanup commands.
@@ -62,7 +76,7 @@ jobs:
           from pathlib import Path
           root = Path("/scratch/evidence")
           suffixes = ["ci.log", "audit.json", "versions.txt", "prepare.log", "build.log", "types.log", "full-ci.log", "app-lint.json", "repo-lint.json", "dependency-paths.json", "status.txt", "vue-config.json", "ts-config.json", "malformed.json"]
-          allowed = {f"{v}-{s}" for v in ["baseline", "candidate"] for s in suffixes} | {"package-lock.json", "lock-resolution.log", "comparison.json", "lock-mode.txt", "direct-versions.json", "transitive-delta.json", "resolution-eresolve.txt"}
+          allowed = {f"{v}-{s}" for v in ["baseline", "candidate"] for s in suffixes} | {"package-lock.json", "lock-resolution.log", "comparison.json", "lock-mode.txt", "direct-versions.json", "transitive-delta.json", "resolution-eresolve.txt", "candidate-inspector-build.log"}
           total = 0
           paths = list(root.iterdir())
           assert len(paths) <= 40
@@ -130,7 +144,7 @@ jobs:
             --env UV_CACHE_DIR=/scratch/uv-cache --env UV_PYTHON_DOWNLOADS=never
             --env PYTHONUNBUFFERED=1 --env PYTHONDONTWRITEBYTECODE=1
             --env npm_config_cache=/scratch/npm-cache --env HOME=/scratch/home
-            --env NUXT_TELEMETRY_DISABLED=1 --env CI=true
+            --env NUXT_TELEMETRY_DISABLED=1 --env CI=true --env EXPECTED_NODE_VERSION="$QUALIFICATION_NODE_VERSION"
             --env npm_config_registry=https://registry.npmjs.org
             --env npm_config_userconfig=/scratch/npm-userconfig --env npm_config_globalconfig=/scratch/npm-globalconfig)
           proxy_env=(--env HTTPS_PROXY=http://dependency-proxy:3128 --env HTTP_PROXY=http://dependency-proxy:3128
@@ -138,6 +152,7 @@ jobs:
             --env NO_PROXY= --env no_proxy=)
 
           "${worker[@]}" --network "$network" "${proxy_env[@]}" "$image" bash -euc '
+            test "$(node --version)" = "$EXPECTED_NODE_VERSION"
             test "$(id -u)" != 0
             test ! -e /var/run/docker.sock
             # Assert both direct external egress and a forbidden proxy destination fail.
@@ -154,7 +169,7 @@ jobs:
           "${worker[@]}" --network "$network" "${proxy_env[@]}" "$image" bash -euc '
             for variant in baseline candidate; do
               cd /scratch/source/$variant
-              if [[ $variant == candidate ]] && ! node --input-type=module -e "import fs from \"node:fs\"; const a=JSON.parse(fs.readFileSync(\"package.json\")); const b=JSON.parse(fs.readFileSync(\"package-lock.json\")).packages[\"\"]; process.exit(JSON.stringify(a.dependencies)===JSON.stringify(b.dependencies)&&JSON.stringify(a.devDependencies)===JSON.stringify(b.devDependencies)?0:1)"; then
+              if [[ $variant == candidate ]] && ! node --input-type=module -e "import fs from \"node:fs\"; const a=JSON.parse(fs.readFileSync(\"package.json\")); const b=JSON.parse(fs.readFileSync(\"package-lock.json\")).packages[\"\"]; process.exit(Object.keys(a.dependencies).length===Object.keys(b.dependencies).length&&Object.entries(a.dependencies).every(([k,v])=>b.dependencies[k]===v)&&Object.keys(a.devDependencies).length===Object.keys(b.devDependencies).length&&Object.entries(a.devDependencies).every(([k,v])=>b.devDependencies[k]===v)?0:1)"; then
                 printf "fresh-pinned-directs\n" > /scratch/evidence/lock-mode.txt
                 # Trusted JSON-only transformation; no candidate module is loaded.
                 node --input-type=module <<"PIN"
@@ -241,7 +256,7 @@ jobs:
           fs.writeFileSync("/scratch/evidence/transitive-delta.json", JSON.stringify(delta, null, 2));
           CHECK_LOCK
               fi
-              if [[ $variant == candidate ]]; then cp package-lock.json /scratch/evidence/package-lock.json; fi
+              if [[ $variant == candidate ]]; then test "$(cat /scratch/evidence/lock-mode.txt)" = persisted; cp package-lock.json /scratch/evidence/package-lock.json; fi
               npm ci --ignore-scripts --no-audit --no-fund > /scratch/evidence/$variant-ci.log 2>&1
               npm ci --prefix server --ignore-scripts --no-audit --no-fund >> /scratch/evidence/$variant-ci.log 2>&1
               set +e
@@ -266,8 +281,9 @@ jobs:
               ./node_modules/.bin/vue-tsc --noEmit > /scratch/evidence/$variant-types.log 2>&1
               # Re-run the full root lifecycle offline using already provisioned npm cache.
               npm ci --offline --no-audit --no-fund > /scratch/evidence/$variant-full-ci.log 2>&1
+              if [[ $variant == candidate ]]; then cmp package-lock.json /scratch/evidence/package-lock.json; fi
               set +e
-              ./node_modules/.bin/eslint app.vue src --format json > /scratch/evidence/$variant-app-lint.json
+              ./node_modules/.bin/eslint app.vue --format json > /scratch/evidence/$variant-app-lint.json
               app_result=$?
               ./node_modules/.bin/eslint . --format json > /scratch/evidence/$variant-repo-lint.json
               repo_result=$?
@@ -277,7 +293,18 @@ jobs:
               printf "%s %s %s\n" "$app_result" "$repo_result" "$tree_result" > /scratch/evidence/$variant-status.txt
               test "$app_result" -le 1
               test "$repo_result" -le 1
-              test "$tree_result" = 0
+              node --input-type=module - "$variant" "$tree_result" <<"TREE"
+          import fs from "node:fs";
+          import assert from "node:assert/strict";
+          const [variant, code] = process.argv.slice(2);
+          const tree = JSON.parse(fs.readFileSync(`/scratch/evidence/${variant}-dependency-paths.json`, "utf8"));
+          if (variant === "baseline" && code === "1") {
+            assert.deepEqual(tree.problems, ["invalid: eslint@8.57.1 /scratch/source/baseline/node_modules/eslint"]);
+          } else {
+            assert.equal(code, "0");
+            assert.equal((tree.problems || []).length, 0);
+          }
+          TREE
               ./node_modules/.bin/eslint --print-config app.vue > /scratch/evidence/$variant-vue-config.json
               ./node_modules/.bin/eslint --print-config src/settings.ts > /scratch/evidence/$variant-ts-config.json
               printf "<script setup lang=\"ts\">const invalid: = ;</script>\n" > eslint30-malformed.vue
@@ -288,6 +315,10 @@ jobs:
               set -e
               test "$malformed_result" = 1
               rm eslint30-malformed.vue src/eslint30-malformed.ts
+              if [[ $variant == candidate ]]; then
+                ./node_modules/.bin/eslint-config-inspector build > /scratch/evidence/candidate-inspector-build.log 2>&1
+                test -s dist/__eslint-config-inspector/index.html
+              fi
             done
           '
           "${worker[@]}" --network none "$image" node --input-type=module -e '
@@ -335,7 +366,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
-          name: eslint30-qualification-${{ github.sha }}
+          name: eslint30-qualification-${{ matrix.name }}-${{ github.sha }}
           path: evidence/
           if-no-files-found: error
           retention-days: 7
