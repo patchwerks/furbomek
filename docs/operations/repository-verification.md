@@ -61,14 +61,29 @@ independently enforced policy boundary or required-check protection against a
 candidate changing the workflow. Independent workflow review remains necessary;
 no secrets are supplied to these jobs.
 
-**Current bootstrap gate:** accepted main `9aa7546` includes the merged PR #22
-helpers, reconciled into this candidate without changing their accepted contents.
-The former missing-helper bootstrap blocker is resolved. Full media/legacy
-Docker/proxy runtime qualification using those accepted helpers remains pending;
-helper availability and unit tests do not establish that result. Never fall back
+**Current bootstrap gate — observed 2026-10-31:** PR #31's scratch-lifetime
+correction is merged. The [fresh accepted-base run 41214219543](https://github.com/patchwerks/furbomek/actions/runs/41214219543)
+used PR head `a267004fa040509dbdaad8c339cd60719f8f0dfc`, synthetic merge checkout
+`a56325a2f29d1806d6779e691e954fba81b99822`, and accepted helpers from
+`c80e1bee0144c1844047e78c46e32f855b22d309`. Native safety passed all 93 checks
+(kernel 44, frame 24, integration 25). Both media and legacy advanced past the
+direct-egress denial, forbidden proxy-host rejection and allowed PyPI request,
+then failed with `cp: cannot create directory '/scratch/source': Permission denied`
+before dependency installation or candidate execution. Dispatcher, media and
+Nuxt qualification did not run. The accepted helper's scratch-permission failure
+is addressed separately in [PR #33](https://github.com/patchwerks/furbomek/pull/33).
+Its [storage probe 41214876308](https://github.com/patchwerks/furbomek/actions/runs/41214876308)
+at helper head `fab5c3071df85f2be2e3e2ecac7abe978be904c3` measured the failure
+on Docker 28.0.4 with the pinned Python and Node images: default volume mounts
+produced scratch ownership/mode `0:0:755` and denied writes; `volume-nocopy`
+preserved `1000:1000:700`, successful writes and markers across worker phases.
+Cleanup was verified, and all nine worker fixtures passed with zero skips.
+This qualifies the bounded storage correction and worker fixtures, not full
+media/Nuxt execution. PR #33 must receive independent acceptance and merge
+before a fresh full accepted-base rerun. PR #18 remains draft. Never fall back
 to candidate helpers or treat this PR's own workflow results as independent
-policy approval. The accepted helper fixture suite contains 28 tests: fifteen
-proxy, seven worker and six exact-uv provisioning regressions. The dispatcher
+policy approval. The accepted helper fixture suite contains 30 tests: fifteen
+proxy, nine worker and six exact-uv provisioning regressions. The dispatcher
 runs its eleven CLI tests plus the fifteen proxy tests; it does not run that
 entire helper suite.
 
@@ -180,6 +195,10 @@ versions and counts. They do not qualify the current accepted-helper runtime.
 
 ## Changelog
 
+- 2026-10-31: updated the accepted helper fixture count after PR #31 and recorded
+  the fresh accepted-base run's native pass and media/legacy scratch-permission
+  failure before candidate execution. Linked PR #33's measured storage correction;
+  independent acceptance and full media/legacy qualification remain open.
 - 2026-10-30: added isolated media/legacy provisioning and offline execution after
   independent review; retained all existing product checks and explicit coverage gaps.
 - 2026-10-30 review follow-up: reconciled accepted main's helpers, documented
