@@ -175,14 +175,31 @@ import {mergeDeep} from "@unocss/core";
 const {modelValue} = defineProps(['modelValue']) as { modelValue: Settings };
 const emit = defineEmits(['update:modelValue']);
 
-const model = ref<Settings>(mergeDeep(defaultSettings, modelValue));
+// Settings are JSON-persisted values. Detach defaults, parent props and emitted
+// snapshots so a later edit cannot mutate the parent's previous provider state.
+const snapshot = (value: Settings): Settings => JSON.parse(JSON.stringify(value));
+const normalized = (value: Settings): Settings => snapshot(mergeDeep(defaultSettings, value));
+const serialized = (value: Settings) => JSON.stringify(value, (_key, entry) =>
+  entry && typeof entry === 'object' && !Array.isArray(entry)
+    ? Object.fromEntries(Object.keys(entry).sort().map(key => [key, entry[key]]))
+    : entry);
+const model = ref<Settings>(normalized(modelValue));
 
-watch(modelValue, (modelValue) => {
-  model.value = mergeDeep(defaultSettings, modelValue) as Settings
+watch(() => modelValue, (value) => {
+  const next = normalized(value);
+  if (serialized(next) === serialized(model.value)) {
+    // A partial replacement may normalize to the current local value; still
+    // complete the parent's missing fields once without replacing local state.
+    if (serialized(next) !== serialized(value)) emit('update:modelValue', snapshot(next));
+    return;
+  }
+  model.value = next;
 }, {deep: true});
 
-watch(model, () => {
-  emit('update:modelValue', model.value)
+watch(model, (value) => {
+  // Compare values, not references: a parent echo must not start another merge.
+  if (serialized(value) === serialized(modelValue)) return;
+  emit('update:modelValue', snapshot(value));
 }, {deep: true});
 
 const playHtEngines = [

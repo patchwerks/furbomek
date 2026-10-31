@@ -1,5 +1,6 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
+  srcDir: '.',
   devtools: {enabled: false},
   modules: ['@bootstrap-vue-next/nuxt', "@nuxt/eslint"],
   css: ['bootstrap/dist/css/bootstrap.min.css'],
