@@ -263,6 +263,9 @@ accepted main `26f4bdb` leaves those helper/test source files unchanged.
 
 ## Changelog
 
+- 2026-11-01: added the bounded Godot staging-permissions correction and offline
+  executable preflight; recorded the observed failure separately from pending
+  Linux permission-probe and full media qualification evidence.
 - 2026-10-30: corrected scratch mount lifetime for issue #4 / PR #31; recorded
   the observed product-run failure, fixed storage probe and 30-test Linux fixture
   evidence. Full worker qualification still requires independent acceptance.
@@ -323,3 +326,35 @@ acceptance. Independent exact-head acceptance and publication on accepted main
 must precede another PR #18 product run using accepted-base helpers. These
 results qualify the bounded storage correction and worker fixtures, not full
 media/Nuxt products, registry provisioning, live integration or deployment.
+
+## Godot staging permissions correction — 2026-11-01
+
+**Observed:** [run 41219748878](https://github.com/patchwerks/furbomek/actions/runs/41219748878)
+verified the pinned Godot download hash and passed 26 dispatcher tests, then
+stopped because Godot was unavailable. These partial results are not a full
+media verification pass.
+
+**Hypothesis pending a Linux probe:** `mktemp -d` creates the host staging
+directory with mode 0700. Binding that directory read-only at `/tools` does not
+give the UID 1000 worker permission to traverse it. The correction applies mode
+0755 only to the exact staging directory and the exact pinned Godot executable,
+after checksum verification and extraction. It does not recursively change
+permissions. An explicit `test -x` inside the network-none worker fails with a
+Godot-specific diagnostic before candidate paths or code are touched.
+
+The existing fake-orchestration regression now creates a real private temporary
+directory under a restrictive umask, writes a fixed fake extracted executable,
+and observes filesystem modes at the recorded offline launch. It requires the
+directory to start at 0700 and both directory and executable to reach 0755;
+an unrelated sentinel must remain 0600. The fixture invokes the actual chmod,
+but no candidate code, real Docker command, network request or Godot executable.
+**Measured locally:** all nine worker tests passed with Python 3.12.16 in a
+credential-free sandbox denying network access, private-home/device reads and
+source writes. This is local fixture evidence; the Linux permission probe and
+full media qualification remain pending.
+
+All image/download pins, UID 1000, dropped capabilities, no-new-privileges,
+read-only mounts and network-none candidate execution remain unchanged.
+Accepted-base helper selection remains mandatory. Linux probe evidence and
+independent exact-revision acceptance are still pending; the correction must be
+accepted and published before a separate full media run can qualify it.
