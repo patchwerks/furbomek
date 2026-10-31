@@ -265,7 +265,9 @@ accepted main `26f4bdb` leaves those helper/test source files unchanged.
 
 - 2026-11-01: prepared offline activation of the hash-verified build inputs and
   editable packages, with no-sync media execution and a fixed advisory Linux
-  handoff probe. Runtime qualification and independent acceptance are pending.
+  handoff probe. The fixed Linux probe and nine-worker fixtures passed at the
+  recorded code revision; full media qualification and independent acceptance
+  remain pending.
 
 - 2026-11-01: added the bounded Godot staging-permissions correction and offline
   executable preflight; recorded the observed failure, successful fixed Linux
@@ -418,8 +420,27 @@ backend. Containers and tmpfs scratch are removed and cleanup is checked.
 The workflow is advisory candidate-authored evidence, not authority to activate
 candidate helpers. Full helper/product qualification remains a separate gate.
 
-**Preparation status:** no probe result is claimed here. Independent review and
-publication of this helper revision must precede PR #18 consuming it. A subsequent
-accepted-base full media run must record its actual result and remaining failures.
-Dates in this section use the operator's Asia/Bangkok date; the referenced Actions
-log uses UTC (2026-10-31), which is the same operational session.
+**Measured at code head `79c7bde5c39029789cda2eeb2d6611a421e0b8c8`:**
+[fixed Linux probe run 41243341343, job 124661583185](https://github.com/patchwerks/furbomek/actions/runs/41243341343/job/124661583185)
+passed both requirement-file hash checks, observed the exact
+`ModuleNotFoundError: No module named 'hatchling'` negative control, installed the
+editable package after copying the prepared inputs, and emitted
+`OFFLINE_EDITABLE_IMPORT_PASSED` / `NO_SYNC_EDITABLE_CHANGE_PASSED`. Clearing
+no-sync then failed specifically on the absent replacement backend and emitted
+`EXPECTED_AUTOMATIC_SYNC_BACKEND_FAILURE`. The job completed its container/volume
+cleanup checks. This proves the bounded fixed-package handoff and no-sync behavior;
+it does not qualify the complete generic helper or media products.
+
+The separate [worker-fixture job 124661583277](https://github.com/patchwerks/furbomek/actions/runs/41243341326/job/124661583277)
+passed **9 tests with zero skips** in the existing credential-free, non-root,
+read-only, network-none container. The existing Godot access and storage probes
+also passed at that head. All four [CodeQL analyses](https://github.com/patchwerks/furbomek/actions/runs/41243339115)
+and the aggregate check passed. Local YAML, Python AST, outer/embedded shell syntax and
+whitespace checks passed. The local confined unit attempt stopped at
+`sandbox_apply: Operation not permitted` before Python started; no local unit or
+runtime pass is claimed.
+
+Independent exact-head review and publication of this helper revision must precede
+PR #18 consuming it. A subsequent accepted-base full media run must record its
+actual result and remaining failures. Dates in this section use the operator's
+Asia/Bangkok date; Actions logs use UTC (2026-10-31), the same operational session.
