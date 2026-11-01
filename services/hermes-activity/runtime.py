@@ -370,6 +370,9 @@ def _bind_hermes(config: RunConfig, snapshot: RuntimeSnapshot, has_history: bool
         if (metadata.st_dev, metadata.st_ino) != (hermes.device, hermes.inode):
             msg = "Hermes source identity changed across restart"
             raise ValueError(msg)
+        if metadata.st_size < snapshot.cursor.offset:
+            msg = "Hermes source continuity lost across restart"
+            raise ValueError(msg)
         return snapshot
     if config.hermes_session is None:
         return snapshot

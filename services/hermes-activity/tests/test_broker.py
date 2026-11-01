@@ -483,8 +483,8 @@ def test_bound_observation_failure_cannot_recover(
         broker.reader.close()
     config.spool.touch(mode=0o600)
     config.spool.chmod(0o600)
-    if failure in {"missing", "replace"}:
-        with pytest.raises(ValueError, match="identity"):
+    if failure in {"missing", "replace", "truncate"}:
+        with pytest.raises(ValueError, match=r"identity|continuity"):
             ActivityBroker(config, clock)
         return
     restarted = ActivityBroker(config, clock)
@@ -496,6 +496,33 @@ def test_bound_observation_failure_cannot_recover(
         assert restarted.snapshot.privacy.holds == frozenset({HoldKey(SESSION, CALL)})
     finally:
         restarted.reader.close()
+
+
+def test_bound_restart_rejects_same_inode_truncated_below_persisted_cursor(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    clock = FixedClock()
+    config = _bound_config(tmp_path, monkeypatch, clock)
+    broker = ActivityBroker(config, clock)
+    try:
+        assert observer.on_session_start(session_id=SESSION) is None
+        assert observer.on_pre_llm_call(session_id=SESSION) is None
+        document = _bound_public_step(broker, NOW + 1)
+        assert document.payload.status == "THINKING"
+        checkpoint = load_checkpoint(config.out_dir / "activity.state.json")
+        assert checkpoint is not None
+        assert checkpoint.cursor_offset > 0
+        assert checkpoint.cursor_offset == broker.snapshot.cursor.offset
+        assert checkpoint.cursor_inode == broker.snapshot.cursor.inode
+    finally:
+        broker.reader.close()
+    original = config.spool.stat()
+    config.spool.write_bytes(b"")
+    truncated = config.spool.stat()
+    assert (truncated.st_dev, truncated.st_ino) == (original.st_dev, original.st_ino)
+    assert truncated.st_size == 0
+    with pytest.raises(ValueError, match="continuity"):
+        ActivityBroker(config, clock)
 
 
 def _damage_bound_source(config: RunConfig, failure: str) -> None:
