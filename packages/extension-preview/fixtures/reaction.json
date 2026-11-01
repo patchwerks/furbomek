@@ -1,0 +1,37 @@
+{
+  "schemaVersion": 1,
+  "packId": "reaction-example",
+  "packVersion": "0.1.0",
+  "previewContractVersion": 1,
+  "capabilities": [
+    "presentation.expression",
+    "presentation.reaction"
+  ],
+  "durationMs": 4000,
+  "events": [
+    {
+      "seq": 1,
+      "atMs": 0,
+      "kind": "presentation.expression",
+      "value": "neutral"
+    },
+    {
+      "seq": 2,
+      "atMs": 1000,
+      "kind": "presentation.expression",
+      "value": "curious"
+    },
+    {
+      "seq": 3,
+      "atMs": 1000,
+      "kind": "presentation.reaction",
+      "value": "acknowledge"
+    },
+    {
+      "seq": 4,
+      "atMs": 3000,
+      "kind": "presentation.expression",
+      "value": "neutral"
+    }
+  ]
+}
