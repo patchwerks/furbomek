@@ -77,3 +77,26 @@ asset, labelled fixture, interruption/expiry, literal HTML text, no global live
 instance and no page errors. All displayed CodeQL checks also passed.
 `npm run generate` is not included in the reused lint workflow and has not been
 freshly run for this cleanup. Final corrected-head qualification remains pending.
+
+## Qualification update — 2026-11-01
+
+Corrected source head `e9fe7d6a31a5dee6af1cb5462a32c4c6a3cd2931` passed
+[41292033486](https://github.com/patchwerks/furbomek/actions/runs/41292033486)
+on both Linux Node22.22.3/npm10.9.8 and Node26.7.0/npm11.19.0. Actual artifact
+JSON records **zero errors, warnings and fatal diagnostics** for both `app.vue`
+and the whole repository on both versions. Each `candidate-status.txt` is
+`0 0 0`: app lint, repository lint and dependency-tree inspection all exited0.
+The previous app11/18 and repository36/23 debt is removed without suppression.
+
+Both jobs completed production build with configured type checks, standalone
+`vue-tsc --noEmit`, persisted-lock dependency installation and the full offline
+`npm ci` including install hooks. Malformed parsing and real self-import/constant
+loop enforcement fixtures passed; the inspector static build passed. Effective
+rule comparison found no enabled baseline rule with reduced severity. This reused
+workflow compares its pinned historical ESLint8 base, not a fresh checkout of the
+source base `cdd9147`; its candidate evidence binds to the exact source head above.
+
+Corrected-head [avatar run41288204852](https://github.com/patchwerks/furbomek/actions/runs/41288204852)
+also passed the existing offline test/browser suite. No additional source change
+is made in this evidence update. Exact final PR-head verification and independent
+review remain required before merge; no merge or deployment is performed here.
