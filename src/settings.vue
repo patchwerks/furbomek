@@ -7,8 +7,8 @@
       <BFormGroup label="Assistant instructions" description="Override default assistant instructions">
         <BFormTextarea
             v-model="localAssistantInstructions"
-            @blur="updateAssistantInstructions"
             rows="10"
+            @blur="updateAssistantInstructions"
         />
       </BFormGroup>
     </BTab>
@@ -42,16 +42,16 @@
         <div class="elements-container">
           <div v-for="(keyword, index) in model.deepgram.keywords" :key="index" class="element-container">
             <BInputGroupText variant="primary" class="element-badge">{{ keyword }}</BInputGroupText>
-            <BButton variant="danger" @click="removeKeyword(index)" class="delete-element-button">
+            <BButton variant="danger" class="delete-element-button" @click="removeKeyword(index)">
               ⨯
             </BButton>
           </div>
           <BFormInput
               v-if="isAddingNewKeyword"
               v-model="newKeyword"
+              class="add-element-input"
               @keyup.enter="addKeyword"
               @keyup.esc="toggleAddingNewKeyword"
-              class="add-element-input"
           />
           <BButton v-else variant="primary" @click="toggleAddingNewKeyword">
             Add Keyword
@@ -63,7 +63,7 @@
         <div class="elements-container">
           <div v-for="(word, index) in model.deepgram.replace_words" :key="index" class="element-container">
             <BInputGroupText variant="primary" class="element-badge">{{ word }}</BInputGroupText>
-            <BButton variant="danger" @click="removeReplaceWord(index)" class="delete-element-button">
+            <BButton variant="danger" class="delete-element-button" @click="removeReplaceWord(index)">
               ⨯
             </BButton>
           </div>
@@ -71,9 +71,9 @@
               v-if="isAddingNewReplaceWord"
               v-model="newReplaceWord"
               placeholder="word:replace-word"
+              class="add-element-input"
               @keyup.enter="addReplaceWord"
               @keyup.esc="toggleAddingNewReplaceWord"
-              class="add-element-input"
           />
           <BButton v-else variant="primary" @click="toggleAddingNewReplaceWord">
             Add Replace Word
@@ -171,6 +171,8 @@
 <script setup lang="ts">
 import {defaultSettings, type Settings} from "~/src/settings.js";
 import {mergeDeep} from "@unocss/core";
+
+defineOptions({name: 'ProviderSettings'});
 
 const {modelValue} = defineProps(['modelValue']) as { modelValue: Settings };
 const emit = defineEmits(['update:modelValue']);

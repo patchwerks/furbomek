@@ -1,17 +1,18 @@
 export abstract class ChatEvent {
+  declare readonly message?: string;
 }
 
 export class ChatCreatedEvent extends ChatEvent {
 }
 
 export class ChatMessageEvent extends ChatEvent {
-  constructor(public message: string) {
+  constructor(public override message: string) {
     super();
   }
 }
 
 export class ChatDeltaEvent extends ChatEvent {
-  constructor(public message: string) {
+  constructor(public override message: string) {
     super();
   }
 }
@@ -25,7 +26,7 @@ interface FileReaderEventMap {
 export abstract class AbstractChat {
   private listeners: { [type: string]: ((event: ChatEvent) => void)[] } = {};
 
-  start(assistantId: string) {
+  start(_assistantId: string) {
     this.run()
   }
 
@@ -34,14 +35,14 @@ export abstract class AbstractChat {
 
   abstract send(content: string): void;
 
-  preSend(content: string): void {
+  preSend(_content: string): void {
   }
 
   protected abstract run(): void;
 
 
-  on<K extends keyof FileReaderEventMap>(type: K, listener: (ev: FileReaderEventMap[K]) => any): void;
-  on(type: string, listener: (event: ChatEvent) => any): void
+  on<K extends keyof FileReaderEventMap>(type: K, listener: (ev: FileReaderEventMap[K]) => void): void;
+  on(type: string, listener: (event: ChatEvent) => void): void
   on(type: string, listener: (event: ChatEvent) => void): void {
     if (!this.listeners[type]) {
       this.listeners[type] = [];
