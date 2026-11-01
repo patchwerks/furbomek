@@ -79,11 +79,11 @@ export class OpenAIAssistantChat extends AbstractChat {
       this.currentRun?.controller.abort();
       this.currentRun = this.client.beta.threads.runs
         .stream(this.thread.id, runBody)
-        .on('textCreated', (text) => {
+        .on('textCreated', () => {
           this.emit('create', new ChatCreatedEvent());
         })
         .on('textDelta', (textDelta) => {
-          textDelta.value && this.emit('delta', new ChatDeltaEvent(textDelta.value));
+          if (textDelta.value) this.emit('delta', new ChatDeltaEvent(textDelta.value));
         })
         .on('textDone', (text) => {
           this.emit('message', new ChatMessageEvent(text.value));
@@ -103,7 +103,7 @@ export class OpenAIAssistantChat extends AbstractChat {
 
   override async stop() {
     this.currentRun?.controller.abort();
-    this.thread && this.client.beta.threads.del(this.thread.id);
+    if (this.thread) this.client.beta.threads.del(this.thread.id);
   }
 
   async getAssistants() {
