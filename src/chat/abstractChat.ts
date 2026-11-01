@@ -6,13 +6,13 @@ export class ChatCreatedEvent extends ChatEvent {
 }
 
 export class ChatMessageEvent extends ChatEvent {
-  constructor(public message: string) {
+  constructor(public override message: string) {
     super();
   }
 }
 
 export class ChatDeltaEvent extends ChatEvent {
-  constructor(public message: string) {
+  constructor(public override message: string) {
     super();
   }
 }

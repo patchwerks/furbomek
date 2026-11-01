@@ -60,3 +60,20 @@ not exercised. This software cleanup does not qualify their lifecycle behavior.
 
 Revert this source/doc change on an accepted revision; retain PR35's supported
 ESLint dependency stack and configuration. No installed runtime is changed.
+
+## Changelog — 2026-11-01
+
+First qualification [41287125795](https://github.com/patchwerks/furbomek/actions/runs/41287125795)
+on head `1c3fda4935bf43ff1147cd209947aeab1f955da9` reached the production build
+on both Node22.22.3 and Node26.7.0, then failed with TS4115 on the two message
+constructor parameter properties. Explicit type-only `override` modifiers correct
+that declaration requirement; constructors and emitted properties stay the same.
+Lint had not run for the candidate at this failure, so no candidate count is
+claimed from that run. This is focused correction attempt one.
+
+The same head passed [avatar fixtures 41287127067](https://github.com/patchwerks/furbomek/actions/runs/41287127067):
+15 unit tests, zero failures, and the real offline browser checks for the bundled
+asset, labelled fixture, interruption/expiry, literal HTML text, no global live
+instance and no page errors. All displayed CodeQL checks also passed.
+`npm run generate` is not included in the reused lint workflow and has not been
+freshly run for this cleanup. Final corrected-head qualification remains pending.
