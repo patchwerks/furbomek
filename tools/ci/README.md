@@ -263,6 +263,12 @@ accepted main `26f4bdb` leaves those helper/test source files unchanged.
 
 ## Changelog
 
+- 2026-11-01: prepared offline activation of the hash-verified build inputs and
+  editable packages, with no-sync media execution and a fixed advisory Linux
+  handoff probe. The fixed Linux probe and nine-worker fixtures passed at the
+  recorded code revision; full media qualification and independent acceptance
+  remain pending.
+
 - 2026-11-01: added the bounded Godot staging-permissions correction and offline
   executable preflight; recorded the observed failure, successful fixed Linux
   permission probe, Linux worker fixtures and local mutation regression.
@@ -376,3 +382,79 @@ read-only mounts and network-none candidate execution remain unchanged.
 Accepted-base helper selection remains mandatory. Independent exact-revision
 acceptance is still pending; the correction must be
 accepted and published before a separate full media run can qualify it.
+
+
+## Offline build-input handoff correction — 2026-11-01
+
+**Observed:** accepted helper `8fab919eda1db86cf5e092cd54a364ff062eaf48`
+in [run 41242539000, media job 124659207560](https://github.com/patchwerks/furbomek/actions/runs/41242539000/job/124659207560)
+installed hashed Hatchling 1.27.0 and its build dependencies into
+`/scratch/build-inputs`, passed Godot access and 26 dispatcher regressions, then
+failed offline build-system resolution for the editable embodiment gateway.
+Those prepared files had not been installed into the service environments;
+the gate's first `uv run --frozen` attempted isolated build resolution instead.
+No media product pass follows from the dispatcher pass.
+
+The correction follows the accepted character-foundation workflow: only after
+entering the network-none worker, copy the hashed build inputs into the
+embodiment-gateway and stream-supervisor environments, install those two local
+editable packages with `--offline --no-deps --no-build-isolation`, then export
+`UV_NO_SYNC=1` before the unchanged dispatcher/media gate. Hermes-activity remains
+a linked environment without an editable build. Interpreter queries and editable
+hooks stay offline. `UV_NO_CONFIG=1` and `PYTHONNOUSERSITE=1` are explicit worker
+defaults; no-sync is confined to the offline media phase. Image/hash pins, users,
+capabilities, read-only mounts, network restrictions and accepted-base helper
+selection remain unchanged.
+
+The existing nine worker fixtures inspect the actual emitted container command
+and parse its nested offline shell. These are orchestration assertions, not
+proof that Hatchling builds work. The separate
+[fixed handoff probe](../../.github/workflows/ci-build-inputs-probe.yml) takes only
+requirement data from exact accepted `8fab919e`, checks their full file hashes,
+and prepares wheels using the fixed interpreter in a non-root container with no
+credentials, host home or candidate source. A fresh network-none phase creates
+one fixed tiny project, requires the specific missing-Hatchling negative failure,
+copies the prepared inputs, installs the editable package without build isolation,
+and checks live editable imports with no-sync despite an unavailable replacement
+backend. Containers and tmpfs scratch are removed and cleanup is checked.
+The workflow is advisory candidate-authored evidence, not authority to activate
+candidate helpers. Full helper/product qualification remains a separate gate.
+
+**Measured at code head `79c7bde5c39029789cda2eeb2d6611a421e0b8c8`:**
+[fixed Linux probe run 41243341343, job 124661583185](https://github.com/patchwerks/furbomek/actions/runs/41243341343/job/124661583185)
+passed both requirement-file hash checks, observed the exact
+`ModuleNotFoundError: No module named 'hatchling'` negative control, installed the
+editable package after copying the prepared inputs, and emitted
+`OFFLINE_EDITABLE_IMPORT_PASSED` / `NO_SYNC_EDITABLE_CHANGE_PASSED`. Clearing
+no-sync then failed specifically on the absent replacement backend and emitted
+`EXPECTED_AUTOMATIC_SYNC_BACKEND_FAILURE`. The job completed its container/volume
+cleanup checks. This proves the bounded fixed-package handoff and no-sync behavior;
+it does not qualify the complete generic helper or media products.
+
+The separate [worker-fixture job 124661583277](https://github.com/patchwerks/furbomek/actions/runs/41243341326/job/124661583277)
+passed **9 tests with zero skips** in the existing credential-free, non-root,
+read-only, network-none container. The existing Godot access and storage probes
+also passed at that head. All four [CodeQL analyses](https://github.com/patchwerks/furbomek/actions/runs/41243339115)
+and the aggregate check passed. Local YAML, Python AST, outer/embedded shell syntax and
+whitespace checks passed. The local confined unit attempt stopped at
+`sandbox_apply: Operation not permitted` before Python started; no local unit or
+runtime pass is claimed.
+
+Independent exact-head review and publication of this helper revision must precede
+PR #18 consuming it. A subsequent accepted-base full media run must record its
+actual result and remaining failures. Dates in this section use the operator's
+Asia/Bangkok date; Actions logs use UTC (2026-10-31), the same operational session.
+
+
+### Probe determinism follow-up
+
+The evidence-only head `1fe8099b234451fc30674ff4e1cf973f9a3b0054`
+triggered a fresh [probe run 41243528798](https://github.com/patchwerks/furbomek/actions/runs/41243528798/job/124662142466).
+Its missing-Hatchling control and first editable import passed, but the second
+same-size source-edit import failed its assertion. The fixed fixture used
+`python -I`, which ignores `PYTHONDONTWRITEBYTECODE`; rewriting a same-size module
+within one timestamp interval can therefore reuse stale bytecode. The earlier
+passing run remains recorded, but is not evidence that this fixture was deterministic.
+The proposed probe correction passes `-B` explicitly and changes the edited
+module's size. Production helper code and all isolation/build-input controls are
+unchanged. A fresh corrected-head probe is required; no pass is claimed yet.
