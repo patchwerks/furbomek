@@ -1,0 +1,134 @@
+name: Fixed offline build inputs probe
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - .github/workflows/ci-build-inputs-probe.yml
+      - tools/ci/worker.sh
+      - tools/tests/test_ci_worker.py
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/ci-build-inputs-probe.yml
+      - tools/ci/worker.sh
+      - tools/tests/test_ci_worker.py
+permissions:
+  contents: read
+jobs:
+  offline-build-inputs:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          # Fixed accepted requirement data, never PR-selected inputs or code.
+          ref: 8fab919eda1db86cf5e092cd54a364ff062eaf48
+          persist-credentials: false
+          path: accepted
+      - name: Prove missing backend and offline editable activation
+        shell: bash
+        run: |
+          set -euo pipefail
+          python_image=python:3.12.11-bookworm@sha256:1b48a1b13ec678be8d84974541cc007d4367aaf01f985231daad1a940106efc0
+          # Check the exact accepted data before mounting only these two files.
+          printf '%s  %s\n' \
+            957962c1e989609d3a15e7bed65dcd394b224eef297bfc9a154146891625cb16 accepted/tools/ci/bootstrap-requirements.txt \
+            3da3b9055958e002237bcd51cbd3f627487677ce129b103db070592e13245602 accepted/tools/ci/build-requirements.txt | sha256sum --check
+          volume="build-inputs-$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT"
+          keeper="$volume-keeper"
+          cleanup() {
+            local rc=$?
+            trap - EXIT
+            docker rm -f "$keeper" >/dev/null 2>&1 || true
+            docker volume rm "$volume" >/dev/null 2>&1 || true
+            if docker container inspect "$keeper" >/dev/null 2>&1 || docker volume inspect "$volume" >/dev/null 2>&1; then
+              echo 'Probe cleanup failed' >&2
+              exit 1
+            fi
+            exit "$rc"
+          }
+          trap cleanup EXIT
+          docker pull "$python_image"
+          docker volume create --driver local --opt type=tmpfs --opt device=tmpfs \
+            --opt o=size=512m,uid=1000,gid=1000,mode=0700 "$volume"
+          mount="type=volume,source=$volume,target=/scratch,volume-nocopy"
+          docker run -d --name "$keeper" --network none --read-only \
+            --user 1000:1000 --cap-drop ALL --security-opt no-new-privileges \
+            --cpus 0.1 --memory 32m --pids-limit 8 --mount "$mount" \
+            "$python_image" sleep infinity
+          worker=(docker run --rm --read-only --user 1000:1000
+                  --cap-drop ALL --security-opt no-new-privileges
+                  --cpus 2 --memory 512m --pids-limit 64
+                  --tmpfs /tmp:rw,exec,nosuid,size=128m
+                  --mount "$mount" --workdir /scratch)
+          # Only fixed trusted interpreter/package tools execute while online.
+          # No candidate tree, host home, credentials or socket is mounted.
+          "${worker[@]}" --network bridge \
+            --mount "type=bind,source=$GITHUB_WORKSPACE/accepted/tools/ci/bootstrap-requirements.txt,target=/bootstrap.txt,readonly" \
+            --mount "type=bind,source=$GITHUB_WORKSPACE/accepted/tools/ci/build-requirements.txt,target=/build.txt,readonly" \
+            "$python_image" env -i PATH=/usr/local/bin:/usr/bin:/bin HOME=/tmp TMPDIR=/tmp \
+            UV_NO_CONFIG=1 UV_PYTHON_DOWNLOADS=never PYTHONNOUSERSITE=1 \
+            bash -euc '
+              test "$(id -u):$(id -g)" = 1000:1000
+              test ! -e /var/run/docker.sock
+              python -I -m venv /scratch/bootstrap
+              /scratch/bootstrap/bin/pip --isolated install --require-hashes --only-binary=:all: --no-deps -r /bootstrap.txt
+              /scratch/bootstrap/bin/uv --no-config pip install --python /usr/local/bin/python3 \
+                --only-binary=:all: --require-hashes --no-deps --link-mode copy \
+                --target /scratch/build-inputs -r /build.txt
+              python -I -m venv /scratch/project-env
+            '
+          "${worker[@]}" --network none "$python_image" \
+            env -i PATH=/scratch/bootstrap/bin:/usr/local/bin:/usr/bin:/bin HOME=/tmp TMPDIR=/tmp \
+            UV_NO_CONFIG=1 UV_OFFLINE=1 UV_PYTHON_DOWNLOADS=never PYTHONNOUSERSITE=1 PYTHONDONTWRITEBYTECODE=1 \
+            UV_CACHE_DIR=/scratch/empty-offline-cache \
+            bash -euc '
+              test "$(id -u):$(id -g)" = 1000:1000
+              test ! -e /var/run/docker.sock
+              mkdir -p /scratch/project/fixed_probe /scratch/empty-offline-cache
+              cd /scratch/project
+              cat > pyproject.toml <<"PROJECT"
+          [build-system]
+          requires = ["hatchling==1.27.0"]
+          build-backend = "hatchling.build"
+          [project]
+          name = "fixed-probe"
+          version = "0.0.1"
+          requires-python = ">=3.12"
+          [tool.hatch.build.targets.wheel]
+          packages = ["fixed_probe"]
+          PROJECT
+              printf "VALUE = 731\n" > fixed_probe/__init__.py
+              ln -s /scratch/project-env .venv
+              # The baseline has the prepared target but no backend in its env.
+              if uv --no-config pip install --python .venv/bin/python --offline --no-deps \
+                  --no-build-isolation -e . > /scratch/missing-backend.log 2>&1; then
+                echo "Missing-backend negative control unexpectedly passed" >&2
+                exit 1
+              fi
+              cat /scratch/missing-backend.log
+              grep -E "ModuleNotFoundError: No module named .hatchling." /scratch/missing-backend.log
+              echo EXPECTED_MISSING_HATCHLING_BACKEND
+              site=$(".venv/bin/python" -I -c "import sysconfig; print(sysconfig.get_path(\"purelib\"))")
+              cp -R /scratch/build-inputs/. "$site/"
+              uv --no-config pip install --python .venv/bin/python --offline --no-deps --no-build-isolation -e .
+              # Build the lock as data offline. Frozen uv run would otherwise try
+              # to resync/rebuild after this metadata change, using an absent backend.
+              uv --no-config lock --offline
+              sed -i "s/hatchling==1.27.0/absent-probe-backend==0.0.1/" pyproject.toml
+              export UV_NO_SYNC=1
+              uv run --frozen python -I -B -c "import fixed_probe; assert fixed_probe.VALUE == 731; print(\"OFFLINE_EDITABLE_IMPORT_PASSED\")"
+              # Prove the successful import used the installed editable project.
+              # -I ignores PYTHONDONTWRITEBYTECODE; pass -B explicitly and change
+              # source size so same-second mtime caching cannot mask this edit.
+              printf "VALUE = 73200\n" > fixed_probe/__init__.py
+              uv run --frozen python -I -B -c "import fixed_probe; assert fixed_probe.VALUE == 73200; print(\"NO_SYNC_EDITABLE_CHANGE_PASSED\")"
+              if env -u UV_NO_SYNC uv run --frozen python -I -B -c "import fixed_probe" > /scratch/sync-control.log 2>&1; then
+                echo "Automatic-sync negative control unexpectedly passed" >&2
+                exit 1
+              fi
+              cat /scratch/sync-control.log
+              grep -F absent-probe-backend /scratch/sync-control.log
+              grep -F "Failed to resolve requirements from" /scratch/sync-control.log
+              echo EXPECTED_AUTOMATIC_SYNC_BACKEND_FAILURE
+            '
