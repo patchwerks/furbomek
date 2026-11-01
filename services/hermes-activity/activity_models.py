@@ -77,6 +77,22 @@ class ActivityEvent(BaseModel):
     payload: ActivityPayload
 
 
+class HermesState(BaseModel):
+    """Private durable authority for exactly one observed Hermes run."""
+
+    model_config: ClassVar[ConfigDict] = ConfigDict(frozen=True, strict=True, extra="forbid")
+
+    session: str = Field(min_length=1, max_length=64, pattern=r"^[A-Za-z0-9][A-Za-z0-9_.-]*$")
+    spool: str = Field(min_length=1)
+    device: int = Field(default=0, ge=0)
+    inode: int = Field(default=0, ge=0)
+    observed_ms: int = Field(default=0, ge=0)
+    clock_ms: int = Field(default=0, ge=0)
+    started: bool = False
+    ended: bool = False
+    failed: bool = False
+
+
 @dataclass(frozen=True, slots=True)
 class BrokerState:
     """Immutable reduction state retained by the broker checkpoint."""
@@ -91,6 +107,7 @@ class BrokerState:
     session_open: bool
     last_event_ms: int
     character: CharacterState | None = None
+    hermes: HermesState | None = None
 
     @classmethod
     def initial(cls, now_ms: int) -> BrokerState:

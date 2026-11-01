@@ -245,9 +245,12 @@ def on_session_start(*, session_id: str = "", **_ignored: JsonValue) -> None:
     _emit(EventDraft("session_start", _bounded(session_id, 64)))
 
 
-def on_session_end(*, session_id: str = "", **_ignored: JsonValue) -> None:
-    """Record a session end."""
-    _emit(EventDraft("session_end", _bounded(session_id, 64)))
+def on_session_end(
+    *, session_id: str = "", failed: JsonValue = False, interrupted: JsonValue = False, **_ignored: JsonValue
+) -> None:
+    """Record only bounded Boolean end metadata, never raw reasons."""
+    phase = "error" if failed is True else "interrupted" if interrupted is True else "ok"
+    _emit(EventDraft("session_end", _bounded(session_id, 64), phase=phase))
 
 
 def on_pre_approval(*, session_key: str = "", **_ignored: JsonValue) -> None:

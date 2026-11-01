@@ -46,10 +46,12 @@ class IncrementalSpoolReader:
     _discarding_oversize: bool
     _poll_gap: bool
     _poll_uncertain: bool
+    require_private: bool
 
-    def __init__(self, path: Path, snapshot: CursorSnapshot) -> None:
+    def __init__(self, path: Path, snapshot: CursorSnapshot, *, require_private: bool = False) -> None:
         """Open lazily so a missing spool remains a recoverable boundary fact."""
         self.path = path
+        self.require_private = require_private
         self._fd = None
         self._inode = snapshot.inode
         self._offset = max(0, snapshot.offset)
@@ -66,10 +68,25 @@ class IncrementalSpoolReader:
         self._poll_uncertain = False
         self._consume_failure_marker()
         readable = self._ensure_open()
+        if readable and self.require_private and not self._private_source_authorized():
+            self._poll_uncertain = True
+            readable = False
         if readable:
             self._drain_current(events)
-            if self._path_rotated():
-                readable = self._switch_to_new_path(events)
+            if self.require_private and not self._private_source_authorized():
+                self._poll_gap = True
+                self._poll_uncertain = True
+                readable = False
+                events.clear()
+                self.close()
+            elif self._path_rotated():
+                if self.require_private:
+                    self._poll_gap = True
+                    self._poll_uncertain = True
+                    readable = False
+                    self.close()
+                else:
+                    readable = self._switch_to_new_path(events)
         return PollResult(
             tuple(events), CursorSnapshot(self._inode, self._offset), readable, self._poll_gap, self._poll_uncertain
         )
@@ -81,6 +98,9 @@ class IncrementalSpoolReader:
         except FileNotFoundError:
             return
         except OSError:
+            self._poll_uncertain = True
+            return
+        if self.require_private:
             self._poll_uncertain = True
             return
         try:
@@ -105,7 +125,11 @@ class IncrementalSpoolReader:
                 return False
             return True
         try:
-            self._fd = self.path.open("rb")
+            if self.require_private:
+                descriptor = os.open(self.path, os.O_RDONLY | os.O_NOFOLLOW | os.O_NONBLOCK)
+                self._fd = os.fdopen(descriptor, "rb")
+            else:
+                self._fd = self.path.open("rb")
             inode = os.fstat(self._fd.fileno()).st_ino
         except OSError:
             self._poll_gap = self._inode is not None
@@ -118,6 +142,9 @@ class IncrementalSpoolReader:
             self._read_offset = 0
             self._poll_gap = True
             self._poll_uncertain = True
+            if self.require_private:
+                self.close()
+                return False
         self._inode = inode
         return True
 
@@ -194,7 +221,7 @@ class IncrementalSpoolReader:
             line = self._pending[: newline + 1]
             self._pending = self._pending[newline + 1 :]
             self._offset += len(line)
-            event = parse_complete_line(line)
+            event = parse_complete_line(line, strict=self.require_private)
             if event is None or (event.kind == "character" and not self._character_source_authorized()):
                 self._poll_uncertain = True
             else:
@@ -221,3 +248,12 @@ class IncrementalSpoolReader:
             and not (source.st_mode & 0o077)
             and not (parent.st_mode & 0o077)
         )
+
+    def _private_source_authorized(self) -> bool:
+        """Recheck canonical path, permissions, descriptor identity and continuity."""
+        if not self._character_source_authorized() or self._fd is None:
+            return False
+        try:
+            return self.path == self.path.resolve() and os.fstat(self._fd.fileno()).st_size >= self._read_offset
+        except (OSError, RuntimeError):
+            return False

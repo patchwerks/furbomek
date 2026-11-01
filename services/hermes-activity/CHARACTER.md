@@ -174,3 +174,9 @@ the full non-live media gate and independent acceptance remain necessary. It
 does not satisfy #6 real Hermes lifecycle, #7 shared PCM/OBS speech, or #8 private
 soak. No live producer, physical audibility, hardware, deployment or public
 broadcast qualification is implied.
+
+
+The separate `--hermes-session` mode projects one bounded Hermes lifecycle and
+is mutually exclusive with `--character-session`. It ignores nested character
+presentation rows and retains its own version-3 private lifecycle authority.
+Neither mode adds speech, pixel capture, planning or actuation capability.

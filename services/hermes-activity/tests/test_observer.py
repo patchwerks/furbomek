@@ -5,10 +5,8 @@ import os
 from collections.abc import Callable
 from pathlib import Path
 import sys
-from typing import TYPE_CHECKING
 
-if TYPE_CHECKING:
-    import pytest
+import pytest
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "plugin"))
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
@@ -114,3 +112,108 @@ def test_lock_contention_returns_without_waiting_for_hermes(tmp_path: Path, monk
     finally:
         fcntl.flock(fd, fcntl.LOCK_UN)
         os.close(fd)
+
+
+@pytest.mark.parametrize("status", ["ok", "error"])
+def test_observer_lifecycle_spool_reader_integration(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, status: str
+) -> None:
+    # Synthetic offline lifecycle; not actual Hermes runtime qualification.
+    tmp_path.chmod(0o700)
+    spool = tmp_path / "events.jsonl"
+    monkeypatch.setenv("FURBOMEK_ACTIVITY_SPOOL", str(spool))
+    session_id = f"fixture-session-{status}"
+    tool_call_id = f"fixture-call-{status}"
+    synthetic_secret = "fixture-private-argument-6a82"
+    synthetic_result_secret = "fixture-private-result-9b73"
+
+    assert observer.on_session_start(session_id=session_id) is None
+    assert observer.on_pre_llm_call(session_id=session_id) is None
+    assert (
+        observer.on_pre_tool_call(
+            tool_name="browser_type",
+            args={"text": synthetic_secret},
+            session_id=session_id,
+            tool_call_id=tool_call_id,
+        )
+        is None
+    )
+    assert (
+        observer.on_post_tool_call(
+            tool_name="browser_type",
+            args={"text": synthetic_secret},
+            session_id=session_id,
+            tool_call_id=tool_call_id,
+            result=synthetic_result_secret,
+            status=status,
+            duration_ms=37,
+        )
+        is None
+    )
+    assert observer.on_post_llm_call(session_id=session_id) is None
+    assert observer.on_session_end(session_id=session_id) is None
+
+    raw = spool.read_bytes()
+    assert synthetic_secret.encode() not in raw
+    assert synthetic_result_secret.encode() not in raw
+    assert b'"args"' not in raw
+    assert b'"arguments"' not in raw
+    assert b'"result"' not in raw
+    assert b'"results"' not in raw
+
+    reader = IncrementalSpoolReader(spool, CursorSnapshot(None, 0))
+    try:
+        result = reader.poll()
+        assert not result.gap
+        assert not result.uncertain
+        assert len(result.events) == 6
+        assert [event.kind for event in result.events] == [
+            "session_start",
+            "thinking",
+            "tool",
+            "tool",
+            "turn_done",
+            "session_end",
+        ]
+        assert all(event.session == session_id for event in result.events)
+        running, completion = result.events[2:4]
+        assert [running.phase, completion.phase] == ["running", status]
+        assert running.call == tool_call_id
+        assert completion.call == tool_call_id
+        assert completion.duration_ms == 37
+        assert not reader.poll().events
+    finally:
+        reader.close()
+
+
+@pytest.mark.parametrize(
+    ("failed", "interrupted", "phase"),
+    [
+        (False, False, "ok"),
+        (True, False, "error"),
+        (False, True, "interrupted"),
+        (True, True, "error"),
+        ("yes", 1, "ok"),
+    ],
+)
+def test_end_metadata_is_boolean_only_and_redacted(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, failed: bool | str, interrupted: bool | int, phase: str
+) -> None:
+    spool = tmp_path / "events.jsonl"
+    monkeypatch.setenv("FURBOMEK_ACTIVITY_SPOOL", str(spool))
+    assert (
+        observer.on_session_end(
+            session_id="selected",
+            failed=failed,
+            interrupted=interrupted,
+            turn_exit_reason="private-reason-canary",
+            error="private-error-canary",
+            body="private-body-canary",
+        )
+        is None
+    )
+    raw = spool.read_text()
+    row = SpoolEvent.model_validate_json(raw)
+    assert row.kind == "session_end"
+    assert row.phase == phase
+    assert "private-" not in raw
