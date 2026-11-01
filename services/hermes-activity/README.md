@@ -117,3 +117,48 @@ This is API compatibility evidence, not an exploit reproduction, Linux/OBS
 qualification, desktop-privacy acceptance or confirmation that GitHub alerts have
 closed. Those require their respective later checks. Rollback reverts this pin
 and lock together, restoring the old advisory exposure; it does not enable capture.
+
+
+## Opt-in bounded Hermes lifecycle
+
+`--hermes-session OPAQUE_ID` binds one bounded Hermes run to a fresh private
+output directory and an already-created empty private spool. It is mutually
+exclusive with character mode and requires screen policy `off`. Both paths
+must be canonical absolute paths; the spool and its immediate real directory
+must be current-UID owned with no group/other permissions. Admission rechecks
+file identity and permissions each poll, rejecting symlinks, special files,
+rotation and truncation. This is local UID authorization, not protection from
+another process using the same UID.
+
+A fresh positive nonfuture selected-session start admits activity. Producer
+observations expire at 90 seconds: thinking, tool activity and approval become
+`UNKNOWN / Activity unavailable`, without a heartbeat extending their life.
+Active public snapshot TTL is capped by the remaining producer freshness window,
+so heartbeats cannot advertise another five seconds at its boundary. A consumer
+using an inclusive expiry comparison may retain the snapshot for the single
+boundary millisecond; no Godot behavior is changed here.
+Fresh observations may recover expiry; observation loss, invalid records,
+unsafe sources and clock reversal instead persist an irreversible failure
+fence. Completion ends the observed step, not the run. An observed session end
+is `Session ended` (IDLE), `Session failed` (ERROR), or `Session interrupted`
+(INTERRUPTED), using only Boolean metadata, with a permanent tombstone even if
+delivered late.
+Neither end, failure nor expiry releases unfinished privacy holds.
+
+An immutable private `activity.hermes.binding.json` marker records session, path
+and source device/inode. Its presence requires the original flag and a complete
+matching checkpoint; marker-only crashes and lost/stripped proof are refused.
+Recovery uses a new output directory and source session ID, never deletion of
+the marker. Deletion of every proof by a hostile same-UID process is not detectable.
+
+Checkpoint version 3 stores the complete private binding and lifecycle fences
+before public publication. Keep its session flag and exact spool on restart;
+reuse requires a new output directory and run. Older unbound checkpoints remain
+supported by legacy mode but cannot be adopted into a bound run. Private session,
+call and path identities never enter the public projection.
+
+The observer records only Boolean `failed`/`interrupted` end metadata, ignoring
+raw reasons. Installed Hermes emits this hook per conversation run; it is not
+proof of process shutdown, and abrupt termination may deliver no end hook.
+This implementation does not qualify live Hermes, Godot, credentials, capture,
+speech, hardware or deployment. Offline fixtures are separate evidence.

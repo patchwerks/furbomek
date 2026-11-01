@@ -10,12 +10,14 @@ if TYPE_CHECKING:
 
 from activity_models import ActivityEvent, ActivityPayload, BrokerState, ScreenState
 from character_state import expire
+from reducer import IDLE_AFTER_MS, expire_hermes
 
 PUBLIC_TTL_MS = 5_000
 
 
 def publish(state: BrokerState, now_ms: int, screen: ScreenState, out_dir: Path) -> None:
     """Write one validated public activity event atomically."""
+    state = expire_hermes(state, now_ms)
     character = expire(state.character, now_ms) if state.character is not None else None
     payload = ActivityPayload(
         title=state.title,
@@ -26,6 +28,8 @@ def publish(state: BrokerState, now_ms: int, screen: ScreenState, out_dir: Path)
         screen=screen,
     )
     ttl_ms = PUBLIC_TTL_MS
+    if state.hermes is not None and state.phase in {"thinking", "acting", "awaiting approval"}:
+        ttl_ms = min(PUBLIC_TTL_MS, max(1, state.hermes.observed_ms + IDLE_AFTER_MS - now_ms))
     if character is not None:
         payload = payload.model_copy(
             update={

@@ -133,3 +133,79 @@ def _timeline(state: BrokerState, event: SpoolEvent, event_ms: int) -> tuple[Tim
         ),
     )
     return tuple(rows[:TIMELINE_LIMIT])
+
+
+def unavailable_hermes(state: BrokerState, *, failed: bool = False) -> BrokerState:
+    """Remove unsupported running claims without changing privacy authority."""
+    hermes = state.hermes
+    if hermes is None:
+        return state
+    return replace(
+        state,
+        hermes=hermes.model_copy(update={"failed": hermes.failed or failed}),
+        phase="unknown",
+        title="Activity unavailable",
+        summary="Activity unavailable",
+        tool="AGENT",
+        timeline=tuple(row for row in state.timeline if row.status != "running"),
+    )
+
+
+def expire_hermes(state: BrokerState, now_ms: int, *, uncertain: bool = False) -> BrokerState:
+    """Enforce producer freshness and durable observation-loss fences."""
+    hermes = state.hermes
+    if hermes is None:
+        return state
+    failed = uncertain or now_ms < hermes.clock_ms
+    state = replace(state, hermes=hermes.model_copy(update={"clock_ms": max(now_ms, hermes.clock_ms)}))
+    if failed or hermes.failed:
+        return unavailable_hermes(state, failed=True)
+    if (
+        not hermes.ended
+        and state.phase in {"thinking", "acting", "awaiting approval"}
+        and now_ms - hermes.observed_ms >= IDLE_AFTER_MS
+    ):
+        return unavailable_hermes(state)
+    return state
+
+
+def apply_hermes(state: BrokerState, event: SpoolEvent, now_ms: int) -> tuple[BrokerState, bool]:
+    """Admit selected fresh hooks, with an irreversible delayed-end tombstone."""
+    hermes = state.hermes
+    if hermes is None or hermes.failed or hermes.ended or event.kind == "character":
+        return state, False
+    if event.session != hermes.session or not 0 < event.ts_ms <= now_ms:
+        return state, False
+    if event.kind == "session_end":
+        return _end_hermes(state, event), False
+    if event.ts_ms < hermes.observed_ms or now_ms - event.ts_ms >= IDLE_AFTER_MS:
+        return state, False
+    if event.kind == "session_start" and hermes.started:
+        return state, False
+    if event.kind != "session_start" and not hermes.started:
+        return state, False
+    reduced = apply_event(state, event, now_ms)
+    reduced = replace(reduced, hermes=hermes.model_copy(update={"observed_ms": event.ts_ms, "started": True}))
+    if event.kind == "turn_done" or (event.kind == "tool" and event.phase != "running"):
+        reduced = replace(reduced, phase="idle")
+    return reduced, True
+
+
+def _end_hermes(state: BrokerState, event: SpoolEvent) -> BrokerState:
+    hermes = state.hermes
+    if hermes is None:
+        return state
+    phase, title = {
+        "error": ("error", "Session failed"),
+        "interrupted": ("interrupted", "Session interrupted"),
+    }.get(event.phase, ("idle", "Session ended"))
+    return replace(
+        state,
+        hermes=hermes.model_copy(update={"ended": True, "observed_ms": max(hermes.observed_ms, event.ts_ms)}),
+        phase=phase,
+        title=title,
+        summary=title,
+        tool="AGENT",
+        session_open=False,
+        timeline=tuple(row for row in state.timeline if row.status != "running"),
+    )

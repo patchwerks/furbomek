@@ -1,13 +1,11 @@
 from __future__ import annotations
 
 from collections.abc import Mapping
+import hashlib
 import os
 from pathlib import Path
 import sys
-from typing import TYPE_CHECKING
-
-if TYPE_CHECKING:
-    import pytest
+import pytest
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
@@ -17,6 +15,76 @@ from hermes_feed import SpoolEvent
 from screen import CapturedFrame, DesktopHealth, ScreenPolicy, desktop_health
 
 NOW = 1_700_000_000_000
+
+
+def metadata_health(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, create_time: object, cmdline: object
+) -> DesktopHealth:
+    desktop = tmp_path / "bot-desktop"
+    desktop.mkdir(mode=0o700)
+    authority = desktop / "xauth"
+    authority.write_bytes(b"x")
+    authority.chmod(0o600)
+    env_path = desktop / "env"
+    env_path.write_text(f"DISPLAY=:20\nXAUTHORITY={authority}\n", encoding="utf-8")
+    env_path.chmod(0o600)
+    pid_path = desktop / "launcher.pid"
+    pid_path.write_text("12345", encoding="utf-8")
+    pid_path.chmod(0o600)
+    observed_pids: list[int] = []
+
+    class FakeProcess:
+        def __init__(self, pid: int) -> None:
+            observed_pids.append(pid)
+
+        def create_time(self) -> object:
+            return create_time
+
+        def cmdline(self) -> object:
+            return cmdline
+
+    def fake_kill(pid: int, signal: int) -> None:
+        assert (pid, signal) == (12345, 0)
+
+    monkeypatch.setattr("screen.psutil.Process", FakeProcess)
+    monkeypatch.setattr("screen.os.kill", fake_kill)
+    result = desktop_health(tmp_path)
+    assert observed_pids == [12345]
+    return result
+
+
+@pytest.mark.parametrize("create_time", [1_700_000_000, 1_700_000_000.125])
+@pytest.mark.parametrize("cmdline", [["python", "launcher.py", "--flag"], ["BOT-DESKTOP", "--flag"]])
+def test_valid_native_launcher_metadata(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, create_time: float, cmdline: list[str]
+) -> None:
+    result = metadata_health(tmp_path, monkeypatch, create_time, cmdline)
+    identity_hash = hashlib.sha256(" ".join(cmdline).encode()).hexdigest()
+    assert result.alive
+    assert result.generation == f"12345:{create_time:.3f}:{identity_hash}::20"
+
+
+@pytest.mark.parametrize(
+    "create_time",
+    [True, False, None, "1700000000", 10**400, float("nan"), float("inf"), float("-inf"), 0, -1],
+)
+def test_malformed_native_creation_time_fails_closed(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, create_time: object
+) -> None:
+    result = metadata_health(tmp_path, monkeypatch, create_time, ["launcher"])
+    assert not result.alive
+    assert result.generation is None
+
+
+@pytest.mark.parametrize(
+    "cmdline", [None, "launcher", ("launcher",), ["launcher", None], ["launcher", 1], [], [""], ["python"]]
+)
+def test_malformed_native_command_line_fails_closed(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, cmdline: object
+) -> None:
+    result = metadata_health(tmp_path, monkeypatch, 1_700_000_000, cmdline)
+    assert not result.alive
+    assert result.generation is None
 
 
 class FixedClock:
