@@ -61,7 +61,9 @@ independently enforced policy boundary or required-check protection against a
 candidate changing the workflow. Independent workflow review remains necessary;
 no secrets are supplied to these jobs.
 
-**Current bootstrap gate — observed 2026-10-31:** PR #31's scratch-lifetime
+**Historical bootstrap gate — observed 2026-10-31:** The following records the
+then-current gate; see the 2026-11-01 qualification below for subsequent results.
+PR #31's scratch-lifetime
 correction is merged. The [fresh accepted-base run 41214219543](https://github.com/patchwerks/furbomek/actions/runs/41214219543)
 used PR head `a267004fa040509dbdaad8c339cd60719f8f0dfc`, synthetic merge checkout
 `a56325a2f29d1806d6779e691e954fba81b99822`, and accepted helpers from
@@ -152,7 +154,53 @@ Dependency remediation is tracked separately in
 Issue 4 remains open until actual checkout and hosted workflow evidence is
 reviewed. No new required-check rule or merge authority is configured here.
 Rollback is reverting this PR's dispatcher, tests, workflow and documentation;
-the existing media script and product runtime remain unchanged.
+the existing media script and product runtime remain unchanged. A snapshot
+dependency rollback must revert its PEP 723 metadata and adjacent script lockfile
+together so frozen execution selects the intended distribution.
+
+## Current qualification — 2026-11-01
+
+**Observed:** [generic CI run 41283330404](https://github.com/patchwerks/furbomek/actions/runs/41283330404)
+passed at implementation head `b8e0f6acf116e63885d99f1355a9eefc8129e3f9`, using
+accepted main `cdd9147fac9141fa0c75b5058f9dce46c7885188`. That base includes
+PR #36's offline-input correction merged as
+`82ec000eb884432a5ddb9528a03633f6d095f399` and PR #35's lint correction.
+The [media job 124779539941](https://github.com/patchwerks/furbomek/actions/runs/41283330404/job/124779539941)
+passed all 26 dispatcher checks (11 CLI and 15 proxy), 121 gateway tests,
+127 activity tests, 18 supervisor tests and three snapshot tests: 269 Python
+product tests plus 26 dispatcher checks. Ruff, formatting, type checks and UV
+lock checks passed. The actual Godot consumer reported `ACTIVITY FIXTURES PASS`;
+the full media summary reported zero failed and zero unavailable components.
+Legacy Nuxt, native safety and all CodeQL checks also passed at this head.
+
+The separate accepted character-foundation
+[offline run 41283330402](https://github.com/patchwerks/furbomek/actions/runs/41283330402)
+passed. These are offline fixture/build results, not live Hermes, OBS, camera or
+hardware qualification. Guard/vendor and AVR coverage gaps remain as stated above.
+
+Two fixture corrections were needed. The interruptible-configuration test now
+sends a real SIGTERM only after entering its configure callback, uses a bounded
+wait for the actual stop event, and retains successful-stop, absent OBS-start
+marker and empty OBS PID assertions. Its viewer stays alive for owned-session
+cleanup. The snapshot test alone selects `opencv-contrib-python-headless==4.11.0.86`
+with a genuinely regenerated UV script lock; all non-OpenCV package records and
+resolution markers are unchanged. The upstream
+[OpenCV packaging guidance](https://github.com/opencv/opencv-python) identifies
+headless packages for environments without GUI requirements. Tracker runtime,
+vision API and host drivers are unchanged.
+
+Earlier failure logs are retained: `69021f` passed the service checks before
+snapshot import failed on missing `libGL.so.1`; `dd408f` changed script metadata
+but frozen execution still selected the old GUI package from its unchanged lock.
+The passing implementation includes the matching headless metadata/lock pair.
+No helper privilege, network or mount policy was relaxed. Accepted-base helper
+selection remains mandatory; candidate-editable workflow results remain advisory
+pending independent review. This evidence does not close issue 4 or establish
+full vendor/AVR coverage.
+
+This section is a documentation-only follow-up to the tested implementation head.
+Its final commit and fresh rerun are pending; the results above do not claim that
+the documentation follow-up itself has already run in CI.
 
 ## Historical implementation evidence
 
@@ -195,6 +243,10 @@ versions and counts. They do not qualify the current accepted-helper runtime.
 
 ## Changelog
 
+- 2026-11-01: recorded the accepted-base full generic CI pass, separate offline
+  character-foundation pass, deterministic signal fixture and snapshot headless
+  metadata/lock correction. Preserved failed-run evidence, independent-review
+  requirement and live/vendor/AVR limits; documentation follow-up rerun is pending.
 - 2026-10-31: updated the accepted helper fixture count after PR #31 and recorded
   the fresh accepted-base run's native pass and media/legacy scratch-permission
   failure before candidate execution. Linked PR #33's measured storage correction;
