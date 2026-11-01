@@ -1,0 +1,383 @@
+name: ESLint 30 advisory qualification
+on:
+  workflow_dispatch:
+  push:
+    branches: [codex/30-eslint-upgrade]
+permissions:
+  contents: read
+jobs:
+  qualification:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      max-parallel: 2
+      matrix:
+        include:
+          - name: node26
+            version: v26.7.0
+            image: node:26.7.0-bookworm@sha256:e929171d35b9df7773a3ec5b068e387fa109441dc90f91e6560af5d39b7e9bf1
+          - name: node22
+            version: v22.22.3
+            image: node:22.22.3-bookworm@sha256:46e94f8cf91baab69a2deb3153e74eeffd73c20c7cc1d8432f5b96469eaa0322
+    env:
+      QUALIFICATION_NODE_IMAGE: ${{ matrix.image }}
+      QUALIFICATION_NODE_VERSION: ${{ matrix.version }}
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          path: candidate
+          persist-credentials: false
+          ref: ${{ github.sha }}
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          ref: fb7e25e9982f53a1f12e6c63955420ac476d8294
+          path: baseline
+          persist-credentials: false
+      - name: Bounded baseline and candidate qualification (advisory)
+        shell: bash
+        run: |
+          set -euo pipefail
+          trusted="$GITHUB_WORKSPACE/baseline"
+          candidate=$(mktemp -d "$RUNNER_TEMP/eslint30-source.XXXXXX")
+          for variant in baseline candidate; do
+            # Refuse source indirection before host staging. No candidate code runs.
+            git -C "$GITHUB_WORKSPACE/$variant" ls-files --stage | awk '$1 == "120000" || $1 == "160000" {bad=1} END {exit bad}'
+            if git -C "$GITHUB_WORKSPACE/$variant" ls-files | grep -E '(^|/)(\.npmrc|\.env(\..*)?|\.gitconfig)$'; then
+              echo 'Candidate package/environment configuration requires separate review' >&2
+              exit 1
+            fi
+            mkdir -p "$candidate/$variant"
+            tar -C "$GITHUB_WORKSPACE/$variant" --exclude=.git --exclude=.jj --exclude=node_modules --exclude=.nuxt --exclude=.output -cf - . | tar -xf - -C "$candidate/$variant"
+          done
+          chmod -R a+rX "$candidate"
+          python_image=python:3.12.11-bookworm@sha256:1b48a1b13ec678be8d84974541cc007d4367aaf01f985231daad1a940106efc0
+          node_image=$QUALIFICATION_NODE_IMAGE
+          image=$node_image
+          mode=eslint30
+          # Check the daemon before any mutation, including registering cleanup commands.
+          docker_version=$(docker version --format '{{.Server.Version}}') || {
+            echo 'Cannot determine Docker Engine version; require stable 28.0.0 or newer' >&2; exit 2;
+          }
+          if [[ ! $docker_version =~ ^([0-9]+)\.([0-9]+)\.([0-9]+)$ ]] ||
+             (( 10#${BASH_REMATCH[1]:-0} < 28 )); then
+            echo 'Require stable Docker Engine 28.0.0 or newer for isolated gateway mode' >&2
+            exit 2
+          fi
+          ci_id="furbomek-${mode}-$$"
+          network="$ci_id-net"
+          volume="$ci_id-work"
+          proxy="$ci_id-proxy"
+          keeper="$ci_id-scratch-keeper"
+          export_evidence() {
+            # Validate inert output in the trusted Python image, before host copy.
+            docker exec -i "$keeper" python -I - <<'VALIDATE'
+          import os, stat
+          from pathlib import Path
+          root = Path("/scratch/evidence")
+          suffixes = ["ci.log", "audit.json", "versions.txt", "prepare.log", "build.log", "types.log", "full-ci.log", "app-lint.json", "repo-lint.json", "dependency-paths.json", "status.txt", "vue-config.json", "ts-config.json", "malformed.json", "enforcement.json"]
+          allowed = {f"{v}-{s}" for v in ["baseline", "candidate"] for s in suffixes} | {"package-lock.json", "lock-resolution.log", "comparison.json", "lock-mode.txt", "direct-versions.json", "transitive-delta.json", "resolution-eresolve.txt", "candidate-inspector-build.log"}
+          total = 0
+          paths = list(root.iterdir())
+          assert len(paths) <= 40
+          for path in paths:
+              st = path.lstat()
+              assert path.name in allowed and stat.S_ISREG(st.st_mode)
+              assert st.st_size <= 8 * 1024 * 1024
+              total += st.st_size
+          assert total <= 32 * 1024 * 1024
+          VALIDATE
+            mkdir -p evidence
+            docker cp "$keeper:/scratch/evidence/." evidence/
+          }
+          cleanup() {
+            local result=${1:-$?}
+            export_evidence || result=1
+            if [[ $result != 0 ]]; then docker logs "$proxy" 2>&1 || true; fi
+            docker rm -f "$proxy" >/dev/null 2>&1 || result=1
+            docker rm -f "$keeper" >/dev/null 2>&1 || result=1
+            docker volume rm -f "$volume" >/dev/null 2>&1 || result=1
+            docker network rm "$network" >/dev/null 2>&1 || result=1
+            if docker container inspect "$proxy" >/dev/null 2>&1 || docker container inspect "$keeper" >/dev/null 2>&1 || docker volume inspect "$volume" >/dev/null 2>&1 || docker network inspect "$network" >/dev/null 2>&1; then result=1; fi
+            rm -rf -- "$candidate" || result=1
+            exit "$result"
+          }
+          trap cleanup EXIT
+          docker pull "$python_image"
+          if [[ $image != "$python_image" ]]; then docker pull "$image"; fi
+          docker network create --internal --opt com.docker.network.bridge.gateway_mode_ipv4=isolated "$network" >/dev/null
+          docker volume create --driver local --opt type=tmpfs --opt device=tmpfs \
+            --opt o=size=8g,uid=1000,gid=1000,mode=0700 "$volume" >/dev/null
+          # A tmpfs-backed local volume loses its contents when its last mount closes.
+          # Keep this trusted, network-none mount alive across every disposable worker.
+          docker run -d --name "$keeper" --network none --read-only \
+            --cap-drop ALL --security-opt no-new-privileges --user 1000:1000 \
+            --cpus 0.1 --memory 32m --pids-limit 8 \
+            --mount "type=volume,source=$volume,target=/scratch,volume-nocopy" \
+            "$python_image" sleep infinity >/dev/null
+          docker run -d --name "$proxy" --network "$network" --network-alias dependency-proxy --read-only --cap-drop ALL --security-opt no-new-privileges \
+            --user 1000:1000 --cpus 1 --memory 128m --pids-limit 64 \
+            --mount "type=bind,source=$trusted/tools/ci/dependency-proxy.py,target=/proxy.py,readonly" \
+            "$python_image" sh -ec 'exec python -B /proxy.py --bind-address "$(python -I -c "import socket; print(socket.gethostbyname(socket.gethostname()))")"' >/dev/null
+          # Discover only the isolated worker-network address, never the egress address.
+          proxy_ip=$(docker inspect --format "{{(index .NetworkSettings.Networks \"$network\").IPAddress}}" "$proxy")
+          # Wait on the listener instead of mistaking startup refusal for policy denial.
+          ready=false
+          for attempt in {1..15}; do
+            if docker exec "$proxy" python -I -c 'import socket,sys; socket.create_connection((sys.argv[1], 3128), timeout=1).close()' "$proxy_ip"; then
+              ready=true
+              break
+            fi
+            sleep 1
+          done
+          [[ $ready == true ]] || { echo 'Dependency proxy did not become ready' >&2; exit 1; }
+          # Bind/readiness precede external attachment; listener stays on its exact IP.
+          docker network connect bridge "$proxy"
+
+          # No runner environment, home, socket or writable host directory is forwarded.
+          worker=(docker run --rm --read-only --cap-drop ALL --security-opt no-new-privileges
+            --user 1000:1000 --cpus 2 --memory 4g --pids-limit 256
+            --tmpfs /tmp:rw,exec,nosuid,size=512m
+            --mount "type=bind,source=$candidate,target=/source,readonly"
+            --mount "type=volume,source=$volume,target=/scratch,volume-nocopy"
+            --workdir /scratch --env XDG_CACHE_HOME=/scratch/cache
+            --env UV_CACHE_DIR=/scratch/uv-cache --env UV_PYTHON_DOWNLOADS=never
+            --env PYTHONUNBUFFERED=1 --env PYTHONDONTWRITEBYTECODE=1
+            --env npm_config_cache=/scratch/npm-cache --env HOME=/scratch/home
+            --env NUXT_TELEMETRY_DISABLED=1 --env CI=true --env EXPECTED_NODE_VERSION="$QUALIFICATION_NODE_VERSION"
+            --env npm_config_registry=https://registry.npmjs.org
+            --env npm_config_userconfig=/scratch/npm-userconfig --env npm_config_globalconfig=/scratch/npm-globalconfig)
+          proxy_env=(--env HTTPS_PROXY=http://dependency-proxy:3128 --env HTTP_PROXY=http://dependency-proxy:3128
+            --env https_proxy=http://dependency-proxy:3128 --env http_proxy=http://dependency-proxy:3128
+            --env NO_PROXY= --env no_proxy=)
+
+          "${worker[@]}" --network "$network" "${proxy_env[@]}" "$image" bash -euc '
+            test "$(node --version)" = "$EXPECTED_NODE_VERSION"
+            test "$(id -u)" != 0
+            test ! -e /var/run/docker.sock
+            # Assert both direct external egress and a forbidden proxy destination fail.
+            if curl --noproxy "*" -fsSI --connect-timeout 3 https://pypi.org; then exit 1; fi
+            forbidden=$(curl -sSI --connect-timeout 3 --output /dev/null --write-out "%{http_connect}" https://example.com || true)
+            test "$forbidden" = 403
+            curl -fsSI --retry 3 --retry-connrefused --connect-timeout 10 https://pypi.org >/dev/null
+            touch /scratch/npm-userconfig /scratch/npm-globalconfig
+            cp -R /source/. /scratch/source
+            mkdir -p /scratch/cache /scratch/home /scratch/evidence
+          '
+
+          # Dependencies only: no lifecycle hooks or candidate code on a networked worker.
+          "${worker[@]}" --network "$network" "${proxy_env[@]}" "$image" bash -euc '
+            for variant in baseline candidate; do
+              cd /scratch/source/$variant
+              if [[ $variant == candidate ]] && ! node --input-type=module -e "import fs from \"node:fs\"; const a=JSON.parse(fs.readFileSync(\"package.json\")); const b=JSON.parse(fs.readFileSync(\"package-lock.json\")).packages[\"\"]; process.exit(Object.keys(a.dependencies).length===Object.keys(b.dependencies).length&&Object.entries(a.dependencies).every(([k,v])=>b.dependencies[k]===v)&&Object.keys(a.devDependencies).length===Object.keys(b.devDependencies).length&&Object.entries(a.devDependencies).every(([k,v])=>b.devDependencies[k]===v)?0:1)"; then
+                printf "fresh-pinned-directs\n" > /scratch/evidence/lock-mode.txt
+                # Trusted JSON-only transformation; no candidate module is loaded.
+                node --input-type=module <<"PIN"
+          import fs from "node:fs";
+          import assert from "node:assert/strict";
+          const read = p => JSON.parse(fs.readFileSync(p, "utf8"));
+          const base = read("../baseline/package.json");
+          const oldLock = read("../baseline/package-lock.json");
+          const bytes = fs.readFileSync("package.json");
+          const candidate = JSON.parse(bytes);
+          const expected = structuredClone(base);
+          expected.dependencies["@nuxt/eslint"] = "1.17.0";
+          expected.devDependencies.eslint = "10.14.0";
+          expected.devDependencies["@eslint/config-inspector"] = "3.2.0";
+          assert.deepEqual(candidate, expected, "unauthorized manifest change");
+          const selected = new Set(["@nuxt/eslint", "eslint", "@eslint/config-inspector"]);
+          const before = {};
+          for (const group of ["dependencies", "devDependencies"]) {
+            for (const [name, range] of Object.entries(candidate[group] || {})) {
+              if (selected.has(name)) continue;
+              assert.equal(range, base[group][name]);
+              const version = oldLock.packages[`node_modules/${name}`]?.version;
+              assert.match(version, /^\d+\.\d+\.\d+/);
+              before[name] = {group, range, version};
+              candidate[group][name] = version;
+            }
+          }
+          fs.writeFileSync("/scratch/original-candidate-package.json", bytes);
+          fs.writeFileSync("/scratch/direct-before.json", JSON.stringify(before));
+          fs.writeFileSync("package.json", JSON.stringify(candidate, null, 2) + "\n");
+          fs.unlinkSync("package-lock.json");
+          PIN
+                resolve_lock() {
+                  if npm install --package-lock-only --ignore-scripts --no-audit --no-fund >> /scratch/evidence/lock-resolution.log 2>&1; then return; fi
+                  node --input-type=module <<"REPORT"
+          import fs from "node:fs";
+          const root = "/scratch/npm-cache/_logs/";
+          const names = fs.readdirSync(root).filter(n => /^\d{4}-\d{2}-\d{2}T[\d_.TZ-]+-eresolve-report\.txt$/.test(n)).sort();
+          if (names.length) {
+            const path = root + names.at(-1);
+            const st = fs.lstatSync(path);
+            if (!st.isFile() || st.size > 8 * 1024 * 1024) throw Error("invalid resolver report");
+            fs.copyFileSync(path, "/scratch/evidence/resolution-eresolve.txt");
+          }
+          REPORT
+                  return 1
+                }
+                resolve_lock
+                cp /scratch/original-candidate-package.json package.json
+                resolve_lock
+              elif [[ $variant == candidate ]]; then
+                printf "persisted\n" > /scratch/evidence/lock-mode.txt
+              fi
+              if [[ $variant == candidate ]]; then
+                # Recheck the real restored manifest and all non-lint direct pins.
+                node --input-type=module <<"CHECK_LOCK"
+          import fs from "node:fs";
+          import assert from "node:assert/strict";
+          const read = p => JSON.parse(fs.readFileSync(p, "utf8"));
+          const base = read("../baseline/package.json");
+          const oldLock = read("../baseline/package-lock.json");
+          const manifest = read("package.json");
+          const lock = read("package-lock.json");
+          for (const group of ["dependencies", "devDependencies"]) assert.deepEqual(lock.packages[""][group], manifest[group]);
+          const selected = new Set(["@nuxt/eslint", "eslint", "@eslint/config-inspector"]);
+          const direct = {};
+          for (const group of ["dependencies", "devDependencies"]) {
+            for (const name of Object.keys(base[group] || {})) {
+              if (selected.has(name)) continue;
+              const before = oldLock.packages[`node_modules/${name}`]?.version;
+              const after = lock.packages[`node_modules/${name}`]?.version;
+              assert.equal(after, before, `non-lint direct changed: ${name}`);
+              direct[name] = {before, after, range: manifest[group][name]};
+            }
+          }
+          const delta = [];
+          for (const path of new Set([...Object.keys(oldLock.packages), ...Object.keys(lock.packages)])) {
+            if (!path) continue;
+            const before = oldLock.packages[path]?.version ?? null;
+            const after = lock.packages[path]?.version ?? null;
+            if (before !== after) delta.push({path, before, after});
+          }
+          fs.writeFileSync("/scratch/evidence/direct-versions.json", JSON.stringify(direct, null, 2));
+          fs.writeFileSync("/scratch/evidence/transitive-delta.json", JSON.stringify(delta, null, 2));
+          CHECK_LOCK
+              fi
+              if [[ $variant == candidate ]]; then test "$(cat /scratch/evidence/lock-mode.txt)" = persisted; cp package-lock.json /scratch/evidence/package-lock.json; fi
+              npm ci --ignore-scripts --no-audit --no-fund > /scratch/evidence/$variant-ci.log 2>&1
+              npm ci --prefix server --ignore-scripts --no-audit --no-fund >> /scratch/evidence/$variant-ci.log 2>&1
+              set +e
+              npm audit --ignore-scripts --json > /scratch/evidence/$variant-audit.json
+              result=$?
+              set -e
+              test "$result" -le 1
+            done
+          '
+          # A new worker has no network; all source/config/dependency execution occurs here.
+          "${worker[@]}" --network none "$image" bash -euc '
+            test "$(id -u)" = 1000
+            test ! -e /var/run/docker.sock
+            test ! -e /home/runner
+            test "$(find /sys/class/net -mindepth 1 -maxdepth 1 | wc -l)" = 1
+            for variant in baseline candidate; do
+              cd /scratch/source/$variant
+              node --version > /scratch/evidence/$variant-versions.txt
+              npm --version >> /scratch/evidence/$variant-versions.txt
+              ./node_modules/.bin/nuxt prepare > /scratch/evidence/$variant-prepare.log 2>&1
+              npm run build > /scratch/evidence/$variant-build.log 2>&1
+              ./node_modules/.bin/vue-tsc --noEmit > /scratch/evidence/$variant-types.log 2>&1
+              # Re-run the full root lifecycle offline using already provisioned npm cache.
+              npm ci --offline --no-audit --no-fund > /scratch/evidence/$variant-full-ci.log 2>&1
+              if [[ $variant == candidate ]]; then cmp package-lock.json /scratch/evidence/package-lock.json; fi
+              set +e
+              ./node_modules/.bin/eslint app.vue --format json > /scratch/evidence/$variant-app-lint.json
+              app_result=$?
+              ./node_modules/.bin/eslint . --format json > /scratch/evidence/$variant-repo-lint.json
+              repo_result=$?
+              npm ls eslint @eslint/config-inspector esbuild glob minimatch --all --json > /scratch/evidence/$variant-dependency-paths.json
+              tree_result=$?
+              set -e
+              printf "%s %s %s\n" "$app_result" "$repo_result" "$tree_result" > /scratch/evidence/$variant-status.txt
+              test "$app_result" -le 1
+              test "$repo_result" -le 1
+              node --input-type=module - "$variant" "$tree_result" <<"TREE"
+          import fs from "node:fs";
+          import assert from "node:assert/strict";
+          const [variant, code] = process.argv.slice(2);
+          const tree = JSON.parse(fs.readFileSync(`/scratch/evidence/${variant}-dependency-paths.json`, "utf8"));
+          if (variant === "baseline" && code === "1") {
+            assert.deepEqual(tree.problems, ["invalid: eslint@8.57.1 /scratch/source/baseline/node_modules/eslint"]);
+          } else {
+            assert.equal(code, "0");
+            assert.equal((tree.problems || []).length, 0);
+          }
+          TREE
+              ./node_modules/.bin/eslint --print-config app.vue > /scratch/evidence/$variant-vue-config.json
+              ./node_modules/.bin/eslint --print-config src/settings.ts > /scratch/evidence/$variant-ts-config.json
+              printf "<script setup lang=\"ts\">const invalid: = ;</script>\n" > eslint30-malformed.vue
+              printf "const invalid: = ;\n" > src/eslint30-malformed.ts
+              set +e
+              ./node_modules/.bin/eslint eslint30-malformed.vue src/eslint30-malformed.ts --format json > /scratch/evidence/$variant-malformed.json
+              malformed_result=$?
+              set -e
+              test "$malformed_result" = 1
+              rm eslint30-malformed.vue src/eslint30-malformed.ts
+              printf "<script setup lang=\"ts\">import \"./eslint30-self.vue\"; while (true) { /* fixture */ }</script>\n" > eslint30-self.vue
+              printf "import \"./eslint30-self.ts\"; while (true) { /* fixture */ }\n" > src/eslint30-self.ts
+              set +e
+              ./node_modules/.bin/eslint eslint30-self.vue src/eslint30-self.ts --format json > /scratch/evidence/$variant-enforcement.json
+              enforcement_result=$?
+              set -e
+              test "$enforcement_result" = 1
+              rm eslint30-self.vue src/eslint30-self.ts
+              if [[ $variant == candidate ]]; then
+                ./node_modules/.bin/eslint-config-inspector build > /scratch/evidence/candidate-inspector-build.log 2>&1
+                test -s dist/__eslint-config-inspector/index.html
+              fi
+            done
+          '
+          "${worker[@]}" --network none "$image" node --input-type=module -e '
+            import fs from "node:fs";
+            const dir = "/scratch/evidence/";
+            const read = name => JSON.parse(fs.readFileSync(dir + name, "utf8"));
+            const result = {};
+            for (const variant of ["baseline", "candidate"]) {
+              result[variant] = {};
+              for (const scope of ["app", "repo"]) {
+                const rows = read(`${variant}-${scope}-lint.json`);
+                if (!Array.isArray(rows) || !rows.length || rows.some(row => row.fatalErrorCount !== 0)) throw Error("invalid/fatal lint data");
+                result[variant][scope] = {errors: rows.reduce((n,r) => n+r.errorCount,0), warnings:rows.reduce((n,r) => n+r.warningCount,0)};
+              }
+              const malformed = read(`${variant}-malformed.json`);
+              if (malformed.length !== 2 || malformed.some(row => row.fatalErrorCount !== 1)) throw Error("malformed parsing not rejected");
+              const enforcement = read(`${variant}-enforcement.json`);
+              if (enforcement.length !== 2 || enforcement.some(row => row.fatalErrorCount !== 0 || !["import/no-self-import", "no-constant-condition"].every(rule => row.messages.some(m => m.ruleId === rule && m.severity === 2)))) throw Error("lost self-import/constant-loop enforcement");
+              read(`${variant}-audit.json`);
+              read(`${variant}-dependency-paths.json`);
+            }
+            const lock = read("package-lock.json");
+            const versions = Object.entries(lock.packages).filter(([p]) => p === "node_modules/eslint" || p.endsWith("/node_modules/eslint")).map(([,v]) => v.version);
+            if (!versions.length || versions.some(v => !v.startsWith("10."))) throw Error("not a single supported ESLint major");
+            if (lock.packages["node_modules/@eslint/config-inspector"].version !== "3.2.0") throw Error("unexpected inspector");
+            result.eslintVersions = versions;
+            result.ruleChanges = {};
+            const severity = v => {v = Array.isArray(v) ? v[0] : v; return typeof v === "number" ? v : {off:0,warn:1,error:2}[v] ?? 0;};
+            for (const kind of ["vue", "ts"]) {
+              const a = read(`baseline-${kind}-config.json`).rules;
+              const b = read(`candidate-${kind}-config.json`).rules;
+              if (!a || !b) throw Error("missing effective rules");
+              result.ruleChanges[kind] = Object.keys(a).filter(k => severity(a[k]) > 0 && JSON.stringify(a[k]) !== JSON.stringify(b[k])).map(k => ({rule:k,before:a[k],after:b[k] ?? null,weakened:severity(b[k]) < severity(a[k])}));
+            }
+            fs.writeFileSync(dir + "comparison.json", JSON.stringify(result,null,2));
+            if (Object.values(result.ruleChanges).some(rows => rows.some(row => row.weakened))) throw Error("an enabled baseline rule lost severity");
+            console.log(JSON.stringify(result));
+          '
+          # Export inert data only; it is not sourced or executed by the credentialed runner.
+          mkdir -p evidence
+          if export_evidence; then
+            printf '%s\n' "$GITHUB_SHA" > evidence/candidate-sha.txt
+            printf '%s\n' fb7e25e9982f53a1f12e6c63955420ac476d8294 > evidence/baseline-sha.txt
+          else
+            exit 1
+          fi
+      - name: Upload advisory evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: eslint30-qualification-${{ matrix.name }}-${{ github.sha }}
+          path: evidence/
+          if-no-files-found: error
+          retention-days: 7
