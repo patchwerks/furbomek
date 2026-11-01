@@ -198,6 +198,29 @@ if name == "docker":
                     self.assertIn("--require-hashes --no-deps --link-mode copy --target /scratch/build-inputs -r /trusted/build-requirements.txt", provision)
                     self.assertNotIn("/source/.github", provision)
                     self.assertIn("--python /usr/local/bin/python3", provision)
+                    # Parse the actual nested shell, including the purelib query.
+                    syntax = subprocess.run(["/bin/bash", "-n", "-c", offline], capture_output=True)
+                    self.assertEqual(syntax.returncode, 0, syntax.stderr)
+                    activate = "for name in embodiment-gateway stream-supervisor; do"
+                    copy = 'cp -R /scratch/build-inputs/. "$site/"'
+                    install = 'uv --no-config pip install --python "services/$name/.venv/bin/python"'
+                    flags = '--offline --no-deps --no-build-isolation -e "services/$name"'
+                    for expected in (activate, copy, install, flags, "export UV_NO_SYNC=1"):
+                        self.assertIn(expected, offline)
+                        for online in workers[:-1]:
+                            self.assertNotIn(expected, online[-1])
+                    self.assertIn('"services/$name/.venv/bin/python" -I -c', offline)
+                    self.assertLess(offline.index("ln -s"), offline.index(activate))
+                    self.assertLess(offline.index("git -c safe.directory"), offline.index(activate))
+                    self.assertLess(offline.index(activate), offline.index(copy))
+                    self.assertLess(offline.index(copy), offline.index(install))
+                    self.assertLess(offline.index(install), offline.index("export UV_NO_SYNC=1"))
+                    self.assertLess(offline.index("export UV_NO_SYNC=1"), offline.index("bash tools/verify.sh"))
+                    for worker in workers:
+                        self.assertIn("UV_NO_CONFIG=1", worker)
+                        self.assertIn("PYTHONNOUSERSITE=1", worker)
+                    self.assertNotIn("UV_NO_SYNC=1", workers[1])
+
 
     def test_readiness_failure_never_attaches_egress_or_runs_candidate(self):
         result, calls, _ = self.run_fake(failure="ready")

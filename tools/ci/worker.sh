@@ -75,6 +75,7 @@ worker=(docker run --rm --read-only --cap-drop ALL --security-opt no-new-privile
   --mount "type=bind,source=$trusted/tools/ci/build-requirements.txt,target=/trusted/build-requirements.txt,readonly"
   --workdir /scratch --env XDG_CACHE_HOME=/scratch/cache
   --env UV_CACHE_DIR=/scratch/uv-cache --env UV_PYTHON_DOWNLOADS=never
+  --env UV_NO_CONFIG=1 --env PYTHONNOUSERSITE=1
   --env PYTHONUNBUFFERED=1 --env PYTHONDONTWRITEBYTECODE=1
   --env npm_config_cache=/scratch/npm-cache)
 proxy_env=(--env HTTPS_PROXY=http://dependency-proxy:3128 --env HTTP_PROXY=http://dependency-proxy:3128
@@ -129,6 +130,16 @@ if [[ $mode == media ]]; then
     done
     cd /scratch/source
     git -c safe.directory=/scratch/source diff --exit-code HEAD -- .
+    # Activate hashed build inputs and candidate editable hooks only offline.
+    # The dependency interpreter may execute installed hooks, so never query it
+    # in the networked provisioning phase.
+    for name in embodiment-gateway stream-supervisor; do
+      site=$("services/$name/.venv/bin/python" -I -c "import sysconfig; print(sysconfig.get_path(\"purelib\"))")
+      cp -R /scratch/build-inputs/. "$site/"
+      uv --no-config pip install --python "services/$name/.venv/bin/python" \
+        --offline --no-deps --no-build-isolation -e "services/$name"
+    done
+    export UV_NO_SYNC=1
     bash tools/verify.sh dispatcher media
   '
 else
