@@ -1,0 +1,91 @@
+name: Non-live verification
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: non-live-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  media:
+    name: Locked media fixtures
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+          path: candidate
+      - name: Check out accepted-base enforcement
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+          path: trusted
+          ref: ${{ github.event.pull_request.base.sha || github.event.before || github.event.repository.default_branch }}
+      - name: Require independently accepted bootstrap
+        shell: bash
+        run: |
+          if [[ ! -f trusted/tools/ci/worker.sh || ! -f trusted/tools/ci/dependency-proxy.py ]]; then
+            echo '::error::Trusted CI helpers are absent from the accepted base. Independent bootstrap acceptance is required; candidate helpers will not execute.'
+            exit 1
+          fi
+      - name: Provision restricted dependencies, then verify offline
+        run: bash trusted/tools/ci/worker.sh media "$GITHUB_WORKSPACE/candidate"
+  native:
+    name: Actuator-disabled native safety
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - name: Provision immutable offline worker inputs
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker pull gcc:13.3.0@sha256:50e85821c43ea2fd683bf5ae41f5d6981c41bab0641e7640962759291ceb7f78
+          curl --fail --location --retry 3 https://github.com/BurntSushi/ripgrep/releases/download/15.1.0/ripgrep-15.1.0-x86_64-unknown-linux-musl.tar.gz -o "$RUNNER_TEMP/rg.tar.gz"
+          printf '%s  %s\n' 1c9297be4a084eea7ecaedf93eb03d058d6faae29bbc57ecdaf5063921491599 "$RUNNER_TEMP/rg.tar.gz" | sha256sum --check
+          mkdir -p "$RUNNER_TEMP/native-tools"
+          tar -xzf "$RUNNER_TEMP/rg.tar.gz" --strip-components=1 -C "$RUNNER_TEMP/native-tools" ripgrep-15.1.0-x86_64-unknown-linux-musl/rg
+      - name: Run native tests without credentials, network or device mounts
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker run --rm --network none --read-only --cap-drop ALL \
+            --security-opt no-new-privileges --user "$(id -u):$(id -g)" \
+            --cpus 2 --memory 2g --pids-limit 128 \
+            --tmpfs /tmp:rw,exec,nosuid,size=512m \
+            --mount "type=bind,source=$GITHUB_WORKSPACE,target=/workspace,readonly" \
+            --mount "type=bind,source=$RUNNER_TEMP/native-tools,target=/tools,readonly" \
+            --workdir /workspace --env PATH=/tools:/usr/local/bin:/usr/bin:/bin \
+            gcc:13.3.0@sha256:50e85821c43ea2fd683bf5ae41f5d6981c41bab0641e7640962759291ceb7f78 \
+            bash -c 'test "$(g++ -dumpfullversion)" = 13.3.0 && bash tools/verify.sh robot-native'
+  legacy:
+    name: Legacy Nuxt build baseline
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+          path: candidate
+      - name: Check out accepted-base enforcement
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+          path: trusted
+          ref: ${{ github.event.pull_request.base.sha || github.event.before || github.event.repository.default_branch }}
+      - name: Require independently accepted bootstrap
+        shell: bash
+        run: |
+          if [[ ! -f trusted/tools/ci/worker.sh || ! -f trusted/tools/ci/dependency-proxy.py ]]; then
+            echo '::error::Trusted CI helpers are absent from the accepted base. Independent bootstrap acceptance is required; candidate helpers will not execute.'
+            exit 1
+          fi
+      - name: Provision restricted dependencies, then build offline
+        run: bash trusted/tools/ci/worker.sh legacy "$GITHUB_WORKSPACE/candidate"
