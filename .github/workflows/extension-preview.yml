@@ -1,0 +1,61 @@
+name: Extension preview offline checks
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'packages/extension-preview/**'
+      - '.github/workflows/extension-preview.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  offline:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      max-parallel: 2
+      matrix:
+        include:
+          - name: node22
+            image: node:22.22.3-bookworm@sha256:46e94f8cf91baab69a2deb3153e74eeffd73c20c7cc1d8432f5b96469eaa0322
+          - name: node26
+            image: node:26.7.0-bookworm@sha256:e929171d35b9df7773a3ec5b068e387fa109441dc90f91e6560af5d39b7e9bf1
+    name: offline-${{ matrix.name }}
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - name: Provision fixed worker image
+        env:
+          WORKER_IMAGE: ${{ matrix.image }}
+        run: docker pull "$WORKER_IMAGE"
+      - name: Run bounded credential-free offline tests
+        shell: bash
+        env:
+          WORKER_IMAGE: ${{ matrix.image }}
+        run: |
+          set -euo pipefail
+          test -d packages/extension-preview
+          test ! -L packages
+          test ! -L packages/extension-preview
+          docker run --rm --pull never \
+            --network none --read-only --cap-drop ALL --security-opt no-new-privileges \
+            --user 1000:1000 --cpus 2 --memory 1g --pids-limit 128 \
+            --tmpfs /tmp:rw,nosuid,nodev,size=512m \
+            --mount "type=bind,src=$GITHUB_WORKSPACE/packages/extension-preview,dst=/candidate,readonly" \
+            --workdir /candidate "$WORKER_IMAGE" \
+            /usr/bin/env -i PATH=/usr/local/bin:/usr/bin:/bin HOME=/tmp/empty \
+            /bin/sh -euc '
+              test "$(id -u)" = 1000
+              test ! -e /var/run/docker.sock
+              test ! -e /run/docker.sock
+              test ! -e /home/runner
+              test ! -e /github/home
+              test ! -e /candidate/.git
+              test "$(ls /sys/class/net)" = lo
+              mkdir -p "$HOME"
+              test -z "$(ls -A "$HOME")"
+              node --version
+              exec node --experimental-vm-modules --test tests/*.test.mjs
+            '
