@@ -93,16 +93,27 @@ jobs:
           import os, stat
           from pathlib import Path
           root = Path("/scratch/evidence")
-          allowed = {"ci.log", "prepare.log", "generate.log", "types.log", "unit.log", "browser.log", "versions.txt", "webgl.json", "browser-results.json", "desktop-light.png", "desktop-dark.png", "mobile.png", "mid-cue.png"}
+          build_allowed = {"ci.log", "prepare.log", "generate.log", "types.log", "unit.log", "versions.txt"}
+          browser_allowed = {"browser.log", "browser-version.json", "renderer-diagnostics.json", "webgl.json", "browser-results.json", "desktop-light.png", "desktop-dark.png", "mobile.png", "mid-cue.png"}
           total = 0
           assert root.is_dir() and not root.is_symlink()
           paths = list(root.iterdir())
-          assert len(paths) <= 40
+          assert len(paths) <= len(build_allowed) + 2
           for path in paths:
               st = path.lstat()
-              assert path.name in allowed and stat.S_ISREG(st.st_mode)
-              assert st.st_size <= 8 * 1024 * 1024
-              total += st.st_size
+              if path.name in {"chromium", "firefox"}:
+                  assert stat.S_ISDIR(st.st_mode)
+                  files = list(path.iterdir())
+                  assert len(files) <= len(browser_allowed)
+                  allowed = browser_allowed
+              else:
+                  files = [path]
+                  allowed = build_allowed
+              for file in files:
+                  st = file.lstat()
+                  assert file.name in allowed and stat.S_ISREG(st.st_mode)
+                  assert st.st_size <= 8 * 1024 * 1024
+                  total += st.st_size
           assert total <= 32 * 1024 * 1024
           VALIDATE
             mkdir -p evidence
@@ -205,19 +216,44 @@ jobs:
             timeout 300 ./node_modules/.bin/nuxt generate apps/extension-viewer > /scratch/evidence/generate.log 2>&1
             VIEWER_SOURCE_ROOT=/source/apps/extension-viewer timeout 120 node --experimental-vm-modules --test packages/extension-preview/tests/*.test.mjs apps/extension-viewer/tests/*.test.mjs > /scratch/evidence/unit.log 2>&1
           '
-          "${worker[@]}" --network none --shm-size 256m \
-            --env PLAYWRIGHT_BROWSERS_PATH=/ms-playwright \
-            --env FURBOMEK_PLAYWRIGHT=/scratch/browser/node_modules/playwright \
-            --env VIEWER_EVIDENCE=/scratch/evidence "$browser_image" bash -euc '
-              test "$(id -u)" = 1000
-              test ! -e /var/run/docker.sock
-              test "$(find /sys/class/net -mindepth 1 -maxdepth 1 | wc -l)" = 1
-              cd /scratch/source
-              timeout 180 node apps/extension-viewer/tests/browser-check.cjs > /scratch/evidence/browser.log 2>&1
-            '
+          browser_result=0
+          for browser in chromium firefox; do
+            # Separate transient workers and profiles; compile/provision only once per Node.
+            if "${worker[@]}" --network none --shm-size 256m \
+              --env PLAYWRIGHT_BROWSERS_PATH=/ms-playwright \
+              --env FURBOMEK_PLAYWRIGHT=/scratch/browser/node_modules/playwright \
+              --env VIEWER_BROWSER="$browser" --env VIEWER_EVIDENCE="/scratch/evidence/$browser" \
+              --env HOME="/scratch/browser-home-$browser" \
+              --env XDG_CACHE_HOME="/scratch/browser-cache-$browser" \
+              "$browser_image" bash -euc '
+                test "$(id -u)" = 1000
+                test ! -e /var/run/docker.sock
+                test "$(find /sys/class/net -mindepth 1 -maxdepth 1 | wc -l)" = 1
+                mkdir -p "$HOME" "$XDG_CACHE_HOME" "$VIEWER_EVIDENCE"
+                cd /scratch/source
+                if [[ "$VIEWER_BROWSER" == firefox ]]; then
+                  {
+                    command -v xvfb-run
+                    dpkg-query -W libgl1-mesa-dri libegl-mesa0 xvfb
+                    test -r /usr/lib/x86_64-linux-gnu/dri/swrast_dri.so
+                    LIBGL_ALWAYS_SOFTWARE=true GALLIUM_DRIVER=llvmpipe \
+                      timeout 240 xvfb-run -a -s "-screen 0 1600x1200x24 -nolisten tcp" \
+                      node apps/extension-viewer/tests/browser-check.cjs
+                  } > "$VIEWER_EVIDENCE/browser.log" 2>&1
+                else
+                  test "$VIEWER_BROWSER" = chromium
+                  timeout 240 node apps/extension-viewer/tests/browser-check.cjs > "$VIEWER_EVIDENCE/browser.log" 2>&1
+                fi
+              '; then
+              :
+            else
+              browser_result=1
+            fi
+          done
           export_evidence
           git -C "$GITHUB_WORKSPACE/candidate" rev-parse HEAD > evidence/candidate-sha.txt
           printf '%s\n' cdd9147fac9141fa0c75b5058f9dce46c7885188 > evidence/enforcement-sha.txt
+          test "$browser_result" = 0
       - name: Upload advisory evidence for source and screenshot review
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02

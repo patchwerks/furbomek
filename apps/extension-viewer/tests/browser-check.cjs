@@ -3,7 +3,9 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
 const http = require('node:http');
-const { chromium } = require(process.env.FURBOMEK_PLAYWRIGHT);
+const playwright = require(process.env.FURBOMEK_PLAYWRIGHT);
+const browserName = process.env.VIEWER_BROWSER || 'chromium';
+assert.ok(['chromium', 'firefox'].includes(browserName), 'VIEWER_BROWSER must be chromium or firefox');
 const root = path.resolve(__dirname, '../.output/public');
 const evidence = process.env.VIEWER_EVIDENCE || '/scratch/evidence';
 const fixture = fs.readFileSync(path.resolve(__dirname, '../../../packages/extension-preview/fixtures/reaction.json'));
@@ -35,10 +37,18 @@ const server = http.createServer((req, res) => {
   fs.createReadStream(file).pipe(res);
 });
 let browser;
+let browserVersion = null;
+let phase = 'launch';
+let unavailablePassed = false;
+fs.mkdirSync(evidence, { recursive: true });
 (async () => {
   await new Promise(resolve => server.listen(0, '127.0.0.1', resolve));
   const origin = `http://127.0.0.1:${server.address().port}`;
-  browser = await chromium.launch({ headless: true, args: ['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--disable-dev-shm-usage'] });
+  browser = await playwright[browserName].launch(browserName === 'chromium'
+    ? { headless: true, args: ['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--disable-dev-shm-usage'] }
+    : { headless: false }); // Firefox uses Xvfb/Mesa in the offline worker.
+  browserVersion = browser.version();
+  fs.writeFileSync(path.join(evidence, 'browser-version.json'), JSON.stringify({ browser: browserName, version: browserVersion }));
   const failures = [];
   const context = await browser.newContext({ viewport: { width: 1440, height: 1000 }, colorScheme: 'light' });
   await context.route('**/*', route => {
@@ -54,6 +64,16 @@ let browser;
     if (navigator.mediaDevices) navigator.mediaDevices.getUserMedia = forbidden('getUserMedia');
     navigator.sendBeacon = forbidden('sendBeacon');
   });
+  phase = 'WebGL-unavailable';
+  const unavailable = await context.newPage();
+  await unavailable.addInitScript(() => { const original = HTMLCanvasElement.prototype.getContext; HTMLCanvasElement.prototype.getContext = function(type, ...args) { return /webgl/.test(type) ? null : original.call(this, type, ...args); }; });
+  await unavailable.goto(origin);
+  await unavailable.getByTestId('renderer-error').waitFor({ state: 'visible' });
+  assert.equal(await unavailable.getByTestId('play-pause').isDisabled(), true);
+  assert.equal(await unavailable.locator('canvas').count(), 0);
+  unavailablePassed = true;
+  await unavailable.close();
+  phase = 'positive-WebGL';
   const page = await context.newPage();
   const errors = [];
   page.on('pageerror', error => errors.push(error.message));
@@ -62,6 +82,9 @@ let browser;
   const seek = async value => { await id('timeline').evaluate((input, next) => { input.value = String(next); input.dispatchEvent(new Event('input', { bubbles: true })); }, value); };
   const upload = (name, buffer) => id('import-file').setInputFiles({ name, mimeType: 'application/json', buffer });
   await page.goto(origin);
+  await page.waitForFunction(() => document.querySelector('[data-testid="viewer-canvas"]') || document.querySelector('[data-testid="renderer-error"]'));
+  const rendererFailure = await id('renderer-error').count() ? await text('renderer-error') : null;
+  fs.writeFileSync(path.join(evidence, 'renderer-diagnostics.json'), JSON.stringify({ browser: browserName, version: browserVersion, rendererFailure }));
   await id('viewer-canvas').waitFor({ state: 'visible' });
   assert.equal(await id('renderer-error').count(), 0);
   const gl = await id('viewer-canvas').evaluate(canvas => {
@@ -72,6 +95,72 @@ let browser;
   });
   assert.ok(gl && gl.width > 0 && gl.height > 0, 'actual WebGL drawing buffer required');
   fs.writeFileSync(path.join(evidence, 'webgl.json'), JSON.stringify(gl));
+  phase = 'keyboard';
+  const focusVisible = async locator => {
+    const result = await locator.evaluate(element => {
+      const style = getComputedStyle(element);
+      const rect = element.getBoundingClientRect();
+      return { focused: document.activeElement === element, visible: element.matches(':focus-visible'),
+        outline: parseFloat(style.outlineWidth), style: style.outlineStyle, color: style.outlineColor,
+        inViewport: rect.width > 0 && rect.height > 0 && rect.left >= 0 && rect.right <= innerWidth && rect.top >= 0 && rect.bottom <= innerHeight };
+    });
+    assert.ok(result.focused && result.visible && result.outline >= 2 && result.style !== 'none' && result.color !== 'transparent' && result.inViewport, `visible keyboard focus: ${JSON.stringify(result)}`);
+  };
+  const tabTo = async locator => {
+    for (let attempt = 0; attempt < 24; attempt++) {
+      await page.keyboard.press('Tab');
+      if (await locator.evaluate(element => document.activeElement === element)) { await focusVisible(locator); return; }
+    }
+    assert.fail('Tab could not reach the requested control');
+  };
+  const keyboardTraversal = async () => {
+    for (const name of ['import-file', 'load-example', 'play-pause', 'reset', 'timeline']) await tabTo(id(name));
+    await tabTo(page.locator('.viewer-footer a'));
+    await tabTo(id('import-file')); // Leave the footer and reach controls again: no trap.
+    await page.keyboard.press('Shift+Tab');
+    assert.equal(await id('import-file').evaluate(element => document.activeElement === element), false, 'reverse Tab leaves import');
+  };
+  await keyboardTraversal();
+  await tabTo(id('import-file'));
+  const chooserPromise = page.waitForEvent('filechooser');
+  await page.keyboard.press('Enter');
+  await (await chooserPromise).setFiles({ name: 'keyboard.json', mimeType: 'application/json', buffer: fixture });
+  await page.waitForFunction(() => document.querySelector('[data-testid="pack-name"]')?.textContent === 'keyboard.json');
+  await tabTo(id('load-example'));
+  await page.keyboard.press('Enter');
+  assert.match(await text('pack-name'), /Bundled reaction example/);
+  await tabTo(id('play-pause'));
+  await page.keyboard.press('Space');
+  await page.waitForFunction(() => Number(document.querySelector('[data-testid="position-ms"]').textContent) > 0);
+  await page.keyboard.press('Space');
+  assert.match(await text('playback-state'), /paused/);
+  const keyboardPaused = await text('position-ms');
+  await page.waitForTimeout(100);
+  assert.equal(await text('position-ms'), keyboardPaused);
+  await tabTo(id('reset'));
+  await page.keyboard.press('Enter');
+  assert.equal(await text('position-ms'), '0');
+  assert.match(await text('expression'), /neutral/);
+  await tabTo(id('timeline'));
+  await page.keyboard.press('Home');
+  await page.keyboard.press('ArrowRight');
+  assert.equal(await text('position-ms'), '1', 'native range arrow uses its 1 ms step');
+  assert.equal(await id('timeline').getAttribute('aria-valuetext'), '1 milliseconds');
+  await page.keyboard.press('ArrowLeft');
+  assert.equal(await text('position-ms'), '0');
+  await page.keyboard.press('End');
+  assert.equal(await text('position-ms'), '4000');
+  assert.match(await text('expression'), /neutral/);
+  await tabTo(id('play-pause'));
+  await page.keyboard.press('Enter');
+  await page.waitForFunction(() => Number(document.querySelector('[data-testid="position-ms"]').textContent) > 0 && Number(document.querySelector('[data-testid="position-ms"]').textContent) < 4000);
+  await tabTo(id('reset'));
+  await page.keyboard.press('Space');
+  assert.equal(await text('position-ms'), '0');
+  assert.match(await text('playback-state'), /paused/);
+  assert.match(await text('expression'), /neutral/);
+  await page.evaluate(() => { document.activeElement.blur(); window.scrollTo(0, 0); });
+  phase = 'existing-browser-regressions';
   assert.match(await text('expression'), /neutral/);
   await page.screenshot({ animations: 'disabled', path: path.join(evidence, 'desktop-light.png'), fullPage: true });
   const neutralPixels = await id('viewer-canvas').screenshot({ animations: 'disabled' });
@@ -186,6 +275,8 @@ let browser;
   await page.setViewportSize({ width: 390, height: 844 });
   await page.screenshot({ animations: 'disabled', path: path.join(evidence, 'mobile.png'), fullPage: true });
   assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), 'no mobile horizontal overflow');
+  await keyboardTraversal();
+  assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), 'keyboard focus causes no mobile horizontal overflow');
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await seek(1000);
   assert.match(await text('expression'), /curious/, 'reduced motion preserves semantic state');
@@ -213,13 +304,11 @@ let browser;
   });
   await unmounted.waitForFunction(() => window.__lastGL.isContextLost());
   assert.equal(await unmounted.locator('canvas').count(), 0, 'unmount removes renderer and releases context');
-  const unavailable = await context.newPage();
-  await unavailable.addInitScript(() => { const original = HTMLCanvasElement.prototype.getContext; HTMLCanvasElement.prototype.getContext = function(type, ...args) { return /webgl/.test(type) ? null : original.call(this, type, ...args); }; });
-  await unavailable.goto(origin);
-  await unavailable.getByTestId('renderer-error').waitFor({ state: 'visible' });
-  assert.equal(await unavailable.getByTestId('play-pause').isDisabled(), true);
-  fs.writeFileSync(path.join(evidence, 'browser-results.json'), JSON.stringify({ status: 'passed', outbound: failures, errors, cases: ['WebGL', 'seek', 'play-pause', 'reset', 'end', 'invalid', 'unauthorized-event', 'read-failure', 'reload-example', 'oversize', 'HTML-filename', 'reduced-motion', 'hidden', 'context-loss', 'WebGL-unavailable', 'stale-import', 'unmount', 'rendered-cue', 'acknowledge-transform', 'reduced-motion-pixels', 'dark-hover-example-contrast', 'dark-license-link-contrast', 'first-frame-clock-order'] }, null, 2));
-})().catch(error => { console.error(error); process.exitCode = 1; }).finally(async () => {
+  fs.writeFileSync(path.join(evidence, 'browser-results.json'), JSON.stringify({ status: 'passed', browser: browserName, browserVersion, outbound: failures, errors, cases: ['WebGL', 'seek', 'play-pause', 'reset', 'end', 'invalid', 'unauthorized-event', 'read-failure', 'reload-example', 'oversize', 'HTML-filename', 'reduced-motion', 'hidden', 'context-loss', 'WebGL-unavailable', 'stale-import', 'unmount', 'rendered-cue', 'acknowledge-transform', 'reduced-motion-pixels', 'dark-hover-example-contrast', 'dark-license-link-contrast', 'first-frame-clock-order', 'keyboard-tab-focus', 'keyboard-file-import', 'keyboard-example', 'keyboard-space-enter-transport', 'keyboard-native-range', 'keyboard-mobile-no-trap'] }, null, 2));
+})().catch(error => {
+  fs.writeFileSync(path.join(evidence, 'browser-results.json'), JSON.stringify({ status: 'failed', browser: browserName, browserVersion, phase, unavailablePassed, error: String(error) }, null, 2));
+  console.error(error); process.exitCode = 1;
+}).finally(async () => {
   if (browser) await browser.close();
   server.close();
 });

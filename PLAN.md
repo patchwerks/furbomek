@@ -1094,8 +1094,14 @@ simulation. Root provider UI and all live integrations remain excluded. Source
 Independent PR 41/42 acceptance, retargeting to accepted main and fresh checks
 remain open; this does not close issue 32. See the [candidate record](docs/operations/extension-viewer-2026-11-02.md).
 
+A [compatibility follow-up](docs/operations/extension-viewer-compatibility-2026-11-02.md)
+proposes Firefox/Xvfb/Mesa and actual keyboard-input coverage using the same two
+Node builds. It is not yet runtime-qualified and does not change the acceptance
+status above.
+
 ## Changelog
 
+- 2026-11-02: Proposed bounded Firefox and keyboard regression qualification; actual hosted results remain pending.
 - 2026-11-02: Added the isolated issue 32 browser presentation viewer candidate with an original procedural six-leg proxy; bounded hosted checks and coordinator visual review passed, while independent acceptance and main integration remain pending.
 
 - 2026-11-02: Added the issue 32 data-only extension preview candidate scope; that first slice excludes the viewer and live integration.
