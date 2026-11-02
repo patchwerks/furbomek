@@ -48,7 +48,9 @@ function seekInput(event) { seek(event.target.value); }
 function tick(now) {
   frame = 0;
   if (!alive || !playing.value || !pack.value || !ready.value) return;
-  const next = now - anchor;
+  // The first RAF timestamp can precede the click-time performance.now() anchor.
+  // Preserve the valid prior position so initial/resumed playback never steps back.
+  const next = Math.max(position.value, now - anchor);
   if (next >= duration.value) { reset(); return; }
   position.value = next;
   sample.value = samplePack(pack.value, next);
