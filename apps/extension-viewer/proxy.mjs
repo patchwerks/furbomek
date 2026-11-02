@@ -27,13 +27,30 @@ export function createProxy(canvas, onLost) {
     parent.add(mesh);
     return mesh;
   }
+  function segment(start, end) {
+    const from = new THREE.Vector3(...start);
+    const to = new THREE.Vector3(...end);
+    const direction = new THREE.Vector3().subVectors(to, from);
+    const geometry = new THREE.CylinderGeometry(0.095, 0.095, direction.length(), 16);
+    geometries.push(geometry);
+    const mesh = new THREE.Mesh(geometry, darkMaterial);
+    mesh.position.copy(from).add(to).multiplyScalar(0.5);
+    mesh.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), direction.normalize());
+    model.add(mesh);
+  }
   ellipsoid(model, bodyMaterial, [0, 0.3, 0], [0.9, 0.45, 1.05]);
-  // Exactly six static legs. No gait, joint actuation, or imported asset.
+  // Exactly six connected static legs. Endpoint joints overlap both segments.
+  // These are fixed meshes, with no gait, joint actuation, or imported asset.
   for (const side of [-1, 1]) {
     for (const z of [-0.72, 0, 0.72]) {
-      const leg = ellipsoid(model, darkMaterial, [side * 1.05, -0.05, z], [0.65, 0.13, 0.16]);
-      leg.rotation.z = side * 0.35;
-      ellipsoid(model, bodyMaterial, [side * 1.55, -0.32, z], [0.18, 0.13, 0.25]);
+      const attachment = [side * 0.58, 0.25, z];
+      const knee = [side * 1.1, -0.15, z];
+      const foot = [side * 1.45, -0.55, z];
+      segment(attachment, knee);
+      segment(knee, foot);
+      ellipsoid(model, bodyMaterial, attachment, [0.13, 0.13, 0.13]);
+      ellipsoid(model, darkMaterial, knee, [0.13, 0.13, 0.13]);
+      ellipsoid(model, bodyMaterial, foot, [0.18, 0.13, 0.25]);
     }
   }
   const head = new THREE.Group();

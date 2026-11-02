@@ -46,8 +46,9 @@ entry. This is a presentation boundary, not a hostile-browser sandbox.
 
 ## Geometry and design provenance
 
-The proxy is original abstract gray ellipsoid geometry with exactly six static
-legs. Curious tilts the head; acknowledge pitches and lifts the whole model.
+The proxy is original abstract gray ellipsoid and cylinder geometry with exactly
+six connected static two-segment legs and overlapping endpoint joints and feet.
+Curious tilts the head; acknowledge pitches and lifts the whole model.
 There is no gait, rig, physics, measured geometry, source photograph or imported
 model. The page explicitly labels Procedural proxy, Presentation preview, and
 No physical simulation. Existing project assets remain excluded pending rights.
