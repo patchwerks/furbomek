@@ -1,0 +1,19 @@
+{
+  "status": "source candidate; independent acceptance pending",
+  "source": "proxy.mjs",
+  "sha256": "ce341fb601b478e576e06d209a288cfd4ee9478e7c0c05f6a6aa6bd46fa98868",
+  "bytes": 4252,
+  "created": "2026-11-02",
+  "provenance": "Original project-authored procedural ellipsoid and cylinder geometry for the issue 32 presentation preview; no downloaded or generated character asset.",
+  "anatomy": "Six connected static two-segment legs with overlapping endpoint joints and feet; abstract gray body and head; no bow, rig, gait or physical simulation.",
+  "units": "Arbitrary scene units; no measured physical dimensions.",
+  "presentation": "Curious head tilt and acknowledge whole-model pitch/bob; all transforms suppressed under reduced motion.",
+  "references": "Photo Atlas consulted before selection; no suitable functional asset selected or copied. Existing character photographs and models excluded because reuse rights remain TBD.",
+  "renderer": {
+    "package": "three",
+    "version": "0.187.0",
+    "license": "MIT",
+    "notice": "public/THREE-LICENSE.txt",
+    "licenseSource": "https://raw.githubusercontent.com/mrdoob/three.js/7e89746a687bb88271253698fa108b1dd59825d0/LICENSE"
+  }
+}
