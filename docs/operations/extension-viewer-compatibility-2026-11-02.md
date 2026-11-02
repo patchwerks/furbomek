@@ -57,7 +57,7 @@ Six additional named scenarios exercise actual keyboard input:
 
 - Tab reaches import, example, transport, timeline and footer, with a visible
   focus outline and a control inside the viewport; reverse Tab leaves import.
-- Enter opens the native file chooser and imports the real bundled fixture.
+- Space opens the native file chooser and imports the real bundled fixture.
 - Enter restores the bundled example.
 - Space/Enter activate play, pause and reset; paused time stays fixed and reset
   returns to neutral at zero.
@@ -95,3 +95,38 @@ accessibility claim is authorized by this proposal alone.
 Rollback is removal of this test/workflow follow-up; it installs or deploys no
 application or hardware changes. PR acceptance, retargeting to accepted main and
 issue closure remain separate gates.
+
+
+## First hosted probe and bounded correction
+
+**Observed:** [run 41396867865](https://github.com/patchwerks/furbomek/actions/runs/41396867865)
+at source `a9fdf722ed3fa7e09957ff79e1d1b44e62c78169` (verified from each
+artifact's `candidate-sha.txt`) failed both Node jobs. The artifact-name SHA
+`e510c5930c41a61bd7dc49be596671b8889c7411` identifies the workflow merge ref,
+not the tested source checkout.
+Firefox 157.0 in each job passed the deliberately unavailable WebGL path and
+created a real WebGL2 drawing buffer (876×570), reporting `llvmpipe, or similar`.
+The worker recorded Mesa 25.2.8 and Xvfb 21.1.12. This establishes a real software
+WebGL context, not full viewer compatibility: Firefox then failed initial Tab
+traversal before the original regression suite completed. Chromium Node 26 timed
+out opening the file chooser with Enter. Chromium Node 22 reached the original
+regressions and screenshots, then failed the immediate narrow-viewport focus
+visibility assertion. No job passed the combined suite.
+
+**Proposed focused retry:** run all original 23 regression scenarios before
+keyboard coverage, then open a fresh 1440×1000 page and bring that page to the
+front. Keyboard import uses Space. Native focus scrolling gets a bounded two
+seconds to settle; tests do not force focus or scroll a control into view. Failure
+diagnostics now include target and active control identities, rectangles,
+viewport, scroll coordinates, document focus and each attempted Tab destination.
+The narrow viewport traversal remains mandatory. A keyboard failure reports any
+completed baseline scenarios separately while keeping overall status failed.
+No production UI, browser preferences or rendering checks changed.
+
+The retry is pending publisher review and hosted execution. If the same failure
+recurs, stop and reassess the approach rather than extending a retry loop.
+
+## Changelog
+
+- 2026-11-02: Recorded the failed first compatibility probe and prepared one
+  bounded keyboard diagnostic correction; no compatibility acceptance claimed.

@@ -40,6 +40,94 @@ let browser;
 let browserVersion = null;
 let phase = 'launch';
 let unavailablePassed = false;
+let baselineCompleted = false;
+let keyboardDiagnostics = null;
+const baselineCases = ['WebGL', 'seek', 'play-pause', 'reset', 'end', 'invalid', 'unauthorized-event', 'read-failure', 'reload-example', 'oversize', 'HTML-filename', 'reduced-motion', 'hidden', 'context-loss', 'WebGL-unavailable', 'stale-import', 'unmount', 'rendered-cue', 'acknowledge-transform', 'reduced-motion-pixels', 'dark-hover-example-contrast', 'dark-license-link-contrast', 'first-frame-clock-order'];
+async function runKeyboard(page) {
+  const id = name => page.getByTestId(name);
+  const text = name => id(name).textContent();
+  await page.bringToFront();
+  const inspectFocus = locator => locator.evaluate(element => {
+    const describe = node => node ? { tag: node.tagName, id: node.id, testid: node.getAttribute('data-testid'), text: node.textContent?.trim().slice(0, 100) } : null;
+    const style = getComputedStyle(element);
+    const rect = element.getBoundingClientRect();
+    return { target: describe(element), active: describe(document.activeElement), focused: document.activeElement === element,
+      visible: element.matches(':focus-visible'), outline: parseFloat(style.outlineWidth), style: style.outlineStyle, color: style.outlineColor,
+      rect: { left: rect.left, right: rect.right, top: rect.top, bottom: rect.bottom, width: rect.width, height: rect.height },
+      viewport: { width: innerWidth, height: innerHeight }, scroll: { x: scrollX, y: scrollY }, documentFocused: document.hasFocus(),
+      inViewport: rect.width > 0 && rect.height > 0 && rect.left >= 0 && rect.right <= innerWidth && rect.top >= 0 && rect.bottom <= innerHeight };
+  });
+  const focusVisible = async locator => {
+    // Native focus scrolling can animate under the page's CSS. Observe it, never force scrolling.
+    const deadline = Date.now() + 2000;
+    do {
+      keyboardDiagnostics.focus = await inspectFocus(locator);
+      const result = keyboardDiagnostics.focus;
+      if (result.focused && result.visible && result.outline >= 2 && result.style !== 'none' && result.color !== 'transparent' && result.inViewport) return;
+      await page.waitForTimeout(25);
+    } while (Date.now() < deadline);
+    assert.fail(`visible keyboard focus: ${JSON.stringify(keyboardDiagnostics)}`);
+  };
+  const tabTo = async locator => {
+    keyboardDiagnostics = { before: await inspectFocus(locator), tabs: [] };
+    for (let attempt = 0; attempt < 24; attempt++) {
+      await page.keyboard.press('Tab');
+      const result = await inspectFocus(locator);
+      keyboardDiagnostics.tabs.push(result);
+      if (result.focused) { await focusVisible(locator); return; }
+    }
+    assert.fail(`Tab could not reach requested control: ${JSON.stringify(keyboardDiagnostics)}`);
+  };
+  const keyboardTraversal = async () => {
+    for (const name of ['import-file', 'load-example', 'play-pause', 'reset', 'timeline']) await tabTo(id(name));
+    await tabTo(page.locator('.viewer-footer a'));
+    await tabTo(id('import-file')); // Leave the footer and reach controls again: no trap.
+    await page.keyboard.press('Shift+Tab');
+    assert.equal(await id('import-file').evaluate(element => document.activeElement === element), false, 'reverse Tab leaves import');
+  };
+  await keyboardTraversal();
+  await tabTo(id('import-file'));
+  const [chooser] = await Promise.all([page.waitForEvent('filechooser'), page.keyboard.press('Space')]);
+  await chooser.setFiles({ name: 'keyboard.json', mimeType: 'application/json', buffer: fixture });
+  await page.waitForFunction(() => document.querySelector('[data-testid="pack-name"]')?.textContent === 'keyboard.json');
+  await tabTo(id('load-example'));
+  await page.keyboard.press('Enter');
+  assert.match(await text('pack-name'), /Bundled reaction example/);
+  await tabTo(id('play-pause'));
+  await page.keyboard.press('Space');
+  await page.waitForFunction(() => Number(document.querySelector('[data-testid="position-ms"]').textContent) > 0);
+  await page.keyboard.press('Space');
+  assert.match(await text('playback-state'), /paused/);
+  const keyboardPaused = await text('position-ms');
+  await page.waitForTimeout(100);
+  assert.equal(await text('position-ms'), keyboardPaused);
+  await tabTo(id('reset'));
+  await page.keyboard.press('Enter');
+  assert.equal(await text('position-ms'), '0');
+  assert.match(await text('expression'), /neutral/);
+  await tabTo(id('timeline'));
+  await page.keyboard.press('Home');
+  await page.keyboard.press('ArrowRight');
+  assert.equal(await text('position-ms'), '1', 'native range arrow uses its 1 ms step');
+  assert.equal(await id('timeline').getAttribute('aria-valuetext'), '1 milliseconds');
+  await page.keyboard.press('ArrowLeft');
+  assert.equal(await text('position-ms'), '0');
+  await page.keyboard.press('End');
+  assert.equal(await text('position-ms'), '4000');
+  assert.match(await text('expression'), /neutral/);
+  await tabTo(id('play-pause'));
+  await page.keyboard.press('Enter');
+  await page.waitForFunction(() => Number(document.querySelector('[data-testid="position-ms"]').textContent) > 0 && Number(document.querySelector('[data-testid="position-ms"]').textContent) < 4000);
+  await tabTo(id('reset'));
+  await page.keyboard.press('Space');
+  assert.equal(await text('position-ms'), '0');
+  assert.match(await text('playback-state'), /paused/);
+  assert.match(await text('expression'), /neutral/);
+  await page.setViewportSize({ width: 390, height: 844 });
+  await keyboardTraversal();
+  assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), 'keyboard focus causes no mobile horizontal overflow');
+}
+
 fs.mkdirSync(evidence, { recursive: true });
 (async () => {
   await new Promise(resolve => server.listen(0, '127.0.0.1', resolve));
@@ -95,71 +183,6 @@ fs.mkdirSync(evidence, { recursive: true });
   });
   assert.ok(gl && gl.width > 0 && gl.height > 0, 'actual WebGL drawing buffer required');
   fs.writeFileSync(path.join(evidence, 'webgl.json'), JSON.stringify(gl));
-  phase = 'keyboard';
-  const focusVisible = async locator => {
-    const result = await locator.evaluate(element => {
-      const style = getComputedStyle(element);
-      const rect = element.getBoundingClientRect();
-      return { focused: document.activeElement === element, visible: element.matches(':focus-visible'),
-        outline: parseFloat(style.outlineWidth), style: style.outlineStyle, color: style.outlineColor,
-        inViewport: rect.width > 0 && rect.height > 0 && rect.left >= 0 && rect.right <= innerWidth && rect.top >= 0 && rect.bottom <= innerHeight };
-    });
-    assert.ok(result.focused && result.visible && result.outline >= 2 && result.style !== 'none' && result.color !== 'transparent' && result.inViewport, `visible keyboard focus: ${JSON.stringify(result)}`);
-  };
-  const tabTo = async locator => {
-    for (let attempt = 0; attempt < 24; attempt++) {
-      await page.keyboard.press('Tab');
-      if (await locator.evaluate(element => document.activeElement === element)) { await focusVisible(locator); return; }
-    }
-    assert.fail('Tab could not reach the requested control');
-  };
-  const keyboardTraversal = async () => {
-    for (const name of ['import-file', 'load-example', 'play-pause', 'reset', 'timeline']) await tabTo(id(name));
-    await tabTo(page.locator('.viewer-footer a'));
-    await tabTo(id('import-file')); // Leave the footer and reach controls again: no trap.
-    await page.keyboard.press('Shift+Tab');
-    assert.equal(await id('import-file').evaluate(element => document.activeElement === element), false, 'reverse Tab leaves import');
-  };
-  await keyboardTraversal();
-  await tabTo(id('import-file'));
-  const chooserPromise = page.waitForEvent('filechooser');
-  await page.keyboard.press('Enter');
-  await (await chooserPromise).setFiles({ name: 'keyboard.json', mimeType: 'application/json', buffer: fixture });
-  await page.waitForFunction(() => document.querySelector('[data-testid="pack-name"]')?.textContent === 'keyboard.json');
-  await tabTo(id('load-example'));
-  await page.keyboard.press('Enter');
-  assert.match(await text('pack-name'), /Bundled reaction example/);
-  await tabTo(id('play-pause'));
-  await page.keyboard.press('Space');
-  await page.waitForFunction(() => Number(document.querySelector('[data-testid="position-ms"]').textContent) > 0);
-  await page.keyboard.press('Space');
-  assert.match(await text('playback-state'), /paused/);
-  const keyboardPaused = await text('position-ms');
-  await page.waitForTimeout(100);
-  assert.equal(await text('position-ms'), keyboardPaused);
-  await tabTo(id('reset'));
-  await page.keyboard.press('Enter');
-  assert.equal(await text('position-ms'), '0');
-  assert.match(await text('expression'), /neutral/);
-  await tabTo(id('timeline'));
-  await page.keyboard.press('Home');
-  await page.keyboard.press('ArrowRight');
-  assert.equal(await text('position-ms'), '1', 'native range arrow uses its 1 ms step');
-  assert.equal(await id('timeline').getAttribute('aria-valuetext'), '1 milliseconds');
-  await page.keyboard.press('ArrowLeft');
-  assert.equal(await text('position-ms'), '0');
-  await page.keyboard.press('End');
-  assert.equal(await text('position-ms'), '4000');
-  assert.match(await text('expression'), /neutral/);
-  await tabTo(id('play-pause'));
-  await page.keyboard.press('Enter');
-  await page.waitForFunction(() => Number(document.querySelector('[data-testid="position-ms"]').textContent) > 0 && Number(document.querySelector('[data-testid="position-ms"]').textContent) < 4000);
-  await tabTo(id('reset'));
-  await page.keyboard.press('Space');
-  assert.equal(await text('position-ms'), '0');
-  assert.match(await text('playback-state'), /paused/);
-  assert.match(await text('expression'), /neutral/);
-  await page.evaluate(() => { document.activeElement.blur(); window.scrollTo(0, 0); });
   phase = 'existing-browser-regressions';
   assert.match(await text('expression'), /neutral/);
   await page.screenshot({ animations: 'disabled', path: path.join(evidence, 'desktop-light.png'), fullPage: true });
@@ -275,8 +298,6 @@ fs.mkdirSync(evidence, { recursive: true });
   await page.setViewportSize({ width: 390, height: 844 });
   await page.screenshot({ animations: 'disabled', path: path.join(evidence, 'mobile.png'), fullPage: true });
   assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), 'no mobile horizontal overflow');
-  await keyboardTraversal();
-  assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), 'keyboard focus causes no mobile horizontal overflow');
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await seek(1000);
   assert.match(await text('expression'), /curious/, 'reduced motion preserves semantic state');
@@ -304,9 +325,21 @@ fs.mkdirSync(evidence, { recursive: true });
   });
   await unmounted.waitForFunction(() => window.__lastGL.isContextLost());
   assert.equal(await unmounted.locator('canvas').count(), 0, 'unmount removes renderer and releases context');
-  fs.writeFileSync(path.join(evidence, 'browser-results.json'), JSON.stringify({ status: 'passed', browser: browserName, browserVersion, outbound: failures, errors, cases: ['WebGL', 'seek', 'play-pause', 'reset', 'end', 'invalid', 'unauthorized-event', 'read-failure', 'reload-example', 'oversize', 'HTML-filename', 'reduced-motion', 'hidden', 'context-loss', 'WebGL-unavailable', 'stale-import', 'unmount', 'rendered-cue', 'acknowledge-transform', 'reduced-motion-pixels', 'dark-hover-example-contrast', 'dark-license-link-contrast', 'first-frame-clock-order', 'keyboard-tab-focus', 'keyboard-file-import', 'keyboard-example', 'keyboard-space-enter-transport', 'keyboard-native-range', 'keyboard-mobile-no-trap'] }, null, 2));
+  assert.deepEqual(failures, [], 'baseline has no outbound requests');
+  assert.deepEqual(errors, [], 'baseline has no uncaught browser errors');
+  baselineCompleted = true;
+  phase = 'keyboard';
+  const keyboardPage = await context.newPage();
+  keyboardPage.on('pageerror', error => errors.push(error.message));
+  await keyboardPage.goto(origin);
+  await keyboardPage.waitForFunction(() => document.querySelector('[data-testid="play-pause"]')?.disabled === false);
+  await runKeyboard(keyboardPage);
+  assert.deepEqual(await keyboardPage.evaluate(() => window.__capabilityCalls), []);
+  assert.deepEqual(failures, [], 'keyboard has no outbound requests');
+  assert.deepEqual(errors, [], 'keyboard has no uncaught browser errors');
+  fs.writeFileSync(path.join(evidence, 'browser-results.json'), JSON.stringify({ status: 'passed', browser: browserName, browserVersion, outbound: failures, errors, cases: [...baselineCases, 'keyboard-tab-focus', 'keyboard-file-import', 'keyboard-example', 'keyboard-space-enter-transport', 'keyboard-native-range', 'keyboard-mobile-no-trap'] }, null, 2));
 })().catch(error => {
-  fs.writeFileSync(path.join(evidence, 'browser-results.json'), JSON.stringify({ status: 'failed', browser: browserName, browserVersion, phase, unavailablePassed, error: String(error) }, null, 2));
+  fs.writeFileSync(path.join(evidence, 'browser-results.json'), JSON.stringify({ status: 'failed', browser: browserName, browserVersion, phase, unavailablePassed, completedBaselineCases: baselineCompleted ? baselineCases : [], keyboardDiagnostics, error: String(error) }, null, 2));
   console.error(error); process.exitCode = 1;
 }).finally(async () => {
   if (browser) await browser.close();
