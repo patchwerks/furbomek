@@ -1084,16 +1084,18 @@ Those boundaries are what make zero-human-in-the-loop operation technically cred
 
 ## Issue 32 browser presentation candidate, 2026-11-02
 
-**Proposed, source-authored; qualification pending:** `apps/extension-viewer/`
+**Candidate; bounded hosted checks observed:** `apps/extension-viewer/`
 adds an isolated local-JSON presentation workbench consuming the unchanged
 PR 41 parser/sampler. The original gray six-leg procedural proxy has static legs,
 head expression tilt and whole-model reaction motion; it is not a physical
-simulation. Root provider UI and all live integrations remain excluded. PR 41
-review, hosted browser/build evidence and independent viewer acceptance remain
-open; this does not close issue 32. See the [candidate record](docs/operations/extension-viewer-2026-11-02.md).
+simulation. Root provider UI and all live integrations remain excluded. Source
+`782bee3f12eff3872bf5b72dc46ebabe6ae823f4` passed Node 22/26 build/type checks,
+62 tests and 23 browser cases per job, plus bounded coordinator visual review.
+Independent PR 41/42 acceptance, retargeting to accepted main and fresh checks
+remain open; this does not close issue 32. See the [candidate record](docs/operations/extension-viewer-2026-11-02.md).
 
 ## Changelog
 
-- 2026-11-02: Added the isolated issue 32 browser presentation viewer candidate with an original procedural six-leg proxy; hosted qualification and independent acceptance remain pending.
+- 2026-11-02: Added the isolated issue 32 browser presentation viewer candidate with an original procedural six-leg proxy; bounded hosted checks and coordinator visual review passed, while independent acceptance and main integration remain pending.
 
-- 2026-11-02: Added the issue 32 data-only extension preview candidate scope; future viewer and live integration remain unimplemented.
+- 2026-11-02: Added the issue 32 data-only extension preview candidate scope; that first slice excludes the viewer and live integration.
