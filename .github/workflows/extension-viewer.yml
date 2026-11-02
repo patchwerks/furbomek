@@ -203,7 +203,7 @@ jobs:
             timeout 120 ./node_modules/.bin/nuxt prepare apps/extension-viewer > /scratch/evidence/prepare.log 2>&1
             timeout 120 ./node_modules/.bin/vue-tsc --noEmit -p apps/extension-viewer/tsconfig.json > /scratch/evidence/types.log 2>&1
             timeout 300 ./node_modules/.bin/nuxt generate apps/extension-viewer > /scratch/evidence/generate.log 2>&1
-            timeout 120 node --experimental-vm-modules --test packages/extension-preview/tests/*.test.mjs apps/extension-viewer/tests/*.test.mjs > /scratch/evidence/unit.log 2>&1
+            VIEWER_SOURCE_ROOT=/source/apps/extension-viewer timeout 120 node --experimental-vm-modules --test packages/extension-preview/tests/*.test.mjs apps/extension-viewer/tests/*.test.mjs > /scratch/evidence/unit.log 2>&1
           '
           "${worker[@]}" --network none --shm-size 256m \
             --env PLAYWRIGHT_BROWSERS_PATH=/ms-playwright \

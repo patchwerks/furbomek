@@ -3,7 +3,7 @@ export default defineNuxtConfig({
   ssr: false,
   devtools: { enabled: false },
   modules: [],
-  css: ['bootstrap/dist/css/bootstrap.min.css', './viewer.css'],
+  css: ['bootstrap/dist/css/bootstrap.min.css', '~/viewer.css'],
   typescript: { strict: true, typeCheck: true },
   app: { head: {
     title: 'Furb-o-Mek · Presentation preview',
