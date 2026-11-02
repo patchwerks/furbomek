@@ -31,7 +31,7 @@ h2 { font-size: 16px; font-weight: 650; margin: 0 0 14px; }
 .inspector-section { padding: 22px; }
 .inspector-section + .inspector-section { border-top: 1px solid var(--line); }
 .form-control { font-size: 13px; background-color: var(--surface); color: var(--ink); border-color: var(--line); }
-.form-control::file-selector-button { appearance: none; background-color: var(--stage); color: var(--ink); }
+.form-control::file-selector-button { appearance: none; transition: none; background-color: var(--stage); color: var(--ink); }
 .form-control:hover:not(:disabled):not([readonly])::file-selector-button { background-color: var(--line); color: var(--ink); }
 .example-button { --bs-btn-color: var(--accent); --bs-btn-hover-color: var(--accent); --bs-btn-active-color: var(--accent); --bs-btn-disabled-color: var(--muted); padding: 12px 0; color: var(--accent); font-size: 13px; }
 .pack-details { display: flex; flex-direction: column; gap: 5px; font-size: 12px; color: var(--muted); overflow-wrap: anywhere; }

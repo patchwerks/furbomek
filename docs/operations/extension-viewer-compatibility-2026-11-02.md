@@ -198,12 +198,12 @@ new CSS or replace the new regression check.
   final acceptance remain pending.
 
 
-## Native paint mismatch after computed-contrast checks
+## Raster mismatch after computed-contrast checks
 
 **Observed:** source `758d425c1999d64ee07fceaa78a6762029eaab9e` in
 [run 41406368411](https://github.com/patchwerks/furbomek/actions/runs/41406368411)
 passed the two build/type/62-test jobs and all 30 cases in each browser/build
-combination. Coordinator pixel review nevertheless found a Firefox native-paint
+combination. Coordinator pixel review nevertheless found a Firefox computed-versus-raster
 mismatch: the dark desktop file button's dominant sampled background was
 RGB(116, 123, 130), while computed hover CSS reported RGB(73, 82, 91).
 The Chromium sampled background was RGB(72, 81, 90). The Firefox result does not
@@ -226,3 +226,29 @@ checks and actual screenshot pixels and label readability are reviewed.
 
 - 2026-11-02: Recorded the computed-versus-rendered Firefox contrast mismatch;
   prepared native-appearance suppression and bounded hover screenshot evidence.
+
+
+## Raster instability and bounded transition correction
+
+**Observed:** the appearance-only follow-up passed build/type/62-test checks and
+all 30 browser cases but did not pass coordinator raster review. Across the two
+Node artifacts, Firefox hovered-button backgrounds were RGB(174, 178, 182) and
+RGB(198, 202, 206), yielding approximately 1.865:1 and 1.441:1 against the light
+label. Chromium backgrounds varied too: RGB(92, 100, 108) and RGB(101, 107, 114),
+approximately 5.25:1 and 4.71:1. Computed colors still reported approximately
+6.95:1. These are observed raster variations; native-overlay causality was not
+proven by the earlier evidence. Appearance suppression alone did not resolve it.
+
+**Final bounded correction pending pixel verification:** set `transition: none`
+on the file-selector button so theme and hover colors change immediately using
+the existing palette. Retain `appearance: none`, opaque-color contrast checks,
+actual hover, all 30 cases and the real hover PNG. Record and assert computed
+`transitionProperty === 'none'`. In-flight color interpolation is a hypothesis
+consistent with the varying raster samples, not an established diagnosis.
+Qualification still requires the next hosted results and independently reviewed
+actual PNG contrast. No further causal or visual-pass claim follows from a green
+computed-style check alone.
+
+- 2026-11-02: Corrected the earlier native-overlay interpretation, recorded the
+  appearance-only raster failures, and prepared immediate file-button theme and
+  hover colors for final bounded pixel verification.
