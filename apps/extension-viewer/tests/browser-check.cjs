@@ -8,6 +8,23 @@ const root = path.resolve(__dirname, '../.output/public');
 const evidence = process.env.VIEWER_EVIDENCE || '/scratch/evidence';
 const fixture = fs.readFileSync(path.resolve(__dirname, '../../../packages/extension-preview/fixtures/reaction.json'));
 const mime = { '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css', '.json': 'application/json', '.svg': 'image/svg+xml' };
+function contrastRatio(foreground, background) {
+  const luminance = color => {
+    const match = /^rgba?\(([^)]+)\)$/.exec(color);
+    assert.ok(match, `expected computed sRGB color, got ${color}`);
+    const channels = match[1].split(/[,\s/]+/).filter(Boolean).map(Number);
+    assert.ok(channels.length === 3 || (channels.length === 4 && channels[3] === 1), `expected opaque color: ${color}`);
+    const linear = channels.slice(0, 3).map(value => {
+      assert.ok(Number.isFinite(value) && value >= 0 && value <= 255);
+      const srgb = value / 255;
+      return srgb <= 0.04045 ? srgb / 12.92 : ((srgb + 0.055) / 1.055) ** 2.4;
+    });
+    return linear[0] * 0.2126 + linear[1] * 0.7152 + linear[2] * 0.0722;
+  };
+  const a = luminance(foreground), b = luminance(background);
+  return (Math.max(a, b) + 0.05) / (Math.min(a, b) + 0.05);
+}
+
 const server = http.createServer((req, res) => {
   const pathname = decodeURIComponent(new URL(req.url, 'http://localhost').pathname);
   let file = path.resolve(root, '.' + pathname);
@@ -140,7 +157,17 @@ let browser;
   await seek(1000);
   assert.match(await text('expression'), /curious/);
   await page.emulateMedia({ colorScheme: 'dark' });
+  await id('load-example').hover();
   await page.screenshot({ animations: 'disabled', path: path.join(evidence, 'desktop-dark.png'), fullPage: true });
+  // The preceding screenshot fast-forwards finite CSS transitions before sampling.
+  const linkColors = await page.evaluate(() => ({
+    example: getComputedStyle(document.querySelector('[data-testid="load-example"]')).color,
+    inspector: getComputedStyle(document.querySelector('.inspector')).backgroundColor,
+    notice: getComputedStyle(document.querySelector('.viewer-footer a')).color,
+    page: getComputedStyle(document.body).backgroundColor,
+  }));
+  assert.ok(contrastRatio(linkColors.example, linkColors.inspector) >= 4.5, `dark hovered example contrast: ${JSON.stringify(linkColors)}`);
+  assert.ok(contrastRatio(linkColors.notice, linkColors.page) >= 4.5, `dark MIT notice contrast: ${JSON.stringify(linkColors)}`);
   await page.setViewportSize({ width: 390, height: 844 });
   await page.screenshot({ animations: 'disabled', path: path.join(evidence, 'mobile.png'), fullPage: true });
   assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), 'no mobile horizontal overflow');
@@ -176,7 +203,7 @@ let browser;
   await unavailable.goto(origin);
   await unavailable.getByTestId('renderer-error').waitFor({ state: 'visible' });
   assert.equal(await unavailable.getByTestId('play-pause').isDisabled(), true);
-  fs.writeFileSync(path.join(evidence, 'browser-results.json'), JSON.stringify({ status: 'passed', outbound: failures, errors, cases: ['WebGL', 'seek', 'play-pause', 'reset', 'end', 'invalid', 'unauthorized-event', 'read-failure', 'reload-example', 'oversize', 'HTML-filename', 'reduced-motion', 'hidden', 'context-loss', 'WebGL-unavailable', 'stale-import', 'unmount', 'rendered-cue', 'acknowledge-transform', 'reduced-motion-pixels'] }, null, 2));
+  fs.writeFileSync(path.join(evidence, 'browser-results.json'), JSON.stringify({ status: 'passed', outbound: failures, errors, cases: ['WebGL', 'seek', 'play-pause', 'reset', 'end', 'invalid', 'unauthorized-event', 'read-failure', 'reload-example', 'oversize', 'HTML-filename', 'reduced-motion', 'hidden', 'context-loss', 'WebGL-unavailable', 'stale-import', 'unmount', 'rendered-cue', 'acknowledge-transform', 'reduced-motion-pixels', 'dark-hover-example-contrast', 'dark-license-link-contrast'] }, null, 2));
 })().catch(error => { console.error(error); process.exitCode = 1; }).finally(async () => {
   if (browser) await browser.close();
   server.close();
