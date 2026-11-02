@@ -42,7 +42,8 @@ let phase = 'launch';
 let unavailablePassed = false;
 let baselineCompleted = false;
 let keyboardDiagnostics = null;
-const baselineCases = ['WebGL', 'seek', 'play-pause', 'reset', 'end', 'invalid', 'unauthorized-event', 'read-failure', 'reload-example', 'oversize', 'HTML-filename', 'reduced-motion', 'hidden', 'context-loss', 'WebGL-unavailable', 'stale-import', 'unmount', 'rendered-cue', 'acknowledge-transform', 'reduced-motion-pixels', 'dark-hover-example-contrast', 'dark-license-link-contrast', 'first-frame-clock-order'];
+const contrastMetrics = {};
+const baselineCases = ['WebGL', 'seek', 'play-pause', 'reset', 'end', 'invalid', 'unauthorized-event', 'read-failure', 'reload-example', 'oversize', 'HTML-filename', 'reduced-motion', 'hidden', 'context-loss', 'WebGL-unavailable', 'stale-import', 'unmount', 'rendered-cue', 'acknowledge-transform', 'reduced-motion-pixels', 'dark-hover-example-contrast', 'dark-license-link-contrast', 'first-frame-clock-order', 'dark-file-selector-contrast'];
 async function runKeyboard(page) {
   const id = name => page.getByTestId(name);
   const text = name => id(name).textContent();
@@ -288,6 +289,17 @@ fs.mkdirSync(evidence, { recursive: true });
   await seek(1000);
   assert.match(await text('expression'), /curious/);
   await page.emulateMedia({ colorScheme: 'dark' });
+  await id('import-file').hover();
+  // Finish finite theme/hover transitions before sampling the actual native pseudo-element.
+  await page.screenshot({ animations: 'disabled' });
+  const fileButtonColors = await id('import-file').evaluate(input => {
+    const style = getComputedStyle(input, '::file-selector-button');
+    return { foreground: style.color, background: style.backgroundColor, hovered: input.matches(':hover') };
+  });
+  assert.equal(fileButtonColors.hovered, true, 'native file input is actually hovered');
+  const fileButtonRatio = contrastRatio(fileButtonColors.foreground, fileButtonColors.background);
+  contrastMetrics.darkFileSelectorHover = { ...fileButtonColors, ratio: fileButtonRatio };
+  assert.ok(fileButtonRatio >= 4.5, `dark hovered file selector contrast: ${JSON.stringify(contrastMetrics.darkFileSelectorHover)}`);
   await id('load-example').hover();
   await page.screenshot({ animations: 'disabled', path: path.join(evidence, 'desktop-dark.png'), fullPage: true });
   // The preceding screenshot fast-forwards finite CSS transitions before sampling.
@@ -341,9 +353,9 @@ fs.mkdirSync(evidence, { recursive: true });
   assert.deepEqual(await keyboardPage.evaluate(() => window.__capabilityCalls), []);
   assert.deepEqual(failures, [], 'keyboard has no outbound requests');
   assert.deepEqual(errors, [], 'keyboard has no uncaught browser errors');
-  fs.writeFileSync(path.join(evidence, 'browser-results.json'), JSON.stringify({ status: 'passed', browser: browserName, browserVersion, outbound: failures, errors, cases: [...baselineCases, 'keyboard-tab-focus', 'keyboard-file-import', 'keyboard-example', 'keyboard-space-enter-transport', 'keyboard-native-range', 'keyboard-mobile-no-trap'] }, null, 2));
+  fs.writeFileSync(path.join(evidence, 'browser-results.json'), JSON.stringify({ status: 'passed', browser: browserName, browserVersion, contrastMetrics, outbound: failures, errors, cases: [...baselineCases, 'keyboard-tab-focus', 'keyboard-file-import', 'keyboard-example', 'keyboard-space-enter-transport', 'keyboard-native-range', 'keyboard-mobile-no-trap'] }, null, 2));
 })().catch(error => {
-  fs.writeFileSync(path.join(evidence, 'browser-results.json'), JSON.stringify({ status: 'failed', browser: browserName, browserVersion, phase, unavailablePassed, completedBaselineCases: baselineCompleted ? baselineCases : [], keyboardDiagnostics, error: String(error) }, null, 2));
+  fs.writeFileSync(path.join(evidence, 'browser-results.json'), JSON.stringify({ status: 'failed', browser: browserName, browserVersion, phase, unavailablePassed, contrastMetrics, completedBaselineCases: baselineCompleted ? baselineCases : [], keyboardDiagnostics, error: String(error) }, null, 2));
   console.error(error); process.exitCode = 1;
 }).finally(async () => {
   if (browser) await browser.close();

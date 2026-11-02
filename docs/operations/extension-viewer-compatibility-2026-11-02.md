@@ -164,3 +164,35 @@ full accessibility remain unaccepted.
 - 2026-11-02: Recorded second-probe Chromium 29/29 and Firefox baseline 23/23
   on both Node builds; corrected the keyboard acceptance path after inspecting
   the actual focus traces. Overall Firefox result remains failed until rechecked.
+
+
+## Qualified keyboard matrix and file-button contrast follow-up
+
+**Observed:** [run 41398180108](https://github.com/patchwerks/furbomek/actions/runs/41398180108)
+tested source `860d445bf1468728f12d5c3325bc765ee0d6990c` and passed all 29
+browser scenarios in all four Node/browser combinations. Source identity remains
+separate from artifact-name merge ref
+`5c353f94f99a75ea9dfb4cb3895fe2e446245fe9`.
+
+**Observed visual defect:** coordinator review of the dark desktop screenshots
+found poor native file-button contrast in both engines. The authored dark
+pseudo-element rule could be overridden by Bootstrap's more-specific light hover
+background while retaining light text. The scoped correction gives the native
+file selector `--stage` / `--ink` in its normal state and `--line` / `--ink` on
+host-input hover. It uses existing theme tokens and removes the old dark-only
+magic background; layout, renderer and dependencies are unchanged.
+
+A new `dark-file-selector-contrast` scenario actually hovers the file input,
+finishes finite transitions with a screenshot, reads the native
+`::file-selector-button` computed foreground/background, and requires 4.5:1.
+Absent/transparent/unsupported color results fail the existing strict color
+parser instead of skipping the assertion. The measured colors and ratio are
+included in browser results. The pointer then returns to the example control
+before the ordinary dark desktop evidence screenshot. This adds one scenario
+(30 total planned; baseline plus contrast is 24), with actual new-source results
+and visual verification pending. Existing 29-case success does not qualify the
+new CSS or replace the new regression check.
+
+- 2026-11-02: Recorded the four-way 29-case pass and prepared the independently
+  observed native-file hover contrast correction. New-source qualification and
+  final acceptance remain pending.
