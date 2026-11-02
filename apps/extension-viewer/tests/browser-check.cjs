@@ -1,0 +1,177 @@
+/* Runs only in the disposable network-none browser worker. */
+const assert = require('node:assert/strict');
+const fs = require('node:fs');
+const path = require('node:path');
+const http = require('node:http');
+const { chromium } = require(process.env.FURBOMEK_PLAYWRIGHT);
+const root = path.resolve(__dirname, '../.output/public');
+const evidence = process.env.VIEWER_EVIDENCE || '/scratch/evidence';
+const fixture = fs.readFileSync(path.resolve(__dirname, '../../../packages/extension-preview/fixtures/reaction.json'));
+const mime = { '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css', '.json': 'application/json', '.svg': 'image/svg+xml' };
+const server = http.createServer((req, res) => {
+  const pathname = decodeURIComponent(new URL(req.url, 'http://localhost').pathname);
+  let file = path.resolve(root, '.' + pathname);
+  if (!file.startsWith(root + path.sep) && file !== root) { res.writeHead(403).end(); return; }
+  if (fs.existsSync(file) && fs.statSync(file).isDirectory()) file = path.join(file, 'index.html');
+  if (!fs.existsSync(file)) { res.writeHead(404).end(); return; }
+  res.setHeader('Content-Type', mime[path.extname(file)] || 'application/octet-stream');
+  fs.createReadStream(file).pipe(res);
+});
+let browser;
+(async () => {
+  await new Promise(resolve => server.listen(0, '127.0.0.1', resolve));
+  const origin = `http://127.0.0.1:${server.address().port}`;
+  browser = await chromium.launch({ headless: true, args: ['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--disable-dev-shm-usage'] });
+  const failures = [];
+  const context = await browser.newContext({ viewport: { width: 1440, height: 1000 }, colorScheme: 'light' });
+  await context.route('**/*', route => {
+    if (new URL(route.request().url()).origin !== origin) { failures.push(route.request().url()); return route.abort(); }
+    return route.continue();
+  });
+  await context.addInitScript(() => {
+    window.__capabilityCalls = [];
+    const forbidden = name => function () { window.__capabilityCalls.push(name); throw Error(`Forbidden capability: ${name}`); };
+    window.WebSocket = forbidden('WebSocket');
+    window.EventSource = forbidden('EventSource');
+    window.RTCPeerConnection = forbidden('RTCPeerConnection');
+    if (navigator.mediaDevices) navigator.mediaDevices.getUserMedia = forbidden('getUserMedia');
+    navigator.sendBeacon = forbidden('sendBeacon');
+  });
+  const page = await context.newPage();
+  const errors = [];
+  page.on('pageerror', error => errors.push(error.message));
+  const id = name => page.getByTestId(name);
+  const text = name => id(name).textContent();
+  const seek = async value => { await id('timeline').evaluate((input, next) => { input.value = String(next); input.dispatchEvent(new Event('input', { bubbles: true })); }, value); };
+  const upload = (name, buffer) => id('import-file').setInputFiles({ name, mimeType: 'application/json', buffer });
+  await page.goto(origin);
+  await id('viewer-canvas').waitFor({ state: 'visible' });
+  assert.equal(await id('renderer-error').count(), 0);
+  const gl = await id('viewer-canvas').evaluate(canvas => {
+    const gl = canvas.getContext('webgl2');
+    if (!gl) return null;
+    const info = gl.getExtension('WEBGL_debug_renderer_info');
+    return { version: gl.getParameter(gl.VERSION), renderer: info ? gl.getParameter(info.UNMASKED_RENDERER_WEBGL) : gl.getParameter(gl.RENDERER), width: gl.drawingBufferWidth, height: gl.drawingBufferHeight };
+  });
+  assert.ok(gl && gl.width > 0 && gl.height > 0, 'actual WebGL drawing buffer required');
+  fs.writeFileSync(path.join(evidence, 'webgl.json'), JSON.stringify(gl));
+  assert.match(await text('expression'), /neutral/);
+  await page.screenshot({ path: path.join(evidence, 'desktop-light.png'), fullPage: true });
+  const neutralPixels = await id('viewer-canvas').screenshot();
+  await seek(1000);
+  assert.match(await text('expression'), /curious/);
+  assert.match(await text('reaction'), /acknowledge/);
+  const curiousPixels = await id('viewer-canvas').screenshot();
+  assert.notDeepEqual(curiousPixels, neutralPixels, 'curious cue changes rendered geometry');
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  const reducedPixels = await id('viewer-canvas').screenshot();
+  assert.deepEqual(reducedPixels, neutralPixels, 'reduced motion renders neutral geometry while semantics remain curious');
+  await page.emulateMedia({ reducedMotion: 'no-preference' });
+  await page.screenshot({ path: path.join(evidence, 'mid-cue.png'), fullPage: true });
+  await seek(3000);
+  assert.match(await text('expression'), /neutral/);
+  await id('reset').click();
+  assert.match(await text('position-ms'), /^0\b/);
+  await id('play-pause').click();
+  await page.waitForTimeout(180);
+  await id('play-pause').click();
+  const paused = await text('position-ms');
+  await page.waitForTimeout(150);
+  assert.equal(await text('position-ms'), paused, 'pause freezes timeline');
+  await seek(3950);
+  await id('play-pause').click();
+  await page.waitForFunction(() => document.querySelector('[data-testid="position-ms"]').textContent === '0');
+  assert.match(await text('expression'), /neutral/);
+  assert.match(await text('playback-state'), /paused/i);
+  await upload('bad.json', Buffer.from('{'));
+  await id('import-error').waitFor({ state: 'visible' });
+  assert.equal(await id('play-pause').isDisabled(), true);
+  await upload('large.json', Buffer.alloc(1024 * 1024 + 1, 32));
+  await id('import-error').waitFor({ state: 'visible' });
+  assert.equal(await id('play-pause').isDisabled(), true);
+  const unauthorized = JSON.parse(fixture.toString('utf8'));
+  unauthorized.events[0].kind = 'robot.motion';
+  await upload('unauthorized.json', Buffer.from(JSON.stringify(unauthorized)));
+  await id('import-error').waitFor({ state: 'visible' });
+  assert.equal(await id('play-pause').isDisabled(), true);
+  await page.evaluate(() => {
+    window.__originalBlobRead = Blob.prototype.arrayBuffer;
+    Blob.prototype.arrayBuffer = async () => { throw new Error('Fixture read failure'); };
+  });
+  await upload('unreadable.json', fixture);
+  await id('import-error').waitFor({ state: 'visible' });
+  assert.equal(await id('play-pause').isDisabled(), true);
+  await page.evaluate(() => { Blob.prototype.arrayBuffer = window.__originalBlobRead; });
+  await id('load-example').click();
+  await page.waitForFunction(() => !document.querySelector('[data-testid="play-pause"]').disabled);
+  assert.match(await text('expression'), /neutral/);
+  // Delay the actual browser Blob read, then supersede it with invalid input.
+  await page.evaluate(() => {
+    const original = Blob.prototype.arrayBuffer;
+    let first = true;
+    Blob.prototype.arrayBuffer = async function () {
+      const data = await original.call(this);
+      if (first) { first = false; window.__blobPending = true; await new Promise(resolve => { window.__releaseBlob = resolve; }); window.__blobReleased = true; }
+      return data;
+    };
+    window.__restoreBlob = () => { Blob.prototype.arrayBuffer = original; };
+  });
+  await upload('slow.json', fixture);
+  await page.waitForFunction(() => window.__blobPending);
+  await upload('new-invalid.json', Buffer.from('{'));
+  await id('import-error').waitFor({ state: 'visible' });
+  await page.evaluate(() => window.__releaseBlob());
+  await page.waitForFunction(() => window.__blobReleased);
+  await page.evaluate(() => new Promise(requestAnimationFrame));
+  await id('import-error').waitFor({ state: 'visible' });
+  assert.equal(await id('play-pause').isDisabled(), true, 'stale successful read cannot overwrite newer invalid input');
+  await page.evaluate(() => window.__restoreBlob());
+  const maliciousName = '<img src=x onerror=alert(1)>.json';
+  await upload(maliciousName, fixture);
+  await page.waitForFunction(() => !document.querySelector('[data-testid="import-error"]'));
+  assert.equal(await text('pack-name'), maliciousName);
+  assert.equal(await page.locator('img').count(), 0, 'filename never parsed as HTML');
+  await seek(1000);
+  assert.match(await text('expression'), /curious/);
+  await page.emulateMedia({ colorScheme: 'dark' });
+  await page.screenshot({ path: path.join(evidence, 'desktop-dark.png'), fullPage: true });
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.screenshot({ path: path.join(evidence, 'mobile.png'), fullPage: true });
+  assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), 'no mobile horizontal overflow');
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await seek(1000);
+  assert.match(await text('expression'), /curious/, 'reduced motion preserves semantic state');
+  await id('play-pause').click();
+  await page.evaluate(() => { Object.defineProperty(document, 'hidden', { configurable: true, value: true }); document.dispatchEvent(new Event('visibilitychange')); });
+  const hiddenPosition = await text('position-ms');
+  await page.waitForTimeout(100);
+  assert.equal(await text('position-ms'), hiddenPosition, 'hidden document pauses');
+  await page.evaluate(() => { Object.defineProperty(document, 'hidden', { configurable: true, value: false }); document.dispatchEvent(new Event('visibilitychange')); });
+  await id('viewer-canvas').evaluate(canvas => { const gl = canvas.getContext('webgl2'); const ext = gl.getExtension('WEBGL_lose_context'); if (!ext) throw Error('context loss extension unavailable'); ext.loseContext(); });
+  await id('renderer-error').waitFor({ state: 'visible' });
+  assert.equal(await id('play-pause').isDisabled(), true);
+  assert.deepEqual(await page.evaluate(() => window.__capabilityCalls), []);
+  assert.deepEqual(failures, [], 'no outbound requests');
+  assert.deepEqual(errors, [], 'no uncaught browser errors');
+  const unmounted = await context.newPage();
+  await unmounted.goto(origin);
+  await unmounted.getByTestId('viewer-canvas').waitFor({ state: 'visible' });
+  await unmounted.getByTestId('play-pause').click();
+  await unmounted.evaluate(() => {
+    window.__lastGL = document.querySelector('canvas').getContext('webgl2');
+    const app = document.querySelector('#__nuxt').__vue_app__;
+    if (!app) throw Error('Vue application unavailable for real unmount');
+    app.unmount();
+  });
+  await unmounted.waitForFunction(() => window.__lastGL.isContextLost());
+  assert.equal(await unmounted.locator('canvas').count(), 0, 'unmount removes renderer and releases context');
+  const unavailable = await context.newPage();
+  await unavailable.addInitScript(() => { const original = HTMLCanvasElement.prototype.getContext; HTMLCanvasElement.prototype.getContext = function(type, ...args) { return /webgl/.test(type) ? null : original.call(this, type, ...args); }; });
+  await unavailable.goto(origin);
+  await unavailable.getByTestId('renderer-error').waitFor({ state: 'visible' });
+  assert.equal(await unavailable.getByTestId('play-pause').isDisabled(), true);
+  fs.writeFileSync(path.join(evidence, 'browser-results.json'), JSON.stringify({ status: 'passed', outbound: failures, errors, cases: ['WebGL', 'seek', 'play-pause', 'reset', 'end', 'invalid', 'unauthorized-event', 'read-failure', 'reload-example', 'oversize', 'HTML-filename', 'reduced-motion', 'hidden', 'context-loss', 'WebGL-unavailable', 'stale-import', 'unmount', 'rendered-cue', 'reduced-motion-pixels'] }, null, 2));
+})().catch(error => { console.error(error); process.exitCode = 1; }).finally(async () => {
+  if (browser) await browser.close();
+  server.close();
+});

@@ -1,0 +1,228 @@
+name: Extension viewer advisory qualification
+on:
+  workflow_dispatch:
+  pull_request:
+    branches: [main, codex/32-extension-contract]
+    paths: ['apps/extension-viewer/**', 'packages/extension-preview/**', '.github/workflows/extension-viewer.yml', 'package.json', 'package-lock.json', 'server/package.json', 'server/package-lock.json']
+  push:
+    branches: [main, codex/32-extension-contract, codex/32-browser-viewer]
+    paths: ['apps/extension-viewer/**', 'packages/extension-preview/**', '.github/workflows/extension-viewer.yml', 'package.json', 'package-lock.json', 'server/package.json', 'server/package-lock.json']
+permissions:
+  contents: read
+jobs:
+  qualification:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      max-parallel: 2
+      matrix:
+        include:
+          - name: node26
+            version: v26.7.0
+            image: node:26.7.0-bookworm@sha256:e929171d35b9df7773a3ec5b068e387fa109441dc90f91e6560af5d39b7e9bf1
+          - name: node22
+            version: v22.22.3
+            image: node:22.22.3-bookworm@sha256:46e94f8cf91baab69a2deb3153e74eeffd73c20c7cc1d8432f5b96469eaa0322
+    env:
+      QUALIFICATION_NODE_IMAGE: ${{ matrix.image }}
+      QUALIFICATION_NODE_VERSION: ${{ matrix.version }}
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          path: candidate
+          persist-credentials: false
+          ref: ${{ github.sha }}
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          ref: cdd9147fac9141fa0c75b5058f9dce46c7885188
+          path: baseline
+          persist-credentials: false
+      - name: Validate source, provision dependencies, then qualify offline (advisory)
+        shell: bash
+        run: |
+          set -euo pipefail
+          trusted="$GITHUB_WORKSPACE/baseline"
+          candidate=$(mktemp -d "$RUNNER_TEMP/viewer32-source.XXXXXX")
+          # Treat all candidate input as data. Never run its hooks on the host.
+          git -C "$GITHUB_WORKSPACE/candidate" ls-files --stage | awk '$1 == "120000" || $1 == "160000" {bad=1} END {exit bad}'
+          if git -C "$GITHUB_WORKSPACE/candidate" ls-files | grep -E '(^|/)(\.npmrc|\.env(\..*)?|\.gitconfig)$'; then exit 1; fi
+          for file in package.json package-lock.json server/package.json server/package-lock.json; do
+            cmp "$trusted/$file" "$GITHUB_WORKSPACE/candidate/$file"
+          done
+          # Existing CI enforcement and dependency proxy must remain accepted bytes.
+          diff -r "$trusted/tools/ci" "$GITHUB_WORKSPACE/candidate/tools/ci"
+          python3 -I - "$GITHUB_WORKSPACE/candidate" <<'VALIDATE_SOURCE'
+          import json, pathlib, sys
+          root = pathlib.Path(sys.argv[1])
+          app = root / "apps/extension-viewer"
+          manifest = json.loads((app / "package.json").read_text())
+          assert manifest == {"name":"@furbomek/extension-viewer","version":"0.1.0","private":True,"type":"module","dependencies":{"three":"0.187.0"}}
+          lock = json.loads((app / "package-lock.json").read_text())
+          assert lock == {"name":"@furbomek/extension-viewer","version":"0.1.0","lockfileVersion":3,"requires":True,"packages":{"":{"name":"@furbomek/extension-viewer","version":"0.1.0","dependencies":{"three":"0.187.0"}},"node_modules/three":{"version":"0.187.0","resolved":"https://registry.npmjs.org/three/-/three-0.187.0.tgz","integrity":"sha512-Qiu7R+Cmh8CstZsY1uJOSWnVlfo7ZtNLV7mF8Jltk3LB3AtDu9cRZlcnRKkAk8Y4z6KKw35z7Y7Urd7jWY8etA==","license":"MIT"}}}
+          for file in app.rglob("*"):
+              assert not file.is_symlink()
+              if file.is_file():
+                  assert file.stat().st_size < 1024 * 1024
+                  assert file.relative_to(app).as_posix() == "public/THREE-LICENSE.txt" or file.suffix in {".json", ".vue", ".css", ".ts", ".mjs", ".cjs", ".md"}, f"Unreviewed asset: {file}"
+          VALIDATE_SOURCE
+          git -C "$GITHUB_WORKSPACE/candidate" archive HEAD | tar -xf - -C "$candidate"
+          chmod -R a+rX "$candidate"
+          python_image=python:3.12.11-bookworm@sha256:1b48a1b13ec678be8d84974541cc007d4367aaf01f985231daad1a940106efc0
+          node_image=$QUALIFICATION_NODE_IMAGE
+          image=$node_image
+          browser_image=mcr.microsoft.com/playwright:v1.64.1-noble@sha256:47b510dd9230bf0b9bfc9b20102241e577ea7a99334ab4c3ca19f19770e9b8ea
+          mode=viewer32
+          # Check the daemon before any mutation, including registering cleanup commands.
+          docker_version=$(docker version --format '{{.Server.Version}}') || {
+            echo 'Cannot determine Docker Engine version; require stable 28.0.0 or newer' >&2; exit 2;
+          }
+          if [[ ! $docker_version =~ ^([0-9]+)\.([0-9]+)\.([0-9]+)$ ]] ||
+             (( 10#${BASH_REMATCH[1]:-0} < 28 )); then
+            echo 'Require stable Docker Engine 28.0.0 or newer for isolated gateway mode' >&2
+            exit 2
+          fi
+          ci_id="furbomek-${mode}-$$"
+          network="$ci_id-net"
+          volume="$ci_id-work"
+          proxy="$ci_id-proxy"
+          keeper="$ci_id-scratch-keeper"
+          export_evidence() {
+            # Validate inert output in the trusted Python image, before host copy.
+            docker exec -i "$keeper" python -I - <<'VALIDATE'
+          import os, stat
+          from pathlib import Path
+          root = Path("/scratch/evidence")
+          allowed = {"ci.log", "prepare.log", "generate.log", "types.log", "unit.log", "browser.log", "versions.txt", "webgl.json", "browser-results.json", "desktop-light.png", "desktop-dark.png", "mobile.png", "mid-cue.png"}
+          total = 0
+          assert root.is_dir() and not root.is_symlink()
+          paths = list(root.iterdir())
+          assert len(paths) <= 40
+          for path in paths:
+              st = path.lstat()
+              assert path.name in allowed and stat.S_ISREG(st.st_mode)
+              assert st.st_size <= 8 * 1024 * 1024
+              total += st.st_size
+          assert total <= 32 * 1024 * 1024
+          VALIDATE
+            mkdir -p evidence
+            docker cp "$keeper:/scratch/evidence/." evidence/
+          }
+          cleanup() {
+            local result=${1:-$?}
+            export_evidence || result=1
+            if [[ $result != 0 ]]; then docker logs "$proxy" 2>&1 || true; fi
+            docker rm -f "$proxy" >/dev/null 2>&1 || result=1
+            docker rm -f "$keeper" >/dev/null 2>&1 || result=1
+            docker volume rm -f "$volume" >/dev/null 2>&1 || result=1
+            docker network rm "$network" >/dev/null 2>&1 || result=1
+            if docker container inspect "$proxy" >/dev/null 2>&1 || docker container inspect "$keeper" >/dev/null 2>&1 || docker volume inspect "$volume" >/dev/null 2>&1 || docker network inspect "$network" >/dev/null 2>&1; then result=1; fi
+            rm -rf -- "$candidate" || result=1
+            exit "$result"
+          }
+          trap cleanup EXIT
+          docker pull "$python_image"
+          docker pull "$browser_image"
+          if [[ $image != "$python_image" ]]; then docker pull "$image"; fi
+          docker network create --internal --opt com.docker.network.bridge.gateway_mode_ipv4=isolated "$network" >/dev/null
+          docker volume create --driver local --opt type=tmpfs --opt device=tmpfs \
+            --opt o=size=8g,uid=1000,gid=1000,mode=0700 "$volume" >/dev/null
+          # A tmpfs-backed local volume loses its contents when its last mount closes.
+          # Keep this trusted, network-none mount alive across every disposable worker.
+          docker run -d --name "$keeper" --network none --read-only \
+            --cap-drop ALL --security-opt no-new-privileges --user 1000:1000 \
+            --cpus 0.1 --memory 32m --pids-limit 8 \
+            --mount "type=volume,source=$volume,target=/scratch,volume-nocopy" \
+            "$python_image" sleep infinity >/dev/null
+          docker run -d --name "$proxy" --network "$network" --network-alias dependency-proxy --read-only --cap-drop ALL --security-opt no-new-privileges \
+            --user 1000:1000 --cpus 1 --memory 128m --pids-limit 64 \
+            --mount "type=bind,source=$trusted/tools/ci/dependency-proxy.py,target=/proxy.py,readonly" \
+            "$python_image" sh -ec 'exec python -B /proxy.py --bind-address "$(python -I -c "import socket; print(socket.gethostbyname(socket.gethostname()))")"' >/dev/null
+          # Discover only the isolated worker-network address, never the egress address.
+          proxy_ip=$(docker inspect --format "{{(index .NetworkSettings.Networks \"$network\").IPAddress}}" "$proxy")
+          # Wait on the listener instead of mistaking startup refusal for policy denial.
+          ready=false
+          for attempt in {1..15}; do
+            if docker exec "$proxy" python -I -c 'import socket,sys; socket.create_connection((sys.argv[1], 3128), timeout=1).close()' "$proxy_ip"; then
+              ready=true
+              break
+            fi
+            sleep 1
+          done
+          [[ $ready == true ]] || { echo 'Dependency proxy did not become ready' >&2; exit 1; }
+          # Bind/readiness precede external attachment; listener stays on its exact IP.
+          docker network connect bridge "$proxy"
+
+          # No runner environment, home, socket or writable host directory is forwarded.
+          worker=(docker run --rm --read-only --cap-drop ALL --security-opt no-new-privileges
+            --user 1000:1000 --cpus 2 --memory 4g --pids-limit 256
+            --tmpfs /tmp:rw,exec,nosuid,size=512m
+            --mount "type=bind,source=$candidate,target=/source,readonly"
+            --mount "type=volume,source=$volume,target=/scratch,volume-nocopy"
+            --workdir /scratch --env XDG_CACHE_HOME=/scratch/cache
+            --env UV_CACHE_DIR=/scratch/uv-cache --env UV_PYTHON_DOWNLOADS=never
+            --env PYTHONUNBUFFERED=1 --env PYTHONDONTWRITEBYTECODE=1
+            --env npm_config_cache=/scratch/npm-cache --env HOME=/scratch/home
+            --env NUXT_TELEMETRY_DISABLED=1 --env CI=true --env EXPECTED_NODE_VERSION="$QUALIFICATION_NODE_VERSION"
+            --env npm_config_registry=https://registry.npmjs.org
+            --env npm_config_userconfig=/scratch/npm-userconfig --env npm_config_globalconfig=/scratch/npm-globalconfig)
+          proxy_env=(--env HTTPS_PROXY=http://dependency-proxy:3128 --env HTTP_PROXY=http://dependency-proxy:3128
+            --env https_proxy=http://dependency-proxy:3128 --env http_proxy=http://dependency-proxy:3128
+            --env NO_PROXY= --env no_proxy=)
+
+          # Initialize only from fixed shell operations; networked phase evaluates no candidate code.
+          "${worker[@]}" --network "$network" "${proxy_env[@]}" "$image" bash -euc '
+            test "$(node --version)" = "$EXPECTED_NODE_VERSION"
+            test "$(id -u)" = 1000
+            test ! -e /var/run/docker.sock
+            if curl --noproxy "*" -fsSI --connect-timeout 3 https://registry.npmjs.org; then exit 1; fi
+            forbidden=$(curl -sSI --connect-timeout 3 --output /dev/null --write-out "%{http_connect}" https://example.com || true)
+            test "$forbidden" = 403
+            mkdir -p /scratch/source /scratch/cache /scratch/home /scratch/evidence /scratch/browser/node_modules/playwright /scratch/browser/node_modules/playwright-core
+            touch /scratch/npm-userconfig /scratch/npm-globalconfig
+            cp -R /source/. /scratch/source/
+            cd /scratch/source
+            timeout 600 npm ci --ignore-scripts --no-audit --no-fund > /scratch/evidence/ci.log 2>&1
+            timeout 120 npm ci --prefix apps/extension-viewer --ignore-scripts --no-audit --no-fund >> /scratch/evidence/ci.log 2>&1
+            curl --fail --location --retry 3 https://registry.npmjs.org/playwright/-/playwright-1.64.1.tgz -o /scratch/playwright.tgz
+            curl --fail --location --retry 3 https://registry.npmjs.org/playwright-core/-/playwright-core-1.64.1.tgz -o /scratch/playwright-core.tgz
+            printf "%s  %s\n" 1c2ad5847af9410bb0628b301141936fb806a79db6c9f95bbff493f27178b05586b8b8d00add7b43f12e6e918648d2989f5b6c4c23d9c6a1e11c27d5511bbb50 /scratch/playwright.tgz | sha512sum --check
+            printf "%s  %s\n" 042e2cf32e9211503a435ad2c594eda3c848d4a508df15e51c6660bc6a8fe08a8f748fdae855fd1f6f480cdcfbbcaa3d976d5be8b7d8a2c49c3cbe8cdf1c720d /scratch/playwright-core.tgz | sha512sum --check
+            tar -xzf /scratch/playwright.tgz --strip-components=1 -C /scratch/browser/node_modules/playwright
+            tar -xzf /scratch/playwright-core.tgz --strip-components=1 -C /scratch/browser/node_modules/playwright-core
+          '
+          # Different transient worker: source, compiler, configuration, and tests only run offline.
+          "${worker[@]}" --network none "$image" bash -euc '
+            test "$(id -u)" = 1000
+            test ! -e /var/run/docker.sock
+            test ! -e /home/runner
+            test "$(find /sys/class/net -mindepth 1 -maxdepth 1 | wc -l)" = 1
+            cd /scratch/source
+            node --version > /scratch/evidence/versions.txt
+            npm --version >> /scratch/evidence/versions.txt
+            timeout 120 ./node_modules/.bin/nuxt prepare apps/extension-viewer > /scratch/evidence/prepare.log 2>&1
+            timeout 120 ./node_modules/.bin/vue-tsc --noEmit -p apps/extension-viewer/tsconfig.json > /scratch/evidence/types.log 2>&1
+            timeout 300 ./node_modules/.bin/nuxt generate apps/extension-viewer > /scratch/evidence/generate.log 2>&1
+            timeout 120 node --experimental-vm-modules --test packages/extension-preview/tests/*.test.mjs apps/extension-viewer/tests/*.test.mjs > /scratch/evidence/unit.log 2>&1
+          '
+          "${worker[@]}" --network none --shm-size 256m \
+            --env PLAYWRIGHT_BROWSERS_PATH=/ms-playwright \
+            --env FURBOMEK_PLAYWRIGHT=/scratch/browser/node_modules/playwright \
+            --env VIEWER_EVIDENCE=/scratch/evidence "$browser_image" bash -euc '
+              test "$(id -u)" = 1000
+              test ! -e /var/run/docker.sock
+              test "$(find /sys/class/net -mindepth 1 -maxdepth 1 | wc -l)" = 1
+              cd /scratch/source
+              timeout 180 node apps/extension-viewer/tests/browser-check.cjs > /scratch/evidence/browser.log 2>&1
+            '
+          export_evidence
+          printf '%s\n' "$GITHUB_SHA" > evidence/candidate-sha.txt
+          printf '%s\n' cdd9147fac9141fa0c75b5058f9dce46c7885188 > evidence/enforcement-sha.txt
+      - name: Upload advisory evidence for source and screenshot review
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: viewer32-qualification-${{ matrix.name }}-${{ github.sha }}
+          path: evidence/
+          if-no-files-found: error
+          retention-days: 7
