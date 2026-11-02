@@ -94,7 +94,7 @@ jobs:
           from pathlib import Path
           root = Path("/scratch/evidence")
           build_allowed = {"ci.log", "prepare.log", "generate.log", "types.log", "unit.log", "versions.txt"}
-          browser_allowed = {"browser.log", "browser-version.json", "renderer-diagnostics.json", "webgl.json", "browser-results.json", "desktop-light.png", "desktop-dark.png", "mobile.png", "mid-cue.png"}
+          browser_allowed = {"browser.log", "browser-version.json", "renderer-diagnostics.json", "webgl.json", "browser-results.json", "desktop-light.png", "desktop-dark.png", "mobile.png", "mid-cue.png", "file-selector-hover.png"}
           total = 0
           assert root.is_dir() and not root.is_symlink()
           paths = list(root.iterdir())

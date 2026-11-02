@@ -291,12 +291,14 @@ fs.mkdirSync(evidence, { recursive: true });
   await page.emulateMedia({ colorScheme: 'dark' });
   await id('import-file').hover();
   // Finish finite theme/hover transitions before sampling the actual native pseudo-element.
-  await page.screenshot({ animations: 'disabled' });
+  await id('import-file').screenshot({ animations: 'disabled', path: path.join(evidence, 'file-selector-hover.png') });
   const fileButtonColors = await id('import-file').evaluate(input => {
     const style = getComputedStyle(input, '::file-selector-button');
-    return { foreground: style.color, background: style.backgroundColor, hovered: input.matches(':hover') };
+    return { foreground: style.color, background: style.backgroundColor, appearance: style.appearance, hovered: input.matches(':hover') };
   });
+  contrastMetrics.darkFileSelectorHover = { ...fileButtonColors };
   assert.equal(fileButtonColors.hovered, true, 'native file input is actually hovered');
+  assert.equal(fileButtonColors.appearance, 'none', 'file selector uses authored colors without a native appearance overlay');
   const fileButtonRatio = contrastRatio(fileButtonColors.foreground, fileButtonColors.background);
   contrastMetrics.darkFileSelectorHover = { ...fileButtonColors, ratio: fileButtonRatio };
   assert.ok(fileButtonRatio >= 4.5, `dark hovered file selector contrast: ${JSON.stringify(contrastMetrics.darkFileSelectorHover)}`);

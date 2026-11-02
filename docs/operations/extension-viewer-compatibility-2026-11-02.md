@@ -196,3 +196,33 @@ new CSS or replace the new regression check.
 - 2026-11-02: Recorded the four-way 29-case pass and prepared the independently
   observed native-file hover contrast correction. New-source qualification and
   final acceptance remain pending.
+
+
+## Native paint mismatch after computed-contrast checks
+
+**Observed:** source `758d425c1999d64ee07fceaa78a6762029eaab9e` in
+[run 41406368411](https://github.com/patchwerks/furbomek/actions/runs/41406368411)
+passed the two build/type/62-test jobs and all 30 cases in each browser/build
+combination. Coordinator pixel review nevertheless found a Firefox native-paint
+mismatch: the dark desktop file button's dominant sampled background was
+RGB(116, 123, 130), while computed hover CSS reported RGB(73, 82, 91).
+The Chromium sampled background was RGB(72, 81, 90). The Firefox result does not
+establish rendered AA contrast; computed-style success alone was insufficient.
+
+**Scoped correction pending qualification:** add standard `appearance: none` to
+`::file-selector-button`, retaining the real file input and native picker.
+[Mozilla's appearance reference](https://developer.mozilla.org/en-US/docs/Web/CSS/Reference/Properties/appearance)
+describes suppression of native styling, and its
+[file-selector-button reference](https://developer.mozilla.org/en-US/docs/Web/CSS/Reference/Selectors/::file-selector-button)
+identifies the native file input button as the style target. The existing token
+colors remain unchanged. The browser test now requires computed appearance
+`none`, records it with the contrast metrics, and exports an actual hovered-input
+`file-selector-hover.png` for coordinator pixel/label review. That exact filename
+is added to the export allowlist; 8 MiB per-file and 32 MiB total limits remain.
+All six native keyboard scenarios, including file-picker activation, stay required.
+
+No rendered-contrast acceptance is claimed until the new source passes hosted
+checks and actual screenshot pixels and label readability are reviewed.
+
+- 2026-11-02: Recorded the computed-versus-rendered Firefox contrast mismatch;
+  prepared native-appearance suppression and bounded hover screenshot evidence.
