@@ -93,8 +93,23 @@ let browser;
   assert.match(await text('expression'), /neutral/);
   await id('reset').click();
   assert.match(await text('position-ms'), /^0\b/);
+  await page.evaluate(() => {
+    const nativeFrame = window.requestAnimationFrame.bind(window);
+    let first = true;
+    window.requestAnimationFrame = callback => nativeFrame(timestamp => {
+      if (first) {
+        first = false;
+        window.__earlyFrameDelivered = true;
+        window.requestAnimationFrame = nativeFrame;
+        callback(timestamp - 1000);
+      } else callback(timestamp);
+    });
+  });
   await id('play-pause').click();
-  await page.waitForTimeout(180);
+  await page.waitForFunction(() => window.__earlyFrameDelivered === true);
+  assert.ok(Number(await text('position-ms')) >= 0, 'early first frame never makes timeline negative');
+  await page.waitForFunction(() => Number(document.querySelector('[data-testid="position-ms"]').textContent) > 0);
+  assert.match(await text('playback-state'), /playing/);
   await id('play-pause').click();
   const paused = await text('position-ms');
   await page.waitForTimeout(150);
@@ -203,7 +218,7 @@ let browser;
   await unavailable.goto(origin);
   await unavailable.getByTestId('renderer-error').waitFor({ state: 'visible' });
   assert.equal(await unavailable.getByTestId('play-pause').isDisabled(), true);
-  fs.writeFileSync(path.join(evidence, 'browser-results.json'), JSON.stringify({ status: 'passed', outbound: failures, errors, cases: ['WebGL', 'seek', 'play-pause', 'reset', 'end', 'invalid', 'unauthorized-event', 'read-failure', 'reload-example', 'oversize', 'HTML-filename', 'reduced-motion', 'hidden', 'context-loss', 'WebGL-unavailable', 'stale-import', 'unmount', 'rendered-cue', 'acknowledge-transform', 'reduced-motion-pixels', 'dark-hover-example-contrast', 'dark-license-link-contrast'] }, null, 2));
+  fs.writeFileSync(path.join(evidence, 'browser-results.json'), JSON.stringify({ status: 'passed', outbound: failures, errors, cases: ['WebGL', 'seek', 'play-pause', 'reset', 'end', 'invalid', 'unauthorized-event', 'read-failure', 'reload-example', 'oversize', 'HTML-filename', 'reduced-motion', 'hidden', 'context-loss', 'WebGL-unavailable', 'stale-import', 'unmount', 'rendered-cue', 'acknowledge-transform', 'reduced-motion-pixels', 'dark-hover-example-contrast', 'dark-license-link-contrast', 'first-frame-clock-order'] }, null, 2));
 })().catch(error => { console.error(error); process.exitCode = 1; }).finally(async () => {
   if (browser) await browser.close();
   server.close();
