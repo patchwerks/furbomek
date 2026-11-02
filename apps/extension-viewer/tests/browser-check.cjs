@@ -68,20 +68,24 @@ async function runKeyboard(page) {
     } while (Date.now() < deadline);
     assert.fail(`visible keyboard focus: ${JSON.stringify(keyboardDiagnostics)}`);
   };
-  const tabTo = async locator => {
-    keyboardDiagnostics = { before: await inspectFocus(locator), tabs: [] };
+  const tabTo = async (locator, direction = 'Tab') => {
+    assert.ok(['Tab', 'Shift+Tab'].includes(direction));
+    keyboardDiagnostics = { direction, before: await inspectFocus(locator), tabs: [] };
+    if (keyboardDiagnostics.before.focused) { await focusVisible(locator); return; }
     for (let attempt = 0; attempt < 24; attempt++) {
-      await page.keyboard.press('Tab');
+      await page.keyboard.press(direction);
       const result = await inspectFocus(locator);
       keyboardDiagnostics.tabs.push(result);
       if (result.focused) { await focusVisible(locator); return; }
     }
     assert.fail(`Tab could not reach requested control: ${JSON.stringify(keyboardDiagnostics)}`);
   };
-  const keyboardTraversal = async () => {
-    for (const name of ['import-file', 'load-example', 'play-pause', 'reset', 'timeline']) await tabTo(id(name));
+  const keyboardTraversal = async (startDirection = 'Tab') => {
+    await tabTo(id('play-pause'), startDirection);
+    for (const name of ['reset', 'timeline', 'import-file', 'load-example']) await tabTo(id(name));
     await tabTo(page.locator('.viewer-footer a'));
-    await tabTo(id('import-file')); // Leave the footer and reach controls again: no trap.
+    // Stay within the page: browser-chrome wraparound is not an app navigation contract.
+    await tabTo(id('import-file'), 'Shift+Tab');
     await page.keyboard.press('Shift+Tab');
     assert.equal(await id('import-file').evaluate(element => document.activeElement === element), false, 'reverse Tab leaves import');
   };
@@ -93,7 +97,7 @@ async function runKeyboard(page) {
   await tabTo(id('load-example'));
   await page.keyboard.press('Enter');
   assert.match(await text('pack-name'), /Bundled reaction example/);
-  await tabTo(id('play-pause'));
+  await tabTo(id('play-pause'), 'Shift+Tab');
   await page.keyboard.press('Space');
   await page.waitForFunction(() => Number(document.querySelector('[data-testid="position-ms"]').textContent) > 0);
   await page.keyboard.press('Space');
@@ -115,7 +119,7 @@ async function runKeyboard(page) {
   await page.keyboard.press('End');
   assert.equal(await text('position-ms'), '4000');
   assert.match(await text('expression'), /neutral/);
-  await tabTo(id('play-pause'));
+  await tabTo(id('play-pause'), 'Shift+Tab');
   await page.keyboard.press('Enter');
   await page.waitForFunction(() => Number(document.querySelector('[data-testid="position-ms"]').textContent) > 0 && Number(document.querySelector('[data-testid="position-ms"]').textContent) < 4000);
   await tabTo(id('reset'));
@@ -124,7 +128,7 @@ async function runKeyboard(page) {
   assert.match(await text('playback-state'), /paused/);
   assert.match(await text('expression'), /neutral/);
   await page.setViewportSize({ width: 390, height: 844 });
-  await keyboardTraversal();
+  await keyboardTraversal('Shift+Tab');
   assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), 'keyboard focus causes no mobile horizontal overflow');
 }
 

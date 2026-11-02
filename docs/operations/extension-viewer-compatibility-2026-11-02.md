@@ -64,8 +64,7 @@ Six additional named scenarios exercise actual keyboard input:
 - Home, ArrowRight, ArrowLeft and End drive the native range with the actual
   one-millisecond step and matching accessible value text; playback from the end
   restarts, and keyboard reset returns to neutral.
-- The same traversal works at 390-pixel width, reaches controls again after the
-  footer, and introduces no horizontal overflow.
+- The same traversal works at 390-pixel width, returns from the footer to controls with reverse Tab, and introduces no horizontal overflow.
 
 This is 29 planned browser scenarios per browser/build combination, not 29 tests
 already observed passing. It is bounded keyboard regression coverage, not an
@@ -130,3 +129,38 @@ recurs, stop and reassess the approach rather than extending a retry loop.
 
 - 2026-11-02: Recorded the failed first compatibility probe and prepared one
   bounded keyboard diagnostic correction; no compatibility acceptance claimed.
+
+
+## Second probe and navigation acceptance correction
+
+**Observed:** the second hosted probe tested source
+`58d9e83930cd9429f7a34078eb7f0c6c9e1f794c`, verified from both artifacts'
+`candidate-sha.txt`. The artifact-name merge ref was
+`904c065f403ffe4a0a6b1d5401d6876504fb0865`; it is not the source revision.
+Chromium passed all 29 scenarios on both Node builds. Firefox passed all 23
+baseline scenarios on both builds, including rendered cue pixels, reduced-motion
+pixels, context loss and unmount. Firefox's overall result remained failed:
+keyboard traversal tried to reach Play by repeatedly pressing forward Tab from
+Use bundled example, passing the event controls and footer. The recorded active
+element then remained the footer link. This test incorrectly required navigation
+through browser chrome and wraparound to an earlier page control.
+
+**Reassessed acceptance design:** stop that wraparound approach. Traverse the
+actual DOM order (Play, Reset, Timeline, Import, Example, footer) forward, then
+return from the footer with Shift+Tab. Use reverse Tab whenever moving from
+Example or Timeline back to Play. If the target already has focus, verify its
+visible focus without cycling away. Repeat the same forward/reverse route at
+mobile width. This tests within-page keyboard access and return paths rather
+than a browser-chrome focus policy. All six keyboard scenario intents and all
+focus/viewport checks remain. No direct control focus, manual scrolling, browser
+preferences or production UI changes are introduced.
+
+This is one bounded acceptance-design correction following explicit reassessment,
+not another retry of the rejected wraparound assumption. New hosted results and
+coordinator screenshot inspection remain pending. Any new failure freezes the
+candidate for a fresh scope decision; the combined Firefox keyboard suite and
+full accessibility remain unaccepted.
+
+- 2026-11-02: Recorded second-probe Chromium 29/29 and Firefox baseline 23/23
+  on both Node builds; corrected the keyboard acceptance path after inspecting
+  the actual focus traces. Overall Firefox result remains failed until rechecked.
