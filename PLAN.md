@@ -1094,13 +1094,21 @@ simulation. Root provider UI and all live integrations remain excluded. Source
 Independent PR 41/42 acceptance, retargeting to accepted main and fresh checks
 remain open; this does not close issue 32. See the [candidate record](docs/operations/extension-viewer-2026-11-02.md).
 
-A [compatibility follow-up](docs/operations/extension-viewer-compatibility-2026-11-02.md)
-proposes Firefox/Xvfb/Mesa and actual keyboard-input coverage using the same two
-Node builds. It is not yet runtime-qualified and does not change the acceptance
-status above.
+The [compatibility follow-up](docs/operations/extension-viewer-compatibility-2026-11-02.md)
+at source `87a50b335a58dea2b4920a53afd14913de405765` passed
+[run 41408050074](https://github.com/patchwerks/furbomek/actions/runs/41408050074):
+62 core/artifact tests per Node 22.22.3/26.7.0 job and 30 browser scenarios each
+on Chromium 156.0.8078.4 and Firefox 157.0. The tested Linux paths are Chromium
+SwiftShader and Firefox Xvfb/Mesa. Actual keyboard navigation stays within page
+DOM order with reverse Tab; native file-button hover contrast measured 6.950862417:1
+with matching sampled raster backgrounds in all four artifacts and bounded
+coordinator visual review. This is not full accessibility or arbitrary-browser
+qualification. Independent PR 41/42 reviews, accepted-main retargeting and fresh
+exact-head checks remain open; issue 32 is not closed.
 
 ## Changelog
 
+- 2026-11-02: Recorded the final four-way 30-case browser/keyboard matrix and stable rendered file-button contrast; independent acceptance and integration remain pending.
 - 2026-11-02: Proposed bounded Firefox and keyboard regression qualification; actual hosted results remain pending.
 - 2026-11-02: Added the isolated issue 32 browser presentation viewer candidate with an original procedural six-leg proxy; bounded hosted checks and coordinator visual review passed, while independent acceptance and main integration remain pending.
 

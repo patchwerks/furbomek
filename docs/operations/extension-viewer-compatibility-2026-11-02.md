@@ -4,251 +4,148 @@ branch: codex/32-browser-viewer
 author: patchWERKS / Codex
 status: active
 ---
-# Issue 32 browser compatibility and keyboard candidate
+# Issue 32 browser compatibility and keyboard evidence
 
-**Proposed, not runtime-qualified.** This follow-up extends the viewer candidate
-at `5090832a218e17439bd74e6b4beaad4b770d512e` (PR 42), stacked on
-`8c38c3fd814cc7dfdfd25ee706e5718f28f0de28` (PR 41). Both remain unaccepted;
-accepted enforcement remains `cdd9147fac9141fa0c75b5058f9dce46c7885188`.
-The [previous candidate record](extension-viewer-2026-11-02.md) preserves the
-observed Chromium evidence. This record does not upgrade those results to Firefox
-compatibility or full accessibility acceptance. Canonical work is
-[issue 32](https://github.com/patchwerks/furbomek/issues/32).
+**Observed bounded qualification:** source
+`87a50b335a58dea2b4920a53afd14913de405765` passed 30 browser scenarios in each
+of four browser/build combinations in
+[run 41408050074](https://github.com/patchwerks/furbomek/actions/runs/41408050074).
+Both Node jobs also passed prepare, type checking, static generation and 62
+core/artifact tests. The viewer supports the tested local JSON import, keyboard
+transport and procedural rendering paths; its native file button now uses stable,
+readable theme colors without color interpolation.
 
-## Proposed qualification
+This is candidate evidence for [issue 32](https://github.com/patchwerks/furbomek/issues/32),
+not final PR acceptance or a comprehensive accessibility audit. Independent PR 41
+and PR 42 reviews, retargeting to accepted main and fresh exact-head checks remain
+required. The [original candidate record](extension-viewer-2026-11-02.md)
+preserves the earlier implementation evidence.
 
-The two existing Node 22.22.3 / 26.7.0 jobs each provision and compile once.
-Each then runs Chromium and Firefox sequentially in separate disposable,
-credential-free, network-none browser workers against that same compiled output.
-A browser failure does not prevent the other browser's attempt or evidence export;
-the job fails if either attempt fails. Root manifests, application, renderer and
-parser/sampler are unchanged.
+## Exact tested scope
 
-Playwright stays pinned to 1.64.1 and image
+| Build runtime | Chromium 156.0.8078.4 | Firefox 157.0 | Core/artifact tests |
+|---|---|---|---|
+| Node 22.22.3 / npm 10.9.8 | 30 passed | 30 passed | 62 passed |
+| Node 26.7.0 / npm 11.19.0 | 30 passed | 30 passed | 62 passed |
+
+All four browser result files report no outbound requests and no uncaught browser
+errors. The 30 scenarios comprise 24 baseline/rendering/contrast checks and six
+keyboard checks. Browser versions above are actual `browser.version()` results,
+not inferred from the package version.
+
+Each artifact's `candidate-sha.txt` identifies tested source
+`87a50b335a58dea2b4920a53afd14913de405765`; `enforcement-sha.txt` identifies
+accepted enforcement `cdd9147fac9141fa0c75b5058f9dce46c7885188`. Artifact names
+contain workflow merge-ref SHA `c28ad7d3018dbea453b9426725d09619346d810c`,
+which must not be mistaken for the source checkout. PR 42 remains stacked on
+unaccepted PR 41 source `8c38c3fd814cc7dfdfd25ee706e5718f28f0de28`.
+
+Qualification used the existing two Linux Node builds, provisioning and compiling
+once per job, followed by separate disposable Chromium and Firefox workers.
+Playwright is pinned to 1.64.1 and browser image
 `mcr.microsoft.com/playwright:v1.64.1-noble@sha256:47b510dd9230bf0b9bfc9b20102241e577ea7a99334ab4c3ca19f19770e9b8ea`.
-The [pinned browser manifest](https://github.com/microsoft/playwright/blob/v1.64.1/packages/playwright-core/browsers.json)
-names Firefox 157.0 revision 1555 and Chromium 156.0.8078.4 revision 1248;
-these are reference versions, not a substitute for observed `browser.version()`.
-Actual versions are recorded separately in each browser's evidence directory.
-The [Playwright Docker documentation](https://playwright.dev/docs/docker)
-explains that the image includes browsers and their system dependencies while the
-Node package must be installed separately; the existing hash-checked tarball
-provisioning remains unchanged.
+Chromium used its headless ANGLE/SwiftShader path. Firefox used headed Xvfb,
+1600×1200×24 virtual screen, `LIBGL_ALWAYS_SOFTWARE=true` and
+`GALLIUM_DRIVER=llvmpipe`, without Chromium flags or Firefox preferences.
+Firefox logs record Mesa 25.2.8 and Xvfb 21.1.12. Actual WebGL2 reports show
+876×570 drawing buffers; Firefox reports `llvmpipe, or similar`, while Chromium
+reports ANGLE Vulkan/SwiftShader. These are the tested Linux software-rendering
+paths, not qualification of arbitrary devices, operating systems or browsers.
 
-Chromium retains its existing headless SwiftShader flags. Firefox uses headed
-mode under Xvfb with a 1600×1200×24 virtual screen, consistent with the
-[official CI guidance](https://playwright.dev/docs/ci#running-headed).
-The worker first checks Xvfb, Mesa package versions and the software driver file.
-`LIBGL_ALWAYS_SOFTWARE=true GALLIUM_DRIVER=llvmpipe` selects Mesa software
-rendering using [documented Mesa variables](https://docs.mesa3d.org/envvars.html).
-No Chromium flags or Firefox preferences are passed to Firefox. This configuration
-is a proposed hosted probe; the pinned image's successful rendering is still TBD.
+## Behavior and rendered contrast
 
-Both browsers must pass a real WebGL2 drawing-buffer check, rendered cue changes,
-acknowledgment transforms, and neutral/reduced-motion pixel equality within the
-same browser. Cross-browser screenshot equality is not asserted. WebGL failure
-is a failed positive test, never a substitute 3D success. The deliberately disabled
-WebGL test runs first and verifies the explicit error, disabled Play and missing
-canvas; its result is retained if the later positive test fails.
+The original 23 scenarios remain: actual WebGL2, rendered expression and reaction
+changes, same-browser reduced-motion/neutral pixel equality, deterministic early
+RAF handling, seek/play/pause/reset/end, invalid/oversize/unauthorized/unreadable
+and stale imports, filename escaping, hidden-document pause, context loss,
+explicit WebGL unavailability, unmount/resource release, and dark link contrast.
+No fake renderer or cross-browser pixel-equality requirement is used.
 
-The original 23 scenarios remain, including stale/invalid imports, unmount and
-context loss, early RAF timestamps, outbound requests and forbidden capabilities.
-Six additional named scenarios exercise actual keyboard input:
+Keyboard tests use actual Tab in DOM order (Play, Reset, Timeline, Import,
+Example, footer) and Shift+Tab to return to earlier controls. They check visible
+focus and viewport bounds, native Space file-picker activation, Enter example
+loading, Space/Enter transport, native Home/Arrow/End range behavior and accessible
+value text, reset/end neutrality, and 390-pixel traversal without overflow.
+They allow bounded native focus scrolling to settle, never directly focus or
+scroll a control, and do not require wraparound through browser chrome. These
+checks do not cover assistive technology or establish full WCAG conformance.
 
-- Tab reaches import, example, transport, timeline and footer, with a visible
-  focus outline and a control inside the viewport; reverse Tab leaves import.
-- Space opens the native file chooser and imports the real bundled fixture.
-- Enter restores the bundled example.
-- Space/Enter activate play, pause and reset; paused time stays fixed and reset
-  returns to neutral at zero.
-- Home, ArrowRight, ArrowLeft and End drive the native range with the actual
-  one-millisecond step and matching accessible value text; playback from the end
-  restarts, and keyboard reset returns to neutral.
-- The same traversal works at 390-pixel width, returns from the footer to controls with reverse Tab, and introduces no horizontal overflow.
+The file-selector button uses existing `--stage`/`--ink` colors normally and
+`--line`/`--ink` on hover, with `appearance: none; transition: none`. The real
+file input/picker and all native keyboard tests remain. Its additional contrast
+scenario hovers the input and captures `file-selector-hover.png`; unsupported or
+transparent computed colors fail instead of silently skipping the assertion.
 
-This is 29 planned browser scenarios per browser/build combination, not 29 tests
-already observed passing. It is bounded keyboard regression coverage, not an
-assistive-technology or comprehensive WCAG audit.
+All four final results record foreground RGB(237, 240, 243), background
+RGB(73, 82, 91), appearance `none`, transition property `none`, actual hover true,
+and computed contrast **6.950862417:1**. Coordinator decoding of each actual hover
+PNG found the same dominant background RGB(73, 82, 91) in the bounded button
+interior sample (x 3–65, y 3–30). Its contrast against the recorded light foreground
+is also **6.950862417:1**. This confirms the sampled raster background matches the
+authored color in all four artifacts; it is not a claim that antialiased text-edge
+pixels all have that ratio.
 
-## Evidence boundary and current result
+The coordinator visually inspected both final engine hover PNGs and final Firefox
+dark desktop: labels were readable and coherent. Earlier Firefox light, mobile
+and mid-cue screenshots of the same layout/renderer were also inspected; the final
+change only affects the file-button styling. Computed colors alone were not used
+to accept the final rendered state.
 
-Build logs stay at the evidence root. Browser logs, observed version, renderer
-failure diagnostics, WebGL report, results and the four existing screenshots go
-under separate `chromium/` and `firefox/` directories. Profiles and caches are
-separate, and each worker has its own ephemeral `/tmp`. The trusted export step
-allows only the two directory names and exact file names, rejects symlinks and
-nonregular files, and preserves 8 MiB per-file / 32 MiB per-job limits.
+## Evidence and execution boundary
 
-**Observed locally:** JavaScript syntax check, Ruby Psych safe YAML parse,
-embedded Python syntax compile, shell syntax check and diff whitespace check.
-Python's optional YAML module is absent on the host; Ruby performed the inert
-YAML parse. No dependency hook, app build, browser installation, app server or
-candidate test executed on the publishing host.
+Build logs stay at artifact root; browser logs, observed version, diagnostics,
+WebGL report, results and five screenshots stay in separate `chromium/` and
+`firefox/` directories. Each browser has a separate profile/cache and ephemeral
+`/tmp`. Candidate code runs only in credential-free, network-none disposable
+workers; the publisher host did not execute dependencies, builds or browser tests.
+The reviewed export validator allows exact directory/file names, rejects symlinks
+and nonregular files, and limits each file to 8 MiB and each job to 32 MiB.
 
-**TBD:** independent workflow/export review, actual hosted Node/build/browser
-results, visual inspection of both browsers' artifacts, and fresh exact-head
-review. A failure requires its actual diagnostics and at most one focused retry
-before reassessing the claimed compatibility. No runtime compatibility or full
-accessibility claim is authorized by this proposal alone.
+Observed local inert checks included JavaScript syntax, safe YAML parsing,
+embedded Python syntax, shell syntax and diff whitespace. These complement the
+hosted checks; they are not runtime qualification by themselves. No deployment,
+live connection, hardware action or issue closure follows from this evidence.
+Rollback is reverting this compatibility/test/theme follow-up; root dependencies,
+renderer and parser/sampler are unchanged.
 
-Rollback is removal of this test/workflow follow-up; it installs or deploys no
-application or hardware changes. PR acceptance, retargeting to accepted main and
-issue closure remain separate gates.
+## Evidence history
 
+- [First probe 41396867865](https://github.com/patchwerks/furbomek/actions/runs/41396867865),
+  source `a9fdf722ed3fa7e09957ff79e1d1b44e62c78169`, failed keyboard checks;
+  Firefox did establish actual WebGL2. Artifact merge ref was
+  `e510c5930c41a61bd7dc49be596671b8889c7411`.
+- Second probe source `58d9e83930cd9429f7a34078eb7f0c6c9e1f794c` passed
+  Chromium 29/29 and Firefox baseline 23/23 on both builds, but Firefox's overall
+  result failed because the test demanded forward-Tab wraparound through browser
+  chrome. Artifact merge ref was `904c065f403ffe4a0a6b1d5401d6876504fb0865`.
+  Inspection justified the in-page forward/reverse route now tested.
+- [Run 41398180108](https://github.com/patchwerks/furbomek/actions/runs/41398180108),
+  source `860d445bf1468728f12d5c3325bc765ee0d6990c`, passed all 29 cases in
+  all combinations. Visual review then found poor native file-button contrast.
+- [Run 41406368411](https://github.com/patchwerks/furbomek/actions/runs/41406368411),
+  source `758d425c1999d64ee07fceaa78a6762029eaab9e`, passed 30 cases but
+  Firefox's actual button raster did not match computed colors. Appearance-only
+  suppression also left varying raster backgrounds and inadequate Firefox
+  contrast. Native-overlay causality was unproven; these remain failed visual
+  evidence, not superseded claims of visual acceptance.
+- The final source/run above adds immediate file-button color changes and passes
+  both the unchanged 30-case matrix and coordinator raster/visual review. The
+  observed final stability is established; earlier causal hypotheses are not.
 
-## First hosted probe and bounded correction
+## Primary references
 
-**Observed:** [run 41396867865](https://github.com/patchwerks/furbomek/actions/runs/41396867865)
-at source `a9fdf722ed3fa7e09957ff79e1d1b44e62c78169` (verified from each
-artifact's `candidate-sha.txt`) failed both Node jobs. The artifact-name SHA
-`e510c5930c41a61bd7dc49be596671b8889c7411` identifies the workflow merge ref,
-not the tested source checkout.
-Firefox 157.0 in each job passed the deliberately unavailable WebGL path and
-created a real WebGL2 drawing buffer (876×570), reporting `llvmpipe, or similar`.
-The worker recorded Mesa 25.2.8 and Xvfb 21.1.12. This establishes a real software
-WebGL context, not full viewer compatibility: Firefox then failed initial Tab
-traversal before the original regression suite completed. Chromium Node 26 timed
-out opening the file chooser with Enter. Chromium Node 22 reached the original
-regressions and screenshots, then failed the immediate narrow-viewport focus
-visibility assertion. No job passed the combined suite.
-
-**Proposed focused retry:** run all original 23 regression scenarios before
-keyboard coverage, then open a fresh 1440×1000 page and bring that page to the
-front. Keyboard import uses Space. Native focus scrolling gets a bounded two
-seconds to settle; tests do not force focus or scroll a control into view. Failure
-diagnostics now include target and active control identities, rectangles,
-viewport, scroll coordinates, document focus and each attempted Tab destination.
-The narrow viewport traversal remains mandatory. A keyboard failure reports any
-completed baseline scenarios separately while keeping overall status failed.
-No production UI, browser preferences or rendering checks changed.
-
-The retry is pending publisher review and hosted execution. If the same failure
-recurs, stop and reassess the approach rather than extending a retry loop.
+- [Pinned Playwright browser manifest](https://github.com/microsoft/playwright/blob/v1.64.1/packages/playwright-core/browsers.json),
+  [Docker contents](https://playwright.dev/docs/docker), and
+  [headed CI/Xvfb](https://playwright.dev/docs/ci#running-headed).
+- [Mesa software-rendering variables](https://docs.mesa3d.org/envvars.html).
+- Mozilla's [appearance](https://developer.mozilla.org/en-US/docs/Web/CSS/Reference/Properties/appearance)
+  and [file-selector button](https://developer.mozilla.org/en-US/docs/Web/CSS/Reference/Selectors/::file-selector-button)
+  references; actual tested behavior is recorded above.
 
 ## Changelog
 
-- 2026-11-02: Recorded the failed first compatibility probe and prepared one
-  bounded keyboard diagnostic correction; no compatibility acceptance claimed.
-
-
-## Second probe and navigation acceptance correction
-
-**Observed:** the second hosted probe tested source
-`58d9e83930cd9429f7a34078eb7f0c6c9e1f794c`, verified from both artifacts'
-`candidate-sha.txt`. The artifact-name merge ref was
-`904c065f403ffe4a0a6b1d5401d6876504fb0865`; it is not the source revision.
-Chromium passed all 29 scenarios on both Node builds. Firefox passed all 23
-baseline scenarios on both builds, including rendered cue pixels, reduced-motion
-pixels, context loss and unmount. Firefox's overall result remained failed:
-keyboard traversal tried to reach Play by repeatedly pressing forward Tab from
-Use bundled example, passing the event controls and footer. The recorded active
-element then remained the footer link. This test incorrectly required navigation
-through browser chrome and wraparound to an earlier page control.
-
-**Reassessed acceptance design:** stop that wraparound approach. Traverse the
-actual DOM order (Play, Reset, Timeline, Import, Example, footer) forward, then
-return from the footer with Shift+Tab. Use reverse Tab whenever moving from
-Example or Timeline back to Play. If the target already has focus, verify its
-visible focus without cycling away. Repeat the same forward/reverse route at
-mobile width. This tests within-page keyboard access and return paths rather
-than a browser-chrome focus policy. All six keyboard scenario intents and all
-focus/viewport checks remain. No direct control focus, manual scrolling, browser
-preferences or production UI changes are introduced.
-
-This is one bounded acceptance-design correction following explicit reassessment,
-not another retry of the rejected wraparound assumption. New hosted results and
-coordinator screenshot inspection remain pending. Any new failure freezes the
-candidate for a fresh scope decision; the combined Firefox keyboard suite and
-full accessibility remain unaccepted.
-
-- 2026-11-02: Recorded second-probe Chromium 29/29 and Firefox baseline 23/23
-  on both Node builds; corrected the keyboard acceptance path after inspecting
-  the actual focus traces. Overall Firefox result remains failed until rechecked.
-
-
-## Qualified keyboard matrix and file-button contrast follow-up
-
-**Observed:** [run 41398180108](https://github.com/patchwerks/furbomek/actions/runs/41398180108)
-tested source `860d445bf1468728f12d5c3325bc765ee0d6990c` and passed all 29
-browser scenarios in all four Node/browser combinations. Source identity remains
-separate from artifact-name merge ref
-`5c353f94f99a75ea9dfb4cb3895fe2e446245fe9`.
-
-**Observed visual defect:** coordinator review of the dark desktop screenshots
-found poor native file-button contrast in both engines. The authored dark
-pseudo-element rule could be overridden by Bootstrap's more-specific light hover
-background while retaining light text. The scoped correction gives the native
-file selector `--stage` / `--ink` in its normal state and `--line` / `--ink` on
-host-input hover. It uses existing theme tokens and removes the old dark-only
-magic background; layout, renderer and dependencies are unchanged.
-
-A new `dark-file-selector-contrast` scenario actually hovers the file input,
-finishes finite transitions with a screenshot, reads the native
-`::file-selector-button` computed foreground/background, and requires 4.5:1.
-Absent/transparent/unsupported color results fail the existing strict color
-parser instead of skipping the assertion. The measured colors and ratio are
-included in browser results. The pointer then returns to the example control
-before the ordinary dark desktop evidence screenshot. This adds one scenario
-(30 total planned; baseline plus contrast is 24), with actual new-source results
-and visual verification pending. Existing 29-case success does not qualify the
-new CSS or replace the new regression check.
-
-- 2026-11-02: Recorded the four-way 29-case pass and prepared the independently
-  observed native-file hover contrast correction. New-source qualification and
-  final acceptance remain pending.
-
-
-## Raster mismatch after computed-contrast checks
-
-**Observed:** source `758d425c1999d64ee07fceaa78a6762029eaab9e` in
-[run 41406368411](https://github.com/patchwerks/furbomek/actions/runs/41406368411)
-passed the two build/type/62-test jobs and all 30 cases in each browser/build
-combination. Coordinator pixel review nevertheless found a Firefox computed-versus-raster
-mismatch: the dark desktop file button's dominant sampled background was
-RGB(116, 123, 130), while computed hover CSS reported RGB(73, 82, 91).
-The Chromium sampled background was RGB(72, 81, 90). The Firefox result does not
-establish rendered AA contrast; computed-style success alone was insufficient.
-
-**Scoped correction pending qualification:** add standard `appearance: none` to
-`::file-selector-button`, retaining the real file input and native picker.
-[Mozilla's appearance reference](https://developer.mozilla.org/en-US/docs/Web/CSS/Reference/Properties/appearance)
-describes suppression of native styling, and its
-[file-selector-button reference](https://developer.mozilla.org/en-US/docs/Web/CSS/Reference/Selectors/::file-selector-button)
-identifies the native file input button as the style target. The existing token
-colors remain unchanged. The browser test now requires computed appearance
-`none`, records it with the contrast metrics, and exports an actual hovered-input
-`file-selector-hover.png` for coordinator pixel/label review. That exact filename
-is added to the export allowlist; 8 MiB per-file and 32 MiB total limits remain.
-All six native keyboard scenarios, including file-picker activation, stay required.
-
-No rendered-contrast acceptance is claimed until the new source passes hosted
-checks and actual screenshot pixels and label readability are reviewed.
-
-- 2026-11-02: Recorded the computed-versus-rendered Firefox contrast mismatch;
-  prepared native-appearance suppression and bounded hover screenshot evidence.
-
-
-## Raster instability and bounded transition correction
-
-**Observed:** the appearance-only follow-up passed build/type/62-test checks and
-all 30 browser cases but did not pass coordinator raster review. Across the two
-Node artifacts, Firefox hovered-button backgrounds were RGB(174, 178, 182) and
-RGB(198, 202, 206), yielding approximately 1.865:1 and 1.441:1 against the light
-label. Chromium backgrounds varied too: RGB(92, 100, 108) and RGB(101, 107, 114),
-approximately 5.25:1 and 4.71:1. Computed colors still reported approximately
-6.95:1. These are observed raster variations; native-overlay causality was not
-proven by the earlier evidence. Appearance suppression alone did not resolve it.
-
-**Final bounded correction pending pixel verification:** set `transition: none`
-on the file-selector button so theme and hover colors change immediately using
-the existing palette. Retain `appearance: none`, opaque-color contrast checks,
-actual hover, all 30 cases and the real hover PNG. Record and assert computed
-`transitionProperty === 'none'`. In-flight color interpolation is a hypothesis
-consistent with the varying raster samples, not an established diagnosis.
-Qualification still requires the next hosted results and independently reviewed
-actual PNG contrast. No further causal or visual-pass claim follows from a green
-computed-style check alone.
-
-- 2026-11-02: Corrected the earlier native-overlay interpretation, recorded the
-  appearance-only raster failures, and prepared immediate file-button theme and
-  hover colors for final bounded pixel verification.
+- 2026-11-02: Prepared bounded Firefox/keyboard qualification and recorded failed
+  probes, corrected navigation acceptance, and investigated rendered contrast.
+- 2026-11-02: Consolidated the final four-way 30-case evidence, exact source and
+  enforcement identities, stable sampled raster contrast and coordinator visual
+  review; preserved independent acceptance and integration gates.
