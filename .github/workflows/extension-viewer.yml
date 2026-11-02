@@ -5,7 +5,7 @@ on:
     branches: [main, codex/32-extension-contract]
     paths: ['apps/extension-viewer/**', 'packages/extension-preview/**', '.github/workflows/extension-viewer.yml', 'package.json', 'package-lock.json', 'server/package.json', 'server/package-lock.json']
   push:
-    branches: [main, codex/32-extension-contract, codex/32-browser-viewer]
+    branches: [main, codex/32-extension-contract]
     paths: ['apps/extension-viewer/**', 'packages/extension-preview/**', '.github/workflows/extension-viewer.yml', 'package.json', 'package-lock.json', 'server/package.json', 'server/package-lock.json']
 permissions:
   contents: read
@@ -32,7 +32,7 @@ jobs:
         with:
           path: candidate
           persist-credentials: false
-          ref: ${{ github.sha }}
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
         with:
           ref: cdd9147fac9141fa0c75b5058f9dce46c7885188
@@ -216,7 +216,7 @@ jobs:
               timeout 180 node apps/extension-viewer/tests/browser-check.cjs > /scratch/evidence/browser.log 2>&1
             '
           export_evidence
-          printf '%s\n' "$GITHUB_SHA" > evidence/candidate-sha.txt
+          git -C "$GITHUB_WORKSPACE/candidate" rev-parse HEAD > evidence/candidate-sha.txt
           printf '%s\n' cdd9147fac9141fa0c75b5058f9dce46c7885188 > evidence/enforcement-sha.txt
       - name: Upload advisory evidence for source and screenshot review
         if: always()
