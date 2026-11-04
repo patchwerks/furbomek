@@ -250,8 +250,37 @@ not a viewer or renderer decision. UI, assets and 3D rights, voice, Hermes,
 character-broker writes, OBS and robot integration are excluded. PR 41 exact head
 `8c38c3fd814cc7dfdfd25ee706e5718f28f0de28` was accepted and merged on
 2026-11-04 at `ccad3d5c9cd9d52c83af20e21163dbd4b0ea8463`. This accepts only
-the data-only slice; PR 42 and wider issue 32 remain open. See the
+the data-only slice; PR 42 and wider issue 32 remain open. This acceptance
+does not qualify live operation or downstream contributions. See the
 [dated record](docs/operations/extension-preview-2026-11-02.md).
+
+**Historical contributor-kit checkpoint, before PR 45 acceptance:**
+
+The separate draft [contributor starter kit](docs/contributing/presentation-packs.md)
+adds authoring guidance, three original JSON examples and offline checks over the
+accepted PR 41 contract. The kit remains unapproved pending its own independent
+review and exact-head checks; the PR 42 viewer remains a separate unapproved draft.
+This kit changes no core contract,
+renderer or live integration, and does not establish a stable external API.
+Corrected kit source `9d993b8cc96528f66a6accfd4809043745faf30b`, based on
+accepted main `85f042887be769442305f0f503835bc588548202`, passed advisory run
+[41801905069](https://github.com/patchwerks/furbomek/actions/runs/41801905069):
+7 starter tests, 66 combined tests and file validation on Node 22.22.3 and 26.7.0.
+The accepted package workflow [41801904997](https://github.com/patchwerks/furbomek/actions/runs/41801904997)
+passed 59 package tests per Node on its PR merge revision. All suites reported
+zero failures, cancellations, skips and todos. See the
+[starter evidence record](docs/operations/presentation-pack-starter-2026-11-02.md)
+for exact revisions and the corrected initial mount failure. This is source-specific
+evidence; independent acceptance and applicable final-head checks remain pending.
+
+**Current-main refresh, 2026-11-04:** PR 45 is accepted and merged at
+`71e753078724c92a57d1690687ed7acc59c27a57`. The contributor starter kit is now
+accepted; the pending kit gates in the historical checkpoint above describe its
+pre-acceptance state. PR 42 is refreshed against this accepted current main while
+preserving its separately qualified viewer source and historical evidence.
+Fresh applicable checks on the refreshed published exact head and independent
+PR 42 review remain required. PR 45 acceptance does not accept the viewer,
+qualify live integration or close issue 32.
 
 ## 4. Runtime design
 
@@ -1123,6 +1152,13 @@ This evidence-only documentation child still needs applicable exact-head checks
 and independent PR 42 acceptance; issue 32 remains open.
 
 ## Changelog
+
+- 2026-11-04: Refreshed PR 42 against accepted PR 45 main; preserved kit and viewer evidence and retained fresh exact-head checks and independent PR 42 review.
+
+- 2026-11-04: Recorded corrected contributor-kit CI evidence; retained independent acceptance and final-head gates.
+- 2026-11-04: Recorded PR 41 acceptance; contributor-kit and viewer gates remain independent and pending.
+- 2026-11-02: Added the separate issue 32 draft contributor kit scope; core contract and viewer acceptance remain pending independent review.
+- 2026-11-02: Added the issue 32 data-only extension preview candidate scope; future viewer and live integration remain unimplemented.
 
 - 2026-11-04: Recorded successful PR 42 source qualification on accepted main; preserved independent review and final documentation-head checks.
 

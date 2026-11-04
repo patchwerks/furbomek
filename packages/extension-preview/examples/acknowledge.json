@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 1,
+  "packId": "starter-acknowledge",
+  "packVersion": "0.1.0",
+  "previewContractVersion": 1,
+  "capabilities": ["presentation.expression", "presentation.reaction"],
+  "durationMs": 1600,
+  "events": [
+    { "seq": 1, "atMs": 0, "kind": "presentation.expression", "value": "neutral" },
+    { "seq": 2, "atMs": 300, "kind": "presentation.reaction", "value": "acknowledge" }
+  ]
+}

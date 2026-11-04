@@ -180,7 +180,27 @@ remain required. No new visual-design acceptance, comprehensive accessibility
 claim, deployment, live integration, physical qualification or issue 32 closure
 is implied.
 
+## Current-main refresh after PR 45 acceptance, 2026-11-04
+
+PR 45 is accepted and merged at current main
+`71e753078724c92a57d1690687ed7acc59c27a57`. PR 42 now incorporates that
+accepted contributor-kit baseline while preserving the viewer implementation,
+parser/sampler contract, workflow, dependencies and historical evidence above.
+The previously published viewer documentation head
+`a9470603d87e0870adc09eec24ff8e7cd27c8114` has prior qualification recorded in
+[run 41802211438](https://github.com/patchwerks/furbomek/actions/runs/41802211438).
+That prior-head run does not qualify this refreshed current-main head.
+
+Fresh applicable checks on the refreshed published exact head and independent
+PR 42 review remain required. Qualification must run only in isolated,
+credential-free CI workers; this documentation refresh runs no candidate code,
+dependency installation, build or tests on the publishing host. PR 45 acceptance
+accepts the contributor kit only; it does not accept PR 42, establish a stable
+external API, qualify live integration or close issue 32.
+
 ## Changelog
+
+- 2026-11-04: Recorded PR 45 acceptance and refreshed current-main baseline; preserved prior-head evidence and retained fresh exact-head checks and independent PR 42 review.
 
 - 2026-11-04: Recorded successful exact-source accepted-main qualification from run 41801331687; retained final documentation-head checks and independent review.
 
