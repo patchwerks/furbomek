@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 1,
+  "packId": "starter-curious",
+  "packVersion": "0.1.0",
+  "previewContractVersion": 1,
+  "capabilities": ["presentation.expression"],
+  "durationMs": 2000,
+  "events": [
+    { "seq": 1, "atMs": 0, "kind": "presentation.expression", "value": "neutral" },
+    { "seq": 2, "atMs": 400, "kind": "presentation.expression", "value": "curious" }
+  ]
+}
