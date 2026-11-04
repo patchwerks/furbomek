@@ -180,3 +180,44 @@ result above. Final required checks and independent review remain outstanding.
 and avatar/OBS smoke checks remain unperformed. No provider or hardware access,
 merge or deployment occurred. The earlier cancelled old-head run41816004616
 is excluded from refreshed-head evidence.
+
+## Changelog — corrected implementation qualification, 2026-11-04
+
+**Observed tested implementation:** corrected source
+`15ec7b25c195dbad8cd8a2dea46ff0361e65b17b` passed
+[qualification41827223490](https://github.com/patchwerks/furbomek/actions/runs/41827223490)
+on Node22.22.3/npm10.9.8 and Node26.7.0/npm11.19.0. Both downloaded archive
+SHA-256 digests matched GitHub artifact metadata and embedded candidate SHA
+matched this exact implementation. Direct inspection of each candidate JSON
+records **0 errors / 0 warnings / 0 fatal diagnostics** for both root `app.vue`
+and repository lint. Both status files are `0 0 0`. The earlier refreshed-head
+0errors/1warning result remains preserved above; the one-line viewer attribute
+reorder removes that warning without rule or configuration changes.
+
+Both jobs passed production build, standalone types, full offline root install,
+malformed parse/enforcement fixtures and inspector build. Persisted exported
+lock bytes equal the committed root lock; dependency-tree inspection is clean.
+No enabled historical-baseline rule lost severity. Node26 again reports the
+`esbuild@0.28.2` postinstall `allowScripts` warning; root postinstall and build
+completed, but this is not evidence that every transitive install hook ran.
+The comparison remains against historical
+`fb7e25e9982f53a1f12e6c63955420ac476d8294`, not current main.
+
+The avatar source tree and its workflow are byte-identical to tested head
+`3b193409255ad441a595f662ccd534ef9e16476b`, where
+[avatar41826521026](https://github.com/patchwerks/furbomek/actions/runs/41826521026)
+passed15/15 and the real offline browser suite. This retains applicable
+unchanged-component evidence; it does not relabel that run as testing `15ec7b25`
+or a later documentation commit.
+
+This evidence append changes documentation only. All runtime source, config,
+dependency locks and workflow bytes remain identical to tested implementation
+`15ec7b25`; all ten original PR40 source files also remain identical to published
+`107fa4e3`. The forthcoming documentation-bearing head must receive its own
+identity/preservation check, applicable automatic required checks and independent
+review. The qualification run above is bound to `15ec7b25`, not that later head.
+
+Real streaming TTS, OpenAI, microphone/audio-device lifecycle and avatar/OBS
+smoke checks remain unperformed; offline CI does not clear those review gates.
+`npm run generate` remains unperformed. No live access, deployment or merge is
+claimed. Independent acceptance remains outstanding.
