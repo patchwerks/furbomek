@@ -1173,7 +1173,22 @@ the bytes and checks again. Browser qualification additionally asserts `lang="en
 See the [bounded preparation record](docs/operations/viewer-language-types-2026-11-04.md).
 Hosted results, exact-head review and acceptance remain pending; issue 32 stays open.
 
+**Viewer language/types source qualification, 2026-11-04:** exact source
+`552cc5b849b0688c757e4acf7f6a0979b8d5d5c1` passed
+[run 41826988549](https://github.com/patchwerks/furbomek/actions/runs/41826988549)
+on Node 22.22.3 and 26.7.0. Each passed normal script typechecking, the exact
+injected `app.vue` TS2339 negative control, restored-source typechecking, static
+generation and 62 core/artifact tests. Chromium 156.0.8078.4 and Firefox 157.0 each
+passed 31 browser cases per Node version, including the actual HTML `lang="en"`
+assertion, with empty outbound/error arrays. Archive digests matched GitHub metadata;
+the [operations record](docs/operations/viewer-language-types-2026-11-04.md)
+binds source, enforcement and artifacts and preserves JavaScript declaration limits.
+Final documentation-head checks and independent PR 46 acceptance remain required;
+issue 32 stays open.
+
 ## Changelog
+
+- 2026-11-04: Recorded exact-source viewer language/type proof and browser matrix; retained final documentation-head and independent PR 46 acceptance.
 
 - 2026-11-04: Prepared explicit viewer document language and meaningful script typechecking with an offline negative control; runtime qualification remains pending.
 
