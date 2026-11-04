@@ -82,8 +82,26 @@ and guide commands, and explicitly included both test directories in the combine
 command. No checks were skipped or made conditional. The accepted package-only
 workflow and core tests are unchanged.
 
-**Pending:** corrected-revision CI and its exact SHA/run IDs. The first-run passes
-do not qualify this correction; no corrected runtime result is claimed.
+**Observed corrected-source evidence (logs retrieved and inspected):** source
+`9d993b8cc96528f66a6accfd4809043745faf30b`, based on accepted main
+`85f042887be769442305f0f503835bc588548202`, passed the following on
+Node `22.22.3` and `26.7.0`:
+
+- [Starter advisory run 41801905069](https://github.com/patchwerks/furbomek/actions/runs/41801905069)
+  checked out the exact source SHA: 7/7 starter tests, 66/66 combined tests, and
+  `Valid pack: starter-neutral` from the documented CLI on each Node version.
+- [Accepted package workflow run 41801904997](https://github.com/patchwerks/furbomek/actions/runs/41801904997)
+  checked out GitHub's PR merge revision
+  `c9c0e64f49092b5427057c6776dbc14beaaf2530` (that source merged with the
+  accepted main above): 59/59 package-only tests on each Node version.
+
+Every reported suite had zero failures, cancellations, skips and todos. The
+initial failure remains recorded above; no package-only workflow or core-test
+change was needed. Retrieval and inspection of logs did not execute candidate code.
+
+**Pending:** this evidence is for the stated source and PR merge revisions, not
+for the documentation child recording it or a future final head. Independent
+acceptance, including workflow review, and applicable final-head checks remain open.
 
 Browser import of these starter examples was not exercised. Any previous viewer
 qualification applies only to its recorded viewer revision, not this kit branch.
@@ -93,6 +111,9 @@ complete; this kit still requires independent review (including its workflow)
 and exact-head checks before integration into main.
 
 ## Changelog
+
+- 2026-11-04: Verified corrected-source CI logs on both Node versions; recorded
+  exact source/base/merge revisions and results without claiming final-head acceptance.
 
 - 2026-11-04: Recorded first-run advisory passes and package-only failure; moved
   all seven contributor tests outside the package-only suite. Corrected runtime

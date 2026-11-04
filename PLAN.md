@@ -259,6 +259,16 @@ accepted PR 41 contract. The kit remains unapproved pending its own independent
 review and exact-head checks; the PR 42 viewer remains a separate unapproved draft.
 This kit changes no core contract,
 renderer or live integration, and does not establish a stable external API.
+Corrected kit source `9d993b8cc96528f66a6accfd4809043745faf30b`, based on
+accepted main `85f042887be769442305f0f503835bc588548202`, passed advisory run
+[41801905069](https://github.com/patchwerks/furbomek/actions/runs/41801905069):
+7 starter tests, 66 combined tests and file validation on Node 22.22.3 and 26.7.0.
+The accepted package workflow [41801904997](https://github.com/patchwerks/furbomek/actions/runs/41801904997)
+passed 59 package tests per Node on its PR merge revision. All suites reported
+zero failures, cancellations, skips and todos. See the
+[starter evidence record](docs/operations/presentation-pack-starter-2026-11-02.md)
+for exact revisions and the corrected initial mount failure. This is source-specific
+evidence; independent acceptance and applicable final-head checks remain pending.
 
 ## 4. Runtime design
 
@@ -1092,6 +1102,8 @@ Normal runtime has no external tether to either legacy controller. Maintenance m
 Those boundaries are what make zero-human-in-the-loop operation technically credible rather than merely theatrical.
 
 ## Changelog
+
+- 2026-11-04: Recorded corrected contributor-kit CI evidence; retained independent acceptance and final-head gates.
 
 - 2026-11-04: Recorded PR 41 acceptance; contributor-kit and viewer gates remain independent and pending.
 
