@@ -18,8 +18,9 @@ readable theme colors without color interpolation.
 This is candidate evidence for [issue 32](https://github.com/patchwerks/furbomek/issues/32),
 not final PR acceptance or a comprehensive accessibility audit. PR 41 was
 accepted and merged on 2026-11-04 at
-`ccad3d5c9cd9d52c83af20e21163dbd4b0ea8463`. PR 42 independent review,
-retargeting to accepted main and fresh exact-head checks remain required. The [original candidate record](extension-viewer-2026-11-02.md)
+`ccad3d5c9cd9d52c83af20e21163dbd4b0ea8463`. PR 42 independent review and
+final documentation-head checks remain required;
+accepted-main retargeting and source qualification are recorded below. The [original candidate record](extension-viewer-2026-11-02.md)
 preserves the earlier implementation evidence.
 
 ## Exact tested scope
@@ -147,7 +148,41 @@ renderer and parser/sampler are unchanged.
   and [file-selector button](https://developer.mozilla.org/en-US/docs/Web/CSS/Reference/Selectors/::file-selector-button)
   references; actual tested behavior is recorded above.
 
+## Accepted-main source qualification, 2026-11-04
+
+PR 42 was rebased onto accepted main
+`85f042887be769442305f0f503835bc588548202` and retargeted to `main`.
+[Run 41801331687](https://github.com/patchwerks/furbomek/actions/runs/41801331687)
+passed on exact source `5ae31fbc293428b53a0858406ad74a48ba85a982`.
+Both downloaded artifacts identify that candidate SHA and accepted enforcement
+`cdd9147fac9141fa0c75b5058f9dce46c7885188`. Their names contain workflow
+merge-ref `e40a6f83a20a55e63c8ee8ef3262fcd809ff7e27`, not the candidate SHA.
+
+- Node 22.22.3 / npm 10.9.8 and Node 26.7.0 / npm 11.19.0 each passed locked
+  provisioning, Nuxt prepare, Vue typecheck and static generation. Both typecheck
+  logs were empty; both generation logs report generated public output. Hosted
+  qualification steps completed successfully, including cleanup.
+- Each Node job passed 62/62 core/artifact tests, with zero failures,
+  cancellations, skips or todos, and 30 browser cases each on Chromium
+  156.0.8078.4 and Firefox 157.0. All four browser-result records report passed
+  status and empty outbound-request/error arrays. Each reports file-selector
+  hover contrast 6.950862417071722:1.
+- Artifact 13306749251 (Node 22) archive SHA-256 is
+  `7d6a5395976148e371faf358574000eea3858e45368d0fc4fdf5002e896efdae`;
+  artifact 13307788008 (Node 26) archive SHA-256 is
+  `6a95fd6e6f9a7130b48dc779133d873c38e2fc5606ae88e81da1fdb7fde0cc0c`.
+  Downloaded archive hashes matched GitHub metadata. Logs and bounded artifact
+  contents were inspected only as inert data on the publishing host.
+
+This documentation-only child preserves the qualified runtime and workflow.
+Fresh applicable checks on its published exact head and independent PR 42 review
+remain required. No new visual-design acceptance, comprehensive accessibility
+claim, deployment, live integration, physical qualification or issue 32 closure
+is implied.
+
 ## Changelog
+
+- 2026-11-04: Recorded successful exact-source accepted-main qualification from run 41801331687; retained final documentation-head checks and independent review.
 
 - 2026-11-04: Recorded PR 41 acceptance and the qualified documentation child; retained exact historical source evidence and pending PR 42 final-main review/checks.
 

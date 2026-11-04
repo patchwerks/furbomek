@@ -1095,8 +1095,9 @@ simulation. Root provider UI and all live integrations remain excluded. Source
 62 tests and 23 browser cases per job, plus bounded coordinator visual review.
 PR 41 was accepted and merged on 2026-11-04 at
 `ccad3d5c9cd9d52c83af20e21163dbd4b0ea8463`, accepting exact head
-`8c38c3fd814cc7dfdfd25ee706e5718f28f0de28`. PR 42 independent acceptance,
-retargeting to accepted main and fresh checks remain open; this does not close issue 32. See the [candidate record](docs/operations/extension-viewer-2026-11-02.md).
+`8c38c3fd814cc7dfdfd25ee706e5718f28f0de28`. PR 42 independent acceptance and
+final documentation-head checks remain open; accepted-main source qualification
+is recorded below. This does not close issue 32. See the [candidate record](docs/operations/extension-viewer-2026-11-02.md).
 
 The [compatibility follow-up](docs/operations/extension-viewer-compatibility-2026-11-02.md)
 at source `87a50b335a58dea2b4920a53afd14913de405765` passed
@@ -1107,10 +1108,23 @@ SwiftShader and Firefox Xvfb/Mesa. Actual keyboard navigation stays within page
 DOM order with reverse Tab; native file-button hover contrast measured 6.950862417:1
 with matching sampled raster backgrounds in all four artifacts and bounded
 coordinator visual review. This is not full accessibility or arbitrary-browser
-qualification. PR 41 acceptance is complete. PR 42 independent review,
-accepted-main retargeting and fresh exact-head checks remain open; issue 32 is not closed.
+qualification. PR 41 acceptance is complete. PR 42 independent review and
+final documentation-head checks remain open; issue 32 is not closed.
+
+**Accepted-main follow-up, 2026-11-04:** PR 42 was rebased onto main
+`85f042887be769442305f0f503835bc588548202` and retargeted to `main`.
+Exact source `5ae31fbc293428b53a0858406ad74a48ba85a982` passed
+[run 41801331687](https://github.com/patchwerks/furbomek/actions/runs/41801331687):
+Node 22.22.3 and 26.7.0 each passed prepare/typecheck/static generation,
+62 core/artifact tests and 30 browser cases each on Chromium 156.0.8078.4 and
+Firefox 157.0, with empty outbound/error arrays in all four browser records.
+The compatibility record retains exact artifact provenance and scope limits.
+This evidence-only documentation child still needs applicable exact-head checks
+and independent PR 42 acceptance; issue 32 remains open.
 
 ## Changelog
+
+- 2026-11-04: Recorded successful PR 42 source qualification on accepted main; preserved independent review and final documentation-head checks.
 
 - 2026-11-04: Recorded accepted PR 41 integration; retained PR 42 review and final-main qualification gates and kept issue 32 open.
 
