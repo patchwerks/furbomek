@@ -198,7 +198,42 @@ dependency installation, build or tests on the publishing host. PR 45 acceptance
 accepts the contributor kit only; it does not accept PR 42, establish a stable
 external API, qualify live integration or close issue 32.
 
+## Post-PR 45 current-main source qualification, 2026-11-04
+
+[Run 41805458563](https://github.com/patchwerks/furbomek/actions/runs/41805458563)
+passed on exact source `69f7850f03edc2f48e2d7dcacf6269df56bb5bde`, incorporating
+accepted PR 45 main `71e753078724c92a57d1690687ed7acc59c27a57`.
+Both downloaded artifacts identify that candidate and accepted enforcement
+`cdd9147fac9141fa0c75b5058f9dce46c7885188`. Artifact names contain workflow
+merge-ref `1dba142c6fcea0cdef65072b16dc0714999e54ae`, not the candidate SHA.
+
+- Node 22.22.3 / npm 10.9.8 and Node 26.7.0 / npm 11.19.0 each passed
+  provisioning, Nuxt prepare, Vue typecheck and static generation. Prepare logs
+  report generated types, both typecheck logs are empty, and generation logs
+  report generated public output. Both hosted qualification jobs and cleanup
+  completed successfully.
+- Each Node job passed 62/62 core/artifact tests with zero failures,
+  cancellations, skips or todos, plus 30 cases each on Chromium 156.0.8078.4 and
+  Firefox 157.0. All four browser-result records report passed status, empty
+  outbound-request/error arrays and file-selector hover contrast
+  6.950862417071722:1. Actual browser-version records match those versions.
+- Artifact 13309926595 (Node 22) archive SHA-256 is
+  `25377c6e15b68f121043759524ecbe589e5c0803706eaf4ae6690ca6d780fc86`;
+  artifact 13308769915 (Node 26) archive SHA-256 is
+  `97e85f55ba924f9a3f7dbcb6f4e6447c9dcb9523a5a50a95bb57d4d1084d498d`.
+  Both archive hashes matched GitHub metadata. Exact artifact filenames, path
+  safety, regular-file types and the existing 8 MiB/file and 32 MiB/job bounds
+  were checked. Logs and artifact records were inspected only as inert data.
+
+This evidence-only documentation child still requires fresh applicable checks on
+its published exact head and independent PR 42 review. The preceding refresh
+checkpoint's pending source checks are satisfied only for the exact source above.
+No new visual-design acceptance, comprehensive accessibility claim, deployment,
+live integration, physical qualification or issue 32 closure is implied.
+
 ## Changelog
+
+- 2026-11-04: Recorded successful post-PR 45 source qualification from run 41805458563 with verified artifact digests; retained final documentation-head checks and independent PR 42 review.
 
 - 2026-11-04: Recorded PR 45 acceptance and refreshed current-main baseline; preserved prior-head evidence and retained fresh exact-head checks and independent PR 42 review.
 

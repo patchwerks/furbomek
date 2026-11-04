@@ -1151,7 +1151,22 @@ The compatibility record retains exact artifact provenance and scope limits.
 This evidence-only documentation child still needs applicable exact-head checks
 and independent PR 42 acceptance; issue 32 remains open.
 
+**Post-PR 45 source qualification, 2026-11-04:** source
+`69f7850f03edc2f48e2d7dcacf6269df56bb5bde`, incorporating accepted main
+`71e753078724c92a57d1690687ed7acc59c27a57`, passed
+[run 41805458563](https://github.com/patchwerks/furbomek/actions/runs/41805458563).
+Node 22.22.3 and 26.7.0 each passed prepare/typecheck/static generation,
+62 core/artifact tests and 30 browser cases each on Chromium 156.0.8078.4 and
+Firefox 157.0, with empty outbound/error arrays in all four records.
+Downloaded archive digests matched GitHub metadata; exact provenance and bounded
+inert inspection are recorded in the compatibility record. This satisfies the
+refresh checkpoint's source checks for that exact source only. Fresh applicable
+checks on this documentation child's published exact head and independent PR 42
+review remain required; issue 32 stays open.
+
 ## Changelog
+
+- 2026-11-04: Recorded successful PR 42 source qualification after accepted PR 45; retained final documentation-head checks and independent review.
 
 - 2026-11-04: Refreshed PR 42 against accepted PR 45 main; preserved kit and viewer evidence and retained fresh exact-head checks and independent PR 42 review.
 
