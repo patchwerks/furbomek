@@ -202,7 +202,7 @@ onBeforeUnmount(() => {
         <section class="inspector-section events-section" aria-labelledby="events-title">
           <h2 id="events-title">Events</h2>
           <ol v-if="pack" class="event-list" data-testid="event-list">
-            <li v-for="event in pack.events" :key="event.seq"><button @click="seek(event.atMs)" :aria-label="`Seek to ${event.value} at ${event.atMs} milliseconds`"><span class="event-time">{{ event.atMs }} ms</span><span>{{ event.value }}<small>{{ event.kind === 'presentation.expression' ? 'Expression' : 'Reaction' }}</small></span></button></li>
+            <li v-for="event in pack.events" :key="event.seq"><button :aria-label="`Seek to ${event.value} at ${event.atMs} milliseconds`" @click="seek(event.atMs)"><span class="event-time">{{ event.atMs }} ms</span><span>{{ event.value }}<small>{{ event.kind === 'presentation.expression' ? 'Expression' : 'Reaction' }}</small></span></button></li>
           </ol>
           <p v-else class="helper">Events appear after a valid import.</p>
         </section>
