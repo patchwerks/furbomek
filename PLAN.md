@@ -235,6 +235,22 @@ furbomek/
 
 The official Freenove repository declares CC BY-NC-SA 3.0 and explicitly says its files are not for commercial use. Before this project becomes a commercial desktop-agent platform, either obtain compatible permission, isolate the upstream material as a development reference, or implement a clean project-owned protocol/firmware layer. Do not copy upstream code into a permissively licensed product without a license decision. AIRI, A2UI, Live2D/VRM assets, and every avatar model also receive separate source, version, and license records; an application's code license never clears bundled character assets or proprietary runtimes automatically.
 
+### 3.1 Data-only extension preview first slice (2026-11-02)
+
+[Issue 32](https://github.com/patchwerks/furbomek/issues/32) now has a bounded
+candidate in [`packages/extension-preview/`](packages/extension-preview/README.md):
+a dependency-free strict JSON parser, immutable presentation pack and stateless
+elapsed-time sampler, plus a separate bounded Node file loader. Only neutral/
+curious expressions and an acknowledge reaction are representable. These template
+capabilities grant no physical action or live authority. The package remains
+private and outside the root workspace/runtime.
+
+This is the first data-contract slice for a possible future extension viewer,
+not a viewer or renderer decision. UI, assets and 3D rights, voice, Hermes,
+character-broker writes, OBS and robot integration are excluded. Exact-head hosted
+checks and independent review are required before acceptance; source presence
+alone is not runtime qualification. See the [dated record](docs/operations/extension-preview-2026-11-02.md).
+
 ## 4. Runtime design
 
 ### 4.1 Control and media planes
@@ -1065,3 +1081,7 @@ It does **not** mean:
 Normal runtime has no external tether to either legacy controller. Maintenance may inspect or electrically characterize removed controls on a supported bench, but they never regain runtime authority.
 
 Those boundaries are what make zero-human-in-the-loop operation technically credible rather than merely theatrical.
+
+## Changelog
+
+- 2026-11-02: Added the issue 32 data-only extension preview candidate scope; future viewer and live integration remain unimplemented.
