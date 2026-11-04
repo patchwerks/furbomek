@@ -132,3 +132,51 @@ Offline fixtures do not substitute for those checks. Fresh independent review
 and all required exact-head checks remain outstanding; this record does not clear
 review, merge or deploy PR40. No candidate install, build, lint or runtime code
 was executed on the credentialed host during preparation.
+
+## Changelog — refreshed-head evidence and bounded correction, 2026-11-04
+
+**Observed:** [ESLint qualification41816174345](https://github.com/patchwerks/furbomek/actions/runs/41816174345)
+completed successfully on refreshed source head
+`3b193409255ad441a595f662ccd534ef9e16476b`, with Node22.22.3/npm10.9.8 and
+Node26.7.0/npm11.19.0. Both artifact archives matched their GitHub SHA-256
+digests; embedded candidate SHA matched this head. Actual candidate JSON shows
+root `app.vue`: **0 errors / 0 warnings / 0 fatal diagnostics**; repository:
+**0 errors / 1 warning / 0 fatal diagnostics**, on both Node versions. Both
+status files are `0 0 0`; successful lint exits do not mean zero warnings.
+
+The sole repository warning is accepted-main
+`apps/extension-viewer/app.vue:197:97`, `vue/attributes-order`, severity1:
+`Attribute ":aria-label" should go before "@click".` This run is not a
+zero-warning repository qualification. The authorized bounded correction moves
+only that button's existing `:aria-label` before `@click`, retaining their exact
+values and bindings. No lint rules, ignores, suppressions, dependencies, locks
+or workflows change. This explicitly adds one viewer template line to the
+original scope; all ten original PR40 source files remain byte-identical to
+published head `107fa4e354b1e7b44ed6f8543a2aba64a50a10cd`.
+
+Both jobs completed preparation, production build, standalone `vue-tsc --noEmit`,
+persisted-lock provisioning and full offline root installation. Exported lock
+bytes match the committed root lock. Malformed Vue/TypeScript fixtures each
+report one fatal parse error; both enforcement fixtures retain severity2
+self-import and constant-condition diagnostics. Inspector build passed and
+no enabled historical-baseline rule lost severity. Node26's full-install log
+also records npm's warning that `esbuild@0.28.2` postinstall is not covered by
+`allowScripts`; do not claim every transitive install hook ran. Root postinstall
+and production build did complete. Comparison baseline is still pinned
+`fb7e25e9982f53a1f12e6c63955420ac476d8294`, not current main.
+
+[Avatar qualification41826521026](https://github.com/patchwerks/furbomek/actions/runs/41826521026)
+passed on the same `3b193409` head: 15 tests, 15 passes, zero failures/skips,
+and the real offline browser checks for asset, labelled fixture,
+interruption/expiry, literal HTML text, no global live instance and no page
+errors. The correction changes no avatar source or avatar workflow bytes;
+this is applicable unchanged-component evidence, not a test of the later full
+commit and not a real OBS check.
+
+**Pending:** publish the bounded correction and rerun exact-head ESLint matrix;
+zero-warning correction results are not yet claimed. Preserve the actual0/1
+result above. Final required checks and independent review remain outstanding.
+`npm run generate`, real streaming TTS, OpenAI, microphone/audio-device lifecycle
+and avatar/OBS smoke checks remain unperformed. No provider or hardware access,
+merge or deployment occurred. The earlier cancelled old-head run41816004616
+is excluded from refreshed-head evidence.
