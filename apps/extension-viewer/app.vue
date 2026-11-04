@@ -1,25 +1,29 @@
-<script setup>
+<script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, ref, shallowRef } from 'vue';
 import { MAX_PACK_BYTES, parsePack, samplePack } from '../../packages/extension-preview/index.mjs';
 import exampleText from '../../packages/extension-preview/fixtures/reaction.json?raw';
 import { createProxy } from './proxy.mjs';
+import type { ParsedPack, Sample } from '../../packages/extension-preview/index.mjs';
+import type { ProxyHandle } from './proxy.mjs';
 
-const neutral = Object.freeze({ positionMs: 0, expression: 'neutral', reaction: null, reactionProgress: 0 });
-const pack = shallowRef(parsePack(new TextEncoder().encode(exampleText)));
+const neutral: Sample = Object.freeze({ positionMs: 0, expression: 'neutral', reaction: null, reactionProgress: 0 });
+const pack = shallowRef<ParsedPack | null>(parsePack(new TextEncoder().encode(exampleText)));
 const filename = ref('Bundled reaction example');
-const sample = shallowRef(neutral);
+const sample = shallowRef<Sample>(neutral);
 const playing = ref(false);
 const importing = ref(false);
 const importError = ref('');
 const rendererError = ref('');
 const ready = ref(false);
 const reducedMotion = ref(false);
-const stage = ref(null);
-const canvas = ref(null);
-const fileInput = ref(null);
+const stage = ref<HTMLDivElement | null>(null);
+const canvas = ref<HTMLCanvasElement | null>(null);
+const fileInput = ref<HTMLInputElement | null>(null);
 const position = ref(0);
 const duration = computed(() => pack.value?.durationMs ?? 0);
-let proxy, observer, media;
+let proxy: ProxyHandle | undefined;
+let observer: ResizeObserver | undefined;
+let media: MediaQueryList | undefined;
 let frame = 0;
 let anchor = 0;
 let nonce = 0;
@@ -37,15 +41,17 @@ function reset() {
   sample.value = neutral;
   draw();
 }
-function seek(value) {
+function seek(value: number | string) {
   pause();
   if (!pack.value) return;
   position.value = Math.max(0, Math.min(Number(value), duration.value));
   sample.value = samplePack(pack.value, position.value);
   draw();
 }
-function seekInput(event) { seek(event.target.value); }
-function tick(now) {
+function seekInput(event: Event) {
+  if (event.target instanceof HTMLInputElement) seek(event.target.value);
+}
+function tick(now: number) {
   frame = 0;
   if (!alive || !playing.value || !pack.value || !ready.value) return;
   // The first RAF timestamp can precede the click-time performance.now() anchor.
@@ -71,7 +77,8 @@ function clearPack() {
   filename.value = '';
   importError.value = '';
 }
-async function importFile(event) {
+async function importFile(event: Event) {
+  if (!(event.target instanceof HTMLInputElement)) return;
   const token = ++nonce;
   clearPack();
   importing.value = false;
@@ -100,7 +107,7 @@ function loadExample() {
   pack.value = parsePack(new TextEncoder().encode(exampleText));
   filename.value = 'Bundled reaction example';
 }
-function failRenderer(message) {
+function failRenderer(message: string) {
   ready.value = false;
   reset();
   proxy?.dispose();
@@ -110,7 +117,7 @@ function failRenderer(message) {
 }
 function visibilityChanged() { if (document.hidden) pause(); }
 function motionChanged() {
-  reducedMotion.value = media.matches;
+  reducedMotion.value = media?.matches ?? false;
   draw();
 }
 onMounted(() => {
@@ -119,6 +126,7 @@ onMounted(() => {
   media.addEventListener('change', motionChanged);
   document.addEventListener('visibilitychange', visibilityChanged);
   try {
+    if (!canvas.value || !stage.value) throw new Error('Preview elements unavailable');
     if (!canvas.value.getContext('webgl2')) throw new Error('WebGL2 unavailable');
     proxy = createProxy(canvas.value, () => failRenderer('The WebGL2 context was lost. Reload this page to restore the preview.'));
     observer = new ResizeObserver(() => {

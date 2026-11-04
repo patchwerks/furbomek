@@ -43,7 +43,7 @@ let unavailablePassed = false;
 let baselineCompleted = false;
 let keyboardDiagnostics = null;
 const contrastMetrics = {};
-const baselineCases = ['WebGL', 'seek', 'play-pause', 'reset', 'end', 'invalid', 'unauthorized-event', 'read-failure', 'reload-example', 'oversize', 'HTML-filename', 'reduced-motion', 'hidden', 'context-loss', 'WebGL-unavailable', 'stale-import', 'unmount', 'rendered-cue', 'acknowledge-transform', 'reduced-motion-pixels', 'dark-hover-example-contrast', 'dark-license-link-contrast', 'first-frame-clock-order', 'dark-file-selector-contrast'];
+const baselineCases = ['document-language', 'WebGL', 'seek', 'play-pause', 'reset', 'end', 'invalid', 'unauthorized-event', 'read-failure', 'reload-example', 'oversize', 'HTML-filename', 'reduced-motion', 'hidden', 'context-loss', 'WebGL-unavailable', 'stale-import', 'unmount', 'rendered-cue', 'acknowledge-transform', 'reduced-motion-pixels', 'dark-hover-example-contrast', 'dark-license-link-contrast', 'first-frame-clock-order', 'dark-file-selector-contrast'];
 async function runKeyboard(page) {
   const id = name => page.getByTestId(name);
   const text = name => id(name).textContent();
@@ -175,6 +175,7 @@ fs.mkdirSync(evidence, { recursive: true });
   const seek = async value => { await id('timeline').evaluate((input, next) => { input.value = String(next); input.dispatchEvent(new Event('input', { bubbles: true })); }, value); };
   const upload = (name, buffer) => id('import-file').setInputFiles({ name, mimeType: 'application/json', buffer });
   await page.goto(origin);
+  assert.equal(await page.locator('html').getAttribute('lang'), 'en');
   await page.waitForFunction(() => document.querySelector('[data-testid="viewer-canvas"]') || document.querySelector('[data-testid="renderer-error"]'));
   const rendererFailure = await id('renderer-error').count() ? await text('renderer-error') : null;
   fs.writeFileSync(path.join(evidence, 'renderer-diagnostics.json'), JSON.stringify({ browser: browserName, version: browserVersion, rendererFailure }));

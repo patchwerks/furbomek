@@ -32,6 +32,11 @@ The core has no Node imports, filesystem, network, timers, dynamic code executio
 or renderer dependencies. `fixtures/reaction.json` is a synthetic contract
 example, never a substitute for observed live character state.
 
+`index.d.mts` provides type-only descriptions of the browser API, reviewed against
+its JavaScript implementation. The private nominal brand describes validated
+parser results for TypeScript consumers; the runtime WeakSet remains the authority.
+These declarations do not typecheck the core JavaScript internals.
+
 ## Contract v1
 
 Root fields are exactly `schemaVersion`, `packId`, `packVersion`,
@@ -101,6 +106,9 @@ is a separate unapproved draft absent from this kit. The guide does not define a
 stable external API or grant live authority.
 
 ## Changelog
+
+- 2026-11-04: Documented the type-only browser API declarations and retained the
+  runtime parser-brand authority and JavaScript verification boundary.
 
 - 2026-11-04: Recorded core acceptance through PR 41; contributor kit and viewer
   still require separate acceptance.
