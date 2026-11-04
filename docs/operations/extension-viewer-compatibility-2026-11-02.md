@@ -16,9 +16,10 @@ transport and procedural rendering paths; its native file button now uses stable
 readable theme colors without color interpolation.
 
 This is candidate evidence for [issue 32](https://github.com/patchwerks/furbomek/issues/32),
-not final PR acceptance or a comprehensive accessibility audit. Independent PR 41
-and PR 42 reviews, retargeting to accepted main and fresh exact-head checks remain
-required. The [original candidate record](extension-viewer-2026-11-02.md)
+not final PR acceptance or a comprehensive accessibility audit. PR 41 was
+accepted and merged on 2026-11-04 at
+`ccad3d5c9cd9d52c83af20e21163dbd4b0ea8463`. PR 42 independent review,
+retargeting to accepted main and fresh exact-head checks remain required. The [original candidate record](extension-viewer-2026-11-02.md)
 preserves the earlier implementation evidence.
 
 ## Exact tested scope
@@ -37,8 +38,12 @@ Each artifact's `candidate-sha.txt` identifies tested source
 `87a50b335a58dea2b4920a53afd14913de405765`; `enforcement-sha.txt` identifies
 accepted enforcement `cdd9147fac9141fa0c75b5058f9dce46c7885188`. Artifact names
 contain workflow merge-ref SHA `c28ad7d3018dbea453b9426725d09619346d810c`,
-which must not be mistaken for the source checkout. PR 42 remains stacked on
-unaccepted PR 41 source `8c38c3fd814cc7dfdfd25ee706e5718f28f0de28`.
+which must not be mistaken for the source checkout. At qualification time PR 42
+was stacked on then-unaccepted PR 41 source
+`8c38c3fd814cc7dfdfd25ee706e5718f28f0de28`; that exact dependency is now accepted.
+The documentation child `92b7c14699d125177bd3f01d896b25ebe3ffa02b` subsequently
+passed [run 41408868444](https://github.com/patchwerks/furbomek/actions/runs/41408868444).
+Neither historical run qualifies a newly rebased final-main head.
 
 Qualification used the existing two Linux Node builds, provisioning and compiling
 once per job, followed by separate disposable Chromium and Firefox workers.
@@ -143,6 +148,8 @@ renderer and parser/sampler are unchanged.
   references; actual tested behavior is recorded above.
 
 ## Changelog
+
+- 2026-11-04: Recorded PR 41 acceptance and the qualified documentation child; retained exact historical source evidence and pending PR 42 final-main review/checks.
 
 - 2026-11-02: Prepared bounded Firefox/keyboard qualification and recorded failed
   probes, corrected navigation acceptance, and investigated rendered contrast.

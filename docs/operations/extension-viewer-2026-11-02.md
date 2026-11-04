@@ -7,10 +7,13 @@ status: active
 # Local presentation viewer candidate
 
 Scope: [issue 32](https://github.com/patchwerks/furbomek/issues/32), building on
-PR 41 head `8c38c3fd814cc7dfdfd25ee706e5718f28f0de28`. The accepted policy base
-remains main `cdd9147fac9141fa0c75b5058f9dce46c7885188`; the package PR remains
-under review. The user authorized this bounded original procedural proxy viewer
-while review is pending. Implementation does not constitute acceptance or closure.
+accepted PR 41 head `8c38c3fd814cc7dfdfd25ee706e5718f28f0de28`, merged
+on 2026-11-04 at `ccad3d5c9cd9d52c83af20e21163dbd4b0ea8463`. The original
+implementation and qualification used main
+`cdd9147fac9141fa0c75b5058f9dce46c7885188` as their accepted enforcement base.
+The user authorized this bounded original procedural proxy viewer; PR 42
+retargeting, final-main checks and independent review remain pending. Implementation
+does not constitute viewer acceptance or issue closure.
 
 ## Implemented source boundary
 
@@ -118,9 +121,8 @@ This visual review is separate from independent PR acceptance.
 This is exact-source advisory evidence, not main integration or repository-wide
 lint/CodeQL acceptance. Full browser coverage, hardware GPU/performance testing,
 a full accessibility audit, physical behavior, canonical character asset rights
-and live-system acceptance remain unqualified. Independent review of
-[PR 41](https://github.com/patchwerks/furbomek/pull/41) and
-[PR 42](https://github.com/patchwerks/furbomek/pull/42), retargeting to accepted
+and live-system acceptance remain unqualified. PR 41 acceptance is complete.
+Independent review of [PR 42](https://github.com/patchwerks/furbomek/pull/42), retargeting to accepted
 main and fresh checks remain required. The coordinator retains publishing and
 claim ownership. No installation, deployment, activation, claim release or issue
 closure is implied by these results.
@@ -131,3 +133,7 @@ Before integration, discard this isolated viewer candidate. After acceptance,
 revert the app, viewer-specific tests/workflow and this documentation together.
 It has no installed service, persistent user data, device write or migration.
 Do not revert the separately reviewed data-only package or unrelated live state.
+
+## Changelog
+
+- 2026-11-04: Recorded PR 41 acceptance and merge; preserved historical qualification and remaining PR 42 integration/review gates.

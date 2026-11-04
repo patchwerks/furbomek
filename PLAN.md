@@ -238,7 +238,7 @@ The official Freenove repository declares CC BY-NC-SA 3.0 and explicitly says it
 ### 3.1 Data-only extension preview first slice (2026-11-02)
 
 [Issue 32](https://github.com/patchwerks/furbomek/issues/32) now has a bounded
-candidate in [`packages/extension-preview/`](packages/extension-preview/README.md):
+accepted data-only slice in [`packages/extension-preview/`](packages/extension-preview/README.md):
 a dependency-free strict JSON parser, immutable presentation pack and stateless
 elapsed-time sampler, plus a separate bounded Node file loader. Only neutral/
 curious expressions and an acknowledge reaction are representable. These template
@@ -247,9 +247,11 @@ private and outside the root workspace/runtime.
 
 This is the first data-contract slice for a possible future extension viewer,
 not a viewer or renderer decision. UI, assets and 3D rights, voice, Hermes,
-character-broker writes, OBS and robot integration are excluded. Exact-head hosted
-checks and independent review are required before acceptance; source presence
-alone is not runtime qualification. See the [dated record](docs/operations/extension-preview-2026-11-02.md).
+character-broker writes, OBS and robot integration are excluded. PR 41 exact head
+`8c38c3fd814cc7dfdfd25ee706e5718f28f0de28` was accepted and merged on
+2026-11-04 at `ccad3d5c9cd9d52c83af20e21163dbd4b0ea8463`. This accepts only
+the data-only slice; PR 42 and wider issue 32 remain open. See the
+[dated record](docs/operations/extension-preview-2026-11-02.md).
 
 ## 4. Runtime design
 
@@ -1091,8 +1093,10 @@ head expression tilt and whole-model reaction motion; it is not a physical
 simulation. Root provider UI and all live integrations remain excluded. Source
 `782bee3f12eff3872bf5b72dc46ebabe6ae823f4` passed Node 22/26 build/type checks,
 62 tests and 23 browser cases per job, plus bounded coordinator visual review.
-Independent PR 41/42 acceptance, retargeting to accepted main and fresh checks
-remain open; this does not close issue 32. See the [candidate record](docs/operations/extension-viewer-2026-11-02.md).
+PR 41 was accepted and merged on 2026-11-04 at
+`ccad3d5c9cd9d52c83af20e21163dbd4b0ea8463`, accepting exact head
+`8c38c3fd814cc7dfdfd25ee706e5718f28f0de28`. PR 42 independent acceptance,
+retargeting to accepted main and fresh checks remain open; this does not close issue 32. See the [candidate record](docs/operations/extension-viewer-2026-11-02.md).
 
 The [compatibility follow-up](docs/operations/extension-viewer-compatibility-2026-11-02.md)
 at source `87a50b335a58dea2b4920a53afd14913de405765` passed
@@ -1103,10 +1107,12 @@ SwiftShader and Firefox Xvfb/Mesa. Actual keyboard navigation stays within page
 DOM order with reverse Tab; native file-button hover contrast measured 6.950862417:1
 with matching sampled raster backgrounds in all four artifacts and bounded
 coordinator visual review. This is not full accessibility or arbitrary-browser
-qualification. Independent PR 41/42 reviews, accepted-main retargeting and fresh
-exact-head checks remain open; issue 32 is not closed.
+qualification. PR 41 acceptance is complete. PR 42 independent review,
+accepted-main retargeting and fresh exact-head checks remain open; issue 32 is not closed.
 
 ## Changelog
+
+- 2026-11-04: Recorded accepted PR 41 integration; retained PR 42 review and final-main qualification gates and kept issue 32 open.
 
 - 2026-11-02: Recorded the final four-way 30-case browser/keyboard matrix and stable rendered file-button contrast; independent acceptance and integration remain pending.
 - 2026-11-02: Proposed bounded Firefox and keyboard regression qualification; actual hosted results remain pending.
