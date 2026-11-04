@@ -238,7 +238,7 @@ The official Freenove repository declares CC BY-NC-SA 3.0 and explicitly says it
 ### 3.1 Data-only extension preview first slice (2026-11-02)
 
 [Issue 32](https://github.com/patchwerks/furbomek/issues/32) now has a bounded
-accepted first slice in [`packages/extension-preview/`](packages/extension-preview/README.md):
+accepted data-only slice in [`packages/extension-preview/`](packages/extension-preview/README.md):
 a dependency-free strict JSON parser, immutable presentation pack and stateless
 elapsed-time sampler, plus a separate bounded Node file loader. Only neutral/
 curious expressions and an acknowledge reaction are representable. These template
@@ -247,11 +247,14 @@ private and outside the root workspace/runtime.
 
 This is the first data-contract slice for a possible future extension viewer,
 not a viewer or renderer decision. UI, assets and 3D rights, voice, Hermes,
-character-broker writes, OBS and robot integration are excluded. PR 41 was accepted
-and merged on 2026-11-04 at `ccad3d5c9cd9d52c83af20e21163dbd4b0ea8463`
-from reviewed head `8c38c3fd814cc7dfdfd25ee706e5718f28f0de28`. This acceptance
+character-broker writes, OBS and robot integration are excluded. PR 41 exact head
+`8c38c3fd814cc7dfdfd25ee706e5718f28f0de28` was accepted and merged on
+2026-11-04 at `ccad3d5c9cd9d52c83af20e21163dbd4b0ea8463`. This accepts only
+the data-only slice; PR 42 and wider issue 32 remain open. This acceptance
 does not qualify live operation or downstream contributions. See the
 [dated record](docs/operations/extension-preview-2026-11-02.md).
+
+**Historical contributor-kit checkpoint, before PR 45 acceptance:**
 
 The separate draft [contributor starter kit](docs/contributing/presentation-packs.md)
 adds authoring guidance, three original JSON examples and offline checks over the
@@ -269,6 +272,15 @@ zero failures, cancellations, skips and todos. See the
 [starter evidence record](docs/operations/presentation-pack-starter-2026-11-02.md)
 for exact revisions and the corrected initial mount failure. This is source-specific
 evidence; independent acceptance and applicable final-head checks remain pending.
+
+**Current-main refresh, 2026-11-04:** PR 45 is accepted and merged at
+`71e753078724c92a57d1690687ed7acc59c27a57`. The contributor starter kit is now
+accepted; the pending kit gates in the historical checkpoint above describe its
+pre-acceptance state. PR 42 is refreshed against this accepted current main while
+preserving its separately qualified viewer source and historical evidence.
+Fresh applicable checks on the refreshed published exact head and independent
+PR 42 review remain required. PR 45 acceptance does not accept the viewer,
+qualify live integration or close issue 32.
 
 ## 4. Runtime design
 
@@ -1101,12 +1113,74 @@ Normal runtime has no external tether to either legacy controller. Maintenance m
 
 Those boundaries are what make zero-human-in-the-loop operation technically credible rather than merely theatrical.
 
+## Issue 32 browser presentation candidate, 2026-11-02
+
+**Candidate; bounded hosted checks observed:** `apps/extension-viewer/`
+adds an isolated local-JSON presentation workbench consuming the unchanged
+PR 41 parser/sampler. The original gray six-leg procedural proxy has static legs,
+head expression tilt and whole-model reaction motion; it is not a physical
+simulation. Root provider UI and all live integrations remain excluded. Source
+`782bee3f12eff3872bf5b72dc46ebabe6ae823f4` passed Node 22/26 build/type checks,
+62 tests and 23 browser cases per job, plus bounded coordinator visual review.
+PR 41 was accepted and merged on 2026-11-04 at
+`ccad3d5c9cd9d52c83af20e21163dbd4b0ea8463`, accepting exact head
+`8c38c3fd814cc7dfdfd25ee706e5718f28f0de28`. PR 42 independent acceptance and
+final documentation-head checks remain open; accepted-main source qualification
+is recorded below. This does not close issue 32. See the [candidate record](docs/operations/extension-viewer-2026-11-02.md).
+
+The [compatibility follow-up](docs/operations/extension-viewer-compatibility-2026-11-02.md)
+at source `87a50b335a58dea2b4920a53afd14913de405765` passed
+[run 41408050074](https://github.com/patchwerks/furbomek/actions/runs/41408050074):
+62 core/artifact tests per Node 22.22.3/26.7.0 job and 30 browser scenarios each
+on Chromium 156.0.8078.4 and Firefox 157.0. The tested Linux paths are Chromium
+SwiftShader and Firefox Xvfb/Mesa. Actual keyboard navigation stays within page
+DOM order with reverse Tab; native file-button hover contrast measured 6.950862417:1
+with matching sampled raster backgrounds in all four artifacts and bounded
+coordinator visual review. This is not full accessibility or arbitrary-browser
+qualification. PR 41 acceptance is complete. PR 42 independent review and
+final documentation-head checks remain open; issue 32 is not closed.
+
+**Accepted-main follow-up, 2026-11-04:** PR 42 was rebased onto main
+`85f042887be769442305f0f503835bc588548202` and retargeted to `main`.
+Exact source `5ae31fbc293428b53a0858406ad74a48ba85a982` passed
+[run 41801331687](https://github.com/patchwerks/furbomek/actions/runs/41801331687):
+Node 22.22.3 and 26.7.0 each passed prepare/typecheck/static generation,
+62 core/artifact tests and 30 browser cases each on Chromium 156.0.8078.4 and
+Firefox 157.0, with empty outbound/error arrays in all four browser records.
+The compatibility record retains exact artifact provenance and scope limits.
+This evidence-only documentation child still needs applicable exact-head checks
+and independent PR 42 acceptance; issue 32 remains open.
+
+**Post-PR 45 source qualification, 2026-11-04:** source
+`69f7850f03edc2f48e2d7dcacf6269df56bb5bde`, incorporating accepted main
+`71e753078724c92a57d1690687ed7acc59c27a57`, passed
+[run 41805458563](https://github.com/patchwerks/furbomek/actions/runs/41805458563).
+Node 22.22.3 and 26.7.0 each passed prepare/typecheck/static generation,
+62 core/artifact tests and 30 browser cases each on Chromium 156.0.8078.4 and
+Firefox 157.0, with empty outbound/error arrays in all four records.
+Downloaded archive digests matched GitHub metadata; exact provenance and bounded
+inert inspection are recorded in the compatibility record. This satisfies the
+refresh checkpoint's source checks for that exact source only. Fresh applicable
+checks on this documentation child's published exact head and independent PR 42
+review remain required; issue 32 stays open.
+
 ## Changelog
 
+- 2026-11-04: Recorded successful PR 42 source qualification after accepted PR 45; retained final documentation-head checks and independent review.
+
+- 2026-11-04: Refreshed PR 42 against accepted PR 45 main; preserved kit and viewer evidence and retained fresh exact-head checks and independent PR 42 review.
+
 - 2026-11-04: Recorded corrected contributor-kit CI evidence; retained independent acceptance and final-head gates.
-
 - 2026-11-04: Recorded PR 41 acceptance; contributor-kit and viewer gates remain independent and pending.
-
 - 2026-11-02: Added the separate issue 32 draft contributor kit scope; core contract and viewer acceptance remain pending independent review.
-
 - 2026-11-02: Added the issue 32 data-only extension preview candidate scope; future viewer and live integration remain unimplemented.
+
+- 2026-11-04: Recorded successful PR 42 source qualification on accepted main; preserved independent review and final documentation-head checks.
+
+- 2026-11-04: Recorded accepted PR 41 integration; retained PR 42 review and final-main qualification gates and kept issue 32 open.
+
+- 2026-11-02: Recorded the final four-way 30-case browser/keyboard matrix and stable rendered file-button contrast; independent acceptance and integration remain pending.
+- 2026-11-02: Proposed bounded Firefox and keyboard regression qualification; actual hosted results remain pending.
+- 2026-11-02: Added the isolated issue 32 browser presentation viewer candidate with an original procedural six-leg proxy; bounded hosted checks and coordinator visual review passed, while independent acceptance and main integration remain pending.
+
+- 2026-11-02: Added the issue 32 data-only extension preview candidate scope; that first slice excludes the viewer and live integration.
