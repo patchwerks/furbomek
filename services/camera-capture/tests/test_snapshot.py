@@ -2,7 +2,7 @@
 # requires-python = ">=3.12,<3.13"
 # dependencies = [
 #   "pytest==8.4.2", "numpy==1.26.4",
-#   "opencv-contrib-python==4.11.0.86", "pydantic==2.12.3",
+#   "opencv-contrib-python-headless==4.11.0.86", "pydantic==2.12.3",
 # ]
 # ///
 """Exercise the tracker revalidation seam without camera or model startup."""

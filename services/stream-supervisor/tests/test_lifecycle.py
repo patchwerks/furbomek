@@ -3,7 +3,6 @@ from __future__ import annotations
 import os
 import signal
 import threading
-import time
 from collections.abc import Mapping
 from pathlib import Path
 from typing import TYPE_CHECKING
@@ -178,6 +177,13 @@ def test_signal_during_interruptible_config_never_starts_obs(tmp_path: Path) -> 
     kinect = tmp_path / "kinect"
     kinect.mkdir()
     stable = command("import time; time.sleep(30)")
+    obs_started = tmp_path / "obs-started.marker"
+    obs = command(
+        f"""import time
+from pathlib import Path
+Path({str(obs_started)!r}).write_text('started')
+time.sleep(30)"""
+    )
     workers = (
         *tuple(
             WorkerDefinition(
@@ -185,10 +191,8 @@ def test_signal_during_interruptible_config_never_starts_obs(tmp_path: Path) -> 
             )
             for key in ("capture", "tracker", "broker")
         ),
-        WorkerDefinition(
-            "viewer", command("import time; time.sleep(.2)"), "viewer.log", presentation=True
-        ),
-        WorkerDefinition("obs", stable, "obs.log", starts_after_configure=True),
+        WorkerDefinition("viewer", stable, "viewer.log", presentation=True),
+        WorkerDefinition("obs", obs, "obs.log", starts_after_configure=True),
     )
     stop_event_seen: list[bool] = []
 
@@ -196,36 +200,31 @@ def test_signal_during_interruptible_config_never_starts_obs(tmp_path: Path) -> 
         paths: RuntimePaths, env: Mapping[str, str], timeout_s: float, stop_event: threading.Event
     ) -> bool:
         _ = paths, env, timeout_s
-        for _ in range(100):
-            if stop_event.is_set():
-                stop_event_seen.append(True)
-                return False
-            time.sleep(0.01)
-        return True
+        os.kill(os.getpid(), signal.SIGTERM)
+        stop_event_seen.append(stop_event.wait(1))
+        return False
 
     paths = RuntimePaths.from_environment(
         tmp_path,
         {"FURBOMEK_MEDIA_ROOT": str(tmp_path / "media"), "FURBOMEK_KINECT_DIR": str(kinect)},
     )
-    timer = threading.Timer(0.1, lambda: os.kill(os.getpid(), signal.SIGTERM))
-    timer.start()
-    try:
-        result = run_session(
-            RuntimeSettings(readiness_timeout_s=2),
-            paths,
-            {},
-            Dependencies(
-                lambda settings, resolved: workers,
-                always_configure,
-                never_bot,
-                SystemClock(),
-                configure_with_stop=configure,
-            ),
-        )
-    finally:
-        timer.cancel()
+    result = run_session(
+        RuntimeSettings(readiness_timeout_s=2),
+        paths,
+        {},
+        Dependencies(
+            lambda settings, resolved: workers,
+            always_configure,
+            never_bot,
+            SystemClock(),
+            configure_with_stop=configure,
+        ),
+    )
     assert result == 0
     assert stop_event_seen == [True]
+    assert not obs_started.exists()
+    health = HealthDocument.model_validate_json(paths.health.read_bytes())
+    assert health.workers["obs"].pid is None
 
 
 def test_false_record_finalizer_fails_health_but_cleans(tmp_path: Path) -> None:

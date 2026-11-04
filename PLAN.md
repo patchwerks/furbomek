@@ -235,6 +235,41 @@ furbomek/
 
 The official Freenove repository declares CC BY-NC-SA 3.0 and explicitly says its files are not for commercial use. Before this project becomes a commercial desktop-agent platform, either obtain compatible permission, isolate the upstream material as a development reference, or implement a clean project-owned protocol/firmware layer. Do not copy upstream code into a permissively licensed product without a license decision. AIRI, A2UI, Live2D/VRM assets, and every avatar model also receive separate source, version, and license records; an application's code license never clears bundled character assets or proprietary runtimes automatically.
 
+### 3.1 Data-only extension preview first slice (2026-11-02)
+
+[Issue 32](https://github.com/patchwerks/furbomek/issues/32) now has a bounded
+accepted first slice in [`packages/extension-preview/`](packages/extension-preview/README.md):
+a dependency-free strict JSON parser, immutable presentation pack and stateless
+elapsed-time sampler, plus a separate bounded Node file loader. Only neutral/
+curious expressions and an acknowledge reaction are representable. These template
+capabilities grant no physical action or live authority. The package remains
+private and outside the root workspace/runtime.
+
+This is the first data-contract slice for a possible future extension viewer,
+not a viewer or renderer decision. UI, assets and 3D rights, voice, Hermes,
+character-broker writes, OBS and robot integration are excluded. PR 41 was accepted
+and merged on 2026-11-04 at `ccad3d5c9cd9d52c83af20e21163dbd4b0ea8463`
+from reviewed head `8c38c3fd814cc7dfdfd25ee706e5718f28f0de28`. This acceptance
+does not qualify live operation or downstream contributions. See the
+[dated record](docs/operations/extension-preview-2026-11-02.md).
+
+The separate draft [contributor starter kit](docs/contributing/presentation-packs.md)
+adds authoring guidance, three original JSON examples and offline checks over the
+accepted PR 41 contract. The kit remains unapproved pending its own independent
+review and exact-head checks; the PR 42 viewer remains a separate unapproved draft.
+This kit changes no core contract,
+renderer or live integration, and does not establish a stable external API.
+Corrected kit source `9d993b8cc96528f66a6accfd4809043745faf30b`, based on
+accepted main `85f042887be769442305f0f503835bc588548202`, passed advisory run
+[41801905069](https://github.com/patchwerks/furbomek/actions/runs/41801905069):
+7 starter tests, 66 combined tests and file validation on Node 22.22.3 and 26.7.0.
+The accepted package workflow [41801904997](https://github.com/patchwerks/furbomek/actions/runs/41801904997)
+passed 59 package tests per Node on its PR merge revision. All suites reported
+zero failures, cancellations, skips and todos. See the
+[starter evidence record](docs/operations/presentation-pack-starter-2026-11-02.md)
+for exact revisions and the corrected initial mount failure. This is source-specific
+evidence; independent acceptance and applicable final-head checks remain pending.
+
 ## 4. Runtime design
 
 ### 4.1 Control and media planes
@@ -1065,3 +1100,13 @@ It does **not** mean:
 Normal runtime has no external tether to either legacy controller. Maintenance may inspect or electrically characterize removed controls on a supported bench, but they never regain runtime authority.
 
 Those boundaries are what make zero-human-in-the-loop operation technically credible rather than merely theatrical.
+
+## Changelog
+
+- 2026-11-04: Recorded corrected contributor-kit CI evidence; retained independent acceptance and final-head gates.
+
+- 2026-11-04: Recorded PR 41 acceptance; contributor-kit and viewer gates remain independent and pending.
+
+- 2026-11-02: Added the separate issue 32 draft contributor kit scope; core contract and viewer acceptance remain pending independent review.
+
+- 2026-11-02: Added the issue 32 data-only extension preview candidate scope; future viewer and live integration remain unimplemented.
