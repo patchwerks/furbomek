@@ -5,11 +5,12 @@ from __future__ import annotations
 import ipaddress
 import re
 from dataclasses import dataclass
-from typing import Final, Literal
+from typing import Final, Literal, TypeAlias
 from urllib.parse import urlsplit
 
-type JsonValue = str | int | float | bool | None | list[JsonValue] | dict[str, JsonValue]
-type JsonObject = dict[str, JsonValue]
+# Keep these aliases compatible with the host Hermes Python 3.11 runtime.
+JsonValue: TypeAlias = str | int | float | bool | None | list["JsonValue"] | dict[str, "JsonValue"]  # noqa: UP040
+JsonObject: TypeAlias = dict[str, "JsonValue"]  # noqa: UP040
 
 Category = Literal["BROWSER", "COMPUTER", "WEB", "TERMINAL", "FILES", "AGENT"]
 Status = Literal["ok", "error", "running"]

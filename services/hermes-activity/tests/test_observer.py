@@ -1,10 +1,12 @@
 from __future__ import annotations
 
+import errno
 import fcntl
 import os
 from collections.abc import Callable
 from pathlib import Path
 import sys
+import time
 
 import pytest
 
@@ -217,3 +219,145 @@ def test_end_metadata_is_boolean_only_and_redacted(
     assert row.kind == "session_end"
     assert row.phase == phase
     assert "private-" not in raw
+
+
+@pytest.mark.parametrize("target_name", ["events.jsonl", ".events.jsonl.lock"])
+def test_fifo_spool_or_lock_returns_with_truthful_failure_marker(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, target_name: str
+) -> None:
+    tmp_path.chmod(0o700)
+    spool = tmp_path / "events.jsonl"
+    target = tmp_path / target_name
+    os.mkfifo(target, 0o600)
+    before = target.lstat()
+    monkeypatch.setenv("FURBOMEK_ACTIVITY_SPOOL", str(spool))
+    started = time.monotonic()
+
+    assert observer.on_pre_llm_call(session_id="fifo-fixture") is None
+
+    assert time.monotonic() - started < 1.0
+    after = target.lstat()
+    assert (after.st_ino, after.st_mode, after.st_size) == (before.st_ino, before.st_mode, before.st_size)
+    assert spool.with_suffix(".failure").read_bytes() == b'{"observer_failure":true}\n'
+    assert not spool.with_suffix(".old").exists()
+    if target != spool:
+        assert not spool.exists()
+
+
+@pytest.mark.parametrize("target_name", ["events.jsonl", ".events.jsonl.lock"])
+def test_hardlinked_spool_or_lock_does_not_mutate_destination(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, target_name: str
+) -> None:
+    tmp_path.chmod(0o700)
+    spool = tmp_path / "events.jsonl"
+    destination = tmp_path / "owner-private-data"
+    destination.write_bytes(b"unchanged-private-canary\n")
+    destination.chmod(0o600)
+    target = tmp_path / target_name
+    target.hardlink_to(destination)
+    before = destination.stat()
+    monkeypatch.setenv("FURBOMEK_ACTIVITY_SPOOL", str(spool))
+
+    assert observer.on_pre_llm_call(session_id="hardlink-fixture") is None
+
+    after = destination.stat()
+    assert destination.read_bytes() == b"unchanged-private-canary\n"
+    assert (after.st_ino, after.st_nlink, after.st_mode, after.st_mtime_ns) == (
+        before.st_ino,
+        before.st_nlink,
+        before.st_mode,
+        before.st_mtime_ns,
+    )
+    assert target.stat().st_ino == before.st_ino
+    assert spool.with_suffix(".failure").read_bytes() == b'{"observer_failure":true}\n'
+    assert not spool.with_suffix(".old").exists()
+    if target != spool:
+        assert not spool.exists()
+
+
+@pytest.mark.parametrize("write_result", [0, -1])
+def test_nonprogress_write_fails_once_and_emits_failure_marker(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, write_result: int
+) -> None:
+    spool = tmp_path / "events.jsonl"
+    monkeypatch.setenv("FURBOMEK_ACTIVITY_SPOOL", str(spool))
+    real_write = os.write
+    event_writes = 0
+
+    def stalled_write(fd: int, payload: bytes) -> int:
+        nonlocal event_writes
+        if b'"kind":"thinking"' in payload:
+            event_writes += 1
+            assert event_writes == 1, "observer retried a write without progress"
+            return write_result
+        return real_write(fd, payload)
+
+    with monkeypatch.context() as patch:
+        patch.setattr(os, "write", stalled_write)
+        assert observer.on_pre_llm_call(session_id="write-fixture") is None
+
+    assert event_writes == 1
+    assert spool.read_bytes() == b'{"observer_failure":true}\n'
+    assert not spool.with_suffix(".failure").exists()
+    reader = IncrementalSpoolReader(spool, CursorSnapshot(None, 0))
+    try:
+        assert reader.poll().uncertain
+    finally:
+        reader.close()
+
+
+def test_failed_rotation_does_not_close_reused_descriptor(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    spool = tmp_path / "events.jsonl"
+    spool.write_bytes(b"original\n")
+    spool.chmod(0o600)
+    sentinel = tmp_path / "sentinel"
+    sentinel.write_bytes(b"preserved\n")
+    sentinel_fds: list[int] = []
+
+    def failing_replace(path: Path, target: str | os.PathLike[str]) -> Path:
+        assert path == spool
+        assert Path(target) == spool.with_suffix(".old")
+        # Reuse the descriptor just closed for rotation. A stale finally-close
+        # would close this unrelated, newly owned descriptor.
+        sentinel_fds.append(os.open(sentinel, os.O_RDONLY))
+        message = "injected rotation failure"
+        raise OSError(message)
+
+    try:
+        with monkeypatch.context() as patch:
+            patch.setattr(observer, "_MAX_SPOOL_BYTES", 1)
+            patch.setattr(Path, "replace", failing_replace)
+            with pytest.raises(OSError, match="injected rotation failure"):
+                observer._append_bytes(spool, b"new\n")  # pyright: ignore[reportPrivateUsage]
+        assert len(sentinel_fds) == 1
+        assert os.fstat(sentinel_fds[0]).st_ino == sentinel.stat().st_ino
+        assert os.read(sentinel_fds[0], 32) == b"preserved\n"
+        assert spool.read_bytes() == b"original\n"
+        assert not spool.with_suffix(".old").exists()
+    finally:
+        for fd in sentinel_fds:
+            try:
+                os.close(fd)
+            except OSError as exc:
+                if exc.errno != errno.EBADF:
+                    raise
+
+
+def test_secure_open_closes_descriptor_on_fstat_error(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    spool = tmp_path / "events.jsonl"
+    observed_fds: list[int] = []
+
+    def failing_fstat(fd: int) -> os.stat_result:
+        observed_fds.append(fd)
+        message = "injected fstat failure"
+        raise OSError(message)
+
+    with monkeypatch.context() as patch:
+        patch.setattr(os, "fstat", failing_fstat)
+        with pytest.raises(OSError, match="injected fstat failure"):
+            observer._secure_open(spool)  # pyright: ignore[reportPrivateUsage]
+
+    assert len(observed_fds) == 1
+    with pytest.raises(OSError, match=r".+") as raised:
+        os.fstat(observed_fds[0])
+    assert raised.value.errno == errno.EBADF

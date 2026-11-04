@@ -61,18 +61,30 @@ def _secure_directory(path: Path) -> None:
 
 
 def _secure_open(path: Path) -> int:
-    fd = os.open(path, os.O_WRONLY | os.O_APPEND | os.O_CREAT | os.O_NOFOLLOW, 0o600)
-    metadata = os.fstat(fd)
-    if not stat.S_ISREG(metadata.st_mode) or metadata.st_uid != os.getuid() or metadata.st_mode & 0o077:
+    fd = os.open(path, os.O_WRONLY | os.O_APPEND | os.O_CREAT | os.O_NOFOLLOW | os.O_NONBLOCK, 0o600)
+    try:
+        metadata = os.fstat(fd)
+    except BaseException:
         os.close(fd)
-        raise OSError("activity spool file is not owner-only")
+        raise
+    if (
+        not stat.S_ISREG(metadata.st_mode)
+        or metadata.st_uid != os.getuid()
+        or metadata.st_mode & 0o077
+        or metadata.st_nlink != 1
+    ):
+        os.close(fd)
+        raise OSError("activity spool file is not private and singly linked")
     return fd
 
 
 def _write_all(fd: int, payload: bytes) -> None:
     written = 0
     while written < len(payload):
-        written += os.write(fd, payload[written:])
+        count = os.write(fd, payload[written:])
+        if count <= 0:
+            raise OSError("activity spool write made no progress")
+        written += count
 
 
 def _append_bytes(path: Path, payload: bytes) -> None:
@@ -90,19 +102,23 @@ def _append_bytes(path: Path, payload: bytes) -> None:
             break
         if not locked:
             raise BlockingIOError("activity spool lock is busy")
-        spool_fd = _secure_open(path)
+        spool_fd: int | None = _secure_open(path)
         try:
             if os.fstat(spool_fd).st_size > _MAX_SPOOL_BYTES:
-                os.close(spool_fd)
+                closing_fd, spool_fd = spool_fd, None
+                os.close(closing_fd)
                 path.replace(path.with_suffix(".old"))
                 spool_fd = _secure_open(path)
             _write_all(spool_fd, payload)
         finally:
-            os.close(spool_fd)
+            if spool_fd is not None:
+                os.close(spool_fd)
     finally:
-        if locked:
-            fcntl.flock(lock_fd, fcntl.LOCK_UN)
-        os.close(lock_fd)
+        try:
+            if locked:
+                fcntl.flock(lock_fd, fcntl.LOCK_UN)
+        finally:
+            os.close(lock_fd)
 
 
 def _failure_marker(path: Path) -> None:
