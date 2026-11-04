@@ -6,7 +6,10 @@ status: active
 ---
 # Data-only extension preview core
 
-First-slice candidate for [issue 32](https://github.com/patchwerks/furbomek/issues/32).
+Accepted first slice for [issue 32](https://github.com/patchwerks/furbomek/issues/32):
+[PR 41](https://github.com/patchwerks/furbomek/pull/41) merged on 2026-11-04 at
+`ccad3d5c9cd9d52c83af20e21163dbd4b0ea8463` from reviewed head
+`8c38c3fd814cc7dfdfd25ee706e5718f28f0de28`.
 This private, dependency-free ESM package parses a bounded JSON presentation pack
 and samples its timeline. A future viewer may consume the samples. This slice
 selects no UI, renderer, character asset, 3D model, or asset license. Nothing is
@@ -83,5 +86,22 @@ qualification target; Node 22 and 26 use the same direct ESM entries.
 
 Candidate runtime tests belong in a credential-free disposable environment. See
 the [dated implementation record](../../docs/operations/extension-preview-2026-11-02.md)
-for actual evidence and outstanding acceptance. This package has no install,
-activation, deployment or live-operation command.
+for the original implementation evidence and its recorded limits. This package has
+no install, activation, deployment or live-operation command.
+
+## Contributor starter kit
+
+The [presentation-pack authoring guide](../../docs/contributing/presentation-packs.md)
+provides three original JSON examples, timing expectations and dependency-free
+checks against the accepted PR 41 contract. This kit remains an unapproved draft
+under issue 32 requiring its own independent review. The optional PR 42 viewer
+is a separate unapproved draft absent from this kit. The guide does not define a
+stable external API or grant live authority.
+
+## Changelog
+
+- 2026-11-04: Recorded core acceptance through PR 41; contributor kit and viewer
+  still require separate acceptance.
+
+- 2026-11-02: Linked the draft contributor kit with neutral, curious and acknowledge
+  examples; preserved the core contract and separate viewer review boundary.

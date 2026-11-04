@@ -238,7 +238,7 @@ The official Freenove repository declares CC BY-NC-SA 3.0 and explicitly says it
 ### 3.1 Data-only extension preview first slice (2026-11-02)
 
 [Issue 32](https://github.com/patchwerks/furbomek/issues/32) now has a bounded
-candidate in [`packages/extension-preview/`](packages/extension-preview/README.md):
+accepted first slice in [`packages/extension-preview/`](packages/extension-preview/README.md):
 a dependency-free strict JSON parser, immutable presentation pack and stateless
 elapsed-time sampler, plus a separate bounded Node file loader. Only neutral/
 curious expressions and an acknowledge reaction are representable. These template
@@ -247,9 +247,18 @@ private and outside the root workspace/runtime.
 
 This is the first data-contract slice for a possible future extension viewer,
 not a viewer or renderer decision. UI, assets and 3D rights, voice, Hermes,
-character-broker writes, OBS and robot integration are excluded. Exact-head hosted
-checks and independent review are required before acceptance; source presence
-alone is not runtime qualification. See the [dated record](docs/operations/extension-preview-2026-11-02.md).
+character-broker writes, OBS and robot integration are excluded. PR 41 was accepted
+and merged on 2026-11-04 at `ccad3d5c9cd9d52c83af20e21163dbd4b0ea8463`
+from reviewed head `8c38c3fd814cc7dfdfd25ee706e5718f28f0de28`. This acceptance
+does not qualify live operation or downstream contributions. See the
+[dated record](docs/operations/extension-preview-2026-11-02.md).
+
+The separate draft [contributor starter kit](docs/contributing/presentation-packs.md)
+adds authoring guidance, three original JSON examples and offline checks over the
+accepted PR 41 contract. The kit remains unapproved pending its own independent
+review and exact-head checks; the PR 42 viewer remains a separate unapproved draft.
+This kit changes no core contract,
+renderer or live integration, and does not establish a stable external API.
 
 ## 4. Runtime design
 
@@ -1083,5 +1092,9 @@ Normal runtime has no external tether to either legacy controller. Maintenance m
 Those boundaries are what make zero-human-in-the-loop operation technically credible rather than merely theatrical.
 
 ## Changelog
+
+- 2026-11-04: Recorded PR 41 acceptance; contributor-kit and viewer gates remain independent and pending.
+
+- 2026-11-02: Added the separate issue 32 draft contributor kit scope; core contract and viewer acceptance remain pending independent review.
 
 - 2026-11-02: Added the issue 32 data-only extension preview candidate scope; future viewer and live integration remain unimplemented.
