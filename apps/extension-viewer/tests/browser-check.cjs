@@ -1,0 +1,366 @@
+/* Runs only in the disposable network-none browser worker. */
+const assert = require('node:assert/strict');
+const fs = require('node:fs');
+const path = require('node:path');
+const http = require('node:http');
+const playwright = require(process.env.FURBOMEK_PLAYWRIGHT);
+const browserName = process.env.VIEWER_BROWSER || 'chromium';
+assert.ok(['chromium', 'firefox'].includes(browserName), 'VIEWER_BROWSER must be chromium or firefox');
+const root = path.resolve(__dirname, '../.output/public');
+const evidence = process.env.VIEWER_EVIDENCE || '/scratch/evidence';
+const fixture = fs.readFileSync(path.resolve(__dirname, '../../../packages/extension-preview/fixtures/reaction.json'));
+const mime = { '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css', '.json': 'application/json', '.svg': 'image/svg+xml' };
+function contrastRatio(foreground, background) {
+  const luminance = color => {
+    const match = /^rgba?\(([^)]+)\)$/.exec(color);
+    assert.ok(match, `expected computed sRGB color, got ${color}`);
+    const channels = match[1].split(/[,\s/]+/).filter(Boolean).map(Number);
+    assert.ok(channels.length === 3 || (channels.length === 4 && channels[3] === 1), `expected opaque color: ${color}`);
+    const linear = channels.slice(0, 3).map(value => {
+      assert.ok(Number.isFinite(value) && value >= 0 && value <= 255);
+      const srgb = value / 255;
+      return srgb <= 0.04045 ? srgb / 12.92 : ((srgb + 0.055) / 1.055) ** 2.4;
+    });
+    return linear[0] * 0.2126 + linear[1] * 0.7152 + linear[2] * 0.0722;
+  };
+  const a = luminance(foreground), b = luminance(background);
+  return (Math.max(a, b) + 0.05) / (Math.min(a, b) + 0.05);
+}
+
+const server = http.createServer((req, res) => {
+  const pathname = decodeURIComponent(new URL(req.url, 'http://localhost').pathname);
+  let file = path.resolve(root, '.' + pathname);
+  if (!file.startsWith(root + path.sep) && file !== root) { res.writeHead(403).end(); return; }
+  if (fs.existsSync(file) && fs.statSync(file).isDirectory()) file = path.join(file, 'index.html');
+  if (!fs.existsSync(file)) { res.writeHead(404).end(); return; }
+  res.setHeader('Content-Type', mime[path.extname(file)] || 'application/octet-stream');
+  fs.createReadStream(file).pipe(res);
+});
+let browser;
+let browserVersion = null;
+let phase = 'launch';
+let unavailablePassed = false;
+let baselineCompleted = false;
+let keyboardDiagnostics = null;
+const contrastMetrics = {};
+const baselineCases = ['WebGL', 'seek', 'play-pause', 'reset', 'end', 'invalid', 'unauthorized-event', 'read-failure', 'reload-example', 'oversize', 'HTML-filename', 'reduced-motion', 'hidden', 'context-loss', 'WebGL-unavailable', 'stale-import', 'unmount', 'rendered-cue', 'acknowledge-transform', 'reduced-motion-pixels', 'dark-hover-example-contrast', 'dark-license-link-contrast', 'first-frame-clock-order', 'dark-file-selector-contrast'];
+async function runKeyboard(page) {
+  const id = name => page.getByTestId(name);
+  const text = name => id(name).textContent();
+  await page.bringToFront();
+  const inspectFocus = locator => locator.evaluate(element => {
+    const describe = node => node ? { tag: node.tagName, id: node.id, testid: node.getAttribute('data-testid'), text: node.textContent?.trim().slice(0, 100) } : null;
+    const style = getComputedStyle(element);
+    const rect = element.getBoundingClientRect();
+    return { target: describe(element), active: describe(document.activeElement), focused: document.activeElement === element,
+      visible: element.matches(':focus-visible'), outline: parseFloat(style.outlineWidth), style: style.outlineStyle, color: style.outlineColor,
+      rect: { left: rect.left, right: rect.right, top: rect.top, bottom: rect.bottom, width: rect.width, height: rect.height },
+      viewport: { width: innerWidth, height: innerHeight }, scroll: { x: scrollX, y: scrollY }, documentFocused: document.hasFocus(),
+      inViewport: rect.width > 0 && rect.height > 0 && rect.left >= 0 && rect.right <= innerWidth && rect.top >= 0 && rect.bottom <= innerHeight };
+  });
+  const focusVisible = async locator => {
+    // Native focus scrolling can animate under the page's CSS. Observe it, never force scrolling.
+    const deadline = Date.now() + 2000;
+    do {
+      keyboardDiagnostics.focus = await inspectFocus(locator);
+      const result = keyboardDiagnostics.focus;
+      if (result.focused && result.visible && result.outline >= 2 && result.style !== 'none' && result.color !== 'transparent' && result.inViewport) return;
+      await page.waitForTimeout(25);
+    } while (Date.now() < deadline);
+    assert.fail(`visible keyboard focus: ${JSON.stringify(keyboardDiagnostics)}`);
+  };
+  const tabTo = async (locator, direction = 'Tab') => {
+    assert.ok(['Tab', 'Shift+Tab'].includes(direction));
+    keyboardDiagnostics = { direction, before: await inspectFocus(locator), tabs: [] };
+    if (keyboardDiagnostics.before.focused) { await focusVisible(locator); return; }
+    for (let attempt = 0; attempt < 24; attempt++) {
+      await page.keyboard.press(direction);
+      const result = await inspectFocus(locator);
+      keyboardDiagnostics.tabs.push(result);
+      if (result.focused) { await focusVisible(locator); return; }
+    }
+    assert.fail(`Tab could not reach requested control: ${JSON.stringify(keyboardDiagnostics)}`);
+  };
+  const keyboardTraversal = async (startDirection = 'Tab') => {
+    await tabTo(id('play-pause'), startDirection);
+    for (const name of ['reset', 'timeline', 'import-file', 'load-example']) await tabTo(id(name));
+    await tabTo(page.locator('.viewer-footer a'));
+    // Stay within the page: browser-chrome wraparound is not an app navigation contract.
+    await tabTo(id('import-file'), 'Shift+Tab');
+    await page.keyboard.press('Shift+Tab');
+    assert.equal(await id('import-file').evaluate(element => document.activeElement === element), false, 'reverse Tab leaves import');
+  };
+  await keyboardTraversal();
+  await tabTo(id('import-file'));
+  const [chooser] = await Promise.all([page.waitForEvent('filechooser'), page.keyboard.press('Space')]);
+  await chooser.setFiles({ name: 'keyboard.json', mimeType: 'application/json', buffer: fixture });
+  await page.waitForFunction(() => document.querySelector('[data-testid="pack-name"]')?.textContent === 'keyboard.json');
+  await tabTo(id('load-example'));
+  await page.keyboard.press('Enter');
+  assert.match(await text('pack-name'), /Bundled reaction example/);
+  await tabTo(id('play-pause'), 'Shift+Tab');
+  await page.keyboard.press('Space');
+  await page.waitForFunction(() => Number(document.querySelector('[data-testid="position-ms"]').textContent) > 0);
+  await page.keyboard.press('Space');
+  assert.match(await text('playback-state'), /paused/);
+  const keyboardPaused = await text('position-ms');
+  await page.waitForTimeout(100);
+  assert.equal(await text('position-ms'), keyboardPaused);
+  await tabTo(id('reset'));
+  await page.keyboard.press('Enter');
+  assert.equal(await text('position-ms'), '0');
+  assert.match(await text('expression'), /neutral/);
+  await tabTo(id('timeline'));
+  await page.keyboard.press('Home');
+  await page.keyboard.press('ArrowRight');
+  assert.equal(await text('position-ms'), '1', 'native range arrow uses its 1 ms step');
+  assert.equal(await id('timeline').getAttribute('aria-valuetext'), '1 milliseconds');
+  await page.keyboard.press('ArrowLeft');
+  assert.equal(await text('position-ms'), '0');
+  await page.keyboard.press('End');
+  assert.equal(await text('position-ms'), '4000');
+  assert.match(await text('expression'), /neutral/);
+  await tabTo(id('play-pause'), 'Shift+Tab');
+  await page.keyboard.press('Enter');
+  await page.waitForFunction(() => Number(document.querySelector('[data-testid="position-ms"]').textContent) > 0 && Number(document.querySelector('[data-testid="position-ms"]').textContent) < 4000);
+  await tabTo(id('reset'));
+  await page.keyboard.press('Space');
+  assert.equal(await text('position-ms'), '0');
+  assert.match(await text('playback-state'), /paused/);
+  assert.match(await text('expression'), /neutral/);
+  await page.setViewportSize({ width: 390, height: 844 });
+  await keyboardTraversal('Shift+Tab');
+  assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), 'keyboard focus causes no mobile horizontal overflow');
+}
+
+fs.mkdirSync(evidence, { recursive: true });
+(async () => {
+  await new Promise(resolve => server.listen(0, '127.0.0.1', resolve));
+  const origin = `http://127.0.0.1:${server.address().port}`;
+  browser = await playwright[browserName].launch(browserName === 'chromium'
+    ? { headless: true, args: ['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--disable-dev-shm-usage'] }
+    : { headless: false }); // Firefox uses Xvfb/Mesa in the offline worker.
+  browserVersion = browser.version();
+  fs.writeFileSync(path.join(evidence, 'browser-version.json'), JSON.stringify({ browser: browserName, version: browserVersion }));
+  const failures = [];
+  const context = await browser.newContext({ viewport: { width: 1440, height: 1000 }, colorScheme: 'light' });
+  await context.route('**/*', route => {
+    if (new URL(route.request().url()).origin !== origin) { failures.push(route.request().url()); return route.abort(); }
+    return route.continue();
+  });
+  await context.addInitScript(() => {
+    window.__capabilityCalls = [];
+    const forbidden = name => function () { window.__capabilityCalls.push(name); throw Error(`Forbidden capability: ${name}`); };
+    window.WebSocket = forbidden('WebSocket');
+    window.EventSource = forbidden('EventSource');
+    window.RTCPeerConnection = forbidden('RTCPeerConnection');
+    if (navigator.mediaDevices) navigator.mediaDevices.getUserMedia = forbidden('getUserMedia');
+    navigator.sendBeacon = forbidden('sendBeacon');
+  });
+  phase = 'WebGL-unavailable';
+  const unavailable = await context.newPage();
+  await unavailable.addInitScript(() => { const original = HTMLCanvasElement.prototype.getContext; HTMLCanvasElement.prototype.getContext = function(type, ...args) { return /webgl/.test(type) ? null : original.call(this, type, ...args); }; });
+  await unavailable.goto(origin);
+  await unavailable.getByTestId('renderer-error').waitFor({ state: 'visible' });
+  assert.equal(await unavailable.getByTestId('play-pause').isDisabled(), true);
+  assert.equal(await unavailable.locator('canvas').count(), 0);
+  unavailablePassed = true;
+  await unavailable.close();
+  phase = 'positive-WebGL';
+  const page = await context.newPage();
+  const errors = [];
+  page.on('pageerror', error => errors.push(error.message));
+  const id = name => page.getByTestId(name);
+  const text = name => id(name).textContent();
+  const seek = async value => { await id('timeline').evaluate((input, next) => { input.value = String(next); input.dispatchEvent(new Event('input', { bubbles: true })); }, value); };
+  const upload = (name, buffer) => id('import-file').setInputFiles({ name, mimeType: 'application/json', buffer });
+  await page.goto(origin);
+  await page.waitForFunction(() => document.querySelector('[data-testid="viewer-canvas"]') || document.querySelector('[data-testid="renderer-error"]'));
+  const rendererFailure = await id('renderer-error').count() ? await text('renderer-error') : null;
+  fs.writeFileSync(path.join(evidence, 'renderer-diagnostics.json'), JSON.stringify({ browser: browserName, version: browserVersion, rendererFailure }));
+  await id('viewer-canvas').waitFor({ state: 'visible' });
+  assert.equal(await id('renderer-error').count(), 0);
+  const gl = await id('viewer-canvas').evaluate(canvas => {
+    const gl = canvas.getContext('webgl2');
+    if (!gl) return null;
+    const info = gl.getExtension('WEBGL_debug_renderer_info');
+    return { version: gl.getParameter(gl.VERSION), renderer: info ? gl.getParameter(info.UNMASKED_RENDERER_WEBGL) : gl.getParameter(gl.RENDERER), width: gl.drawingBufferWidth, height: gl.drawingBufferHeight };
+  });
+  assert.ok(gl && gl.width > 0 && gl.height > 0, 'actual WebGL drawing buffer required');
+  fs.writeFileSync(path.join(evidence, 'webgl.json'), JSON.stringify(gl));
+  phase = 'existing-browser-regressions';
+  assert.match(await text('expression'), /neutral/);
+  await page.screenshot({ animations: 'disabled', path: path.join(evidence, 'desktop-light.png'), fullPage: true });
+  const neutralPixels = await id('viewer-canvas').screenshot({ animations: 'disabled' });
+  await seek(1000);
+  assert.match(await text('expression'), /curious/);
+  assert.match(await text('reaction'), /acknowledge/);
+  const curiousPixels = await id('viewer-canvas').screenshot({ animations: 'disabled' });
+  assert.notDeepEqual(curiousPixels, neutralPixels, 'curious cue changes rendered geometry');
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  const reducedPixels = await id('viewer-canvas').screenshot({ animations: 'disabled' });
+  assert.deepEqual(reducedPixels, neutralPixels, 'reduced motion renders neutral geometry while semantics remain curious');
+  await page.emulateMedia({ reducedMotion: 'no-preference' });
+  await seek(1300);
+  assert.match(await text('reaction'), /acknowledge/);
+  const acknowledgePixels = await id('viewer-canvas').screenshot({ animations: 'disabled' });
+  assert.notDeepEqual(acknowledgePixels, curiousPixels, 'mid-acknowledgment transforms rendered geometry');
+  await page.screenshot({ animations: 'disabled', path: path.join(evidence, 'mid-cue.png'), fullPage: true });
+  await seek(3000);
+  assert.match(await text('expression'), /neutral/);
+  await id('reset').click();
+  assert.match(await text('position-ms'), /^0\b/);
+  await page.evaluate(() => {
+    const nativeFrame = window.requestAnimationFrame.bind(window);
+    let first = true;
+    window.requestAnimationFrame = callback => nativeFrame(timestamp => {
+      if (first) {
+        first = false;
+        window.__earlyFrameDelivered = true;
+        window.requestAnimationFrame = nativeFrame;
+        callback(timestamp - 1000);
+      } else callback(timestamp);
+    });
+  });
+  await id('play-pause').click();
+  await page.waitForFunction(() => window.__earlyFrameDelivered === true);
+  assert.ok(Number(await text('position-ms')) >= 0, 'early first frame never makes timeline negative');
+  await page.waitForFunction(() => Number(document.querySelector('[data-testid="position-ms"]').textContent) > 0);
+  assert.match(await text('playback-state'), /playing/);
+  await id('play-pause').click();
+  const paused = await text('position-ms');
+  await page.waitForTimeout(150);
+  assert.equal(await text('position-ms'), paused, 'pause freezes timeline');
+  await seek(3950);
+  await id('play-pause').click();
+  await page.waitForFunction(() => document.querySelector('[data-testid="position-ms"]').textContent === '0');
+  assert.match(await text('expression'), /neutral/);
+  assert.match(await text('playback-state'), /paused/i);
+  await upload('bad.json', Buffer.from('{'));
+  await id('import-error').waitFor({ state: 'visible' });
+  assert.equal(await id('play-pause').isDisabled(), true);
+  await upload('large.json', Buffer.alloc(1024 * 1024 + 1, 32));
+  await id('import-error').waitFor({ state: 'visible' });
+  assert.equal(await id('play-pause').isDisabled(), true);
+  const unauthorized = JSON.parse(fixture.toString('utf8'));
+  unauthorized.events[0].kind = 'robot.motion';
+  await upload('unauthorized.json', Buffer.from(JSON.stringify(unauthorized)));
+  await id('import-error').waitFor({ state: 'visible' });
+  assert.equal(await id('play-pause').isDisabled(), true);
+  await page.evaluate(() => {
+    window.__originalBlobRead = Blob.prototype.arrayBuffer;
+    Blob.prototype.arrayBuffer = async () => { throw new Error('Fixture read failure'); };
+  });
+  await upload('unreadable.json', fixture);
+  await id('import-error').waitFor({ state: 'visible' });
+  assert.equal(await id('play-pause').isDisabled(), true);
+  await page.evaluate(() => { Blob.prototype.arrayBuffer = window.__originalBlobRead; });
+  await id('load-example').click();
+  await page.waitForFunction(() => !document.querySelector('[data-testid="play-pause"]').disabled);
+  assert.match(await text('expression'), /neutral/);
+  // Delay the actual browser Blob read, then supersede it with invalid input.
+  await page.evaluate(() => {
+    const original = Blob.prototype.arrayBuffer;
+    let first = true;
+    Blob.prototype.arrayBuffer = async function () {
+      const data = await original.call(this);
+      if (first) { first = false; window.__blobPending = true; await new Promise(resolve => { window.__releaseBlob = resolve; }); window.__blobReleased = true; }
+      return data;
+    };
+    window.__restoreBlob = () => { Blob.prototype.arrayBuffer = original; };
+  });
+  await upload('slow.json', fixture);
+  await page.waitForFunction(() => window.__blobPending);
+  await upload('new-invalid.json', Buffer.from('{'));
+  await id('import-error').waitFor({ state: 'visible' });
+  await page.evaluate(() => window.__releaseBlob());
+  await page.waitForFunction(() => window.__blobReleased);
+  await page.evaluate(() => new Promise(requestAnimationFrame));
+  await id('import-error').waitFor({ state: 'visible' });
+  assert.equal(await id('play-pause').isDisabled(), true, 'stale successful read cannot overwrite newer invalid input');
+  await page.evaluate(() => window.__restoreBlob());
+  const maliciousName = '<img src=x onerror=alert(1)>.json';
+  await upload(maliciousName, fixture);
+  await page.waitForFunction(() => !document.querySelector('[data-testid="import-error"]'));
+  assert.equal(await text('pack-name'), maliciousName);
+  assert.equal(await page.locator('img').count(), 0, 'filename never parsed as HTML');
+  await id('load-example').click();
+  await page.waitForFunction(() => !document.querySelector('[data-testid="play-pause"]').disabled);
+  await seek(1000);
+  assert.match(await text('expression'), /curious/);
+  await page.emulateMedia({ colorScheme: 'dark' });
+  await id('import-file').hover();
+  // Finish finite theme/hover transitions before sampling the actual native pseudo-element.
+  await id('import-file').screenshot({ animations: 'disabled', path: path.join(evidence, 'file-selector-hover.png') });
+  const fileButtonColors = await id('import-file').evaluate(input => {
+    const style = getComputedStyle(input, '::file-selector-button');
+    return { foreground: style.color, background: style.backgroundColor, appearance: style.appearance, transitionProperty: style.transitionProperty, hovered: input.matches(':hover') };
+  });
+  contrastMetrics.darkFileSelectorHover = { ...fileButtonColors };
+  assert.equal(fileButtonColors.hovered, true, 'native file input is actually hovered');
+  assert.equal(fileButtonColors.appearance, 'none', 'file selector disables native appearance');
+  assert.equal(fileButtonColors.transitionProperty, 'none', 'file selector theme and hover colors change without interpolation');
+  const fileButtonRatio = contrastRatio(fileButtonColors.foreground, fileButtonColors.background);
+  contrastMetrics.darkFileSelectorHover = { ...fileButtonColors, ratio: fileButtonRatio };
+  assert.ok(fileButtonRatio >= 4.5, `dark hovered file selector contrast: ${JSON.stringify(contrastMetrics.darkFileSelectorHover)}`);
+  await id('load-example').hover();
+  await page.screenshot({ animations: 'disabled', path: path.join(evidence, 'desktop-dark.png'), fullPage: true });
+  // The preceding screenshot fast-forwards finite CSS transitions before sampling.
+  const linkColors = await page.evaluate(() => ({
+    example: getComputedStyle(document.querySelector('[data-testid="load-example"]')).color,
+    inspector: getComputedStyle(document.querySelector('.inspector')).backgroundColor,
+    notice: getComputedStyle(document.querySelector('.viewer-footer a')).color,
+    page: getComputedStyle(document.body).backgroundColor,
+  }));
+  assert.ok(contrastRatio(linkColors.example, linkColors.inspector) >= 4.5, `dark hovered example contrast: ${JSON.stringify(linkColors)}`);
+  assert.ok(contrastRatio(linkColors.notice, linkColors.page) >= 4.5, `dark MIT notice contrast: ${JSON.stringify(linkColors)}`);
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.screenshot({ animations: 'disabled', path: path.join(evidence, 'mobile.png'), fullPage: true });
+  assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), 'no mobile horizontal overflow');
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await seek(1000);
+  assert.match(await text('expression'), /curious/, 'reduced motion preserves semantic state');
+  await id('play-pause').click();
+  await page.evaluate(() => { Object.defineProperty(document, 'hidden', { configurable: true, value: true }); document.dispatchEvent(new Event('visibilitychange')); });
+  const hiddenPosition = await text('position-ms');
+  await page.waitForTimeout(100);
+  assert.equal(await text('position-ms'), hiddenPosition, 'hidden document pauses');
+  await page.evaluate(() => { Object.defineProperty(document, 'hidden', { configurable: true, value: false }); document.dispatchEvent(new Event('visibilitychange')); });
+  await id('viewer-canvas').evaluate(canvas => { const gl = canvas.getContext('webgl2'); const ext = gl.getExtension('WEBGL_lose_context'); if (!ext) throw Error('context loss extension unavailable'); ext.loseContext(); });
+  await id('renderer-error').waitFor({ state: 'visible' });
+  assert.equal(await id('play-pause').isDisabled(), true);
+  assert.deepEqual(await page.evaluate(() => window.__capabilityCalls), []);
+  assert.deepEqual(failures, [], 'no outbound requests');
+  assert.deepEqual(errors, [], 'no uncaught browser errors');
+  const unmounted = await context.newPage();
+  await unmounted.goto(origin);
+  await unmounted.getByTestId('viewer-canvas').waitFor({ state: 'visible' });
+  await unmounted.getByTestId('play-pause').click();
+  await unmounted.evaluate(() => {
+    window.__lastGL = document.querySelector('canvas').getContext('webgl2');
+    const app = document.querySelector('#__nuxt').__vue_app__;
+    if (!app) throw Error('Vue application unavailable for real unmount');
+    app.unmount();
+  });
+  await unmounted.waitForFunction(() => window.__lastGL.isContextLost());
+  assert.equal(await unmounted.locator('canvas').count(), 0, 'unmount removes renderer and releases context');
+  assert.deepEqual(failures, [], 'baseline has no outbound requests');
+  assert.deepEqual(errors, [], 'baseline has no uncaught browser errors');
+  baselineCompleted = true;
+  phase = 'keyboard';
+  const keyboardPage = await context.newPage();
+  keyboardPage.on('pageerror', error => errors.push(error.message));
+  await keyboardPage.goto(origin);
+  await keyboardPage.waitForFunction(() => document.querySelector('[data-testid="play-pause"]')?.disabled === false);
+  await runKeyboard(keyboardPage);
+  assert.deepEqual(await keyboardPage.evaluate(() => window.__capabilityCalls), []);
+  assert.deepEqual(failures, [], 'keyboard has no outbound requests');
+  assert.deepEqual(errors, [], 'keyboard has no uncaught browser errors');
+  fs.writeFileSync(path.join(evidence, 'browser-results.json'), JSON.stringify({ status: 'passed', browser: browserName, browserVersion, contrastMetrics, outbound: failures, errors, cases: [...baselineCases, 'keyboard-tab-focus', 'keyboard-file-import', 'keyboard-example', 'keyboard-space-enter-transport', 'keyboard-native-range', 'keyboard-mobile-no-trap'] }, null, 2));
+})().catch(error => {
+  fs.writeFileSync(path.join(evidence, 'browser-results.json'), JSON.stringify({ status: 'failed', browser: browserName, browserVersion, phase, unavailablePassed, contrastMetrics, completedBaselineCases: baselineCompleted ? baselineCases : [], keyboardDiagnostics, error: String(error) }, null, 2));
+  console.error(error); process.exitCode = 1;
+}).finally(async () => {
+  if (browser) await browser.close();
+  server.close();
+});

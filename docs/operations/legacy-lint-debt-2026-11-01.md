@@ -100,3 +100,35 @@ Corrected-head [avatar run41288204852](https://github.com/patchwerks/furbomek/ac
 also passed the existing offline test/browser suite. No additional source change
 is made in this evidence update. Exact final PR-head verification and independent
 review remain required before merge; no merge or deployment is performed here.
+
+## Changelog — current-main refresh preparation, 2026-11-04
+
+**Observed static preparation:** PR40's published head
+`107fa4e354b1e7b44ed6f8543a2aba64a50a10cd` was combined with accepted main
+`95a9a8821d4ff245399a4f8d425742222ef787a1` (including PR42, PR44 and PR45)
+in clean merge `5c2ebb031c56060cdef1e439ce215c574db1b5e7`. All eleven
+original PR40-owned files were byte-identical to the published PR40 head at
+that merge. This appended evidence section is the only subsequent change to
+those files in this preparation slice; the ten source files remain unchanged.
+Original creation metadata and historical qualification records above are retained.
+Ownership is recorded in [issue30 claim6628619719](https://github.com/patchwerks/furbomek/issues/30#issuecomment-6628619719).
+
+**Pending current evidence:** publish the refreshed head, then dispatch the
+unchanged accepted ESLint and avatar workflows on that exact head. The older
+successful runs above do not qualify the current merged tree. Node22.22.3 and
+Node26.7.0 candidate lint JSON, actual exit statuses, production build, types,
+full offline install, enforcement fixtures and offline avatar browser evidence
+must be inspected again. A green advisory run alone does not establish zero
+lint debt. Its comparison baseline remains historical
+`fb7e25e9982f53a1f12e6c63955420ac476d8294`, not current main. Accepted viewer
+files may expose unrelated repository-wide lint diagnostics; report their paths,
+rules and counts without fixing, ignoring or suppressing them in this slice.
+`npm run generate` remains unperformed by this reused qualification workflow.
+
+**Unperformed merge gates:** the review-requested real streaming TTS, OpenAI,
+microphone/audio-device lifecycle and avatar/OBS smoke checks remain unperformed.
+No provider, microphone, OBS or hardware access is authorized by this refresh.
+Offline fixtures do not substitute for those checks. Fresh independent review
+and all required exact-head checks remain outstanding; this record does not clear
+review, merge or deploy PR40. No candidate install, build, lint or runtime code
+was executed on the credentialed host during preparation.

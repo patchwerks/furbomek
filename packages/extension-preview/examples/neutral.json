@@ -1,0 +1,11 @@
+{
+  "schemaVersion": 1,
+  "packId": "starter-neutral",
+  "packVersion": "0.1.0",
+  "previewContractVersion": 1,
+  "capabilities": ["presentation.expression"],
+  "durationMs": 1200,
+  "events": [
+    { "seq": 1, "atMs": 0, "kind": "presentation.expression", "value": "neutral" }
+  ]
+}
