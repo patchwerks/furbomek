@@ -3,11 +3,11 @@ import assert from 'node:assert/strict';
 import { readFile, readdir, lstat } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import { resolve, dirname } from 'node:path';
-import { parsePack, samplePack } from '../index.mjs';
-import { loadPackFile } from '../load-file.mjs';
+import { parsePack, samplePack } from '../../../packages/extension-preview/index.mjs';
+import { loadPackFile } from '../../../packages/extension-preview/load-file.mjs';
 
 const root = new URL('../../../', import.meta.url);
-const examples = new URL('../examples/', import.meta.url);
+const examples = new URL('packages/extension-preview/examples/', root);
 const guideURL = new URL('docs/contributing/presentation-packs.md', root);
 const names = ['acknowledge.json', 'curious.json', 'neutral.json'];
 const neutral = (positionMs) => ({ positionMs, expression: 'neutral', reaction: null, reactionProgress: 0 });
@@ -74,8 +74,8 @@ test('guide commands remain direct, copyable and nonrecursive', async () => {
   const guide = await readFile(guideURL, 'utf8');
   const commands = new Map([...guide.matchAll(/<!-- (starter-[a-z-]+) -->\s*```sh\n([\s\S]*?)\n```/g)].map((m) => [m[1], m[2]]));
   assert.equal(commands.size, 3);
-  assert.equal(commands.get('starter-check'), 'node --test packages/extension-preview/tests/starter-examples.test.mjs');
-  assert.equal(commands.get('starter-full-suite'), 'node --experimental-vm-modules --test packages/extension-preview/tests/*.test.mjs');
+  assert.equal(commands.get('starter-check'), 'node --test docs/contributing/tests/presentation-packs.test.mjs');
+  assert.equal(commands.get('starter-full-suite'), 'node --experimental-vm-modules --test packages/extension-preview/tests/*.test.mjs docs/contributing/tests/*.test.mjs');
   assert.equal(commands.get('starter-validate-file'), 'node --input-type=module -e \'import { loadPackFile } from "./packages/extension-preview/load-file.mjs"; const pack = await loadPackFile(process.argv[1]); console.log(`Valid pack: ${pack.packId}`);\' -- \'packages/extension-preview/examples/neutral.json\'');
 });
 

@@ -23,7 +23,10 @@ JSON examples and direct Node commands. The package adds neutral, curious and
 acknowledge examples, plus tests for exact inventory, regular bounded files,
 strict parser acceptance, identities/capabilities, cue timing, expiry, reset,
 end clamping, backwards seeks, guide JSON fidelity, documented command text
-and relative links. Existing parser/schema/loader implementations are unchanged.
+and relative links. The seven contributor tests live in
+`docs/contributing/tests/presentation-packs.test.mjs`, outside the independently
+qualified package-only suite. Existing parser/schema/loader implementations and
+the accepted package-only workflow are unchanged.
 No install scripts or new dependencies are required.
 
 ## Verification procedure and limits
@@ -64,9 +67,23 @@ there is no candidate artifact export or untrusted write back to the host.
 publishing host. This does not execute the candidate module or establish runtime
 acceptance. No candidate package code or guide command was executed on that host.
 
-**Pending:** actual offline workflow run IDs, exact tested candidate revision,
-Node-specific test totals and documented-command outcomes must be recorded after
-execution. No runtime pass count is claimed by this preparation record.
+**Observed first-run evidence (reported by the supervising publisher):** source
+`a70d14122ee0cfb4ba0164b0eb49939c771e5367`, advisory workflow run
+[41801400363](https://github.com/patchwerks/furbomek/actions/runs/41801400363),
+passed on both Node workers: 7 starter tests, 66 combined tests, and the documented
+file-validation CLI. However, the accepted package-only workflow run
+[41801400113](https://github.com/patchwerks/furbomek/actions/runs/41801400113)
+failed three guide checks with `ENOENT` for `/docs/contributing/presentation-packs.md`.
+Its package-only mount deliberately excludes contributor documentation.
+
+**Correction prepared:** moved all seven contributor tests from the package test
+directory to `docs/contributing/tests/presentation-packs.test.mjs`, updated imports
+and guide commands, and explicitly included both test directories in the combined
+command. No checks were skipped or made conditional. The accepted package-only
+workflow and core tests are unchanged.
+
+**Pending:** corrected-revision CI and its exact SHA/run IDs. The first-run passes
+do not qualify this correction; no corrected runtime result is claimed.
 
 Browser import of these starter examples was not exercised. Any previous viewer
 qualification applies only to its recorded viewer revision, not this kit branch.
@@ -76,6 +93,10 @@ complete; this kit still requires independent review (including its workflow)
 and exact-head checks before integration into main.
 
 ## Changelog
+
+- 2026-11-04: Recorded first-run advisory passes and package-only failure; moved
+  all seven contributor tests outside the package-only suite. Corrected runtime
+  checks remain pending.
 
 - 2026-11-04: Recorded parent acceptance and separate remaining kit gates; clarified
   advisory execution review and host-device exclusion. Corrected the initial

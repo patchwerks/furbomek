@@ -117,7 +117,7 @@ available, the dependency-free starter check is:
 
 <!-- starter-check -->
 ```sh
-node --test packages/extension-preview/tests/starter-examples.test.mjs
+node --test docs/contributing/tests/presentation-packs.test.mjs
 ```
 
 That checks the committed examples and the complete JSON blocks in this guide.
@@ -135,7 +135,7 @@ Optional full package suite:
 
 <!-- starter-full-suite -->
 ```sh
-node --experimental-vm-modules --test packages/extension-preview/tests/*.test.mjs
+node --experimental-vm-modules --test packages/extension-preview/tests/*.test.mjs docs/contributing/tests/*.test.mjs
 ```
 
 No `npm install`, `npm ci` or `npx` is needed. In particular, the root package's
@@ -185,6 +185,9 @@ Before requesting review:
   outside the pack. The contract has no fields or runtime for them.
 
 ## Changelog
+
+- 2026-11-04: Moved contributor checks under this guide so package-only checks
+  remain independent; the full command explicitly includes both test directories.
 
 - 2026-11-04: Recorded accepted PR 41; kept contributor-kit and viewer acceptance
   separate and pending.

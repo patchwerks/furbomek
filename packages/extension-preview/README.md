@@ -93,7 +93,9 @@ no install, activation, deployment or live-operation command.
 
 The [presentation-pack authoring guide](../../docs/contributing/presentation-packs.md)
 provides three original JSON examples, timing expectations and dependency-free
-checks against the accepted PR 41 contract. This kit remains an unapproved draft
+checks against the accepted PR 41 contract. Contributor checks live in
+`docs/contributing/tests/presentation-packs.test.mjs`; the guide gives separate
+starter and combined-suite commands. Package-only tests need no contributor docs. This kit remains an unapproved draft
 under issue 32 requiring its own independent review. The optional PR 42 viewer
 is a separate unapproved draft absent from this kit. The guide does not define a
 stable external API or grant live authority.
