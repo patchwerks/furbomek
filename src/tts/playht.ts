@@ -1,18 +1,16 @@
 import type {Settings} from "~/src/settings";
-import type {TTSInterface, TTSStreamInterface} from "~/src/tts/interfaces";
+import type {TTSInterface, TTSStreamInterface, TTSSubscription} from "~/src/tts/interfaces";
 import type {AudioContextWithSetSinkId} from "~/src/types/audio-context.interface";
 
-
-const HEADERS_SIZE: number = 78;
 
 export class PlayHtTTSStream extends EventTarget implements TTSStreamInterface {
   private nextPlayTime: number = 0;
   private readonly audioContext: AudioContext;
   private textBuffer: string = '';
-  private audioStack: Promise<any>[] = [];
+  private audioStack: Promise<ReadableStreamDefaultReader<Uint8Array> | undefined>[] = [];
   private reader?: ReadableStreamDefaultReader<Uint8Array>;
   private queue: string[] = [];
-  private currentRequest: any;
+  private currentRequest?: Promise<ReadableStreamDefaultReader<Uint8Array> | undefined>;
 
   constructor(private settings: Settings, private voice: string, audioOutputId?: string) {
     super();
@@ -89,14 +87,14 @@ export class PlayHtTTSStream extends EventTarget implements TTSStreamInterface {
 
     this.audioStack.push(this.currentRequest);
 
-    this.currentRequest.then((result: any) => {
+    this.currentRequest.then((result) => {
       console.log("RESULT", result)
 
       if (!result) {
         return
       }
 
-      this.reader || this.read();
+      if (!this.reader) this.read();
     });
   }
 
@@ -137,7 +135,7 @@ export class PlayHtTTSStream extends EventTarget implements TTSStreamInterface {
         this.dispatchEvent(new Event('first'));
       }
 
-      let buffer = value!.buffer;
+      const buffer = value!.buffer;
       console.log('buffer', buffer.byteLength)
       if (buffer.byteLength > 0) {
         const [audioBuffer, _offset] = this.createAudioBuffer(buffer, buffer.byteLength, offset);
@@ -206,7 +204,7 @@ export class PlayHtTTS implements TTSInterface {
     const jsonVoicesResponse = await fetchVoicesResponse.json();
     const voicesResponse = Object.fromEntries(
       jsonVoicesResponse
-        .filter((voice: any) => voice.voice_engine === 'PlayHT2.0')
+        .filter((voice: {voice_engine: string}) => voice.voice_engine === 'PlayHT2.0')
         .map((voice: { id: string, name: string }) => [voice.id, voice.name])
     )
 
@@ -221,14 +219,14 @@ export class PlayHtTTS implements TTSInterface {
     const jsonClonedVoicesResponse = await fetchClonedVoicesResponse.json();
     const clonedVoicesResponse = Object.fromEntries(
       jsonClonedVoicesResponse
-        .filter((voice: any) => voice.voice_engine === 'PlayHT2.0')
+        .filter((voice: {voice_engine: string}) => voice.voice_engine === 'PlayHT2.0')
         .map((voice: { id: string, name: string }) => [voice.id, voice.name])
     )
 
     return {...voicesResponse, ...clonedVoicesResponse}
   }
 
-  async getSubscription(): Promise<Record<string, any>> {
+  async getSubscription(): Promise<TTSSubscription> {
     return {"1": 'tier'}
   }
 }

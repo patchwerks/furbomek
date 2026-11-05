@@ -1,0 +1,223 @@
+---
+created: 2026-11-01T07:58:12Z
+branch: codex/30-lint-debt
+author: madeleine-lgtm / Codex
+status: active
+---
+# Legacy application lint debt — issue 30
+
+This follows [issue 30](https://github.com/patchwerks/furbomek/issues/30) and
+accepted ESLint upgrade PR35. The source base is published main
+`cdd9147fac9141fa0c75b5058f9dce46c7885188`.
+
+## Scope and behavior preservation
+
+The patch types select options, provider voice/subscription responses, stream
+reader promises and event callbacks. `ChatEvent` remains an exported runtime
+class with the same inheritance and constructors; its optional `message`
+declaration is type-only and emits no property. Callback return values remain
+ignored. The browser process compatibility assignment remains the same object.
+
+Explicit `if` statements retain the existing truthiness and order of chat/TTS
+side effects. No awaits, cancellation logic or queue operations are added.
+Only unused literal initializers are removed: the local empty `prevDelta`
+shadow and `HEADERS_SIZE = 78`. The actual outer delta ref remains unchanged.
+The existing `created` listener versus `create` emission mismatch is outside
+this cleanup and is preserved.
+
+Vue template changes reorder attributes, hyphenate a prop and self-close empty
+nodes without changing layout, text, styles or bindings. The settings component
+gets explicit multi-word metadata name `ProviderSettings`; this changes its
+devtools/component name, not its props or rendering. Avatar entrypoints explicitly
+read `globalThis.FurbomekView`, matching the existing renderer export.
+
+No dependency, lockfile, ESLint configuration, rule severity, suppression,
+workflow, service, CI helper or shared governance file changes are included.
+No new images or visual redesign are included.
+
+## Qualification record
+
+**Observed prior evidence:** PR35 run
+[41243857696](https://github.com/patchwerks/furbomek/actions/runs/41243857696)
+reported 36 errors / 23 warnings repository-wide and 11 errors / 18 warnings in
+`app.vue`, with zero fatal diagnostics, on its final head
+`b2dc72d89d464d883361551502b4f553b32d5946`, subsequently merged at the base above.
+These are historical baseline observations, not a fresh run of this patch.
+
+**Pending:** exact-head hosted lint, production build/type checks, full offline
+install and avatar browser fixture results. No candidate JavaScript, dependencies
+or install hooks were executed on the credentialed host. The existing accepted
+ESLint qualification workflow can be dispatched on the branch unchanged; its
+embedded older ESLint8 baseline must not be confused with this patch's base.
+Candidate lint exit codes and zero diagnostic counts must be checked directly,
+because that advisory workflow permits pre-existing debt. The existing avatar
+workflow supplies real offline tests and browser fixtures on the changed files.
+
+Live microphone, provider accounts, audio devices, OBS and robot hardware are
+not exercised. This software cleanup does not qualify their lifecycle behavior.
+
+## Rollback
+
+Revert this source/doc change on an accepted revision; retain PR35's supported
+ESLint dependency stack and configuration. No installed runtime is changed.
+
+## Changelog — 2026-11-01
+
+First qualification [41287125795](https://github.com/patchwerks/furbomek/actions/runs/41287125795)
+on head `1c3fda4935bf43ff1147cd209947aeab1f955da9` reached the production build
+on both Node22.22.3 and Node26.7.0, then failed with TS4115 on the two message
+constructor parameter properties. Explicit type-only `override` modifiers correct
+that declaration requirement; constructors and emitted properties stay the same.
+Lint had not run for the candidate at this failure, so no candidate count is
+claimed from that run. This is focused correction attempt one.
+
+The same head passed [avatar fixtures 41287127067](https://github.com/patchwerks/furbomek/actions/runs/41287127067):
+15 unit tests, zero failures, and the real offline browser checks for the bundled
+asset, labelled fixture, interruption/expiry, literal HTML text, no global live
+instance and no page errors. All displayed CodeQL checks also passed.
+`npm run generate` is not included in the reused lint workflow and has not been
+freshly run for this cleanup. Final corrected-head qualification remains pending.
+
+## Qualification update — 2026-11-01
+
+Corrected source head `e9fe7d6a31a5dee6af1cb5462a32c4c6a3cd2931` passed
+[41292033486](https://github.com/patchwerks/furbomek/actions/runs/41292033486)
+on both Linux Node22.22.3/npm10.9.8 and Node26.7.0/npm11.19.0. Actual artifact
+JSON records **zero errors, warnings and fatal diagnostics** for both `app.vue`
+and the whole repository on both versions. Each `candidate-status.txt` is
+`0 0 0`: app lint, repository lint and dependency-tree inspection all exited0.
+The previous app11/18 and repository36/23 debt is removed without suppression.
+
+Both jobs completed production build with configured type checks, standalone
+`vue-tsc --noEmit`, persisted-lock dependency installation and the full offline
+`npm ci` including install hooks. Malformed parsing and real self-import/constant
+loop enforcement fixtures passed; the inspector static build passed. Effective
+rule comparison found no enabled baseline rule with reduced severity. This reused
+workflow compares its pinned historical ESLint8 base, not a fresh checkout of the
+source base `cdd9147`; its candidate evidence binds to the exact source head above.
+
+Corrected-head [avatar run41288204852](https://github.com/patchwerks/furbomek/actions/runs/41288204852)
+also passed the existing offline test/browser suite. No additional source change
+is made in this evidence update. Exact final PR-head verification and independent
+review remain required before merge; no merge or deployment is performed here.
+
+## Changelog — current-main refresh preparation, 2026-11-04
+
+**Observed static preparation:** PR40's published head
+`107fa4e354b1e7b44ed6f8543a2aba64a50a10cd` was combined with accepted main
+`95a9a8821d4ff245399a4f8d425742222ef787a1` (including PR42, PR44 and PR45)
+in clean merge `5c2ebb031c56060cdef1e439ce215c574db1b5e7`. All eleven
+original PR40-owned files were byte-identical to the published PR40 head at
+that merge. This appended evidence section is the only subsequent change to
+those files in this preparation slice; the ten source files remain unchanged.
+Original creation metadata and historical qualification records above are retained.
+Ownership is recorded in [issue30 claim6628619719](https://github.com/patchwerks/furbomek/issues/30#issuecomment-6628619719).
+
+**Pending current evidence:** publish the refreshed head, then dispatch the
+unchanged accepted ESLint and avatar workflows on that exact head. The older
+successful runs above do not qualify the current merged tree. Node22.22.3 and
+Node26.7.0 candidate lint JSON, actual exit statuses, production build, types,
+full offline install, enforcement fixtures and offline avatar browser evidence
+must be inspected again. A green advisory run alone does not establish zero
+lint debt. Its comparison baseline remains historical
+`fb7e25e9982f53a1f12e6c63955420ac476d8294`, not current main. Accepted viewer
+files may expose unrelated repository-wide lint diagnostics; report their paths,
+rules and counts without fixing, ignoring or suppressing them in this slice.
+`npm run generate` remains unperformed by this reused qualification workflow.
+
+**Unperformed merge gates:** the review-requested real streaming TTS, OpenAI,
+microphone/audio-device lifecycle and avatar/OBS smoke checks remain unperformed.
+No provider, microphone, OBS or hardware access is authorized by this refresh.
+Offline fixtures do not substitute for those checks. Fresh independent review
+and all required exact-head checks remain outstanding; this record does not clear
+review, merge or deploy PR40. No candidate install, build, lint or runtime code
+was executed on the credentialed host during preparation.
+
+## Changelog — refreshed-head evidence and bounded correction, 2026-11-04
+
+**Observed:** [ESLint qualification41816174345](https://github.com/patchwerks/furbomek/actions/runs/41816174345)
+completed successfully on refreshed source head
+`3b193409255ad441a595f662ccd534ef9e16476b`, with Node22.22.3/npm10.9.8 and
+Node26.7.0/npm11.19.0. Both artifact archives matched their GitHub SHA-256
+digests; embedded candidate SHA matched this head. Actual candidate JSON shows
+root `app.vue`: **0 errors / 0 warnings / 0 fatal diagnostics**; repository:
+**0 errors / 1 warning / 0 fatal diagnostics**, on both Node versions. Both
+status files are `0 0 0`; successful lint exits do not mean zero warnings.
+
+The sole repository warning is accepted-main
+`apps/extension-viewer/app.vue:197:97`, `vue/attributes-order`, severity1:
+`Attribute ":aria-label" should go before "@click".` This run is not a
+zero-warning repository qualification. The authorized bounded correction moves
+only that button's existing `:aria-label` before `@click`, retaining their exact
+values and bindings. No lint rules, ignores, suppressions, dependencies, locks
+or workflows change. This explicitly adds one viewer template line to the
+original scope; all ten original PR40 source files remain byte-identical to
+published head `107fa4e354b1e7b44ed6f8543a2aba64a50a10cd`.
+
+Both jobs completed preparation, production build, standalone `vue-tsc --noEmit`,
+persisted-lock provisioning and full offline root installation. Exported lock
+bytes match the committed root lock. Malformed Vue/TypeScript fixtures each
+report one fatal parse error; both enforcement fixtures retain severity2
+self-import and constant-condition diagnostics. Inspector build passed and
+no enabled historical-baseline rule lost severity. Node26's full-install log
+also records npm's warning that `esbuild@0.28.2` postinstall is not covered by
+`allowScripts`; do not claim every transitive install hook ran. Root postinstall
+and production build did complete. Comparison baseline is still pinned
+`fb7e25e9982f53a1f12e6c63955420ac476d8294`, not current main.
+
+[Avatar qualification41826521026](https://github.com/patchwerks/furbomek/actions/runs/41826521026)
+passed on the same `3b193409` head: 15 tests, 15 passes, zero failures/skips,
+and the real offline browser checks for asset, labelled fixture,
+interruption/expiry, literal HTML text, no global live instance and no page
+errors. The correction changes no avatar source or avatar workflow bytes;
+this is applicable unchanged-component evidence, not a test of the later full
+commit and not a real OBS check.
+
+**Pending:** publish the bounded correction and rerun exact-head ESLint matrix;
+zero-warning correction results are not yet claimed. Preserve the actual0/1
+result above. Final required checks and independent review remain outstanding.
+`npm run generate`, real streaming TTS, OpenAI, microphone/audio-device lifecycle
+and avatar/OBS smoke checks remain unperformed. No provider or hardware access,
+merge or deployment occurred. The earlier cancelled old-head run41816004616
+is excluded from refreshed-head evidence.
+
+## Changelog — corrected implementation qualification, 2026-11-04
+
+**Observed tested implementation:** corrected source
+`15ec7b25c195dbad8cd8a2dea46ff0361e65b17b` passed
+[qualification41827223490](https://github.com/patchwerks/furbomek/actions/runs/41827223490)
+on Node22.22.3/npm10.9.8 and Node26.7.0/npm11.19.0. Both downloaded archive
+SHA-256 digests matched GitHub artifact metadata and embedded candidate SHA
+matched this exact implementation. Direct inspection of each candidate JSON
+records **0 errors / 0 warnings / 0 fatal diagnostics** for both root `app.vue`
+and repository lint. Both status files are `0 0 0`. The earlier refreshed-head
+0errors/1warning result remains preserved above; the one-line viewer attribute
+reorder removes that warning without rule or configuration changes.
+
+Both jobs passed production build, standalone types, full offline root install,
+malformed parse/enforcement fixtures and inspector build. Persisted exported
+lock bytes equal the committed root lock; dependency-tree inspection is clean.
+No enabled historical-baseline rule lost severity. Node26 again reports the
+`esbuild@0.28.2` postinstall `allowScripts` warning; root postinstall and build
+completed, but this is not evidence that every transitive install hook ran.
+The comparison remains against historical
+`fb7e25e9982f53a1f12e6c63955420ac476d8294`, not current main.
+
+The avatar source tree and its workflow are byte-identical to tested head
+`3b193409255ad441a595f662ccd534ef9e16476b`, where
+[avatar41826521026](https://github.com/patchwerks/furbomek/actions/runs/41826521026)
+passed15/15 and the real offline browser suite. This retains applicable
+unchanged-component evidence; it does not relabel that run as testing `15ec7b25`
+or a later documentation commit.
+
+This evidence append changes documentation only. All runtime source, config,
+dependency locks and workflow bytes remain identical to tested implementation
+`15ec7b25`; all ten original PR40 source files also remain identical to published
+`107fa4e3`. The forthcoming documentation-bearing head must receive its own
+identity/preservation check, applicable automatic required checks and independent
+review. The qualification run above is bound to `15ec7b25`, not that later head.
+
+Real streaming TTS, OpenAI, microphone/audio-device lifecycle and avatar/OBS
+smoke checks remain unperformed; offline CI does not clear those review gates.
+`npm run generate` remains unperformed. No live access, deployment or merge is
+claimed. Independent acceptance remains outstanding.
