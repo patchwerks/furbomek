@@ -77,3 +77,39 @@ and the unchanged core intact. Existing companions remain inert JSON. No
 installation, device, media, live transport, host configuration or power change
 occurred. Parent-directory trust and self-declared author/license limitations
 remain intentional and documented.
+
+
+## First hosted pass and focused correction, 2026-11-05
+
+**Observed failed first pass:** source
+`41b923288ba8097e3a892b9b240e1e8479069527` ran in
+[run 41993762135](https://github.com/patchwerks/furbomek/actions/runs/41993762135).
+Node 22.22.3 and 26.7.0 each passed 86 of 87 metadata/core tests. The sole
+failure was the CLI usage test: its duplicate `--json` case incorrectly
+required `Usage` on stderr. The CLI correctly returned exit 2, structured
+stdout with `error: "usage"`, and empty stderr, as documented. This failed
+first pass is not runtime acceptance of the full suite.
+
+At 2026-11-05T08:23:12Z, the test was corrected to assert structured stdout
+(`ok: false`, `error: "usage"`, usage message) and empty stderr when the
+malformed invocation includes `--json`; all other usage cases assert the
+usage message on stderr and empty stdout. All existing exit-2 cases remain.
+Production CLI logic was unchanged. The new advisory workflow job display
+names changed to `metadata-node22` / `metadata-node26` to distinguish them
+from the existing starter advisory jobs; pins and worker boundary are unchanged.
+
+**Pending after correction:** fresh hosted matrix on the published correction,
+combined browser-download integration, exact-head checks and independent
+acceptance. No candidate code or tests were executed on the host. The earlier
+preparation-only pending list is historical; the first hosted execution is
+recorded here without implying successful completion or issue 32 closure.
+
+
+**Additional first-pass diagnostic, 2026-11-05:** the combined viewer
+[run 41993761735](https://github.com/patchwerks/furbomek/actions/runs/41993761735)
+reported two `no-control-regex` lint errors in the metadata test's terminal
+output assertions. Those assertions now check explicitly for absence of code
+points U+001B and U+202E in the same output channels instead of embedding a
+control character escape in a regular expression. No lint rule was suppressed,
+and the terminal-safety coverage and earlier usage-channel correction remain.
+This correction awaits the same fresh hosted run; it was not executed on host.

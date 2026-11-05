@@ -107,18 +107,27 @@ test('CLI usage and file failures have stable distinct exits and terminal-safe o
   for (const args of [[], ['other', example], ['validate'], ['template', example],
     ['validate', example, '--unknown'], ['validate', example, '--json', '--json'],
     ['validate', example, '--metadata'], ['template', example, '--author', 'X', '--license', 'MIT', 'extra']]) {
-    const result = run(args); assert.equal(result.status, 2); assert.match(result.stderr, /Usage/);
+    const result = run(args); assert.equal(result.status, 2);
+    if (args.includes('--json')) {
+      const output = JSON.parse(result.stdout);
+      assert.equal(output.ok, false); assert.equal(output.error, 'usage');
+      assert.match(output.message, /Usage/); assert.equal(result.stderr, '');
+    } else {
+      assert.match(result.stderr, /Usage/); assert.equal(result.stdout, '');
+    }
   }
   const usage = run(['validate', '--json']); assert.equal(usage.status, 2); assert.equal(JSON.parse(usage.stdout).error, 'usage');
   const template = run(['template', example, '--author', 'X', '--license', 'bad']); assert.equal(template.status, 1); assert.equal(template.stdout, '');
   const hostile = join(dir, '\x1b[31m\n\u202efile');
   for (const json of [false, true]) {
     const result = run(['validate', hostile, ...(json ? ['--json'] : [])]);
-    assert.equal(result.status, 1); assert.doesNotMatch(result.stdout + result.stderr, /[\x1b\u202e]/);
+    assert.equal(result.status, 1);
+    for (const codePoint of [0x1b, 0x202e]) assert.equal((result.stdout + result.stderr).includes(String.fromCodePoint(codePoint)), false);
     if (json) assert.equal(JSON.parse(result.stdout).ok, false);
   }
   await writeFile(hostile, await readFile(example));
-  const success = run(['validate', hostile]); assert.equal(success.status, 0); assert.doesNotMatch(success.stdout, /[\x1b\u202e]/);
+  const success = run(['validate', hostile]); assert.equal(success.status, 0);
+  for (const codePoint of [0x1b, 0x202e]) assert.equal(success.stdout.includes(String.fromCodePoint(codePoint)), false);
 }));
 
 test('descriptor race checks fail closed and close handles; unsupported flags never open', async () => {
