@@ -6,7 +6,7 @@ status: active
 ---
 # Presentation metadata preparation
 
-**Implemented candidate; runtime qualification pending.** Linked work is
+**Metadata/core source qualified; combined integration and acceptance pending.** Linked work is
 [issue 32](https://github.com/patchwerks/furbomek/issues/32), under the
 [parallel authoring claim](https://github.com/patchwerks/furbomek/issues/32#issuecomment-6653015423).
 Preparation base is accepted main
@@ -113,3 +113,42 @@ points U+001B and U+202E in the same output channels instead of embedding a
 control character escape in a regular expression. No lint rule was suppressed,
 and the terminal-safety coverage and earlier usage-channel correction remain.
 This correction awaits the same fresh hosted run; it was not executed on host.
+
+
+## Corrected metadata source qualification, 2026-11-05
+
+**Observed:** [run 41994352925](https://github.com/patchwerks/furbomek/actions/runs/41994352925)
+completed successfully at 2026-11-05T08:26:03Z for exact source
+`1a0e5ae66e4ffe28c7cdc2c03860cae2f97ced38`. The GitHub run/status JSON confirms
+that head and successful completed jobs; raw logs confirm actual runtime
+versions and totals, rather than inferring them from the workflow matrix.
+
+| Job | Observed Node | Tests | Passed | Failed / cancelled / skipped / todo |
+| --- | --- | --- | --- | --- |
+| metadata-node22 | 22.22.3 | 87 | 87 | 0 / 0 / 0 / 0 |
+| metadata-node26 | 26.7.0 | 87 | 87 | 0 / 0 / 0 / 0 |
+
+Both logs explicitly report successful CLI template/match/absent/tampering/no
+output-write checks and CLI usage/file-failure/terminal-safety checks. The
+strict parser, descriptor race/file boundaries and unchanged core suites also
+passed. VM Modules emitted its expected experimental-feature warning; that is
+not a lint result or evidence for arbitrary runtimes.
+
+The raw read-only provider response and logs were retrieved at
+2026-11-05T08:28:09Z. Retained sibling evidence has SHA-256:
+
+- Run JSON: `4bf28f84535974fb249d143bcfcea0c54043452e8144347c5c3887f4332d4e57`.
+- Run log: `6a495652a41ad35c5fead8c084c7312a8646c8124835b9cbd65d71c5559db206`.
+
+This supersedes the corrected metadata suite's pending rerun status above;
+the first-pass 86/87 failure and two lint-fixture errors remain recorded as
+historical evidence. No candidate code or downloaded artifact was executed on
+the host. Source qualification is bounded to this exact revision and these
+offline Node workers. Combined browser-download integration also passed in
+[viewer run 41994353036](https://github.com/patchwerks/furbomek/actions/runs/41994353036)
+at the same exact source: all four Chromium/Firefox build combinations passed
+real export/reimport, CLI template/match and byte-tamper rejection. See the
+[builder evidence](pack-builder-2026-11-05.md) for artifact provenance and visual
+review. Final published head checks, independent review and policy acceptance
+remain pending. A later
+source change requires fresh applicable evidence. Issue 32 remains open.

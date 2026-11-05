@@ -38,8 +38,14 @@ companion after changing any bytes.
 ## Candidate command interface
 
 Run candidate code only in a reviewed, credential-free disposable offline
-worker. These commands are implemented but their runtime qualification is
-pending the hosted checks described in the [preparation record](../operations/presentation-metadata-2026-11-05.md).
+worker. At source `1a0e5ae66e4ffe28c7cdc2c03860cae2f97ced38`, the metadata/core
+suite passed all 87 tests on Node 22.22.3 and 26.7.0 in
+[run 41994352925](https://github.com/patchwerks/furbomek/actions/runs/41994352925).
+See the [qualified-source record and limits](../operations/presentation-metadata-2026-11-05.md).
+The real browser-download/CLI roundtrip and byte-tamper rejection also passed
+in all four Chromium/Firefox build combinations at that source; see the
+[builder record](../operations/pack-builder-2026-11-05.md). Final-head checks and
+independent acceptance remain separate gates; evidence applies only to that source.
 From the repository root:
 
 ```sh
@@ -80,3 +86,10 @@ file-boundary/race, same-byte hash, CLI and existing core tests. It is not an
 independent policy acceptance mechanism. Combined builder checks must also
 validate an actual browser download through this CLI, generate and match its
 companion in temporary storage, and reject a byte-tampered pair.
+
+
+## Changelog
+
+- 2026-11-05: Replaced preparation-only runtime status with observed Node 22/26
+  metadata/core source qualification; retained combined integration, final-head
+  and independent acceptance gates.
