@@ -1,23 +1,45 @@
+---
+created: 2026-09-08T02:09:02Z
+branch: codex/47-readme-navigation
+author: thales
+editor: Codex
+status: active
+---
+
+<!-- Creation metadata records the earliest tracked README addition, commit
+20544904e0071f3d1d380160f6e2c9e24d77ca62, not an independently known writing date. -->
+
 # Furb-o-Mek
 
 Furb-o-Mek is a planned fully autonomous Hermes-controlled streaming robot built around a modified Freenove-style hexapod and Furby-like head. The target system combines safe remote embodiment, speech, an autonomous OBS stream, a swappable VTuber fallback, visual/perception overlays and future advisory agents.
 
 ## Start here
 
+### Onboarding and project context
+
 - Humans and coding agents: [`AGENTS.md`](AGENTS.md), then [`PLAN.md`](PLAN.md).
 - Shared work queue: [delivery boards](https://github.com/orgs/patchwerks/projects/1)
   and [GitHub Issues](https://github.com/patchwerks/furbomek/issues); follow the
   [claim, tracking and closeout policy](docs/agents/issue-tracker.md) from any harness.
+- Source-backed topic research: [`docs/research/README.md`](docs/research/README.md).
+
+### Non-live verification and media boundaries
+
+- Non-live media verification: `bash tools/verify-media.sh`.
+- Public activity and private media lifecycle: [`services/hermes-activity`](services/hermes-activity/README.md), [`services/stream-supervisor`](services/stream-supervisor/README.md).
+- Tested actuator-disabled safety component: [`firmware/robot-safety/README.md`](firmware/robot-safety/README.md).
+
+### Deployment entrypoints
+
 - A host Hermes deploying a fresh clone: [`HERMES.md`](HERMES.md).
 - Exact current and target deployment flow: [`docs/operations/hermes-one-shot.md`](docs/operations/hermes-one-shot.md).
-- Source-backed topic research: [`docs/research/README.md`](docs/research/README.md).
-- Hardware/visual evidence: [`.schematics/README.md`](.schematics/README.md).
-- Current hardware/firmware records: [`docs/hardware/README.md`](docs/hardware/README.md).
-- Downloaded official manuals and schematics: [`Freenove archive`](docs/hardware/vendor/freenove/INDEX.md).
-- Tested actuator-disabled safety component: [`firmware/robot-safety/README.md`](firmware/robot-safety/README.md).
+
+### Physical-operation boundaries and evidence
+
 - Bounded supported Hermes robot control: [`docs/operations/hermes-robot.md`](docs/operations/hermes-robot.md).
-- Public activity and private media lifecycle: [`services/hermes-activity`](services/hermes-activity/README.md), [`services/stream-supervisor`](services/stream-supervisor/README.md).
-- Non-live media verification: `bash tools/verify-media.sh`.
+- Current hardware/firmware records: [`docs/hardware/README.md`](docs/hardware/README.md).
+- Hardware/visual evidence: [`.schematics/README.md`](.schematics/README.md).
+- Downloaded official manuals and schematics: [`Freenove archive`](docs/hardware/vendor/freenove/INDEX.md).
 
 ## Current status
 
@@ -51,3 +73,7 @@ Never commit `.env` files, provider keys, stream keys, wallet secrets, private v
 - `STOP` is local, unconditional and higher priority than every model or service.
 
 See [`PLAN.md`](PLAN.md) for implementation phases and acceptance gates.
+
+## Changelog
+
+- 2026-11-05: Codex grouped existing reading links by onboarding, non-live verification, deployment and physical-operation boundaries; added provenance-qualified document metadata. Product status, command examples and safety limits are unchanged.
