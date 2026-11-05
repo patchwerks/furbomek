@@ -1,0 +1,95 @@
+name: Presentation metadata advisory checks
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'packages/extension-preview/**'
+      - 'tools/presentation-pack/**'
+      - 'docs/contributing/presentation-metadata.md'
+      - '.github/workflows/presentation-pack-tools.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  offline:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      max-parallel: 2
+      matrix:
+        include:
+          - name: node22
+            image: node:22.22.3-bookworm@sha256:46e94f8cf91baab69a2deb3153e74eeffd73c20c7cc1d8432f5b96469eaa0322
+          - name: node26
+            image: node:26.7.0-bookworm@sha256:e929171d35b9df7773a3ec5b068e387fa109441dc90f91e6560af5d39b7e9bf1
+    name: advisory-${{ matrix.name }}
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Inspect bounded mount inputs as data
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import os, stat, subprocess
+          roots = ('packages/extension-preview', 'tools/presentation-pack')
+          entries = subprocess.check_output(['git', 'ls-tree', '-rz', 'HEAD', '--', *roots]).split(b'\0')
+          for entry in filter(None, entries):
+              metadata, path = entry.split(b'\t', 1)
+              mode = metadata.split()[0]
+              if mode not in (b'100644', b'100755'):
+                  raise SystemExit('Nonregular Git entry in mounted subtree')
+          total = 0
+          count = 0
+          for root in roots:
+              parts = root.split('/')
+              for i in range(1, len(parts) + 1):
+                  if not stat.S_ISDIR(os.lstat('/'.join(parts[:i])).st_mode):
+                      raise SystemExit('Mount ancestor is not a real directory')
+              for directory, dirs, files in os.walk(root, followlinks=False):
+                  for name in dirs:
+                      if not stat.S_ISDIR(os.lstat(os.path.join(directory, name)).st_mode):
+                          raise SystemExit('Nonregular directory in mount')
+                  for name in files:
+                      info = os.lstat(os.path.join(directory, name))
+                      if not stat.S_ISREG(info.st_mode) or info.st_size > 1048576:
+                          raise SystemExit('Nonregular or oversized mounted file')
+                      count += 1
+                      total += info.st_size
+                      if count > 500 or total > 16777216:
+                          raise SystemExit('Mounted input budget exceeded')
+          PY
+      - name: Provision fixed worker image
+        env:
+          WORKER_IMAGE: ${{ matrix.image }}
+        run: docker pull "$WORKER_IMAGE"
+      - name: Run bounded metadata checks only inside offline worker
+        shell: bash
+        env:
+          WORKER_IMAGE: ${{ matrix.image }}
+        run: |
+          set -euo pipefail
+          docker run --rm --pull never \
+            --network none --read-only --cap-drop ALL --security-opt no-new-privileges \
+            --user 1000:1000 --cpus 2 --memory 1g --pids-limit 128 \
+            --tmpfs /tmp:rw,nosuid,nodev,size=512m \
+            --mount "type=bind,src=$GITHUB_WORKSPACE/packages/extension-preview,dst=/candidate/packages/extension-preview,readonly" \
+            --mount "type=bind,src=$GITHUB_WORKSPACE/tools/presentation-pack,dst=/candidate/tools/presentation-pack,readonly" \
+            --workdir /candidate "$WORKER_IMAGE" \
+            /usr/bin/env -i PATH=/usr/local/bin:/usr/bin:/bin HOME=/tmp/empty \
+            /bin/sh -euc '
+              test "$(id -u)" = 1000
+              test ! -e /var/run/docker.sock
+              test ! -e /run/docker.sock
+              test ! -e /home/runner
+              test ! -e /github/home
+              test ! -e /candidate/.git
+              test "$(ls /sys/class/net)" = lo
+              mkdir -p "$HOME"
+              test -z "$(ls -A "$HOME")"
+              node --version
+              exec node --experimental-vm-modules --test tools/presentation-pack/tests/*.test.mjs packages/extension-preview/tests/*.test.mjs
+            '
