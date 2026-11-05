@@ -8,31 +8,31 @@
       <BButton @click="showSettingsModal">Settings</BButton>
       <BNavForm>
         <BFormSelect
+            v-model="assistant"
             class="float-end"
             size="sm"
-            v-model="assistant"
             :options="assistants"
             @change="handleAssistantChange"
         />
       </BNavForm>
       <BNavForm>
-        <BFormSelect class="float-end" size="sm" v-model="voice" :options="voices"/>
+        <BFormSelect v-model="voice" class="float-end" size="sm" :options="voices"/>
       </BNavForm>
-      <div style="flex-grow: 1"></div>
+      <div style="flex-grow: 1"/>
       <BNavForm>
-        <BFormSelect class="float-end" size="sm" v-model="audioInputDevice" :options="audioInputDevices"/>
+        <BFormSelect v-model="audioInputDevice" class="float-end" size="sm" :options="audioInputDevices"/>
       </BNavForm>
       <BNavForm>
-        <BFormSelect class="float-end" size="sm" v-model="audioOutputDevice" :options="audioOutputDevices"/>
+        <BFormSelect v-model="audioOutputDevice" class="float-end" size="sm" :options="audioOutputDevices"/>
       </BNavForm>
-      <div class="bar" id="bar-container"></div>
+      <div id="bar-container" class="bar"/>
     </BNav>
   </BNavbar>
   <BContainer class="chat-container">
     <BContainer>
-      <div class="chat p-2" ref="chatEl">
+      <div ref="chatEl" class="chat p-2">
         <template v-for="message in messages" :key="message.text">
-          <div class="clearfix"></div>
+          <div class="clearfix"/>
           <div v-if="message.type === 'user'" class="p-2 float-start">
             <BBadge variant="secondary">
               {{ message.userIndex !== null ? `USER ${message.userIndex}` : '' }}: {{ message.text }}
@@ -52,11 +52,11 @@
         <div v-if="phrase || phraseEnd" class="p-2 float-start">
           <BBadge variant="secondary">{{ phrase + phraseEnd }} ...</BBadge>
         </div>
-        <div class="clearfix"></div>
+        <div class="clearfix"/>
         <div v-if="latestAssistantMessage" class="p-2 float-end">
           <BBadge variant="primary">{{ latestAssistantMessage }} ...</BBadge>
         </div>
-        <div class="clearfix"></div>
+        <div class="clearfix"/>
       </div>
       <div>
         <div class="input-wrapper">
@@ -68,24 +68,24 @@
             {{ isBotInput ? botName : 'USER' }}:
           </BButton>
           <BFormInput
-              @keyup.enter="handleInput"
-              placeholder="Write your message here..."
-              v-model="input"
               ref="inputField"
+              v-model="input"
+              placeholder="Write your message here..."
               class="input-field"
+              @keyup.enter="handleInput"
           />
-          <BButton @click="handleInput" :disabled="!input || ((isBotInput && !voice) || (!isBotInput && !assistant))">
+          <BButton :disabled="!input || ((isBotInput && !voice) || (!isBotInput && !assistant))" @click="handleInput">
             Send
           </BButton>
         </div>
       </div>
     </BContainer>
   </BContainer>
-  <BModal id="settings-modal" v-model="settingsModalVisible" noCloseOnBackdrop size="xl">
+  <BModal id="settings-modal" v-model="settingsModalVisible" no-close-on-backdrop size="xl">
     <template #title><h4>Settings</h4></template>
     <SettingsComponent v-model="settings"/>
   </BModal>
-  <BModal id="warning-modal" v-model="warningModalVisible" noCloseOnBackdrop title="Out of credits">
+  <BModal id="warning-modal" v-model="warningModalVisible" no-close-on-backdrop title="Out of credits">
     <p>PlayHT API is out of credits. Please upgrade your plan or use another account.</p>
   </BModal>
 </template>
@@ -95,14 +95,14 @@ import {mergeDeep} from "@unocss/core";
 import {defaultSettings, type Settings} from "~/src/settings";
 import SettingsComponent from "~/src/settings.vue";
 import type {TTSInterface, TTSStreamInterface} from "~/src/tts/interfaces";
-import {AbstractChat, ChatCreatedEvent, ChatDeltaEvent, ChatMessageEvent} from "~/src/chat/abstractChat";
+import type {AbstractChat, ChatDeltaEvent, ChatMessageEvent} from "~/src/chat/abstractChat";
 import {OpenAIAssistantChat} from "~/src/chat/openai-assistant";
 import {ElevenLabsTTS} from "~/src/tts/elevenlabs";
 import {PlayHtTTS} from "~/src/tts/playht";
 import type {Message} from "~/src/types/message.interface";
 import type {AudioDeviceSelectInterface} from "~/src/types/audio-device-select.interface";
 
-(window as any).process = {versions: {node: null}};
+(window as unknown as {process: {versions: {node: null}}}).process = {versions: {node: null}};
 
 const {
   createClient,
@@ -207,7 +207,7 @@ function useDevices() {
         useAudioVisualizer(audioStream);
 
         navigator.mediaDevices.enumerateDevices().then((devices) => {
-          return devices.filter(({kind, label}) => kind === 'audioinput' || kind === 'audiooutput');
+          return devices.filter(({kind}) => kind === 'audioinput' || kind === 'audiooutput');
         }).then((audioDevices) => {
           const defaultInput = audioDevices.find(({kind, label}) => kind === 'audioinput' && label === 'Default');
           const defaultOutput = audioDevices.find(({kind, label}) => kind === 'audiooutput' && label === 'Default');
@@ -336,8 +336,13 @@ function useSettings() {
   return {settings, settingsHaveChanged};
 }
 
+type SelectEntry<T> = {value: T | ""; text: string; disabled: boolean} | {
+  label: string;
+  options: {value: T; text: string; disabled: boolean}[];
+};
+
 function useTextToSpeech() {
-  const voices = ref<any[]>([
+  const voices = ref<SelectEntry<{tts: string; voice: string}>[]>([
     {value: "", text: "Please select a voice", disabled: true},
   ]);
   const voice = ref<{ tts: string; voice: string } | "">("");
@@ -374,7 +379,7 @@ function useTextToSpeech() {
     ).then((list) => {
       const _list = list
           .filter(({status}) => status === "fulfilled")
-          .map((result: PromiseFulfilledResult<{ name: string; voices: any }>) => result.value)
+          .map((result: PromiseFulfilledResult<{ name: string; voices: Record<string, string> }>) => result.value)
       voices.value = [
         {value: "", text: "Please select a voice", disabled: true},
         ..._list.map(({name, voices}) => ({
@@ -437,9 +442,9 @@ function useTextToSpeech() {
 function useAssistants(settings) {
   const assistImpl = ref<Record<string, OpenAIAssistantChat>>({});
   const assistant = ref<{ id: string, assistant: string } | string>("");
-  const assistants = ref<any[]>([{value: "", text: "Please select an assistant", disabled: true}]);
+  const assistants = ref<SelectEntry<{id: string; assistant: string}>[]>([{value: "", text: "Please select an assistant", disabled: true}]);
   const prevDelta = ref("");
-  const latestAssistantMessage = ref<any>('');
+  const latestAssistantMessage = ref('');
 
   watch(
       settings,
@@ -464,7 +469,7 @@ function useAssistants(settings) {
     ).then((list) => {
       const _list = list
           .filter(({status}) => status === "fulfilled")
-          .map((result: PromiseFulfilledResult<{ name: string; assistants: any }>) => result.value);
+          .map((result: PromiseFulfilledResult<{ name: string; assistants: Record<string, string> }>) => result.value);
       assistants.value = [
         {value: "", text: "Please select an assistant", disabled: true},
         ..._list.map(({name, assistants}) => ({
@@ -485,7 +490,6 @@ function useAssistants(settings) {
   function handleAssistantChange() {
     if (!assistant.value || typeof assistant.value === 'string') return;
 
-    let prevDelta = "";
     messages.value = [];
     chat.value?.stop();
     chat.value = null;
@@ -496,7 +500,7 @@ function useAssistants(settings) {
 
     const _chat = assistImpl.value[assistant.value.assistant];
     chat.value = _chat;
-    _chat.on("created", (event: ChatCreatedEvent) => {
+    _chat.on("created", () => {
       openAiResponse = Date.now();
     });
 

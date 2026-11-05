@@ -55,7 +55,7 @@ export class ElevenLabsTTSStream extends EventTarget implements TTSStreamInterfa
 
   public end(text?: string) {
     console.log("ELEVENLABS END", text)
-    text && this.send(text);
+    if (text) this.send(text);
     this.ws.send(JSON.stringify({
       text: '',
       xi_api_key: this.settings.elevenlabs.key
@@ -140,11 +140,11 @@ export class ElevenLabsTTS implements TTSInterface {
     }).then((response) => response.json())
       .then((response) => Object.fromEntries(
         response.voices
-          .map((voice: any) => [voice.voice_id, voice.name])
+          .map((voice: {voice_id: string; name: string}) => [voice.voice_id, voice.name])
       ))
   }
 
-  public async getSubscription(): Promise<Record<string, any>> {
+  public async getSubscription(): Promise<{tier: string; character_count: number; character_limit: number}> {
     const fetchClonedVoicesResponse = await fetch('http://localhost:3500/proxy/elevenlabs/subscription', {
       method: 'GET',
       headers: {

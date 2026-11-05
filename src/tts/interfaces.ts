@@ -1,3 +1,10 @@
+export interface TTSSubscription {
+  tier?: string;
+  character_count?: number;
+  character_limit?: number;
+  [key: string]: unknown;
+}
+
 export interface TTSStreamInterface extends EventTarget {
   send(text: string, force?: boolean): void;
 
@@ -15,5 +22,5 @@ export interface TTSInterface {
 
   getVoices(): Promise<Record<string, string>>;
 
-  getSubscription(): Promise<Record<string, any>>;
+  getSubscription(): Promise<TTSSubscription>;
 }
