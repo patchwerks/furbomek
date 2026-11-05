@@ -1186,7 +1186,20 @@ binds source, enforcement and artifacts and preserves JavaScript declaration lim
 Final documentation-head checks and independent PR 46 acceptance remain required;
 issue 32 stays open.
 
+**Pack authoring preparation, 2026-11-05 (candidate):** issue 32 now has two
+bounded parallel slices: a local browser builder in the existing viewer and
+separate Node-only companion metadata/validation tools. The builder edits only
+presentation pack v1, derives ordering/capabilities, and validates exact export
+bytes with the unchanged parser. Companion metadata stays outside the timeline
+and binds self-declared author/license to exact pack bytes. No core parser/runtime or timeline-schema/dependency/live-authority change
+is included. See the
+[builder preparation record](docs/operations/pack-builder-2026-11-05.md).
+Isolated execution, screenshot review, exact-head checks and independent
+acceptance remain pending; issue 32 remains open.
+
 ## Changelog
+
+- 2026-11-05: Prepared parallel browser pack authoring and separate companion metadata validation; retained unchanged timeline contract and pending isolated qualification.
 
 - 2026-11-04: Recorded exact-source viewer language/type proof and browser matrix; retained final documentation-head and independent PR 46 acceptance.
 
