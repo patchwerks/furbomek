@@ -24,7 +24,7 @@ test('viewer source ships no borrowed model, texture, photograph, or executable 
       const stat = await lstat(file);
       assert.equal(stat.isSymbolicLink(), false, `source symlink: ${file}`);
       if (stat.isDirectory()) await inspect(file);
-      else assert.ok(['public/THREE-LICENSE.txt', 'proxy.d.mts'].includes(path.relative(sourceApp, file)) || ['.vue', '.mjs', '.cjs', '.ts', '.json', '.css', '.md'].includes(path.extname(name)), `unreviewed asset ${name}`);
+      else assert.ok(['public/THREE-LICENSE.txt', 'proxy.d.mts', 'builder.d.mts'].includes(path.relative(sourceApp, file)) || ['.vue', '.mjs', '.cjs', '.ts', '.json', '.css', '.md'].includes(path.extname(name)), `unreviewed asset ${name}`);
     }
   }
   await inspect(sourceApp);

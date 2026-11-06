@@ -52,3 +52,16 @@ h2 { font-size: 16px; font-weight: 650; margin: 0 0 14px; }
 @media (max-width: 800px) { .viewer-shell { padding: 0 16px; } .viewer-header { flex-wrap: wrap; gap: 8px 16px; padding: 16px 0; } h1 { font-size: 15px; } .local-label { width: 100%; margin: 0; } .workbench { grid-template-columns: 1fr; gap: 20px; padding-top: 20px; } .stage { height: 380px; } .section-heading { flex-wrap: wrap; gap: 0; margin-bottom: 12px; } .section-heading h2 { margin-bottom: 4px; } .inspector-section { padding: 20px; } }
 @media (max-width: 380px) { .transport-buttons { flex-wrap: wrap; } .clock { width: 100%; margin: 4px 0 0; } }
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; } }
+
+.mode-button { margin-bottom: 16px; }
+.builder-actions { display: flex; flex-wrap: wrap; gap: 8px; margin: 16px 0; }
+.builder-fields { display: grid; gap: 12px; }
+.builder-fields .helper { margin: 6px 0 0; }
+.cue-heading { font-size: 16px; margin: 24px 0 8px; }
+.cue-list { list-style: none; padding: 0; margin: 0 0 16px; }
+.cue-row { display: grid; grid-template-columns: minmax(0, 1fr); gap: 8px; padding: 16px 0; border-bottom: 1px solid var(--line); }
+.cue-row .btn { justify-self: start; }
+.builder .form-select { color: var(--ink); background-color: var(--surface); border-color: var(--line); font-size: 13px; }
+.builder .form-control:focus, .builder .form-select:focus { color: var(--ink); background-color: var(--surface); }
+.builder .form-control:disabled, .builder .form-select:disabled { color: var(--muted); background-color: var(--stage); }
+.builder .error-message { margin-top: 16px; }

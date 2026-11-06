@@ -1186,7 +1186,37 @@ binds source, enforcement and artifacts and preserves JavaScript declaration lim
 Final documentation-head checks and independent PR 46 acceptance remain required;
 issue 32 stays open.
 
+**Pack authoring preparation, 2026-11-05 (candidate):** issue 32 now has two
+bounded parallel slices: a local browser builder in the existing viewer and
+separate Node-only companion metadata/validation tools. The builder edits only
+presentation pack v1, derives ordering/capabilities, and validates exact export
+bytes with the unchanged parser. Companion metadata stays outside the timeline
+and binds self-declared author/license to exact pack bytes. No core parser/runtime or timeline-schema/dependency/live-authority change
+is included. See the
+[builder preparation record](docs/operations/pack-builder-2026-11-05.md).
+Isolated execution, screenshot review, exact-head checks and independent
+acceptance remain pending; issue 32 remains open.
+
+**Pack authoring source qualification, 2026-11-05:** combined source
+`1a0e5ae66e4ffe28c7cdc2c03860cae2f97ced38` passed
+[viewer run 41994353036](https://github.com/patchwerks/furbomek/actions/runs/41994353036).
+Node 22.22.3 and 26.7.0 each passed targeted lint (16 files, zero errors/warnings),
+normal/negative-control/restored typechecking, static generation and 66
+core/artifact/helper tests. Chromium 156.0.8078.4 and Firefox 157.0 each passed
+43 cases per Node job, including actual downloaded-pack CLI metadata validation
+and exact-byte tamper rejection, with empty outbound/error arrays. Downloaded
+archive digests matched GitHub metadata. The
+[builder record](docs/operations/pack-builder-2026-11-05.md) records provenance
+and the first-attempt metadata-test lint correction. Coordinator inspected actual builder light/dark/mobile/error and default-preview
+screenshots across Chromium/Firefox; no visual correction was required. Final
+documentation-head checks and independent PR 48 acceptance remain pending;
+issue 32 stays open.
+
 ## Changelog
+
+- 2026-11-05: Recorded exact-source browser authoring matrix and combined download/metadata proof; retained visual, final-head and independent acceptance gates.
+
+- 2026-11-05: Prepared parallel browser pack authoring and separate companion metadata validation; retained unchanged timeline contract and pending isolated qualification.
 
 - 2026-11-04: Recorded exact-source viewer language/type proof and browser matrix; retained final documentation-head and independent PR 46 acceptance.
 
