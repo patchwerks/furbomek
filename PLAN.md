@@ -1252,3 +1252,12 @@ issue 32 stays open.
 - 2026-11-06T04:09:16Z: Refreshed issue 13 / PR 50 against accepted main `6d829351c305a56fb8104469446ae574a07dec7b`, preserving accepted builder/metadata tooling and README plus the exact previously selected security lock. Both qualification pins now use accepted main. Historical results remain scoped to their original source; fresh hosted qualification and independent review of this refreshed head are pending. No merge, deployment or issue closure.
 
 - 2026-11-06T04:25:34Z: Issue 13 refreshed source `a4dfd3dd2358de69d084561156234c96fff80515` qualified against accepted `6d829351c305a56fb8104469446ae574a07dec7b`: both persisted-lock root jobs, metadata 87/87 per runtime and viewer 66/66 units passed. Viewer Node 26 Chromium initially timed out on keyboard file import; one unchanged failed-job retry passed all 43 cases on both browsers, while Node 22 results remain from the first attempt. Cause is unresolved, not a claimed fix. All 14 current source checks succeeded; final documentation-head checks and independent PR 50 review remain pending. See the [full evidence and both attempts](docs/operations/nuxt-nitro-security-2026-11-06.md#refreshed-source-qualification). No merge, deployment or issue closure.
+
+- 2026-11-06T10:50:48Z (codex/13-proxy-error-hardening): Prepared issue 13's
+  separate bounded proxy error hardening: fixed non-sensitive provider/parser
+  errors, preserved successful metadata/audio contracts, and cancelled/terminated
+  failed streams without raw error disclosure. Added real-process regressions
+  and a server-only isolated Node 22/26 advisory workflow. Static syntax checks
+  passed; hosted execution and independent acceptance remain pending. See the
+  [candidate record](docs/operations/proxy-error-hardening-2026-11-06.md).
+  No dependency, live-operation, deployment or complete-production-security claim.

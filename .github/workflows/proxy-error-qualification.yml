@@ -1,0 +1,217 @@
+name: Proxy error advisory qualification
+on:
+  workflow_dispatch:
+  pull_request:
+    branches: [main]
+    paths: ['server/**', '.github/workflows/proxy-error-qualification.yml']
+  push:
+    branches: [main]
+    paths: ['server/**', '.github/workflows/proxy-error-qualification.yml']
+permissions:
+  contents: read
+jobs:
+  qualification:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      max-parallel: 2
+      matrix:
+        include:
+          - name: node26
+            version: v26.7.0
+            image: node:26.7.0-bookworm@sha256:e929171d35b9df7773a3ec5b068e387fa109441dc90f91e6560af5d39b7e9bf1
+          - name: node22
+            version: v22.22.3
+            image: node:22.22.3-bookworm@sha256:46e94f8cf91baab69a2deb3153e74eeffd73c20c7cc1d8432f5b96469eaa0322
+    env:
+      QUALIFICATION_NODE_IMAGE: ${{ matrix.image }}
+      QUALIFICATION_NODE_VERSION: ${{ matrix.version }}
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          path: candidate
+          persist-credentials: false
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          ref: 63184419ab5c5437ffc37028ba7829ae53c4f289
+          path: baseline
+          persist-credentials: false
+      # Advisory qualification; independent acceptance is required before merge.
+      - name: Validate source, provision dependencies, then qualify offline (advisory)
+        shell: bash
+        run: |
+          set -euo pipefail
+          trusted="$GITHUB_WORKSPACE/baseline"
+          candidate=$(mktemp -d "$RUNNER_TEMP/proxy13-source.XXXXXX")
+          # Treat candidate files as bounded inert data; execute no candidate host hooks.
+          git -C "$GITHUB_WORKSPACE/candidate" ls-files --stage | awk '$1 == "120000" || $1 == "160000" {bad=1} END {exit bad}'
+          if git -C "$GITHUB_WORKSPACE/candidate" ls-files | grep -E '(^|/)(\.npmrc|\.env(\..*)?|\.gitconfig)$'; then exit 1; fi
+          for file in server/package.json server/package-lock.json; do
+            cmp "$trusted/$file" "$GITHUB_WORKSPACE/candidate/$file"
+          done
+          diff -r "$trusted/tools/ci" "$GITHUB_WORKSPACE/candidate/tools/ci"
+          python3 -I - "$GITHUB_WORKSPACE/candidate/server" "$candidate/server" <<'STAGE'
+          import pathlib, shutil, stat, sys
+          source, target = map(pathlib.Path, sys.argv[1:])
+          assert source.is_dir() and not source.is_symlink()
+          paths = list(source.rglob("*"))
+          assert len(paths) <= 200
+          total = 0
+          for path in paths:
+              info = path.lstat()
+              assert stat.S_ISDIR(info.st_mode) or stat.S_ISREG(info.st_mode)
+              assert path.name not in {"node_modules", ".npmrc", ".git", ".gitconfig"}
+              assert not path.name.startswith(".env")
+              if path.is_file():
+                  assert info.st_nlink == 1 and info.st_size <= 1024 * 1024
+                  assert path.suffix in {".js", ".cjs", ".json", ".md"}
+                  total += info.st_size
+          assert total <= 4 * 1024 * 1024
+          shutil.copytree(source, target)
+          STAGE
+          chmod -R a+rX "$candidate"
+          python_image=python:3.12.11-bookworm@sha256:1b48a1b13ec678be8d84974541cc007d4367aaf01f985231daad1a940106efc0
+          node_image=$QUALIFICATION_NODE_IMAGE
+          image=$node_image
+          mode=proxy13
+          # Check the daemon before any mutation, including registering cleanup commands.
+          docker_version=$(docker version --format '{{.Server.Version}}') || {
+            echo 'Cannot determine Docker Engine version; require stable 28.0.0 or newer' >&2; exit 2;
+          }
+          if [[ ! $docker_version =~ ^([0-9]+)\.([0-9]+)\.([0-9]+)$ ]] ||
+             (( 10#${BASH_REMATCH[1]:-0} < 28 )); then
+            echo 'Require stable Docker Engine 28.0.0 or newer for isolated gateway mode' >&2
+            exit 2
+          fi
+          ci_id="furbomek-${mode}-$$"
+          network="$ci_id-net"
+          volume="$ci_id-work"
+          proxy="$ci_id-proxy"
+          keeper="$ci_id-scratch-keeper"
+          export_evidence() {
+            # Validate inert output in the trusted Python image, before host copy.
+            docker exec -i "$keeper" python -I - <<'VALIDATE'
+          import os, stat
+          from pathlib import Path
+          root = Path("/scratch/evidence")
+          allowed = {"ci.log", "unit.log", "syntax.log", "versions.txt"}
+          total = 0
+          assert root.is_dir() and not root.is_symlink()
+          paths = list(root.iterdir())
+          assert len(paths) <= len(allowed)
+          for path in paths:
+              st = path.lstat()
+              assert path.name in allowed and stat.S_ISREG(st.st_mode) and st.st_nlink == 1
+              assert st.st_size <= 8 * 1024 * 1024
+              total += st.st_size
+          assert total <= 24 * 1024 * 1024
+          VALIDATE
+            mkdir -p evidence
+            docker cp "$keeper:/scratch/evidence/." evidence/
+          }
+          cleanup() {
+            local result=${1:-$?}
+            export_evidence || result=1
+            if [[ $result != 0 ]]; then docker logs "$proxy" 2>&1 || true; fi
+            docker rm -f "$proxy" >/dev/null 2>&1 || result=1
+            docker rm -f "$keeper" >/dev/null 2>&1 || result=1
+            docker volume rm -f "$volume" >/dev/null 2>&1 || result=1
+            docker network rm "$network" >/dev/null 2>&1 || result=1
+            if docker container inspect "$proxy" >/dev/null 2>&1 || docker container inspect "$keeper" >/dev/null 2>&1 || docker volume inspect "$volume" >/dev/null 2>&1 || docker network inspect "$network" >/dev/null 2>&1; then result=1; fi
+            rm -rf -- "$candidate" || result=1
+            exit "$result"
+          }
+          trap cleanup EXIT
+          mkdir -p evidence
+          git -C "$GITHUB_WORKSPACE/candidate" rev-parse HEAD > evidence/candidate-sha.txt
+          printf '%s\n' 63184419ab5c5437ffc37028ba7829ae53c4f289 > evidence/enforcement-sha.txt
+          docker pull "$python_image"
+          if [[ $image != "$python_image" ]]; then docker pull "$image"; fi
+          docker network create --internal --opt com.docker.network.bridge.gateway_mode_ipv4=isolated "$network" >/dev/null
+          docker volume create --driver local --opt type=tmpfs --opt device=tmpfs \
+            --opt o=size=1g,uid=1000,gid=1000,mode=0700 "$volume" >/dev/null
+          # A tmpfs-backed local volume loses its contents when its last mount closes.
+          # Keep this trusted, network-none mount alive across every disposable worker.
+          docker run -d --name "$keeper" --network none --read-only \
+            --cap-drop ALL --security-opt no-new-privileges --user 1000:1000 \
+            --cpus 0.1 --memory 32m --pids-limit 8 \
+            --mount "type=volume,source=$volume,target=/scratch,volume-nocopy" \
+            "$python_image" sleep infinity >/dev/null
+          docker run -d --name "$proxy" --network "$network" --network-alias dependency-proxy --read-only --cap-drop ALL --security-opt no-new-privileges \
+            --user 1000:1000 --cpus 1 --memory 128m --pids-limit 64 \
+            --mount "type=bind,source=$trusted/tools/ci/dependency-proxy.py,target=/proxy.py,readonly" \
+            "$python_image" sh -ec 'exec python -B /proxy.py --bind-address "$(python -I -c "import socket; print(socket.gethostbyname(socket.gethostname()))")"' >/dev/null
+          # Discover only the isolated worker-network address, never the egress address.
+          proxy_ip=$(docker inspect --format "{{(index .NetworkSettings.Networks \"$network\").IPAddress}}" "$proxy")
+          # Wait on the listener instead of mistaking startup refusal for policy denial.
+          ready=false
+          for attempt in {1..15}; do
+            if docker exec "$proxy" python -I -c 'import socket,sys; socket.create_connection((sys.argv[1], 3128), timeout=1).close()' "$proxy_ip"; then
+              ready=true
+              break
+            fi
+            sleep 1
+          done
+          [[ $ready == true ]] || { echo 'Dependency proxy did not become ready' >&2; exit 1; }
+          # Bind/readiness precede external attachment; listener stays on its exact IP.
+          docker network connect bridge "$proxy"
+
+          # No runner environment, home, socket or writable host directory is forwarded.
+          worker=(docker run --rm --read-only --cap-drop ALL --security-opt no-new-privileges
+            --user 1000:1000 --cpus 2 --memory 1g --pids-limit 256
+            --tmpfs /tmp:rw,exec,nosuid,size=512m
+            --mount "type=bind,source=$candidate,target=/source,readonly"
+            --mount "type=volume,source=$volume,target=/scratch,volume-nocopy"
+            --workdir /scratch --env XDG_CACHE_HOME=/scratch/cache
+            --env UV_CACHE_DIR=/scratch/uv-cache --env UV_PYTHON_DOWNLOADS=never
+            --env PYTHONUNBUFFERED=1 --env PYTHONDONTWRITEBYTECODE=1
+            --env npm_config_cache=/scratch/npm-cache --env HOME=/scratch/home
+            --env NUXT_TELEMETRY_DISABLED=1 --env CI=true --env EXPECTED_NODE_VERSION="$QUALIFICATION_NODE_VERSION"
+            --env npm_config_registry=https://registry.npmjs.org
+            --env npm_config_userconfig=/scratch/npm-userconfig --env npm_config_globalconfig=/scratch/npm-globalconfig)
+          proxy_env=(--env HTTPS_PROXY=http://dependency-proxy:3128 --env HTTP_PROXY=http://dependency-proxy:3128
+            --env https_proxy=http://dependency-proxy:3128 --env http_proxy=http://dependency-proxy:3128
+            --env NO_PROXY= --env no_proxy=)
+
+          # Initialize only from fixed shell operations; networked phase evaluates no candidate code.
+          "${worker[@]}" --network "$network" "${proxy_env[@]}" "$image" bash -euc '
+            test "$(node --version)" = "$EXPECTED_NODE_VERSION"
+            test "$(id -u)" = 1000
+            test ! -e /var/run/docker.sock
+            if curl --noproxy "*" -fsSI --connect-timeout 3 https://registry.npmjs.org; then exit 1; fi
+            forbidden=$(curl -sSI --connect-timeout 3 --output /dev/null --write-out "%{http_connect}" https://example.com || true)
+            test "$forbidden" = 403
+            ulimit -f 8192
+            mkdir -p /scratch/source /scratch/cache /scratch/home /scratch/evidence
+            touch /scratch/npm-userconfig /scratch/npm-globalconfig
+            cp -R /source/. /scratch/source/
+            cd /scratch/source
+            timeout 180 npm ci --prefix server --ignore-scripts --no-audit --no-fund > /scratch/evidence/ci.log 2>&1
+          '
+          # Different transient worker: source, compiler, configuration, and tests only run offline.
+          "${worker[@]}" --network none "$image" bash -euc '
+            test "$(id -u)" = 1000
+            test ! -e /var/run/docker.sock
+            test ! -e /home/runner
+            test "$(find /sys/class/net -mindepth 1 -maxdepth 1 | wc -l)" = 1
+            cd /scratch/source
+            node --version > /scratch/evidence/versions.txt
+            npm --version >> /scratch/evidence/versions.txt
+            ulimit -f 8192
+            timeout 120 npm test --prefix server > /scratch/evidence/unit.log 2>&1
+            timeout 30 node --check server/tts-proxy.js > /scratch/evidence/syntax.log 2>&1
+            for file in server/test/*.cjs server/test/fixtures/*.cjs; do
+              timeout 30 node --check "$file" >> /scratch/evidence/syntax.log 2>&1
+            done
+          '
+          export_evidence
+      - name: Upload advisory proxy evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: proxy13-qualification-${{ matrix.name }}-${{ github.sha }}
+          path: evidence/
+          if-no-files-found: error
+          retention-days: 7
