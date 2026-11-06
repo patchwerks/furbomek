@@ -357,7 +357,12 @@ fs.mkdirSync(evidence, { recursive: true });
   assert.deepEqual(await keyboardPage.evaluate(() => window.__capabilityCalls), []);
   assert.deepEqual(failures, [], 'keyboard has no outbound requests');
   assert.deepEqual(errors, [], 'keyboard has no uncaught browser errors');
-  fs.writeFileSync(path.join(evidence, 'browser-results.json'), JSON.stringify({ status: 'passed', browser: browserName, browserVersion, contrastMetrics, outbound: failures, errors, cases: [...baselineCases, 'keyboard-tab-focus', 'keyboard-file-import', 'keyboard-example', 'keyboard-space-enter-transport', 'keyboard-native-range', 'keyboard-mobile-no-trap'] }, null, 2));
+  phase = 'builder';
+  const builderCases = await require('./builder-browser.cjs')(keyboardPage, evidence);
+  assert.deepEqual(await keyboardPage.evaluate(() => window.__capabilityCalls), []);
+  assert.deepEqual(failures, [], 'builder has no outbound requests');
+  assert.deepEqual(errors, [], 'builder has no uncaught browser errors');
+  fs.writeFileSync(path.join(evidence, 'browser-results.json'), JSON.stringify({ status: 'passed', browser: browserName, browserVersion, contrastMetrics, outbound: failures, errors, cases: [...baselineCases, ...builderCases, 'keyboard-tab-focus', 'keyboard-file-import', 'keyboard-example', 'keyboard-space-enter-transport', 'keyboard-native-range', 'keyboard-mobile-no-trap'] }, null, 2));
 })().catch(error => {
   fs.writeFileSync(path.join(evidence, 'browser-results.json'), JSON.stringify({ status: 'failed', browser: browserName, browserVersion, phase, unavailablePassed, contrastMetrics, completedBaselineCases: baselineCompleted ? baselineCases : [], keyboardDiagnostics, error: String(error) }, null, 2));
   console.error(error); process.exitCode = 1;
