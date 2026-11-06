@@ -1210,3 +1210,5 @@ issue 32 stays open.
 - 2026-11-02: Added the isolated issue 32 browser presentation viewer candidate with an original procedural six-leg proxy; bounded hosted checks and coordinator visual review passed, while independent acceptance and main integration remain pending.
 
 - 2026-11-02: Added the issue 32 data-only extension preview candidate scope; that first slice excludes the viewer and live integration.
+
+- 2026-11-06: Proposed the bounded issue 13 Nuxt 4.6.4 / Nitro 2.13.6 security patch and isolated two-stage lock qualification. See the [candidate record](docs/operations/nuxt-nitro-security-2026-11-06.md). Persisted-lock hosted evidence and independent review remain pending; full glob/minimatch remediation remains unresolved. No live operation, application-logic change, deployment or new risk acceptance; the dependency runtime update remains proposed.
