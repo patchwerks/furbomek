@@ -103,7 +103,24 @@ After acceptance, a separately authorized reviewed revert of its accepted commit
 can restore prior behavior. No host configuration or live deployment changed,
 so this slice has no host rollback action.
 
+## First hosted attempt and focused correction, 2026-11-06
+
+**Observed:** [viewer run 42186596389](https://github.com/patchwerks/furbomek/actions/runs/42186596389)
+failed both Node jobs at normal typechecking. Both retained `types.log` files
+report TS2345 at `PackBuilder.vue(38,12)`: the indexed cue lookup can be
+`undefined` under `noUncheckedIndexedAccess`. This run did not reach the unit
+or browser checks and does not qualify the new behavior.
+
+The focused correction checks that the captured reactive cue exists before
+focusing it after `nextTick`. It retains the same stable cue identity and adds
+no type assertion, suppression, test change or workflow change. Static diff
+inspection is complete; execution of the corrected revision remains pending.
+The failed attempt is retained as evidence and is not replaced by a retry claim.
+
 ## Changelog
+
+- 2026-11-06: Recorded first hosted normal-typecheck failure and guarded the
+  indexed cue before focusing; corrected-revision execution remains pending.
 
 - 2026-11-06: Prepared bounded keyboard, native-select, announcement-semantics and
   CLI diagnostics follow-up; retained unresolved native-picker history and

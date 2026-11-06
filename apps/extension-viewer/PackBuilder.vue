@@ -35,7 +35,7 @@ async function addCue() {
   draft.value.cues.push({ atMs: '1000', value: 'curious' });
   const cue = draft.value.cues[draft.value.cues.length - 1];
   await nextTick();
-  focusCue(cue);
+  if (cue) focusCue(cue);
 }
 async function removeCue(index: number, event: Event) {
   if (index === 0) return;
