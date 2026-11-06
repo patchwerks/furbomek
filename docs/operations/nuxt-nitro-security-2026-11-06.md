@@ -6,7 +6,7 @@ status: active
 ---
 # Nuxt/Nitro security patch candidate
 
-**Earlier persisted source qualified; refreshed source qualification and independent acceptance pending:** issue [13](https://github.com/patchwerks/furbomek/issues/13) has a bounded Nuxt 4.6.3 → 4.6.4 patch candidate, targeting Nitro 2.13.6 through ordinary supported resolution. The refreshed accepted comparison revision is `6d829351c305a56fb8104469446ae574a07dec7b`; earlier run records below retain their original baseline. Application source, configuration, server and viewer manifests/locks, and accepted CI helpers are unchanged. No override, forced peer resolution or unrelated direct upgrade is permitted.
+**Refreshed source qualified after one unchanged viewer retry; final documentation-head checks and independent acceptance pending:** issue [13](https://github.com/patchwerks/furbomek/issues/13) has a bounded Nuxt 4.6.3 → 4.6.4 patch candidate, targeting Nitro 2.13.6 through ordinary supported resolution. The refreshed accepted comparison revision is `6d829351c305a56fb8104469446ae574a07dec7b`; earlier run records below retain their original baseline. Application source, configuration, server and viewer manifests/locks, and accepted CI helpers are unchanged. No override, forced peer resolution or unrelated direct upgrade is permitted.
 
 Official [Nuxt 4.6.4 release notes](https://github.com/nuxt/nuxt/releases/tag/v4.6.4) and [Nitro 2.13.6 release notes](https://github.com/nitrojs/nitro/releases/tag/v2.13.6) describe additional security fixes and changed production error detail, dev-host checks, workspace detection and route rules. These upstream statements motivate qualification; they do not establish application reachability or runtime compatibility.
 
@@ -114,3 +114,45 @@ The viewer workflow retains accepted `builder.d.mts` admission, builder screensh
 ### Refresh changelog
 
 - 2026-11-06T04:09:16Z: Integrated accepted main and advanced both qualification pins while preserving the selected lock and accepted features; fresh execution and review remain pending.
+
+
+## Refreshed source qualification
+
+**Observed at 2026-11-06T04:25:34Z:** exact source `a4dfd3dd2358de69d084561156234c96fff80515` qualified against accepted baseline/enforcement `6d829351c305a56fb8104469446ae574a07dec7b`. The coordinator verified all 14 current source checks successful after the viewer reproduction below. This is new evidence for accepted builder/metadata tooling combined with the security patch; the earlier `fe95b52b7af9fff34cb429da151d713c0e3cd6f1` results retain their original `c0c3f7ce44cfa3db34cbe46a723bf1fc16b56b6c` baseline. Results do not transfer to a subsequent documentation head.
+
+### Root and metadata checks
+
+[Root run 42161228055](https://github.com/patchwerks/furbomek/actions/runs/42161228055) passed on Node 22.22.3/npm 10.9.8 and Node 26.7.0/npm 11.19.0. Both artifacts report exact `persisted` lock mode and SHA-256 `8fcda3cd6ef3b23dc4aad02e18a5be400d3697cea981d688bb29e536635f4ef0`, with all 14 non-Nuxt direct installed versions preserved. Baseline and candidate prepare/build/types and full offline root lifecycle passed, including actual root postinstall preparation/build and nested server installation. Node 26 npm reported an allowScripts warning blocking the esbuild dependency postinstall; successful root postinstall does not mean every dependency hook executed.
+
+Both app/repository lint reports have zero errors, warnings and fatal errors. Malformed Vue/TypeScript controls each report one fatal parse error; self-import and constant-condition controls remain errors. Dependency trees have no problems, effective Vue/TypeScript rule-change arrays are empty, and inspector/comparison completed. ESLint is 10.14.0. Audit totals remain 28 baseline package findings (25 moderate, 3 low) versus 27 candidate findings (20 moderate, 7 low), with the same three residual advisory identities; this does not close remediation.
+
+| Root artifact | Official ZIP SHA-256 |
+|---|---|
+| [Node 22 / 13477500356](https://api.github.com/repos/patchwerks/furbomek/actions/artifacts/13477500356) | `6974be219743222febb6098cc5c7461ae32a2ea7c3ae1eb57a7cf1d9059e44f4` |
+| [Node 26 / 13476692847](https://api.github.com/repos/patchwerks/furbomek/actions/artifacts/13476692847) | `aa7182d1e64f0da8f6715724df68f00b085e5af7395ef83d226a6ac16fcc354b` |
+
+The unchanged metadata workflow was manually dispatched at this exact source: [run 42161261516](https://github.com/patchwerks/furbomek/actions/runs/42161261516). Node 22.22.3 and 26.7.0 each actually passed 87/87 tests with zero failures, skips, cancellations or todo cases in offline workers. The workflow uploads no artifact; official run/job identities and inert logs provide the evidence, with no metadata artifact digest claimed.
+
+### Viewer failure and unchanged reproduction
+
+[Viewer run 42161227944, attempt 1](https://github.com/patchwerks/furbomek/actions/runs/42161227944/attempts/1) passed 66/66 unit tests, zero-warning targeted authoring lint, normal types, the injected `app.vue(35,34)` TS2339 negative control and restored-source types on both Node versions. Static generation passed with three routes. The client-rendered `ssr:false` content is not prerendered HTML; chunk-size/timing warnings remain.
+
+Node 22 Chromium 156.0.8078.4 and Firefox 157.0 each passed all 43 browser cases. Node 26 Firefox also passed 43, but Node 26 Chromium failed: a 30-second timeout waiting for the keyboard-triggered `filechooser` at `browser-check.cjs:95:45`, called from line 356. The record contains 25 completed baseline cases and shows the file input focused, visible, with a solid three-pixel outline and document focus. It failed before builder cases. These observations do not establish the cause, and that failed configuration does not contain the successful outbound/pageerror arrays.
+
+The coordinator reran only the failed job once, without source or test changes. [Attempt 2](https://github.com/patchwerks/furbomek/actions/runs/42161227944/attempts/2), Node 26 job `127709131795`, passed both browsers with all 43 cases, including the actual keyboard file import, builder download/reimport, CLI metadata roundtrip and exact-byte tamper rejection. It again passed 66/66 unit tests, zero lint diagnostics, the meaningful TS rejection/restoration and static generation. Node 22 results remain from attempt 1; they were not rerun. The first failure and logs are retained. Its cause remains unresolved: this successful unchanged reproduction is not a source fix or a demonstrated flake fix.
+
+| Viewer attempt / artifact | Official ZIP SHA-256 |
+|---|---|
+| [Attempt 1 Node 22 / 13476727650](https://api.github.com/repos/patchwerks/furbomek/actions/artifacts/13476727650) | `a5698f25c5fafca409e4deb22d645b420492c6d4f9b78db5ba63cf65481c2496` |
+| [Attempt 1 Node 26, failed Chromium / 13476508386](https://api.github.com/repos/patchwerks/furbomek/actions/artifacts/13476508386) | `0d11a67016a598542b74403c2700afd01b4bc41afe07640a2f12d5148da16c9e` |
+| [Attempt 2 Node 26 / 13476479151](https://api.github.com/repos/patchwerks/furbomek/actions/artifacts/13476479151) | `f59b021c53d2b49fc06e73e9eb8ff1fa41b5a1ae4658ae7fbd0026f1bc1b753f` |
+
+The new Node 26 artifact was created at `2026-11-06T04:22:12Z`; attempt-2 job upload logs bind its ID and digest despite its name matching the first-attempt artifact. Official run/source/repository identities, nonexpiry and ZIP hashes were checked before bounded extraction of unique allowlisted regular files (at most 8 MiB per file, 32 MiB per job and 40 files). Embedded candidate and enforcement identities match the exact source and accepted baseline above. Both first-attempt archives and failed logs remain preserved separately from retry evidence. No artifact code was executed on the host.
+
+Successful browser records contain empty outbound-request and pageerror arrays. These arrays do not assert absence of all browser console messages; the previously accepted nonblocking CSP select-chevron console note remains a separate observation. The coordinator actually inspected attempt-1 Node 22 Chromium `builder-light.png`, Node 26 Firefox `builder-dark.png` and Node 22 Firefox `builder-mobile.png`; no visual correction was required. Visual acceptance is limited to those screenshots.
+
+**Still pending:** fresh applicable checks for the final documentation head and independent exact-head review of PR 50. These source results do not close issue 13, establish complete security remediation, dismiss advisories, grant new risk acceptance, merge the PR or deploy any runtime.
+
+### Qualification changelog
+
+- 2026-11-06T04:25:34Z: Appended refreshed root and metadata evidence, both viewer attempts and verified artifact provenance; preserved the unresolved first-attempt keyboard timeout and distinguished successful unchanged reproduction from a fix. Recorded bounded coordinator screenshot inspection; final documentation-head checks and independent review remain pending.
