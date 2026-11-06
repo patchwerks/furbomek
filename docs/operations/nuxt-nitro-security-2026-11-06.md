@@ -6,7 +6,7 @@ status: active
 ---
 # Nuxt/Nitro security patch candidate
 
-**Proposed, not qualified:** issue [13](https://github.com/patchwerks/furbomek/issues/13) has a bounded Nuxt 4.6.3 → 4.6.4 patch candidate, targeting Nitro 2.13.6 through ordinary supported resolution. The accepted comparison revision is `c0c3f7ce44cfa3db34cbe46a723bf1fc16b56b6c`. Application source, configuration, server and viewer manifests/locks, and accepted CI helpers are unchanged. No override, forced peer resolution or unrelated direct upgrade is permitted.
+**Persisted source qualified; independent acceptance pending:** issue [13](https://github.com/patchwerks/furbomek/issues/13) has a bounded Nuxt 4.6.3 → 4.6.4 patch candidate, targeting Nitro 2.13.6 through ordinary supported resolution. The accepted comparison revision is `c0c3f7ce44cfa3db34cbe46a723bf1fc16b56b6c`. Application source, configuration, server and viewer manifests/locks, and accepted CI helpers are unchanged. No override, forced peer resolution or unrelated direct upgrade is permitted.
 
 Official [Nuxt 4.6.4 release notes](https://github.com/nuxt/nuxt/releases/tag/v4.6.4) and [Nitro 2.13.6 release notes](https://github.com/nitrojs/nitro/releases/tag/v2.13.6) describe additional security fixes and changed production error detail, dev-host checks, workspace detection and route rules. These upstream statements motivate qualification; they do not establish application reachability or runtime compatibility.
 
@@ -61,7 +61,29 @@ The exact Node 26 artifact lock is now persisted as the candidate `package-lock.
 
 Both npm audit responses contain 28 baseline package findings (25 moderate, 3 low) versus 27 candidate package findings (20 moderate, 7 low). These include propagated dependency findings, not distinct advisory or GitHub alert counts. The same three direct advisory identities remain: glob GHSA-3g3m-2fjr-6pw4, minimatch GHSA-g3hv-75wg-m249 and deepmerge GHSA-gcqx-w48m-w2h4. The changed totals do not establish new direct advisories or complete remediation.
 
-**Still pending:** both runtimes must now qualify the selected exact checked-in lock with `persisted` mode on the published candidate head. Actual viewer compilation/browser checks, normal required checks and independent exact-head contributor review also remain pending. First-run evidence cannot substitute for those gates. No merge, deployment, alert dismissal or new security risk acceptance is implied.
+### Persisted-source qualification
+
+**Observed at exact source `fe95b52b7af9fff34cb429da151d713c0e3cd6f1`:** [Nuxt/Nitro run 42145701660](https://github.com/patchwerks/furbomek/actions/runs/42145701660) succeeded on both Node 22.22.3 and 26.7.0. The coordinator independently verified the official artifact digests, source/baseline identities, exact `persisted` mode and the same checked-in lock SHA-256 `8fcda3cd6ef3b23dc4aad02e18a5be400d3697cea981d688bb29e536635f4ef0` in both artifacts. This is qualification of the selected persisted lock, distinct from the earlier ephemeral resolution.
+
+Both runtimes passed baseline/candidate normal prepare/build/types, the complete offline root lifecycle including nested server installation, valid dependency trees, malformed Vue/TypeScript parser controls, self-import/constant-loop enforcement and inspector build. App/repository lint remained zero errors and warnings, with enabled effective rules unchanged. The coordinator verified all 12 reported source checks successful, including [non-live verification 42145701684](https://github.com/patchwerks/furbomek/actions/runs/42145701684) and [CodeQL 42145698034](https://github.com/patchwerks/furbomek/actions/runs/42145698034). These results bind to the source SHA above, not a subsequent documentation revision.
+
+| Persisted root artifact | Official ZIP SHA-256 |
+|---|---|
+| [Node 22 / 13470510733](https://api.github.com/repos/patchwerks/furbomek/actions/artifacts/13470510733) | `34ad7dd2bf726741b12005f4714bd4c8ee2ba8ff0e9237944f5c0e4ba63a1bc3` |
+| [Node 26 / 13470231491](https://api.github.com/repos/patchwerks/furbomek/actions/artifacts/13470231491) | `816c662d4f4bea442d85134b72d81044044a4f05028aab4b8286d402ee18bff8` |
+
+[Viewer run 42145701686](https://github.com/patchwerks/furbomek/actions/runs/42145701686) also succeeded at the same source. Both runtimes passed actual prepare, type checking, static generation and 62/62 unit tests with no failures/skips. The injected draw mutation failed at `app.vue(32,34)` with TS2339, and the restored source passed. Generation reported Nuxt 4.6.4 / Nitro 2.13.6 with the static preset and three generated routes. Client chunk-size warnings remain; client-rendered HTML under `ssr:false` is not server-rendered prerender content.
+
+Chromium 156.0.8078.4 and Firefox 157.0 each passed all 31 browser cases on both Node versions, including keyboard/mobile, rendered cues, WebGL loss/unavailability, reduced motion and malformed/stale import handling. All four results have empty outbound-request and error arrays and no renderer failure. The hosted renderers were SwiftShader and llvmpipe; this does not qualify physical graphics hardware. The coordinator visually inspected Node 26 Chromium desktop-light and Node 22 Firefox desktop-dark/mobile PNGs: layout, text, procedural proxy and cue presentation were clear, with no correction required. This visual inspection is limited to those selected screenshots.
+
+| Viewer artifact, including PNG evidence | Official ZIP SHA-256 |
+|---|---|
+| [Node 22 / 13469907655](https://api.github.com/repos/patchwerks/furbomek/actions/artifacts/13469907655) | `07d430fd4435aa473b563684d5d1256be27488f8dd85e06edc8302a0dac27cdd` |
+| [Node 26 / 13470310927](https://api.github.com/repos/patchwerks/furbomek/actions/artifacts/13470310927) | `d9b1fa2d5cf0c4cb8ce5bae170dd0f022900cf13cabf435326c4958e6601a92a` |
+
+Official artifact identity, digest and nonexpiry were checked before bounded inspection/extraction of regular allowlisted files; extracted candidate/enforcement SHA records matched the expected source and accepted baseline. No downloaded artifact code was executed. The metadata/log and PNG artifacts support the reported checks and selected visual inspection, not deployment authority.
+
+**Still pending:** checks for the final documentation-only child and independent exact-head acceptance of [PR 50](https://github.com/patchwerks/furbomek/pull/50). Source qualification does not close issue 13, resolve all advisories, merge the PR or authorize deployment. No alert dismissal or new security risk acceptance is implied.
 
 This is partial security progress, not complete remediation: NFT still constrains glob below the patched major; readdir-glob and lint parents still constrain affected minimatch versions. Deepmerge retains its prior narrowly scoped disposition, with no new risk acceptance. Advisory audit differences do not close issue 13 or dismiss provider alerts. No provider, media, robot, firmware or live deployment qualification is included.
 
@@ -74,3 +96,4 @@ Rollback is a reviewed revert of this bounded manifest/lock/workflow series to t
 - 2026-11-06: Added primary advisory links for the eight Nuxt and three Nitro fixes, exact-source prerequisite limits, workspace compatibility requirements and the separate Express error boundary. Hosted results and persisted-lock acceptance remain pending.
 - 2026-11-06: Removed the initial branch-push bootstrap trigger for the persisted stage and required exact persisted-lock mode for pull-request success; manual dispatch remains available for explicitly exploratory evidence. No run result is inferred from this workflow edit.
 - 2026-11-06: Recorded successful first ephemeral qualification, verified artifact identities, exact selected Node 26 lock, metadata-only cross-runtime lock differences and honest audit residuals. Persisted-head and viewer qualification remain pending.
+- 2026-11-06: Recorded successful persisted-source root/viewer/non-live/CodeQL checks at `fe95b52b7af9fff34cb429da151d713c0e3cd6f1`, verified artifact provenance and selected coordinator screenshot inspection. Final documentation-head checks and independent PR 50 acceptance remain pending.
