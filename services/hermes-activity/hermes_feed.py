@@ -11,7 +11,7 @@ from pydantic import BaseModel, ConfigDict, Field
 from character_state import CharacterInput  # noqa: TC001 - Pydantic resolves this field at runtime.
 
 SpoolKind = Literal["session_start", "session_end", "thinking", "turn_done", "tool", "approval", "character"]
-SpoolPhase = Literal["running", "ok", "error", "waiting", "resolved"]
+SpoolPhase = Literal["running", "ok", "error", "waiting", "resolved", "interrupted"]
 SpoolCategory = Literal["BROWSER", "COMPUTER", "WEB", "TERMINAL", "FILES", "AGENT"]
 MAX_LINE_BYTES: Final = 4_096
 
@@ -36,17 +36,33 @@ class SpoolEvent(BaseModel):
     character: CharacterInput | None = None
 
 
-def parse_complete_line(line: bytes) -> SpoolEvent | None:
+def parse_complete_line(line: bytes, *, strict: bool = False) -> SpoolEvent | None:
     """Parse one newline-terminated record, rejecting malformed input."""
     if len(line) > MAX_LINE_BYTES or not line.endswith(b"\n"):
         return None
     try:
-        event = SpoolEvent.model_validate_json(line)
+        event = SpoolEvent.model_validate_json(line, strict=strict)
     except (UnicodeDecodeError, ValueError):
         return None
     if event.kind == "character" and event.character is None:
         return None
+    if event.phase == "interrupted" and event.kind != "session_end":
+        return None
+    if strict and not _valid_phase(event):
+        return None
     return event
+
+
+def _valid_phase(event: SpoolEvent) -> bool:
+    phases: dict[str, set[str]] = {
+        "session_start": {"ok"},
+        "thinking": {"ok"},
+        "turn_done": {"ok"},
+        "session_end": {"ok", "error", "interrupted"},
+        "tool": {"running", "ok", "error"},
+        "approval": {"waiting", "resolved"},
+    }
+    return event.kind == "character" or event.phase in phases[event.kind]
 
 
 def spool_directory() -> Path:

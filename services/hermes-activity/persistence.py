@@ -13,12 +13,13 @@ if TYPE_CHECKING:
 
 from pydantic import BaseModel, ConfigDict, Field, ValidationInfo, model_validator
 
-from activity_models import BrokerState, TimelineEntry, TimelineStatus
+from activity_models import BrokerState, HermesState, TimelineEntry, TimelineStatus
 from character_state import CharacterState
 from cursor import CursorSnapshot
 from privacy import HoldKey, PrivacyState
 
 MAX_CHECKPOINT_BYTES = 262_144
+HERMES_CHECKPOINT_VERSION = 3
 
 
 class TimelineCheckpoint(BaseModel):
@@ -48,6 +49,7 @@ class BrokerCheckpoint(BaseModel):
     session_open: bool
     last_event_ms: int
     character: CharacterState | None = None
+    hermes: HermesState | None = None
 
     @model_validator(mode="after")
     def require_complete_character(self, info: ValidationInfo) -> Self:
@@ -58,6 +60,13 @@ class BrokerCheckpoint(BaseModel):
             and self.character.model_fields_set != set(CharacterState.model_fields)
         ):
             msg = "persisted character state requires every authority field"
+            raise ValueError(msg)
+        if (
+            info.mode == "json"
+            and self.hermes is not None
+            and self.hermes.model_fields_set != set(HermesState.model_fields)
+        ):
+            msg = "persisted Hermes state requires every authority field"
             raise ValueError(msg)
         return self
 
@@ -91,13 +100,23 @@ class Checkpoint(BaseModel):
 
     model_config: ClassVar[ConfigDict] = ConfigDict(frozen=True)
 
-    version: int = Field(default=2, ge=1, le=2)
+    version: int = Field(default=3, ge=1, le=3, strict=True)
     cursor_inode: int | None
     cursor_offset: int = Field(ge=0)
     publication_seq: int = Field(ge=0)
     screen_seq: int = Field(ge=0)
     broker: BrokerCheckpoint
     privacy: PrivacyCheckpoint
+
+    @model_validator(mode="after")
+    def require_binding_version(self) -> Self:
+        """Never reconstruct bound authority from older checkpoint versions."""
+        if self.broker.hermes is not None and (
+            self.version != HERMES_CHECKPOINT_VERSION or "version" not in self.model_fields_set
+        ):
+            msg = "Hermes authority requires checkpoint version 3"
+            raise ValueError(msg)
+        return self
 
 
 @dataclass(frozen=True, slots=True)
@@ -162,6 +181,7 @@ def restore_snapshot(checkpoint: Checkpoint) -> RuntimeSnapshot:
         checkpoint.broker.session_open,
         checkpoint.broker.last_event_ms,
         checkpoint.broker.character,
+        checkpoint.broker.hermes,
     )
     privacy = PrivacyState(
         checkpoint.privacy.latched,
@@ -214,6 +234,7 @@ def _checkpoint(snapshot: RuntimeSnapshot) -> Checkpoint:
         session_open=snapshot.broker.session_open,
         last_event_ms=snapshot.broker.last_event_ms,
         character=snapshot.broker.character,
+        hermes=snapshot.broker.hermes,
     )
     privacy = PrivacyCheckpoint(
         latched=snapshot.privacy.latched,
@@ -226,6 +247,7 @@ def _checkpoint(snapshot: RuntimeSnapshot) -> Checkpoint:
         holds=tuple(HoldCheckpoint(session=item.session, call=item.call) for item in snapshot.privacy.holds),
     )
     return Checkpoint(
+        version=HERMES_CHECKPOINT_VERSION,
         cursor_inode=snapshot.cursor.inode,
         cursor_offset=snapshot.cursor.offset,
         publication_seq=snapshot.publication_seq,
@@ -238,3 +260,38 @@ def _checkpoint(snapshot: RuntimeSnapshot) -> Checkpoint:
 def _number(raw: str, pattern: str) -> int:
     match = re.search(pattern, raw)
     return int(match.group(1)) if match is not None else 0
+
+
+def load_hermes_binding(path: Path) -> HermesState:
+    """Read immutable private binding evidence, refusing incomplete authority."""
+    descriptor = os.open(path, os.O_RDONLY | os.O_NOFOLLOW | os.O_NONBLOCK)
+    with os.fdopen(descriptor, "rb") as stream:
+        metadata = os.fstat(stream.fileno())
+        if (
+            not stat.S_ISREG(metadata.st_mode)
+            or metadata.st_uid != os.getuid()
+            or metadata.st_mode & 0o077
+            or metadata.st_nlink != 1
+            or path != path.resolve()
+        ):
+            msg = "Hermes binding marker must be a private unaliased regular file"
+            raise ValueError(msg)
+        raw = stream.read(MAX_CHECKPOINT_BYTES + 1)
+    if len(raw) > MAX_CHECKPOINT_BYTES:
+        msg = "Hermes binding marker exceeds its size limit"
+        raise ValueError(msg)
+    binding = HermesState.model_validate_json(raw)
+    if binding.model_fields_set != set(HermesState.model_fields) or binding != binding.model_copy(
+        update={"observed_ms": 0, "clock_ms": 0, "started": False, "ended": False, "failed": False}
+    ):
+        msg = "Hermes binding marker must contain complete pristine authority"
+        raise ValueError(msg)
+    return binding
+
+
+def save_hermes_binding(path: Path, binding: HermesState) -> None:
+    """Create identity proof once; an incomplete crash is never adopted."""
+    descriptor = os.open(path, os.O_WRONLY | os.O_CREAT | os.O_EXCL | os.O_NOFOLLOW, 0o600)
+    with os.fdopen(descriptor, "w", encoding="utf-8") as stream:
+        os.fchmod(stream.fileno(), 0o600)
+        stream.write(binding.model_dump_json())
