@@ -4,8 +4,6 @@ on:
   pull_request:
     branches: [main]
     paths: [package.json, package-lock.json, .github/workflows/nuxt13-qualification.yml]
-  push:
-    branches: [codex/13-nuxt-nitro-security]
 permissions:
   contents: read
 jobs:
@@ -439,6 +437,10 @@ jobs:
             printf '%s\n' c0c3f7ce44cfa3db34cbe46a723bf1fc16b56b6c > evidence/baseline-sha.txt
           else
             exit 1
+          fi
+          # PR acceptance must qualify the checked-in lock, never an ephemeral resolution.
+          if [[ "$GITHUB_EVENT_NAME" == pull_request ]]; then
+            printf 'persisted\n' | cmp - evidence/lock-mode.txt
           fi
       - name: Upload advisory evidence
         if: always()
