@@ -1252,3 +1252,28 @@ issue 32 stays open.
 - 2026-11-06T04:09:16Z: Refreshed issue 13 / PR 50 against accepted main `6d829351c305a56fb8104469446ae574a07dec7b`, preserving accepted builder/metadata tooling and README plus the exact previously selected security lock. Both qualification pins now use accepted main. Historical results remain scoped to their original source; fresh hosted qualification and independent review of this refreshed head are pending. No merge, deployment or issue closure.
 
 - 2026-11-06T04:25:34Z: Issue 13 refreshed source `a4dfd3dd2358de69d084561156234c96fff80515` qualified against accepted `6d829351c305a56fb8104469446ae574a07dec7b`: both persisted-lock root jobs, metadata 87/87 per runtime and viewer 66/66 units passed. Viewer Node 26 Chromium initially timed out on keyboard file import; one unchanged failed-job retry passed all 43 cases on both browsers, while Node 22 results remain from the first attempt. Cause is unresolved, not a claimed fix. All 14 current source checks succeeded; final documentation-head checks and independent PR 50 review remain pending. See the [full evidence and both attempts](docs/operations/nuxt-nitro-security-2026-11-06.md#refreshed-source-qualification). No merge, deployment or issue closure.
+
+- 2026-11-06T10:50:48Z (codex/13-proxy-error-hardening): Prepared issue 13's
+  separate bounded proxy error hardening: fixed non-sensitive provider/parser
+  errors, preserved successful metadata/audio contracts, and cancelled/terminated
+  failed streams without raw error disclosure. Added real-process regressions
+  and a server-only isolated Node 22/26 advisory workflow. Static syntax checks
+  passed; hosted execution and independent acceptance remain pending. See the
+  [candidate record](docs/operations/proxy-error-hardening-2026-11-06.md).
+  No dependency, live-operation, deployment or complete-production-security claim.
+
+- 2026-11-06T10:56:23Z (codex/13-proxy-error-hardening): Issue 13 proxy source
+  `0f9dc6b4dd77a45558265ea5212c846550a23fe5` passed
+  [run 42206046796, attempt 1](https://github.com/patchwerks/furbomek/actions/runs/42206046796/attempts/1):
+  Node 22.22.3 and 26.7.0 each passed 85/85 tests (13 retained plus 72 new),
+  zero failures/cancellations/skips/TODOs, and syntax checks. Early/late audio
+  errors, pending-fetch/client disconnect cancellation, 2 MiB backpressure,
+  staged-header cleanup and recovery passed. Official bounded artifact ZIP
+  digests and source/enforcement identities were independently verified. All ten
+  source checks succeeded, including
+  [non-live 42206046667](https://github.com/patchwerks/furbomek/actions/runs/42206046667)
+  and [CodeQL 42206042705](https://github.com/patchwerks/furbomek/actions/runs/42206042705).
+  See the [source evidence](docs/operations/proxy-error-hardening-2026-11-06.md#source-qualification-2026-11-06t105623z).
+  This documentation-only follow-up preserves qualified application/test/workflow
+  and dependency bytes. Final-head checks and independent PR 54 acceptance remain
+  pending; no live provider, production-security, merge or deployment claim.
