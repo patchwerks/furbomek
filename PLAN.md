@@ -1252,3 +1252,28 @@ issue 32 stays open.
 - 2026-11-06T04:09:16Z: Refreshed issue 13 / PR 50 against accepted main `6d829351c305a56fb8104469446ae574a07dec7b`, preserving accepted builder/metadata tooling and README plus the exact previously selected security lock. Both qualification pins now use accepted main. Historical results remain scoped to their original source; fresh hosted qualification and independent review of this refreshed head are pending. No merge, deployment or issue closure.
 
 - 2026-11-06T04:25:34Z: Issue 13 refreshed source `a4dfd3dd2358de69d084561156234c96fff80515` qualified against accepted `6d829351c305a56fb8104469446ae574a07dec7b`: both persisted-lock root jobs, metadata 87/87 per runtime and viewer 66/66 units passed. Viewer Node 26 Chromium initially timed out on keyboard file import; one unchanged failed-job retry passed all 43 cases on both browsers, while Node 22 results remain from the first attempt. Cause is unresolved, not a claimed fix. All 14 current source checks succeeded; final documentation-head checks and independent PR 50 review remain pending. See the [full evidence and both attempts](docs/operations/nuxt-nitro-security-2026-11-06.md#refreshed-source-qualification). No merge, deployment or issue closure.
+
+- 2026-11-06: Prepared issue 32 browser-only companion validation on accepted
+  `63184419ab5c5437ffc37028ba7829ae53c4f289`: bounded synchronous input snapshots,
+  unchanged strict parsers, native Web Crypto exact-byte SHA-256 and frozen branded
+  results. Added wrapper tests and a separate ten-case Chromium/Firefox harness;
+  existing viewer checks and enforcement baseline are preserved. See the
+  [preparation record](docs/operations/browser-metadata-2026-11-06.md). Only static
+  syntax is checked locally; hosted qualification and independent review remain
+  pending. No UI wiring, merge, deployment, rights approval or live authority.
+
+- 2026-11-06T10:57:06Z: Issue 32 / PR 53 source
+  `7350419b5585a6379d90c84d3a7f658352536e61` passed all 14 source checks:
+  [metadata run 42205915021](https://github.com/patchwerks/furbomek/actions/runs/42205915021)
+  passed 94/94 tests per Node runtime with zero failures/skips, while
+  [viewer run 42205915244](https://github.com/patchwerks/furbomek/actions/runs/42205915244)
+  attempt 1 passed 66 viewer units per runtime and all four Chromium/Firefox
+  configurations, each retaining 43 existing viewer cases plus ten separately
+  recorded native metadata cases. The coordinator verified exact source,
+  enforcement revision, official artifact hashes and empty recorded
+  outbound/blocked/error arrays. See the
+  [source qualification record](docs/operations/browser-metadata-2026-11-06.md#observed-source-qualification--2026-11-06t105706z).
+  The unconsumed declaration remains outside viewer typecheck qualification;
+  no UI screenshot re-review was needed. Final documentation-head checks and
+  independent review remain pending. No merge, deployment, rights approval or
+  live authority is claimed.

@@ -93,3 +93,37 @@ companion in temporary storage, and reject a byte-tampered pair.
 - 2026-11-05: Replaced preparation-only runtime status with observed Node 22/26
   metadata/core source qualification; retained combined integration, final-head
   and independent acceptance gates.
+
+## Browser byte validation candidate (2026-11-06)
+
+`tools/presentation-pack/browser.mjs` exports
+`validateBrowserMetadata(packBytes, metadataBytes)`. Both arguments must be
+`Uint8Array` views, bounded to 1 MiB and 16 KiB respectively. The returned promise
+resolves to a frozen `{ pack, metadata, packSha256 }`: the original branded,
+deeply frozen core parse result, the frozen strict companion, and a lowercase
+SHA-256 digest of the exact supplied pack bytes. The declaration in
+`browser.d.mts` retains the core `ParsedPack` type.
+
+The function checks sizes before allocation and synchronously copies both byte
+views before its first await. Parsing, hashing and matching use these snapshots;
+ordinary caller mutation after invocation cannot change the result. Offset views
+include only their visible bytes. SharedArrayBuffer-backed inputs are rejected;
+this is not a boundary against arbitrary hostile JavaScript in the same context.
+There is no caller-supplied parsed-object or digest shortcut.
+
+Native Web Crypto SHA-256 requires a secure browser context (HTTPS or a browser's
+trusted loopback context). Missing or rejecting Web Crypto produces the fixed
+error `Browser metadata validation requires Web Crypto SHA-256 in a secure
+context`; there is no fallback hash implementation. Digest semantics follow the
+[Web Crypto recommendation](https://www.w3.org/TR/2017/REC-WebCryptoAPI-20170126/#SubtleCrypto-method-digest).
+The module does not read files, store data, request URLs, install packs or wire
+viewer UI. Its result verifies byte/format compatibility only; names and licenses
+remain unverified self-declarations. Appending whitespace to the pack requires a
+new companion even if its parsed content is unchanged.
+
+Candidate tests cover the wrapper trust boundary with native Node Web Crypto and
+isolated module contexts. A separate fixed-route loopback browser harness imports
+the actual three browser modules and exercises native Web Crypto in Chromium and
+Firefox. Its ten cases and `browser-metadata-results.json` are separate from the
+existing viewer's 43 cases and evidence. Hosted execution and independent review
+remain pending; see the [candidate record](../operations/browser-metadata-2026-11-06.md).
