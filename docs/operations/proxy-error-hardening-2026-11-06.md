@@ -78,3 +78,61 @@ Hermes, OBS, firmware or public-stream operations were performed.
 
 - 2026-11-06T10:50:48Z: Prepared the bounded error contract, actual-process
   regressions and isolated advisory matrix; runtime qualification remains pending.
+
+## Source qualification, 2026-11-06T10:56:23Z
+
+**Observed:** source `0f9dc6b4dd77a45558265ea5212c846550a23fe5` passed
+[proxy run 42206046796, attempt 1](https://github.com/patchwerks/furbomek/actions/runs/42206046796/attempts/1).
+Node 22.22.3 / npm 10.9.8 and Node 26.7.0 / npm 11.19.0 each passed 85/85 tests:
+all 13 existing regressions plus 72 additions, with zero failures, cancellations,
+skips or TODOs. The exact passing test-name sets match across Node 22's TAP and
+Node 26's spec output. Both syntax logs are empty successful results. The first
+attempt passed; no retry or corrective runtime patch was needed.
+
+Passing cases include early audio failure returning fixed JSON; late failure
+terminating incomplete bytes without JSON; cancellation on normal and large
+stream disconnect; cancellation when the client disconnects while fetch remains
+pending; successful 2 MiB chunks under backpressure; staged-header failure
+clearing provider headers; partial-content status/header preservation; and
+same-process recovery. The route matrix covers transport and invalid/non-success
+statuses on all five routes, malformed provider JSON on all metadata routes,
+fixed parser errors and unknown middleware failure. These are actual proxy child
+processes on private Unix sockets with synthetic provider responses.
+
+Official downloaded ZIP digests matched the GitHub artifact metadata. Both
+artifacts were unexpired at collection and contained exactly the six unique,
+regular allowlisted files: `ci.log`, `unit.log`, `syntax.log`, `versions.txt`,
+`candidate-sha.txt` and `enforcement-sha.txt`. No symlinks or duplicate entries
+were admitted; each file was below 8 MiB and each job below 24 MiB. Embedded
+source identity matched the source above; enforcement identity matched accepted
+`63184419ab5c5437ffc37028ba7829ae53c4f289`. Artifact names contain GitHub's PR
+merge-context SHA; the checked `candidate-sha.txt` binds the actual source head.
+
+| Runtime | Official artifact ID | ZIP SHA-256 | Total uncompressed evidence bytes |
+|---|---|---|---|
+| Node 22.22.3 | 13496088533 | `9eeb26a21277ee86cdb5f8c2d699fb2eb3f3617a48b8e48b70ca757f0e76f7bb` | 15,785 |
+| Node 26.7.0 | 13495879268 | `d7abd744e8d099f461bcf6e1161bcf557faaf71d4f432a2dbe1a0ad0446f09ca` | 6,583 |
+
+The coordinator independently checked these artifacts, identities, bounds and
+actual counts. All ten source-head PR 54 checks succeeded, including
+[non-live verification 42206046667](https://github.com/patchwerks/furbomek/actions/runs/42206046667)
+and [CodeQL 42206042705](https://github.com/patchwerks/furbomek/actions/runs/42206042705).
+Local retained evidence is under
+`outputs/proxy13-hardening-20261106/source-evidence/` in the parent workspace:
+official run/jobs/artifact metadata, original ZIPs, official run logs, validated
+extracted evidence and `verification.json`. It is not added to product source.
+
+This supersedes the preparation-time pending runtime statement above only for
+this exact source. The documentation follow-up changes only this record and
+PLAN; application, test, dependency and workflow bytes remain the qualified
+source bytes. Final documentation-head checks and independent PR 54 acceptance
+remain pending. The offline, credential-free worker boundary and synthetic
+upstream limitation still apply. No real provider, deployed service, production
+security, robot/device, Hermes, OBS or public-stream qualification is implied;
+no merge or deployment was performed.
+
+### Qualification changelog
+
+- 2026-11-06T10:56:23Z (codex/13-proxy-error-hardening): Appended verified
+  first-attempt source qualification, artifact provenance and remaining final-head
+  and independent acceptance gates; preserved original preparation history.

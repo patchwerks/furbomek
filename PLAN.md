@@ -1261,3 +1261,19 @@ issue 32 stays open.
   passed; hosted execution and independent acceptance remain pending. See the
   [candidate record](docs/operations/proxy-error-hardening-2026-11-06.md).
   No dependency, live-operation, deployment or complete-production-security claim.
+
+- 2026-11-06T10:56:23Z (codex/13-proxy-error-hardening): Issue 13 proxy source
+  `0f9dc6b4dd77a45558265ea5212c846550a23fe5` passed
+  [run 42206046796, attempt 1](https://github.com/patchwerks/furbomek/actions/runs/42206046796/attempts/1):
+  Node 22.22.3 and 26.7.0 each passed 85/85 tests (13 retained plus 72 new),
+  zero failures/cancellations/skips/TODOs, and syntax checks. Early/late audio
+  errors, pending-fetch/client disconnect cancellation, 2 MiB backpressure,
+  staged-header cleanup and recovery passed. Official bounded artifact ZIP
+  digests and source/enforcement identities were independently verified. All ten
+  source checks succeeded, including
+  [non-live 42206046667](https://github.com/patchwerks/furbomek/actions/runs/42206046667)
+  and [CodeQL 42206042705](https://github.com/patchwerks/furbomek/actions/runs/42206042705).
+  See the [source evidence](docs/operations/proxy-error-hardening-2026-11-06.md#source-qualification-2026-11-06t105623z).
+  This documentation-only follow-up preserves qualified application/test/workflow
+  and dependency bytes. Final-head checks and independent PR 54 acceptance remain
+  pending; no live provider, production-security, merge or deployment claim.
