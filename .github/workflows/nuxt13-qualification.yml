@@ -1,9 +1,8 @@
 name: Nuxt/Nitro security advisory qualification
+# Manual historical qualification of the reviewed Nuxt/Nitro patch against 6d829351.
+# This advisory comparison is not a generic future dependency-promotion gate.
 on:
   workflow_dispatch:
-  pull_request:
-    branches: [main]
-    paths: [package.json, package-lock.json, .github/workflows/nuxt13-qualification.yml]
 permissions:
   contents: read
 jobs:
