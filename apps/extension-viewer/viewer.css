@@ -61,7 +61,7 @@ h2 { font-size: 16px; font-weight: 650; margin: 0 0 14px; }
 .cue-list { list-style: none; padding: 0; margin: 0 0 16px; }
 .cue-row { display: grid; grid-template-columns: minmax(0, 1fr); gap: 8px; padding: 16px 0; border-bottom: 1px solid var(--line); }
 .cue-row .btn { justify-self: start; }
-.builder .form-select { color: var(--ink); background-color: var(--surface); border-color: var(--line); font-size: 13px; }
+.builder .form-select { appearance: auto; background-image: none; padding-right: 0.75rem; color: var(--ink); background-color: var(--surface); border-color: var(--line); font-size: 13px; }
 .builder .form-control:focus, .builder .form-select:focus { color: var(--ink); background-color: var(--surface); }
 .builder .form-control:disabled, .builder .form-select:disabled { color: var(--muted); background-color: var(--stage); }
 .builder .error-message { margin-top: 16px; }

@@ -25,20 +25,20 @@ module.exports = async function runBuilder(page, evidence) {
     await id('preset-neutral').click();
     assert.equal(await page.locator('.cue-row').count(), 1);
     await id('preset-curious').click();
-    assert.equal(await page.locator('#cue-value-1').inputValue(), 'curious');
+    assert.equal(await id('cue-1').locator('select').inputValue(), 'curious');
     await id('preset-acknowledge').click();
-    assert.equal(await page.locator('#cue-value-1').inputValue(), 'acknowledge');
+    assert.equal(await id('cue-1').locator('select').inputValue(), 'acknowledge');
     await id('edit-current').click();
     assert.equal(await id('pack-id').inputValue(), 'reaction-example');
-    assert.equal(await page.locator('#cue-time-0').isDisabled(), true);
-    assert.equal(await page.locator('#cue-value-0').isDisabled(), true);
+    assert.equal(await id('cue-0').locator('input').isDisabled(), true);
+    assert.equal(await id('cue-0').locator('select').isDisabled(), true);
     assert.equal(await id('cue-0').getByRole('button').count(), 0);
     await id('pack-id').fill('browser-authored');
     await id('pack-version').fill('1.2.3');
     await id('pack-duration').fill('5000');
-    await page.locator('#cue-time-1').fill('2000');
-    await page.locator('#cue-time-2').fill('2000');
-    await page.locator('#cue-time-3').fill('1000');
+    await id('cue-1').locator('input').fill('2000');
+    await id('cue-2').locator('input').fill('2000');
+    await id('cue-3').locator('input').fill('1000');
     await id('play-pause').click();
     await page.waitForFunction(() => Number(document.querySelector('[data-testid="position-ms"]').textContent) > 0);
     await id('pack-version').fill('1.2.4');
@@ -90,6 +90,7 @@ module.exports = async function runBuilder(page, evidence) {
     assert.equal(await id('add-cue').isDisabled(), true);
     await page.getByRole('button', { name: 'Remove cue 64', exact: true }).click();
     assert.equal(await id('add-cue').isEnabled(), true);
+    const accessibilityCases = await checkBuilderAccessibility(page);
     await id('preset-curious').click();
     await page.setViewportSize({ width: 390, height: 844 });
     await id('pack-id').focus();
@@ -105,6 +106,113 @@ module.exports = async function runBuilder(page, evidence) {
     assert.equal(await id('export-pack').isDisabled(), true);
     await id('preview-mode').click();
     assert.equal(await id('play-pause').isDisabled(), true, 'leaving invalid draft cannot restore stale authority');
-    return ['builder-presets', 'builder-edit-current', 'builder-locked-reset', 'builder-valid-edit-pauses', 'builder-invalid-clears', 'builder-real-download', 'builder-reimport', 'builder-cli-metadata-roundtrip', 'builder-exact-byte-tamper', 'builder-url-revocation', 'builder-cue-cap-removal', 'builder-keyboard-mobile'];
+    return ['builder-presets', 'builder-edit-current', 'builder-locked-reset', 'builder-valid-edit-pauses', 'builder-invalid-clears', 'builder-real-download', 'builder-reimport', 'builder-cli-metadata-roundtrip', 'builder-exact-byte-tamper', 'builder-url-revocation', 'builder-cue-cap-removal', 'builder-keyboard-mobile', ...accessibilityCases];
   } finally { fs.rmSync(scratch, { recursive: true, force: true }); }
 };
+
+
+async function checkBuilderAccessibility(page) {
+  const id = name => page.getByTestId(name);
+  const time = index => id(`cue-${index}`).locator('input');
+  const value = index => id(`cue-${index}`).locator('select');
+  const focused = locator => locator.evaluate(element => document.activeElement === element);
+  // Reach controls only through native Tab. No scripted focus or click fallback.
+  const tabTo = async (locator, direction = 'Tab') => {
+    for (let i = 0; i < 40; i++) {
+      if (await focused(locator)) return;
+      await page.keyboard.press(direction);
+    }
+    assert.fail(`Native ${direction} could not reach builder control`);
+  };
+  await id('preset-neutral').click();
+  await id('pack-duration').fill('5000');
+  await tabTo(id('add-cue'));
+  await page.keyboard.press('Enter');
+  assert.equal(await focused(time(1)), true, 'added cue receives time focus');
+  // Replace the value using native editing so append-vs-selection is immaterial.
+  await page.keyboard.press('ControlOrMeta+A');
+  await page.keyboard.type('1200');
+  await tabTo(id('add-cue'));
+  await page.keyboard.press('Space');
+  assert.equal(await focused(time(2)), true, 'Space adds and focuses new cue');
+  await page.keyboard.press('ControlOrMeta+A');
+  await page.keyboard.type('2200');
+  await page.keyboard.press('Tab');
+  assert.equal(await focused(value(2)), true);
+  await page.keyboard.press('Home');
+  await page.keyboard.press('ArrowDown');
+  await page.keyboard.press('ArrowDown');
+  await page.keyboard.press('Tab');
+  assert.equal(await value(2).inputValue(), 'acknowledge');
+  // Removing another row must preserve this exact surviving DOM node and focus.
+  await page.keyboard.press('Shift+Tab');
+  await value(2).evaluate(element => { window.__survivingCueValue = element; });
+  await id('cue-1').getByRole('button').evaluate(element => element.click());
+  assert.equal(await value(1).evaluate(element => element === window.__survivingCueValue && document.activeElement === element), true);
+  assert.equal(await value(1).inputValue(), 'acknowledge');
+  assert.equal(await time(1).inputValue(), '2200');
+  await tabTo(id('add-cue'));
+  await page.keyboard.press('Enter');
+  await tabTo(id('cue-1').getByRole('button'), 'Shift+Tab');
+  await page.keyboard.press('Enter');
+  assert.equal(await focused(time(1)), true, 'delete focuses next surviving editable cue');
+  await tabTo(id('add-cue'));
+  await page.keyboard.press('Enter');
+  await tabTo(id('cue-2').getByRole('button'));
+  await page.keyboard.press('Space');
+  assert.equal(await focused(time(1)), true, 'delete last editable cue focuses previous');
+  await tabTo(id('cue-1').getByRole('button'));
+  await page.keyboard.press('Enter');
+  assert.equal(await focused(id('add-cue')), true, 'delete only editable cue focuses Add');
+  await page.keyboard.press('Enter');
+  const associations = await page.locator('.builder input, .builder select').evaluateAll(elements => elements.map(element => ({
+    id: element.id, labels: Array.from(element.labels || []).map(label => label.textContent.trim()),
+    descriptions: (element.getAttribute('aria-describedby') || '').split(/\s+/).filter(Boolean).map(id => ({ id, present: !!document.getElementById(id) })),
+  })));
+  for (const field of associations) {
+    assert.ok(field.id && field.labels.length === 1 && field.labels[0], `explicit label: ${JSON.stringify(field)}`);
+    assert.ok(field.descriptions.some(item => item.id === 'builder-error'), `error association: ${field.id}`);
+    assert.ok(field.descriptions.every(item => item.present), `description target: ${field.id}`);
+  }
+  await page.evaluate(associations => { window.__builderAccessibility = { associations, reflow: [] }; }, associations);
+  const alert = id('builder-error'), status = page.locator('.builder [role="status"]');
+  assert.equal(await alert.getAttribute('role'), 'alert');
+  assert.equal(await alert.getAttribute('aria-atomic'), 'true');
+  assert.equal(await status.getAttribute('aria-atomic'), 'true');
+  await page.evaluate(() => {
+    window.__builderLive = { alert: document.querySelector('[data-testid="builder-error"]'), status: document.querySelector('.builder [role="status"]'), mutations: [] };
+    window.__builderLive.observer = new MutationObserver(records => {
+      for (const record of records) {
+        const live = window.__builderLive;
+        const region = record.target === live.alert || live.alert.contains(record.target) ? 'alert' : 'status';
+        if (live.mutations.length < 20) live.mutations.push({ region, text: live[region].textContent });
+      }
+    });
+    for (const region of ['alert', 'status']) window.__builderLive.observer.observe(window.__builderLive[region], { childList: true, characterData: true, subtree: true });
+  });
+  await id('pack-id').fill('../invalid');
+  await page.waitForFunction(() => window.__builderLive.mutations.some(item => item.region === 'alert' && /packId/.test(item.text)));
+  assert.equal(await status.textContent(), '');
+  await id('pack-id').fill('accessible-draft');
+  await page.waitForFunction(() => window.__builderLive.mutations.some(item => item.region === 'status' && /Valid draft/.test(item.text)));
+  assert.equal(await alert.textContent(), '');
+  assert.equal(await page.evaluate(() => window.__builderLive.alert === document.querySelector('[data-testid="builder-error"]') && window.__builderLive.status === document.querySelector('.builder [role="status"]')), true, 'live region nodes persist through validation');
+  await page.evaluate(() => { window.__builderLive.observer.disconnect(); window.__builderAccessibility.liveMutations = window.__builderLive.mutations; });
+  // CSS viewport equivalents for 1280px at 200%/400%, not actual browser zoom.
+  for (const width of [640, 320]) {
+    await page.setViewportSize({ width, height: 800 });
+    const reflow = await page.evaluate(() => ({ width: innerWidth, scrollWidth: document.documentElement.scrollWidth }));
+    await page.evaluate(result => window.__builderAccessibility.reflow.push(result), reflow);
+    assert.ok(reflow.scrollWidth <= reflow.width, `reflow at ${width} CSS px`);
+    const controls = [time(1), value(1), id('add-cue'), id('export-pack')];
+    for (let index = 0; index < controls.length; index++) {
+      const locator = controls[index];
+      await tabTo(locator, width === 320 && index === 0 ? 'Shift+Tab' : 'Tab');
+      assert.equal(await locator.evaluate(element => {
+        const rect = element.getBoundingClientRect();
+        return rect.width > 0 && rect.left >= 0 && rect.right <= innerWidth && element.matches(':focus-visible');
+      }), true, `visible usable keyboard control at ${width} CSS px`);
+    }
+  }
+  return ['builder-keyboard-add-focus', 'builder-remove-other-retains-identity', 'builder-keyboard-delete-next', 'builder-keyboard-delete-previous', 'builder-keyboard-delete-add', 'builder-field-label-associations', 'builder-alert-status-mutations', 'builder-reflow-200-percent-equivalent', 'builder-reflow-400-percent-equivalent'];
+}

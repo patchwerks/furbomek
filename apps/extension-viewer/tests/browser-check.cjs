@@ -42,8 +42,14 @@ let phase = 'launch';
 let unavailablePassed = false;
 let baselineCompleted = false;
 let keyboardDiagnostics = null;
+let keyboardActivation = null;
 const contrastMetrics = {};
-const baselineCases = ['document-language', 'WebGL', 'seek', 'play-pause', 'reset', 'end', 'invalid', 'unauthorized-event', 'read-failure', 'reload-example', 'oversize', 'HTML-filename', 'reduced-motion', 'hidden', 'context-loss', 'WebGL-unavailable', 'stale-import', 'unmount', 'rendered-cue', 'acknowledge-transform', 'reduced-motion-pixels', 'dark-hover-example-contrast', 'dark-license-link-contrast', 'first-frame-clock-order', 'dark-file-selector-contrast'];
+const securityPolicyViolations = [];
+const consoleErrors = [];
+const outbound = [];
+const browserErrors = [];
+const boundedText = value => String(value).slice(0, 1000);
+const baselineCases = ['document-language', 'clock-live-region-off', 'WebGL', 'seek', 'play-pause', 'reset', 'end', 'invalid', 'unauthorized-event', 'read-failure', 'reload-example', 'oversize', 'HTML-filename', 'reduced-motion', 'hidden', 'context-loss', 'WebGL-unavailable', 'stale-import', 'unmount', 'rendered-cue', 'acknowledge-transform', 'reduced-motion-pixels', 'dark-hover-example-contrast', 'dark-license-link-contrast', 'first-frame-clock-order', 'dark-file-selector-contrast'];
 async function runKeyboard(page) {
   const id = name => page.getByTestId(name);
   const text = name => id(name).textContent();
@@ -92,7 +98,47 @@ async function runKeyboard(page) {
   };
   await keyboardTraversal();
   await tabTo(id('import-file'));
-  const [chooser] = await Promise.all([page.waitForEvent('filechooser'), page.keyboard.press('Space')]);
+  keyboardActivation = { filechooserEvents: [], press: { started: null, completed: null, error: null }, before: await inspectFocus(id('import-file')) };
+  const chooserObserved = () => { if (keyboardActivation.filechooserEvents.length < 10) keyboardActivation.filechooserEvents.push(Date.now()); };
+  page.on('filechooser', chooserObserved);
+  await id('import-file').evaluate(element => {
+    window.__pickerTrace = [];
+    window.__pickerState = () => ({ connected: element.isConnected, inputType: element.type, disabled: element.disabled, inertAncestor: !!element.closest('[inert]'), focused: document.activeElement === element, documentFocused: document.hasFocus(), visibility: document.visibilityState, activation: navigator.userActivation ? { active: navigator.userActivation.isActive, hasBeenActive: navigator.userActivation.hasBeenActive } : null });
+    window.__pickerBefore = window.__pickerState();
+    window.__pickerListener = event => {
+      if (window.__pickerTrace.length < 20) window.__pickerTrace.push({ type: event.type, phase: event.eventPhase, key: event.key || null, repeat: event.repeat || false, modifiers: { alt: !!event.altKey, ctrl: !!event.ctrlKey, meta: !!event.metaKey, shift: !!event.shiftKey }, trusted: event.isTrusted, defaultPrevented: event.defaultPrevented, targetIsInput: event.target === element, time: performance.now(), ...window.__pickerState() });
+    };
+    for (const type of ['keydown', 'keypress', 'keyup', 'click', 'focusin', 'focusout']) { document.addEventListener(type, window.__pickerListener, true); document.addEventListener(type, window.__pickerListener); }
+  });
+  let chooser;
+  try {
+    keyboardActivation.press.started = Date.now();
+    [chooser] = await Promise.all([page.waitForEvent('filechooser'), page.keyboard.press('Space').then(() => { keyboardActivation.press.completed = Date.now(); }, error => { keyboardActivation.press.error = boundedText(error); throw error; })]);
+  } finally {
+    try {
+      const diagnostics = await Promise.allSettled([
+        inspectFocus(id('import-file')),
+        page.evaluate(() => {
+          for (const type of ['keydown', 'keypress', 'keyup', 'click', 'focusin', 'focusout']) { document.removeEventListener(type, window.__pickerListener, true); document.removeEventListener(type, window.__pickerListener); }
+          return { before: window.__pickerBefore, after: window.__pickerState(), trace: window.__pickerTrace };
+        }),
+      ]);
+      for (const [index, result] of diagnostics.entries()) {
+        if (result.status === 'fulfilled') keyboardActivation[index === 0 ? 'after' : 'events'] = result.value;
+        else keyboardActivation.diagnosticError = boundedText(`${keyboardActivation.diagnosticError || ''} ${index === 0 ? 'focus' : 'events'}: ${result.reason}`);
+      }
+    } catch (diagnosticError) {
+      keyboardActivation.diagnosticError = boundedText(diagnosticError);
+    } finally {
+      page.off('filechooser', chooserObserved);
+    }
+  }
+  assert.equal(keyboardActivation.filechooserEvents.length, 1, 'native Space opens exactly one file chooser');
+  assert.ok(keyboardActivation.press.completed !== null && keyboardActivation.press.error === null, 'native Space press completed');
+  assert.equal(keyboardActivation.diagnosticError, undefined, 'native picker diagnostics captured');
+  for (const type of ['keydown', 'keyup']) {
+    assert.ok(keyboardActivation.events.trace.some(event => event.type === type && event.key === ' ' && event.trusted && event.targetIsInput), `trusted Space ${type} targets file input`);
+  }
   await chooser.setFiles({ name: 'keyboard.json', mimeType: 'application/json', buffer: fixture });
   await page.waitForFunction(() => document.querySelector('[data-testid="pack-name"]')?.textContent === 'keyboard.json');
   await tabTo(id('load-example'));
@@ -142,13 +188,29 @@ fs.mkdirSync(evidence, { recursive: true });
     : { headless: false }); // Firefox uses Xvfb/Mesa in the offline worker.
   browserVersion = browser.version();
   fs.writeFileSync(path.join(evidence, 'browser-version.json'), JSON.stringify({ browser: browserName, version: browserVersion }));
-  const failures = [];
+  const failures = outbound;
   const context = await browser.newContext({ viewport: { width: 1440, height: 1000 }, colorScheme: 'light' });
+  await context.exposeBinding('__recordCspViolation', ({ page }, violation) => {
+    if (securityPolicyViolations.length < 100) securityPolicyViolations.push({ phase, page: boundedText(page.url()), ...violation });
+  });
+  context.on('page', page => {
+    page.on('console', message => {
+      if (['error', 'warning'].includes(message.type()) && consoleErrors.length < 100) consoleErrors.push({ phase, type: message.type(), text: boundedText(message.text()), location: { ...message.location(), url: boundedText(message.location().url) } });
+    });
+  });
   await context.route('**/*', route => {
     if (new URL(route.request().url()).origin !== origin) { failures.push(route.request().url()); return route.abort(); }
     return route.continue();
   });
   await context.addInitScript(() => {
+    document.addEventListener('securitypolicyviolation', event => {
+      void window.__recordCspViolation({
+        effectiveDirective: event.effectiveDirective.slice(0, 100),
+        violatedDirective: event.violatedDirective.slice(0, 100),
+        blockedURI: event.blockedURI.slice(0, 1000), disposition: event.disposition,
+        sourceFile: event.sourceFile.slice(0, 1000), lineNumber: event.lineNumber, columnNumber: event.columnNumber,
+      });
+    });
     window.__capabilityCalls = [];
     const forbidden = name => function () { window.__capabilityCalls.push(name); throw Error(`Forbidden capability: ${name}`); };
     window.WebSocket = forbidden('WebSocket');
@@ -168,7 +230,7 @@ fs.mkdirSync(evidence, { recursive: true });
   await unavailable.close();
   phase = 'positive-WebGL';
   const page = await context.newPage();
-  const errors = [];
+  const errors = browserErrors;
   page.on('pageerror', error => errors.push(error.message));
   const id = name => page.getByTestId(name);
   const text = name => id(name).textContent();
@@ -176,6 +238,7 @@ fs.mkdirSync(evidence, { recursive: true });
   const upload = (name, buffer) => id('import-file').setInputFiles({ name, mimeType: 'application/json', buffer });
   await page.goto(origin);
   assert.equal(await page.locator('html').getAttribute('lang'), 'en');
+  assert.equal(await page.locator('output.clock').getAttribute('aria-live'), 'off', 'per-frame clock does not announce as a live status');
   await page.waitForFunction(() => document.querySelector('[data-testid="viewer-canvas"]') || document.querySelector('[data-testid="renderer-error"]'));
   const rendererFailure = await id('renderer-error').count() ? await text('renderer-error') : null;
   fs.writeFileSync(path.join(evidence, 'renderer-diagnostics.json'), JSON.stringify({ browser: browserName, version: browserVersion, rendererFailure }));
@@ -362,9 +425,11 @@ fs.mkdirSync(evidence, { recursive: true });
   assert.deepEqual(await keyboardPage.evaluate(() => window.__capabilityCalls), []);
   assert.deepEqual(failures, [], 'builder has no outbound requests');
   assert.deepEqual(errors, [], 'builder has no uncaught browser errors');
-  fs.writeFileSync(path.join(evidence, 'browser-results.json'), JSON.stringify({ status: 'passed', browser: browserName, browserVersion, contrastMetrics, outbound: failures, errors, cases: [...baselineCases, ...builderCases, 'keyboard-tab-focus', 'keyboard-file-import', 'keyboard-example', 'keyboard-space-enter-transport', 'keyboard-native-range', 'keyboard-mobile-no-trap'] }, null, 2));
+  const builderAccessibility = await keyboardPage.evaluate(() => window.__builderAccessibility);
+  assert.deepEqual(securityPolicyViolations, [], 'no unexpected CSP violations, including builder select rendering');
+  fs.writeFileSync(path.join(evidence, 'browser-results.json'), JSON.stringify({ builderAccessibility, keyboardActivation, securityPolicyViolations, consoleErrors, reflowMethod: '640 and 320 CSS-pixel viewports approximate 1280px at 200% and 400%; not browser zoom or screen-reader verification', status: 'passed', browser: browserName, browserVersion, contrastMetrics, outbound: failures, errors, cases: [...baselineCases, ...builderCases, 'no-unexpected-csp-violations', 'keyboard-tab-focus', 'keyboard-file-import', 'keyboard-example', 'keyboard-space-enter-transport', 'keyboard-native-range', 'keyboard-mobile-no-trap'] }, null, 2));
 })().catch(error => {
-  fs.writeFileSync(path.join(evidence, 'browser-results.json'), JSON.stringify({ status: 'failed', browser: browserName, browserVersion, phase, unavailablePassed, contrastMetrics, completedBaselineCases: baselineCompleted ? baselineCases : [], keyboardDiagnostics, error: String(error) }, null, 2));
+  fs.writeFileSync(path.join(evidence, 'browser-results.json'), JSON.stringify({ keyboardActivation, securityPolicyViolations, consoleErrors, outbound, errors: browserErrors, status: 'failed', browser: browserName, browserVersion, phase, unavailablePassed, contrastMetrics, completedBaselineCases: baselineCompleted ? baselineCases : [], keyboardDiagnostics, error: String(error) }, null, 2));
   console.error(error); process.exitCode = 1;
 }).finally(async () => {
   if (browser) await browser.close();
