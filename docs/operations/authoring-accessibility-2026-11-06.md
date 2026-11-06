@@ -117,7 +117,90 @@ no type assertion, suppression, test change or workflow change. Static diff
 inspection is complete; execution of the corrected revision remains pending.
 The failed attempt is retained as evidence and is not replaced by a retry claim.
 
+## Exact-source qualification and diagnostic correction, 2026-11-06
+
+The first failed source was `0e2ceb39ef9c102d737713fde45907dbc877d67f`.
+After the guarded focus correction, source
+`c91435a7a2179465d93933b6f9ddc9ada7d72a56` passed all 12 checks, including
+[viewer run 42187130957](https://github.com/patchwerks/furbomek/actions/runs/42187130957)
+and [metadata run 42187131114](https://github.com/patchwerks/furbomek/actions/runs/42187131114).
+The viewer passed 66 unit cases per Node job and 54 browser cases in each of
+four browser/Node combinations; metadata passed 90 combined tests per Node job
+with no skips. This established bounded behavior, but its event diagnostics
+overwrote event `type` with the input's type, leaving event names incomplete.
+
+The next source, `4e2baf1439d67e9470f037ea0e5a7b9702b6b9d6`, names the
+control field `inputType` and asserts trusted Space keydown/keyup, one chooser
+and completed key press. This changes test diagnostics and assertions, not
+production UI bytes. Its [viewer run 42187842791](https://github.com/patchwerks/furbomek/actions/runs/42187842791)
+passed attempt 1 on both jobs:
+
+| Worker | Targeted lint | Unit cases | Chromium 156.0.8078.4 | Firefox 157.0 |
+| --- | --- | --- | --- | --- |
+| Node 22.22.3 | 16 files; 0 errors/warnings | 66 passed | 54 passed | 54 passed |
+| Node 26.7.0 | 16 files; 0 errors/warnings | 66 passed | 54 passed | 54 passed |
+
+Both jobs passed normal typechecking, the injected negative control,
+restored-source typechecking and static generation. All 43 existing browser
+cases remain in the 54-case inventory. The four diagnostic traces now retain
+`keydown`, `keypress`, `keyup` and `click` event names, trusted Space down/up
+targeting the input, `inputType=file`, exactly one chooser and a completed press,
+with no diagnostic error. These observations do not resolve the historical
+intermittent timeout. Instrumentation can change timing; successful instrumented
+runs are not proof that instrumentation repaired the cause.
+
+All four browser records have empty CSP-violation, outbound-request and page-error
+arrays, and zero console errors. Console warnings remain: one Chromium warning
+and seven Firefox warnings per run. Retained messages concern unsupported
+`WEBGL_lose_context`, destination-rectangle size during `drawElementsInstanced`,
+debug-renderer-info deprecation and intentional context loss. This is not a
+console-clean claim or a claim that every warning's cause is fully diagnosed.
+
+The exact-source [metadata run 42187842684](https://github.com/patchwerks/furbomek/actions/runs/42187842684)
+passed 90 combined tests per Node job: 59 core plus 31 metadata, with zero
+failures, skips, cancellations or todos. The actual unreadable-file permission
+case passed in both workers. [Non-live verification 42187842786](https://github.com/patchwerks/furbomek/actions/runs/42187842786)
+and [CodeQL 42187837510](https://github.com/patchwerks/furbomek/actions/runs/42187837510)
+also passed; all 12 source checks succeeded.
+
+## Artifact provenance and visual review, 2026-11-06
+
+| Artifact | GitHub ID | Verified downloaded ZIP SHA-256 |
+| --- | --- | --- |
+| Node 22 viewer qualification | 13488332935 | `16b34c54f0e124c717123319e6c9a0bee745ba9858676766ec3e78dc15ce3ae4` |
+| Node 26 viewer qualification | 13488491788 | `f716e2ec0d334435236cd0e0f4b50bfc0fd1b630b5c06f8cf1f9534f56188c7a` |
+
+Downloaded archive hashes match GitHub artifact metadata. Embedded source records
+identify `4e2baf1439d67e9470f037ea0e5a7b9702b6b9d6`; the enforcement pin is
+`cdd9147fac9141fa0c75b5058f9dce46c7885188`. Artifact names contain the workflow
+merge-context SHA `64d3313ee86c25885a9557d14564c82a8c8c68b3`, not the source
+identity. Verification used the explicit embedded source and provider metadata.
+Inert archive inspection checked unique allowlisted regular entries, no more than
+40 entries, at most 8 MiB per file and 32 MiB per job before extraction. No
+artifact was executed on the credentialed host.
+
+Coordinator independently inspected the earlier `c91435a7` artifacts and actual
+Node 22 Chromium builder-light, Node 26 Firefox builder-dark and Node 22 Firefox
+builder-mobile screenshots. Native arrows, focus and layout were readable, with
+no correction required. Production UI bytes are identical at `4e2baf14`.
+Coordinator also independently verified the latest ZIP hashes, embedded source
+and all four 54-case records, and inspected the latest Node 26 Firefox
+builder-error screenshot: readable validation error, disabled export/transport
+and a neutral proxy, with no visual correction required.
+
+These source results supersede the earlier execution-pending preparation
+checkpoint, while preserving the initial failure and diagnostic correction.
+The documentation-bearing head still requires its own checks and independent
+review; root will bind that completion in the PR/issue record. No merge,
+deployment, full accessibility, actual browser-zoom, screen-reader or physical
+qualification is claimed.
+
 ## Changelog
+
+- 2026-11-06: Recorded verified `4e2baf14` source qualification and artifact
+  digests; preserved the earlier type failure, `c91435a7` diagnostic limitation,
+  WebGL warnings and unresolved picker cause. Final documentation-head checks
+  and independent review remain pending.
 
 - 2026-11-06: Recorded first hosted normal-typecheck failure and guarded the
   indexed cue before focusing; corrected-revision execution remains pending.
