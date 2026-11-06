@@ -1,11 +1,24 @@
 <script setup lang="ts">
-import { onBeforeUnmount, ref, shallowRef, watch } from 'vue';
+import { nextTick, onBeforeUnmount, ref, shallowRef, watch } from 'vue';
 import { compileDraft, draftFromPack, newDraft } from './builder.mjs';
-import type { CompiledDraft } from './builder.mjs';
+import type { CompiledDraft, Draft } from './builder.mjs';
 import type { ParsedPack } from '../../packages/extension-preview/index.mjs';
 const props = defineProps<{ initialPack: ParsedPack | null }>();
 const emit = defineEmits<{ change: [pack: ParsedPack | null] }>();
 const draft = ref(props.initialPack ? draftFromPack(props.initialPack) : newDraft());
+const builder = ref<HTMLElement | null>(null);
+const addButton = ref<HTMLButtonElement | null>(null);
+// Identity belongs to the UI, never to the draft or exported presentation data.
+const cueKeys = new WeakMap<Draft['cues'][number], number>();
+let nextCueKey = 0;
+function cueKey(cue: Draft['cues'][number]) {
+  let key = cueKeys.get(cue);
+  if (key === undefined) { key = nextCueKey++; cueKeys.set(cue, key); }
+  return key;
+}
+function focusCue(cue: Draft['cues'][number]) {
+  builder.value?.querySelector<HTMLInputElement>(`#cue-time-${cueKey(cue)}`)?.focus();
+}
 const error = ref('');
 const compiled = shallowRef<CompiledDraft | null>(null);
 const urls = new Map<string, ReturnType<typeof setTimeout>>();
@@ -17,8 +30,24 @@ watch(draft, () => {
   emit('change', compiled.value?.pack ?? null);
 }, { deep: true, immediate: true, flush: 'sync' });
 function start(preset: string) { draft.value = newDraft(preset); }
-function addCue() {
-  if (draft.value.cues.length < 64) draft.value.cues.push({ atMs: '1000', value: 'curious' });
+async function addCue() {
+  if (draft.value.cues.length >= 64) return;
+  draft.value.cues.push({ atMs: '1000', value: 'curious' });
+  const cue = draft.value.cues[draft.value.cues.length - 1];
+  await nextTick();
+  focusCue(cue);
+}
+async function removeCue(index: number, event: Event) {
+  if (index === 0) return;
+  const row = event.currentTarget instanceof Element ? event.currentTarget.closest('.cue-row') : null;
+  const moveFocus = row?.contains(document.activeElement);
+  const next = draft.value.cues[index + 1] ?? (index > 1 ? draft.value.cues[index - 1] : null);
+  draft.value.cues.splice(index, 1);
+  await nextTick();
+  if (moveFocus) {
+    if (next) focusCue(next);
+    else addButton.value?.focus();
+  }
 }
 function download() {
   if (!compiled.value) return;
@@ -36,7 +65,7 @@ onBeforeUnmount(() => { for (const [url, timer] of urls) { clearTimeout(timer); 
 </script>
 
 <template>
-  <section class="inspector-section builder" aria-labelledby="builder-title">
+  <section ref="builder" class="inspector-section builder" aria-labelledby="builder-title">
     <h2 id="builder-title">Build a presentation pack</h2>
     <p class="helper">Local draft only. Every edit pauses and resets the preview. Start new with a preset, or edit the pack you opened.</p>
     <div class="builder-actions" aria-label="Starter presets">
@@ -51,16 +80,16 @@ onBeforeUnmount(() => { for (const [url, timer] of urls) { clearTimeout(timer); 
     <h3 class="cue-heading">Cues <span class="helper">{{ draft.cues.length }} / 64</span></h3>
     <p class="helper">Export orders cues by time and preserves row order for ties. Sequence and capabilities are derived automatically.</p>
     <ol class="cue-list">
-      <li v-for="(cue, index) in draft.cues" :key="index" class="cue-row" :data-testid="`cue-${index}`">
-        <div><label class="form-label" :for="`cue-time-${index}`">Cue {{ index + 1 }} time (ms)</label><input :id="`cue-time-${index}`" v-model="cue.atMs" class="form-control" type="text" inputmode="numeric" maxlength="8" :disabled="index === 0" aria-describedby="builder-error"></div>
-        <div><label class="form-label" :for="`cue-value-${index}`">Cue {{ index + 1 }} value</label><select :id="`cue-value-${index}`" v-model="cue.value" class="form-select" :disabled="index === 0"><option value="neutral">Neutral expression</option><option value="curious">Curious expression</option><option value="acknowledge">Acknowledge reaction</option></select></div>
+      <li v-for="(cue, index) in draft.cues" :key="cueKey(cue)" class="cue-row" :data-testid="`cue-${index}`">
+        <div><label class="form-label" :for="`cue-time-${cueKey(cue)}`">Cue {{ index + 1 }} time (ms)</label><input :id="`cue-time-${cueKey(cue)}`" v-model="cue.atMs" class="form-control" type="text" inputmode="numeric" maxlength="8" :disabled="index === 0" aria-describedby="builder-error"></div>
+        <div><label class="form-label" :for="`cue-value-${cueKey(cue)}`">Cue {{ index + 1 }} value</label><select :id="`cue-value-${cueKey(cue)}`" v-model="cue.value" class="form-select" :disabled="index === 0" aria-describedby="builder-error"><option value="neutral">Neutral expression</option><option value="curious">Curious expression</option><option value="acknowledge">Acknowledge reaction</option></select></div>
         <span v-if="index === 0" class="helper">Locked reset</span>
-        <button v-else class="btn btn-outline-secondary" :aria-label="`Remove cue ${index + 1}`" @click="draft.cues.splice(index, 1)">Remove</button>
+        <button v-else class="btn btn-outline-secondary" :aria-label="`Remove cue ${index + 1}`" @click="removeCue(index, $event)">Remove</button>
       </li>
     </ol>
-    <button class="btn btn-outline-secondary" data-testid="add-cue" :disabled="draft.cues.length >= 64" @click="addCue">Add cue</button>
-    <p id="builder-error" class="error-message" role="alert" data-testid="builder-error">{{ error }}</p>
-    <p v-if="!error" class="helper" role="status">Valid draft. Ready to preview and export.</p>
+    <button ref="addButton" class="btn btn-outline-secondary" data-testid="add-cue" :disabled="draft.cues.length >= 64" @click="addCue">Add cue</button>
+    <p id="builder-error" class="error-message" role="alert" aria-atomic="true" data-testid="builder-error">{{ error }}</p>
+    <p class="helper" role="status" aria-atomic="true">{{ !error ? 'Valid draft. Ready to preview and export.' : '' }}</p>
     <button class="btn btn-primary" data-testid="export-pack" :disabled="!compiled" @click="download">Export JSON</button>
   </section>
 </template>
