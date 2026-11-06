@@ -103,7 +103,7 @@ async function runKeyboard(page) {
   page.on('filechooser', chooserObserved);
   await id('import-file').evaluate(element => {
     window.__pickerTrace = [];
-    window.__pickerState = () => ({ connected: element.isConnected, type: element.type, disabled: element.disabled, inertAncestor: !!element.closest('[inert]'), focused: document.activeElement === element, documentFocused: document.hasFocus(), visibility: document.visibilityState, activation: navigator.userActivation ? { active: navigator.userActivation.isActive, hasBeenActive: navigator.userActivation.hasBeenActive } : null });
+    window.__pickerState = () => ({ connected: element.isConnected, inputType: element.type, disabled: element.disabled, inertAncestor: !!element.closest('[inert]'), focused: document.activeElement === element, documentFocused: document.hasFocus(), visibility: document.visibilityState, activation: navigator.userActivation ? { active: navigator.userActivation.isActive, hasBeenActive: navigator.userActivation.hasBeenActive } : null });
     window.__pickerBefore = window.__pickerState();
     window.__pickerListener = event => {
       if (window.__pickerTrace.length < 20) window.__pickerTrace.push({ type: event.type, phase: event.eventPhase, key: event.key || null, repeat: event.repeat || false, modifiers: { alt: !!event.altKey, ctrl: !!event.ctrlKey, meta: !!event.metaKey, shift: !!event.shiftKey }, trusted: event.isTrusted, defaultPrevented: event.defaultPrevented, targetIsInput: event.target === element, time: performance.now(), ...window.__pickerState() });
@@ -132,6 +132,12 @@ async function runKeyboard(page) {
     } finally {
       page.off('filechooser', chooserObserved);
     }
+  }
+  assert.equal(keyboardActivation.filechooserEvents.length, 1, 'native Space opens exactly one file chooser');
+  assert.ok(keyboardActivation.press.completed !== null && keyboardActivation.press.error === null, 'native Space press completed');
+  assert.equal(keyboardActivation.diagnosticError, undefined, 'native picker diagnostics captured');
+  for (const type of ['keydown', 'keyup']) {
+    assert.ok(keyboardActivation.events.trace.some(event => event.type === type && event.key === ' ' && event.trusted && event.targetIsInput), `trusted Space ${type} targets file input`);
   }
   await chooser.setFiles({ name: 'keyboard.json', mimeType: 'application/json', buffer: fixture });
   await page.waitForFunction(() => document.querySelector('[data-testid="pack-name"]')?.textContent === 'keyboard.json');
