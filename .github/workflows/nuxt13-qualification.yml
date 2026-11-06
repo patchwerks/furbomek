@@ -32,7 +32,7 @@ jobs:
           ref: ${{ github.event.pull_request.head.sha || github.sha }}
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
         with:
-          ref: c0c3f7ce44cfa3db34cbe46a723bf1fc16b56b6c
+          ref: 6d829351c305a56fb8104469446ae574a07dec7b
           path: baseline
           persist-credentials: false
       - name: Bounded baseline and candidate qualification (advisory)
@@ -42,7 +42,7 @@ jobs:
           trusted="$GITHUB_WORKSPACE/baseline"
           mkdir -p evidence
           git -C "$GITHUB_WORKSPACE/candidate" rev-parse HEAD > evidence/candidate-sha.txt
-          printf '%s\n' c0c3f7ce44cfa3db34cbe46a723bf1fc16b56b6c > evidence/baseline-sha.txt
+          printf '%s\n' 6d829351c305a56fb8104469446ae574a07dec7b > evidence/baseline-sha.txt
           candidate=$(mktemp -d "$RUNNER_TEMP/nuxt13-source.XXXXXX")
           for variant in baseline candidate; do
             # Refuse source indirection before host staging. No candidate code runs.
@@ -434,7 +434,7 @@ jobs:
           mkdir -p evidence
           if export_evidence; then
             git -C "$GITHUB_WORKSPACE/candidate" rev-parse HEAD > evidence/candidate-sha.txt
-            printf '%s\n' c0c3f7ce44cfa3db34cbe46a723bf1fc16b56b6c > evidence/baseline-sha.txt
+            printf '%s\n' 6d829351c305a56fb8104469446ae574a07dec7b > evidence/baseline-sha.txt
           else
             exit 1
           fi

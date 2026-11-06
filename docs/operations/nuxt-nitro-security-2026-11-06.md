@@ -6,7 +6,7 @@ status: active
 ---
 # Nuxt/Nitro security patch candidate
 
-**Persisted source qualified; independent acceptance pending:** issue [13](https://github.com/patchwerks/furbomek/issues/13) has a bounded Nuxt 4.6.3 → 4.6.4 patch candidate, targeting Nitro 2.13.6 through ordinary supported resolution. The accepted comparison revision is `c0c3f7ce44cfa3db34cbe46a723bf1fc16b56b6c`. Application source, configuration, server and viewer manifests/locks, and accepted CI helpers are unchanged. No override, forced peer resolution or unrelated direct upgrade is permitted.
+**Earlier persisted source qualified; refreshed source qualification and independent acceptance pending:** issue [13](https://github.com/patchwerks/furbomek/issues/13) has a bounded Nuxt 4.6.3 → 4.6.4 patch candidate, targeting Nitro 2.13.6 through ordinary supported resolution. The refreshed accepted comparison revision is `6d829351c305a56fb8104469446ae574a07dec7b`; earlier run records below retain their original baseline. Application source, configuration, server and viewer manifests/locks, and accepted CI helpers are unchanged. No override, forced peer resolution or unrelated direct upgrade is permitted.
 
 Official [Nuxt 4.6.4 release notes](https://github.com/nuxt/nuxt/releases/tag/v4.6.4) and [Nitro 2.13.6 release notes](https://github.com/nitrojs/nitro/releases/tag/v2.13.6) describe additional security fixes and changed production error detail, dev-host checks, workspace detection and route rules. These upstream statements motivate qualification; they do not establish application reachability or runtime compatibility.
 
@@ -63,6 +63,8 @@ Both npm audit responses contain 28 baseline package findings (25 moderate, 3 lo
 
 ### Persisted-source qualification
 
+This historical qualification used accepted baseline/enforcement `c0c3f7ce44cfa3db34cbe46a723bf1fc16b56b6c`. Its artifact identities and results are unchanged by the refresh; they do not qualify the accepted builder/metadata additions combined with the security patch.
+
 **Observed at exact source `fe95b52b7af9fff34cb429da151d713c0e3cd6f1`:** [Nuxt/Nitro run 42145701660](https://github.com/patchwerks/furbomek/actions/runs/42145701660) succeeded on both Node 22.22.3 and 26.7.0. The coordinator independently verified the official artifact digests, source/baseline identities, exact `persisted` mode and the same checked-in lock SHA-256 `8fcda3cd6ef3b23dc4aad02e18a5be400d3697cea981d688bb29e536635f4ef0` in both artifacts. This is qualification of the selected persisted lock, distinct from the earlier ephemeral resolution.
 
 Both runtimes passed baseline/candidate normal prepare/build/types, the complete offline root lifecycle including nested server installation, valid dependency trees, malformed Vue/TypeScript parser controls, self-import/constant-loop enforcement and inspector build. App/repository lint remained zero errors and warnings, with enabled effective rules unchanged. The coordinator verified all 12 reported source checks successful, including [non-live verification 42145701684](https://github.com/patchwerks/furbomek/actions/runs/42145701684) and [CodeQL 42145698034](https://github.com/patchwerks/furbomek/actions/runs/42145698034). These results bind to the source SHA above, not a subsequent documentation revision.
@@ -97,3 +99,18 @@ Rollback is a reviewed revert of this bounded manifest/lock/workflow series to t
 - 2026-11-06: Removed the initial branch-push bootstrap trigger for the persisted stage and required exact persisted-lock mode for pull-request success; manual dispatch remains available for explicitly exploratory evidence. No run result is inferred from this workflow edit.
 - 2026-11-06: Recorded successful first ephemeral qualification, verified artifact identities, exact selected Node 26 lock, metadata-only cross-runtime lock differences and honest audit residuals. Persisted-head and viewer qualification remain pending.
 - 2026-11-06: Recorded successful persisted-source root/viewer/non-live/CodeQL checks at `fe95b52b7af9fff34cb429da151d713c0e3cd6f1`, verified artifact provenance and selected coordinator screenshot inspection. Final documentation-head checks and independent PR 50 acceptance remain pending.
+
+
+## Accepted-main refresh preparation
+
+**Observed preparation at 2026-11-06T04:09:16Z:** PR 50 was locally integrated with accepted main `6d829351c305a56fb8104469446ae574a07dec7b`, preserving the accepted PR 48 builder/metadata tooling and PR 49 README. Both the root advisory baseline and viewer enforcement pins now identify that exact accepted revision. The root comparison therefore includes the accepted builder/metadata source on both sides, with the same proposed security dependency patch. Historical run evidence above does not qualify this refreshed source.
+
+The original PR 50 `package.json` and `package-lock.json` bytes are preserved from `3a16463d859e6331c7125b262d28c3621b2c6d35`; the lock SHA-256 remains `8fcda3cd6ef3b23dc4aad02e18a5be400d3697cea981d688bb29e536635f4ef0`. No dependency resolution was performed for this refresh. Nuxt 4.6.4, Nitro 2.13.6 and the 14 other direct installed versions remain fixed. Accepted application, builder, metadata, tests, README and other workflow bytes are preserved.
+
+The viewer workflow retains accepted `builder.d.mts` admission, builder screenshot and lint artifact allowlists, root preparation and zero-warning targeted authoring lint. Its actual browser/CLI roundtrip and metadata integration tests remain unchanged; the separate metadata workflow remains byte-identical to accepted main. The only main-relative paths are the original six PR 50 files: root manifest/lock, two qualification workflows, PLAN and this record.
+
+**Pending:** fresh root baseline/candidate qualification on both pinned Node runtimes, complete accepted viewer/builder/browser and metadata checks, other applicable exact-head checks, artifact inspection and independent review of the refreshed published head. Local preparation uses only static data/syntax and diff checks; no candidate installation, hook, build, test or configuration execution runs on the host. Merge, deployment, issue closure, advisory dismissal and new risk acceptance remain excluded.
+
+### Refresh changelog
+
+- 2026-11-06T04:09:16Z: Integrated accepted main and advanced both qualification pins while preserving the selected lock and accepted features; fresh execution and review remain pending.

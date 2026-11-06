@@ -2,10 +2,13 @@
 import { computed, onBeforeUnmount, onMounted, ref, shallowRef } from 'vue';
 import { MAX_PACK_BYTES, parsePack, samplePack } from '../../packages/extension-preview/index.mjs';
 import exampleText from '../../packages/extension-preview/fixtures/reaction.json?raw';
+import PackBuilder from './PackBuilder.vue';
 import { createProxy } from './proxy.mjs';
 import type { ParsedPack, Sample } from '../../packages/extension-preview/index.mjs';
 import type { ProxyHandle } from './proxy.mjs';
 
+const building = ref(false);
+const builderSource = shallowRef<ParsedPack | null>(null);
 const neutral: Sample = Object.freeze({ positionMs: 0, expression: 'neutral', reaction: null, reactionProgress: 0 });
 const pack = shallowRef<ParsedPack | null>(parsePack(new TextEncoder().encode(exampleText)));
 const filename = ref('Bundled reaction example');
@@ -107,6 +110,20 @@ function loadExample() {
   pack.value = parsePack(new TextEncoder().encode(exampleText));
   filename.value = 'Bundled reaction example';
 }
+function enterBuild() {
+  ++nonce;
+  importing.value = false;
+  importError.value = '';
+  builderSource.value = pack.value;
+  reset();
+  building.value = true;
+}
+function draftChanged(value: ParsedPack | null) {
+  clearPack();
+  pack.value = value;
+  filename.value = value ? `${value.packId} (draft)` : '';
+}
+function leaveBuild() { reset(); building.value = false; }
 function failRenderer(message: string) {
   ready.value = false;
   reset();
@@ -181,20 +198,25 @@ onBeforeUnmount(() => {
       </section>
       <aside class="inspector" aria-label="Pack inspector">
         <section class="inspector-section">
-          <h2>Preview pack</h2>
+          <h2>{{ building ? 'Pack workspace' : 'Preview pack' }}</h2>
+          <button v-if="!building" class="btn btn-outline-secondary mode-button" data-testid="build-mode" @click="enterBuild">Build a pack</button>
+          <button v-else class="btn btn-outline-secondary mode-button" data-testid="preview-mode" @click="leaveBuild">Return to preview</button>
+          <template v-if="!building">
           <p class="helper">Load one presentation pack to inspect its expressions and reactions.</p>
           <label class="form-label" for="import-file">Import local JSON <span class="helper">(max 1 MiB)</span></label>
           <input id="import-file" ref="fileInput" class="form-control" type="file" accept=".json,application/json" data-testid="import-file" @change="importFile">
           <button class="btn btn-link example-button" data-testid="load-example" @click="loadExample">Use bundled example</button>
           <p v-if="importing" role="status">Reading local file…</p>
           <p v-if="importError" class="error-message" role="alert" data-testid="import-error">{{ importError }}</p>
+          </template>
           <div v-if="pack" class="pack-details">
             <strong data-testid="pack-name">{{ filename }}</strong>
             <span>{{ pack.packId }} · {{ pack.packVersion }}</span>
             <span>Contract {{ pack.previewContractVersion }} · {{ pack.events.length }} events · {{ duration }} ms</span>
           </div>
-          <p v-else-if="!importing" class="helper">No pack loaded. Choose a valid JSON file or the bundled example.</p>
+          <p v-else-if="!importing" class="helper">{{ building ? 'Fix the draft to restore the preview.' : 'No pack loaded. Choose a valid JSON file or the bundled example.' }}</p>
         </section>
+        <PackBuilder v-if="building" :initial-pack="builderSource" @change="draftChanged" />
         <section class="inspector-section" aria-labelledby="state-title">
           <h2 id="state-title">Sampled state</h2>
           <dl class="state-grid"><dt>Expression</dt><dd data-testid="expression">{{ sample.expression }}</dd><dt>Reaction</dt><dd data-testid="reaction">{{ sample.reaction ?? 'none' }}</dd></dl>

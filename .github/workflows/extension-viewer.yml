@@ -3,10 +3,10 @@ on:
   workflow_dispatch:
   pull_request:
     branches: [main, codex/32-extension-contract]
-    paths: ['apps/extension-viewer/**', 'packages/extension-preview/**', '.github/workflows/extension-viewer.yml', 'package.json', 'package-lock.json', 'server/package.json', 'server/package-lock.json']
+    paths: ['apps/extension-viewer/**', 'packages/extension-preview/**', 'tools/presentation-pack/**', '.github/workflows/extension-viewer.yml', 'package.json', 'package-lock.json', 'server/package.json', 'server/package-lock.json']
   push:
     branches: [main, codex/32-extension-contract]
-    paths: ['apps/extension-viewer/**', 'packages/extension-preview/**', '.github/workflows/extension-viewer.yml', 'package.json', 'package-lock.json', 'server/package.json', 'server/package-lock.json']
+    paths: ['apps/extension-viewer/**', 'packages/extension-preview/**', 'tools/presentation-pack/**', '.github/workflows/extension-viewer.yml', 'package.json', 'package-lock.json', 'server/package.json', 'server/package-lock.json']
 permissions:
   contents: read
 jobs:
@@ -35,7 +35,7 @@ jobs:
           ref: ${{ github.event.pull_request.head.sha || github.sha }}
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
         with:
-          ref: c0c3f7ce44cfa3db34cbe46a723bf1fc16b56b6c
+          ref: 6d829351c305a56fb8104469446ae574a07dec7b
           path: baseline
           persist-credentials: false
       - name: Validate source, provision dependencies, then qualify offline (advisory)
@@ -102,7 +102,7 @@ jobs:
               assert not file.is_symlink()
               if file.is_file():
                   assert file.stat().st_size < 1024 * 1024
-                  assert file.relative_to(app).as_posix() in {"public/THREE-LICENSE.txt", "proxy.d.mts"} or file.suffix in {".json", ".vue", ".css", ".ts", ".mjs", ".cjs", ".md"}, f"Unreviewed asset: {file}"
+                  assert file.relative_to(app).as_posix() in {"public/THREE-LICENSE.txt", "proxy.d.mts", "builder.d.mts"} or file.suffix in {".json", ".vue", ".css", ".ts", ".mjs", ".cjs", ".md"}, f"Unreviewed asset: {file}"
           VALIDATE_SOURCE
           git -C "$GITHUB_WORKSPACE/candidate" archive HEAD | tar -xf - -C "$candidate"
           chmod -R a+rX "$candidate"
@@ -131,8 +131,8 @@ jobs:
           import os, stat
           from pathlib import Path
           root = Path("/scratch/evidence")
-          build_allowed = {"ci.log", "prepare.log", "generate.log", "types.log", "types-negative-control.log", "unit.log", "versions.txt"}
-          browser_allowed = {"browser.log", "browser-version.json", "renderer-diagnostics.json", "webgl.json", "browser-results.json", "desktop-light.png", "desktop-dark.png", "mobile.png", "mid-cue.png", "file-selector-hover.png"}
+          build_allowed = {"ci.log", "prepare.log", "generate.log", "types.log", "types-negative-control.log", "unit.log", "versions.txt", "root-prepare.log", "authoring-lint.json"}
+          browser_allowed = {"browser.log", "browser-version.json", "renderer-diagnostics.json", "webgl.json", "browser-results.json", "desktop-light.png", "desktop-dark.png", "mobile.png", "mid-cue.png", "file-selector-hover.png", "builder-light.png", "builder-dark.png", "builder-mobile.png", "builder-error.png"}
           total = 0
           assert root.is_dir() and not root.is_symlink()
           paths = list(root.iterdir())
@@ -249,6 +249,8 @@ jobs:
             cd /scratch/source
             node --version > /scratch/evidence/versions.txt
             npm --version >> /scratch/evidence/versions.txt
+            timeout 120 ./node_modules/.bin/nuxt prepare > /scratch/evidence/root-prepare.log 2>&1
+            timeout 120 ./node_modules/.bin/eslint apps/extension-viewer tools/presentation-pack --max-warnings 0 --format json > /scratch/evidence/authoring-lint.json
             timeout 120 ./node_modules/.bin/nuxt prepare apps/extension-viewer > /scratch/evidence/prepare.log 2>&1
             timeout 120 ./node_modules/.bin/vue-tsc --noEmit -p apps/extension-viewer/tsconfig.json > /scratch/evidence/types.log 2>&1
             timeout 240 node apps/extension-viewer/tests/typecheck-negative-control.mjs > /scratch/evidence/types-negative-control.log 2>&1
@@ -291,7 +293,7 @@ jobs:
           done
           export_evidence
           git -C "$GITHUB_WORKSPACE/candidate" rev-parse HEAD > evidence/candidate-sha.txt
-          printf '%s\n' c0c3f7ce44cfa3db34cbe46a723bf1fc16b56b6c > evidence/enforcement-sha.txt
+          printf '%s\n' 6d829351c305a56fb8104469446ae574a07dec7b > evidence/enforcement-sha.txt
           test "$browser_result" = 0
       - name: Upload advisory evidence for source and screenshot review
         if: always()

@@ -1186,7 +1186,37 @@ binds source, enforcement and artifacts and preserves JavaScript declaration lim
 Final documentation-head checks and independent PR 46 acceptance remain required;
 issue 32 stays open.
 
+**Pack authoring preparation, 2026-11-05 (candidate):** issue 32 now has two
+bounded parallel slices: a local browser builder in the existing viewer and
+separate Node-only companion metadata/validation tools. The builder edits only
+presentation pack v1, derives ordering/capabilities, and validates exact export
+bytes with the unchanged parser. Companion metadata stays outside the timeline
+and binds self-declared author/license to exact pack bytes. No core parser/runtime or timeline-schema/dependency/live-authority change
+is included. See the
+[builder preparation record](docs/operations/pack-builder-2026-11-05.md).
+Isolated execution, screenshot review, exact-head checks and independent
+acceptance remain pending; issue 32 remains open.
+
+**Pack authoring source qualification, 2026-11-05:** combined source
+`1a0e5ae66e4ffe28c7cdc2c03860cae2f97ced38` passed
+[viewer run 41994353036](https://github.com/patchwerks/furbomek/actions/runs/41994353036).
+Node 22.22.3 and 26.7.0 each passed targeted lint (16 files, zero errors/warnings),
+normal/negative-control/restored typechecking, static generation and 66
+core/artifact/helper tests. Chromium 156.0.8078.4 and Firefox 157.0 each passed
+43 cases per Node job, including actual downloaded-pack CLI metadata validation
+and exact-byte tamper rejection, with empty outbound/error arrays. Downloaded
+archive digests matched GitHub metadata. The
+[builder record](docs/operations/pack-builder-2026-11-05.md) records provenance
+and the first-attempt metadata-test lint correction. Coordinator inspected actual builder light/dark/mobile/error and default-preview
+screenshots across Chromium/Firefox; no visual correction was required. Final
+documentation-head checks and independent PR 48 acceptance remain pending;
+issue 32 stays open.
+
 ## Changelog
+
+- 2026-11-05: Recorded exact-source browser authoring matrix and combined download/metadata proof; retained visual, final-head and independent acceptance gates.
+
+- 2026-11-05: Prepared parallel browser pack authoring and separate companion metadata validation; retained unchanged timeline contract and pending isolated qualification.
 
 - 2026-11-04: Recorded exact-source viewer language/type proof and browser matrix; retained final documentation-head and independent PR 46 acceptance.
 
@@ -1218,3 +1248,5 @@ issue 32 stays open.
 - 2026-11-06: Issue 13 first hosted run [42144626039](https://github.com/patchwerks/furbomek/actions/runs/42144626039) passed baseline/candidate root qualification on Node 22/26 using ephemeral minimal lock resolution. The coordinator persisted the exact reviewed Node 26 lock; all 14 other direct versions remain fixed. Both runtimes still require fresh persisted-head qualification, and viewer/independent acceptance remain pending. Audit package-finding changes do not clear the three residual advisories; see the [evidence record](docs/operations/nuxt-nitro-security-2026-11-06.md#current-evidence-and-remaining-gates).
 
 - 2026-11-06: Issue 13 persisted source `fe95b52b7af9fff34cb429da151d713c0e3cd6f1` passed both Node 22/26 root qualification on the exact selected lock, viewer prepare/types/static generation and 62/62 tests per runtime, all four 31-case browser configurations, non-live verification and CodeQL. Selected coordinator screenshot inspection required no correction. See the [persisted evidence](docs/operations/nuxt-nitro-security-2026-11-06.md#persisted-source-qualification). Final documentation-head checks and independent PR 50 acceptance remain pending; complete security remediation, merge and deployment are not claimed.
+
+- 2026-11-06T04:09:16Z: Refreshed issue 13 / PR 50 against accepted main `6d829351c305a56fb8104469446ae574a07dec7b`, preserving accepted builder/metadata tooling and README plus the exact previously selected security lock. Both qualification pins now use accepted main. Historical results remain scoped to their original source; fresh hosted qualification and independent review of this refreshed head are pending. No merge, deployment or issue closure.
