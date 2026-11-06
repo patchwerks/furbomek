@@ -189,7 +189,7 @@ onBeforeUnmount(() => {
             <button class="btn btn-primary" data-testid="play-pause" :disabled="!ready || !pack || importing" @click="togglePlay">{{ playing ? 'Pause' : 'Play' }}</button>
             <button class="btn btn-outline-secondary" data-testid="reset" :disabled="!pack" @click="reset">Reset</button>
             <span class="playback-state" data-testid="playback-state">{{ playing ? 'playing' : 'paused' }}</span>
-            <output class="clock"><span data-testid="position-ms">{{ Math.floor(position) }}</span> / {{ duration }} ms</output>
+            <output class="clock" aria-live="off"><span data-testid="position-ms">{{ Math.floor(position) }}</span> / {{ duration }} ms</output>
           </div>
           <label class="form-label" for="timeline">Timeline</label>
           <input id="timeline" class="form-range" type="range" data-testid="timeline" min="0" :max="duration || 1" step="1" :value="position" :disabled="!pack" :aria-valuetext="`${Math.floor(position)} milliseconds`" @input="seekInput">
