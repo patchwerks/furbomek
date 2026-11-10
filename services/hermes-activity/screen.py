@@ -56,11 +56,15 @@ class CapturedFrame:
     captured_at_ms: int
 
 
-@dataclass(frozen=True, slots=True)
 class CaptureError(RuntimeError):
     """Capture failed before publication."""
 
     reason: str
+
+    def __init__(self, reason: str) -> None:
+        """Preserve writable exception traceback fields across context managers."""
+        self.reason = reason
+        super().__init__(reason)
 
     @override
     def __str__(self) -> str:
