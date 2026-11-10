@@ -4,8 +4,10 @@ from __future__ import annotations
 
 import os
 import select
+import stat
 import subprocess
 import time
+from contextlib import suppress
 from dataclasses import dataclass
 from pathlib import Path
 from subprocess import PIPE, Popen
@@ -20,6 +22,7 @@ MAX_SOURCE_PIXELS: Final = 4096 * 4096
 WINDOW_LINE_FIELDS: Final = 9
 FRAME_HEADER_SIZE: Final = 28
 HELPER_NAME: Final = "x11-window-capture"
+MAX_ERROR_BYTES: Final = 65_535
 
 
 @dataclass(frozen=True, slots=True)
@@ -61,10 +64,23 @@ def helper_path(profile_home: Path) -> Path:
     """Return the operator-installed private native helper."""
     path = profile_home / "app-window" / HELPER_NAME
     try:
+        profile = profile_home.lstat()
+        directory = path.parent.lstat()
         metadata = path.lstat()
     except OSError as exc:
         raise CaptureError("app-window native helper is not installed") from exc
-    if path.is_symlink() or not path.is_file() or metadata.st_uid != os.getuid() or not os.access(path, os.X_OK):
+    if (
+        not stat.S_ISDIR(profile.st_mode)
+        or profile.st_uid != os.getuid()
+        or profile.st_mode & 0o022
+        or not stat.S_ISDIR(directory.st_mode)
+        or directory.st_uid != os.getuid()
+        or directory.st_mode & 0o077
+        or not stat.S_ISREG(metadata.st_mode)
+        or metadata.st_uid != os.getuid()
+        or metadata.st_mode & 0o077
+        or not os.access(path, os.X_OK)
+    ):
         raise CaptureError("app-window native helper is not a private executable")
     return path
 
@@ -75,7 +91,7 @@ def list_windows(profile_home: Path) -> tuple[WindowInfo, ...]:
     if not health.alive:
         raise CaptureError("dedicated app-window display is unavailable")
     helper = helper_path(profile_home)
-    env = os.environ | dict(health.env)
+    env = dict(health.env)
     try:
         result = subprocess.run(
             (str(helper), "--list"),
@@ -93,7 +109,13 @@ def list_windows(profile_home: Path) -> tuple[WindowInfo, ...]:
     display = health.env.get("DISPLAY")
     if generation is None or display is None:
         raise CaptureError("dedicated app-window identity is incomplete")
-    entries = tuple(_parse_window_line(line, generation, display) for line in result.stdout.splitlines() if line)
+    entries: list[WindowInfo] = []
+    for line in result.stdout.splitlines():
+        if line:
+            try:
+                entries.append(_parse_window_line(line, generation, display))
+            except psutil.Error:
+                continue
     return tuple(entry for entry in entries if _is_local(entry.identity))
 
 
@@ -119,26 +141,31 @@ class NativeWindowCapture:
         self._process = None
         if process is None:
             return
-        if process.stdin is not None:
-            try:
-                process.stdin.write(b"QUIT\n")
-                process.stdin.flush()
-            except BrokenPipeError:
-                process.wait(timeout=2.0)
-            finally:
-                process.stdin.close()
         try:
-            process.wait(timeout=2.0)
-        except subprocess.TimeoutExpired:
-            process.kill()
-            process.wait()
-        if process.stdout is not None:
-            process.stdout.close()
-        if process.stderr is not None:
-            process.stderr.close()
+            if process.stdin is not None and process.poll() is None:
+                with suppress(BrokenPipeError):
+                    process.stdin.write(b"QUIT\n")
+                    process.stdin.flush()
+            try:
+                process.wait(timeout=0.25)
+            except subprocess.TimeoutExpired:
+                process.kill()
+                process.wait(timeout=2.0)
+        finally:
+            for stream in (process.stdin, process.stdout, process.stderr):
+                if stream is not None:
+                    with suppress(BrokenPipeError):
+                        stream.close()
 
     def capture(self, target: WindowIdentity) -> CapturedFrame:
         """Capture the selected named window pixmap and revalidate its identity."""
+        try:
+            return self._capture(target)
+        except (CaptureError, OSError, subprocess.SubprocessError) as error:
+            self.close()
+            raise CaptureError("app-window capture failed; explicit resume is required") from error
+
+    def _capture(self, target: WindowIdentity) -> CapturedFrame:
         process = self._ensure_process(target.display)
         stdin = process.stdin
         stdout = process.stdout
@@ -149,6 +176,8 @@ class NativeWindowCapture:
         header = _read_exact(stdout, FRAME_HEADER_SIZE)
         if header[:4] == b"XERR":
             length = int.from_bytes(header[8:12], "big")
+            if length > MAX_ERROR_BYTES:
+                raise CaptureError("native app-window error exceeds size limit")
             message = _read_exact(stdout, length).decode("utf-8", errors="replace")
             raise CaptureError(message)
         if header[:4] != b"XCAP" or int.from_bytes(header[4:6], "big") != 1:
@@ -173,7 +202,7 @@ class NativeWindowCapture:
                 raise CaptureError("app-window connection ended; explicit resume is required")
             return self._process
         helper = helper_path(self._profile_home)
-        environment = os.environ | dict(read_desktop_env(self._profile_home))
+        environment = dict(read_desktop_env(self._profile_home))
         environment["DISPLAY"] = display
         try:
             self._process = Popen((str(helper), "--serve"), env=environment, stdin=PIPE, stdout=PIPE, stderr=PIPE)

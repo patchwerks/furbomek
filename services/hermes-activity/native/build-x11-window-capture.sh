@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 set -euo pipefail
+umask 077
 
 output=${1:?usage: build-x11-window-capture.sh OUTPUT}
 source_dir=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
