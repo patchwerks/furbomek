@@ -9,7 +9,7 @@ from typing import Annotated, assert_never
 
 import typer
 
-from screen import CaptureError, invalidate_frames
+from screen import CaptureError
 from window_capture import list_windows, select_window
 from window_consent import ConsentDocument, ConsentError, ConsentMode, WindowConsentStore
 
@@ -45,7 +45,6 @@ def cli(
             case WindowAction.SHUTTER:
                 store = WindowConsentStore(profile_home, out_dir)
                 document = store.shutter()
-                invalidate_frames(out_dir)
             case WindowAction.RESUME:
                 store = WindowConsentStore(profile_home, out_dir)
                 selected_id = _parse_window_id(_require_window_id(window_id))

@@ -4,7 +4,7 @@
 from __future__ import annotations
 
 from dataclasses import replace
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Literal
 
 import runtime as runtime_module
 from screen import SCREEN_MAX_AGE_MS, CaptureError, DesktopHealth, ScreenPolicy
@@ -24,15 +24,18 @@ def capture_app_window_candidate(broker: ActivityBroker, health: DesktopHealth, 
     try:
         consent = store.read_locked()
         if consent is None or consent.mode is not ConsentMode.SHARED or consent.window_id is None:
+            capture.close()
             broker.frame = None
             runtime_module.invalidate_frames(broker.config.out_dir)
             return
         if broker.config.window_id is not None and broker.config.window_id != consent.window_id:
+            capture.close()
             broker.frame = None
             runtime_module.invalidate_frames(broker.config.out_dir)
             return
         target = runtime_module.select_window(broker.config.profile_home, consent.window_id)
         if not consent.matches(target):
+            capture.close()
             store.revoke_locked()
             broker.frame = None
             return
@@ -56,7 +59,12 @@ def capture_app_window_candidate(broker: ActivityBroker, health: DesktopHealth, 
             broker.frame_generation = consent.generation
             return
     except (CaptureError, OSError, ValueError):
+        capture.close()
         store.revoke_locked()
+        broker.frame = None
+        return
+    capture.close()
+    store.revoke_locked()
     broker.frame = None
     runtime_module.invalidate_frames(broker.config.out_dir)
 
@@ -83,24 +91,25 @@ def app_window_ready(broker: ActivityBroker) -> bool:
 def screen_state(broker: ActivityBroker, now_ms: int, health: DesktopHealth) -> ScreenState:
     """Build the public screen state and delete pixels on every denial path."""
     if broker.config.screen_policy is ScreenPolicy.OFF:
-        runtime_module.invalidate_frames(broker.config.out_dir)
-        return runtime_module.offline_screen(broker.snapshot.screen_seq, broker.snapshot.screen_seq)
-    if broker.config.screen_policy is ScreenPolicy.APP_WINDOW and not app_window_ready(broker):
-        broker.frame = None
-        runtime_module.invalidate_frames(broker.config.out_dir)
-        return runtime_module.offline_screen(broker.snapshot.screen_seq, broker.snapshot.screen_seq, "shuttered")
-    if broker.config.screen_policy is ScreenPolicy.APP_WINDOW and broker.frame_generation != broker.window_generation:
-        broker.frame = None
+        return _clear_screen(broker, "offline")
+    if not app_window_ready(broker):
+        return _clear_screen(broker, "shuttered")
     if not health.alive:
-        broker.frame = None
-        runtime_module.invalidate_frames(broker.config.out_dir)
-        return runtime_module.offline_screen(broker.snapshot.screen_seq, broker.snapshot.screen_seq)
-    if broker.snapshot.privacy.latched and broker.config.screen_policy is not ScreenPolicy.APP_WINDOW:
-        broker.frame = None
-        runtime_module.invalidate_frames(broker.config.out_dir)
-        return runtime_module.offline_screen(broker.snapshot.screen_seq, broker.snapshot.screen_seq, "shuttered")
-    if broker.frame is None or not 0 <= now_ms - broker.frame.captured_at_ms <= SCREEN_MAX_AGE_MS:
-        broker.frame = None
-        runtime_module.invalidate_frames(broker.config.out_dir)
-        return runtime_module.offline_screen(broker.snapshot.screen_seq, broker.snapshot.screen_seq)
+        if broker.window_store is not None:
+            broker.window_store.revoke_locked()
+        return _clear_screen(broker, "offline")
+    if (
+        broker.frame_generation != broker.window_generation
+        or broker.frame is None
+        or not 0 <= now_ms - broker.frame.captured_at_ms <= SCREEN_MAX_AGE_MS
+    ):
+        return _clear_screen(broker, "offline")
     return runtime_module.live_screen(broker.frame, broker.snapshot.screen_seq, broker.filename)
+
+
+def _clear_screen(broker: ActivityBroker, state: Literal["offline", "shuttered"]) -> ScreenState:
+    broker.frame = None
+    runtime_module.invalidate_frames(broker.config.out_dir)
+    if broker.window_capture is not None:
+        broker.window_capture.close()
+    return runtime_module.offline_screen(broker.snapshot.screen_seq, broker.snapshot.screen_seq, state)

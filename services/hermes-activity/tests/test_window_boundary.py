@@ -5,10 +5,7 @@ from dataclasses import replace
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 from threading import Event
-from typing import TYPE_CHECKING
-
-if TYPE_CHECKING:
-    import pytest
+import pytest
 
 from activity_models import ActivityEvent
 from broker import ActivityBroker, RunConfig
@@ -128,4 +125,40 @@ def test_shutter_serializes_with_inflight_publication(tmp_path: Path, monkeypatc
         shutter.result(timeout=3)
     assert screen(broker) == "shuttered"
     assert not list(broker.config.out_dir.glob("hermes-screen-*.jpg"))
+    broker.reader.close()
+
+
+@pytest.mark.parametrize("transition", ["resume", "boot"])
+def test_every_consent_transition_clears_previous_public_pixels(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, transition: str
+) -> None:
+    broker, identity = setup_broker(tmp_path, monkeypatch)
+    assert broker.window_store is not None
+    broker.window_store.share(identity)
+    broker.step(NOW)
+    assert screen(broker) == "live"
+    if transition == "resume":
+        broker.window_store.resume(replace(identity, window_id=99))
+    else:
+        broker.window_store.boot()
+    assert screen(broker) == "shuttered"
+    assert not list(broker.config.out_dir.glob("hermes-screen-*.jpg"))
+    broker.reader.close()
+
+
+def test_shutter_closes_capture_connection_on_next_broker_step(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    broker, identity = setup_broker(tmp_path, monkeypatch)
+    assert broker.window_store is not None
+    closed: list[NativeWindowCapture] = []
+
+    def close(capture: NativeWindowCapture) -> None:
+        closed.append(capture)
+
+    monkeypatch.setattr(NativeWindowCapture, "close", close)
+    broker.window_store.share(identity)
+    broker.step(NOW)
+    before = len(closed)
+    broker.window_store.shutter()
+    broker.step(NOW + 1)
+    assert len(closed) > before
     broker.reader.close()

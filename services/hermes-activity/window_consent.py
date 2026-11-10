@@ -104,6 +104,7 @@ class WindowConsentStore:
         """Create a fresh broker nonce and shutter any previous capability."""
         with self.locked():
             current = self._read_unlocked()
+            self.clear_public_locked()
             return self._write_unlocked(self._shuttered(current, secrets.token_hex(24)))
 
     def share(self, identity: WindowIdentity) -> ConsentDocument:
@@ -120,6 +121,7 @@ class WindowConsentStore:
             current = self._read_unlocked()
             if current is None or current.window_id is None:
                 raise ConsentError("no selected window is available to resume")
+            self.clear_public_locked()
             return self._write_unlocked(self._from_identity(current, identity, ConsentMode.SHARED))
 
     def shutter(self) -> ConsentDocument:
