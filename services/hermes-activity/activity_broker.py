@@ -16,18 +16,15 @@ from persistence import RuntimeSnapshot, load_checkpoint, published_sequences, r
 from privacy import (
     PrivacyState,
     apply_privacy_event,
-    candidate_allowed,
-    complete_candidate,
     mark_uncertain,
     observe_generation,
 )
 from publisher import publish
 from reducer import apply_event, idle_state, refresh_timeline
-from runtime import ACTIVE_FRAME_MS, HEARTBEAT_MS, IDLE_FRAME_MS, Clock, RunConfig, SystemClock
+from runtime import ACTIVE_FRAME_MS, HEARTBEAT_MS, Clock, RunConfig, SystemClock
 from screen import (
     SCREEN_RING,
     CapturedFrame,
-    CaptureError,
     DesktopHealth,
     ScreenPolicy,
 )
@@ -52,6 +49,9 @@ class ActivityBroker:
 
     def __init__(self, config: RunConfig, clock: Clock | None = None) -> None:
         """Restore durable state and prepare one broker run."""
+        if not any(config.screen_policy is policy for policy in (ScreenPolicy.OFF, ScreenPolicy.APP_WINDOW)):
+            message = "broker capture requires explicit off or app-window policy"
+            raise ValueError(message)
         self.config = config
         self.clock = clock or SystemClock()
         self.config.out_dir.mkdir(mode=0o700, parents=True, exist_ok=True)
@@ -112,7 +112,6 @@ class ActivityBroker:
             self.window_nonce = boot.boot_nonce
             self.window_generation = boot.generation
             self.window_capture = runtime_module.NativeWindowCapture(self.config.profile_home)
-            runtime_module.invalidate_frames(self.config.out_dir)
         if self.config.screen_policy is ScreenPolicy.OFF:
             runtime_module.invalidate_frames(self.config.out_dir)
 
@@ -128,8 +127,12 @@ class ActivityBroker:
         finally:
             self.reader.close()
             if self.window_capture is not None:
-                runtime_module.invalidate_frames(self.config.out_dir)
                 self.window_capture.close()
+            if self.window_store is not None:
+                with self.window_store.locked():
+                    consent = self.window_store.read_locked()
+                    if consent is not None and consent.boot_nonce == self.window_nonce:
+                        self.window_store.revoke_locked()
 
     def step(self, now_ms: int) -> None:
         """Poll, reduce, capture, and publish one deterministic cycle."""
@@ -201,51 +204,15 @@ class ActivityBroker:
         return runtime_module.desktop_health(self.config.profile_home)
 
     def _capture_due(self, now_ms: int, health: DesktopHealth) -> bool:
-        if (
-            self.config.screen_policy is ScreenPolicy.OFF
-            or not health.alive
-            or (
-                self.config.screen_policy is not ScreenPolicy.APP_WINDOW
-                and not candidate_allowed(self.snapshot.privacy)
-            )
-        ):
-            return False
-        if self.config.screen_policy is ScreenPolicy.APP_WINDOW:
-            return app_window_ready(self) and now_ms - self.last_capture_ms >= ACTIVE_FRAME_MS
-        interval = ACTIVE_FRAME_MS if self.snapshot.broker.phase != "idle" else IDLE_FRAME_MS
-        return now_ms - self.last_capture_ms >= interval
+        return (
+            self.config.screen_policy is ScreenPolicy.APP_WINDOW
+            and health.alive
+            and app_window_ready(self)
+            and now_ms - self.last_capture_ms >= ACTIVE_FRAME_MS
+        )
 
     def _capture_candidate(self, health: DesktopHealth, now_ms: int) -> None:
-        if self.config.screen_policy is ScreenPolicy.APP_WINDOW:
-            capture_app_window_candidate(self, health, now_ms)
-            return
-        try:
-            candidate = runtime_module.capture_frame(health.env)
-        except (CaptureError, OSError):
-            self.frame = None
-            runtime_module.invalidate_frames(self.config.out_dir)
-            return
-        after_capture = self.reader.poll()
-        self.consume(after_capture, now_ms)
-        after_health = self.health()
-        privacy = observe_generation(self.snapshot.privacy, after_health.generation if after_health.alive else None)
-        valid = (
-            after_capture.readable
-            and not after_capture.gap
-            and not after_capture.uncertain
-            and after_health.alive
-            and after_health.generation == health.generation
-        )
-        privacy = complete_candidate(privacy, after_health.generation, valid)
-        self.snapshot = replace(self.snapshot, privacy=privacy)
-        self.last_capture_ms = now_ms
-        if valid and not privacy.latched and not privacy.holds:
-            self.snapshot = replace(self.snapshot, screen_seq=self.snapshot.screen_seq + 1)
-            self.filename = runtime_module.write_frame(candidate, self.config.out_dir, self.snapshot.screen_seq)
-            self.frame = candidate
-            return
-        self.frame = None
-        runtime_module.invalidate_frames(self.config.out_dir)
+        capture_app_window_candidate(self, health, now_ms)
 
 
 def _require_private_character_state(directory: Path, checkpoint: Path, *, strict_checkpoint: bool = True) -> None:
