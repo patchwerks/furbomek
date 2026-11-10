@@ -92,8 +92,10 @@ uv lock --check
 ```
 
 `bash tools/verify-media.sh` from repository root also runs the actual Godot
-consumer fixtures and the locked supervisor checks. Real Hermes/OBS acceptance
-is separately recorded in `docs/operations/media-integration-2026-10-19.md`.
+consumer fixtures and the locked supervisor checks. Real Hermes/OBS text/timeline
+acceptance is recorded in `docs/operations/media-integration-2026-10-19.md`;
+window-only qualification and review remediation are recorded in
+`docs/operations/window-preview-2026-11-09.md`.
 
 ### Pillow compatibility, 2026-10-30
 

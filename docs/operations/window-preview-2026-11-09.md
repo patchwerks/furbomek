@@ -137,3 +137,57 @@ which is why lifecycle invalidation must not be replaced by a frozen last frame.
 - A frame-permission regression failed under umask0 before repair, then passed:
   pending/ring JPEGs now use0600 even with a permissive caller. This final
   permission-only change does not change the renderer or captured pixel content.
+
+## Independent review remediation, 2026-11-10 UTC
+
+The first five-lane review was **not an approval**: visual/goal and hands-on QA
+passed, but code/security/context lanes found release blockers. They correctly
+identified the exported Python broker's legacy desktop fallback, permissive
+helper admission, non-atomic boot/resume clearing, post-shutter cleanup races,
+resident helpers after revocation, and uncaught process-disappearance races.
+An ABI-width correction in the native canary had also advanced the PR beyond
+that first review snapshot. Neither the old green CI nor visual passes waived
+those findings.
+
+Remediation is in `9734517`, `a8e3e83`, `9f3f25c`, and the source qualification
+checkpoint **`df6c3cce66e8fcefcc772c320da11c9c853553b1`**:
+
+- The broker accepts only actual `OFF`/`APP_WINDOW` enum values before output
+  creation. Its generic desktop-capture branch is removed. Old positive desktop
+  activation tests now exercise supported window freshness/cadence and refusal
+  to treat observer release as window consent; no coverage was deleted.
+- Helper file and directory must be current-UID, non-symlink and owner-only.
+  The profile directory must not be group/world writable. Child environments
+  contain only the required display/auth variables, not provider credentials.
+- Boot/share/resume/shutter clear public pixels under the same commit lock.
+  The CLI no longer deletes frames after unlocking. Revocation and capture
+  failure close/reap the helper; ordinary process-exit races are skipped safely.
+- A frozen exception could turn a capture failure into a traceback-assignment
+  TypeError. Its exception fields remain writable, with a context-manager
+  regression. Real subprocess tests cover fragmented reads, EOF, timeout,
+  process reaping and descriptor cleanup rather than only a duplicate decoder.
+- Twelve review regressions failed before repair; an additional writable-profile
+  regression also failed before its guard. At the exact source checkpoint,
+  **159 activity tests passed, zero skipped**, with native `:28` and actual Godot.
+  Ruff ALL/format, strict basedpyright and lock validation pass as well.
+
+The eight-state recording was repeated after these production edits, not reused:
+
+- Private durable directory: `/data/furbomek-media/window-preview-55/`.
+- `2026-11-10 00-20-58.mkv`: **56.833seconds,1920x1080,H.264,30 output FPS,AAC**;
+  full ffmpeg decode exited0. SHA256
+  `f0bc517f9c7d04a9d917d6f5200481b00a4a95d14f277e1869478667749ddf5f`.
+- `review-{browser,app,shutter,resume,stale,recovered,unmapped,remapped}.png` are
+  all fresh full-frame exports. Every state was personally inspected. The
+  driver also verified no helper child remained after shutter or unmap.
+- The first stale-frame export landed just after recovery; a16-frame timing
+  sheet located the actual stale interval, and the final stale export uses
+  video time26.5s. This was an evidence-sampling correction, not a product fix.
+  `stale-timing-sheet.png` and `requalification-times.json` preserve the timing.
+- The original429.966s recording,40.966s smoke and their images were also copied
+  into this owner-only durable directory. Private artifacts are never published.
+
+The independent re-review must target this remediated source (or a later
+documentation-only descendant) and these fresh eight frames. The disconnected
+Kinect and separate-account GitHub approval remain explicit external release
+limits; neither CI nor a model's review overrides branch protection.
