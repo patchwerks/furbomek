@@ -30,7 +30,7 @@ static void property(Display *display, Window window, Atom name, Atom type, int 
     XChangeProperty(display, window, name, type, format, PropModeReplace, value, count);
 }
 
-static void identify(Display *display, Window window, Visual *visual, unsigned int pid) {
+static void identify(Display *display, Window window, Visual *visual, unsigned long pid) {
     char hostname[256] = {0};
     char instance[] = "native-canary";
     char class_name[] = "NativeCanary";
@@ -78,8 +78,8 @@ int main(void) {
     attributes.border_pixel = 0;
     Window target = XCreateWindow(display, root, 0, 0, 240, 160, 0, visual_info.depth, InputOutput, visual_info.visual, CWColormap | CWBackPixel | CWBorderPixel, &attributes);
     Window sibling = XCreateWindow(display, root, 0, 0, 240, 160, 0, visual_info.depth, InputOutput, visual_info.visual, CWColormap | CWBackPixel | CWBorderPixel, &attributes);
-    identify(display, target, visual_info.visual, (unsigned int)getpid());
-    identify(display, sibling, visual_info.visual, (unsigned int)getpid());
+    identify(display, target, visual_info.visual, (unsigned long)getpid());
+    identify(display, sibling, visual_info.visual, (unsigned long)getpid());
     XSelectInput(display, target, ExposureMask);
     XSelectInput(display, sibling, ExposureMask);
     XCompositeRedirectWindow(display, target, 0);
