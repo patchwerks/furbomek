@@ -191,3 +191,41 @@ The independent re-review must target this remediated source (or a later
 documentation-only descendant) and these fresh eight frames. The disconnected
 Kinect and separate-account GitHub approval remain explicit external release
 limits; neither CI nor a model's review overrides branch protection.
+
+## Final acceptance and handoff, 2026-11-10 UTC
+
+All five fresh independent lanes **PASS** at reviewed head
+`552845eb9e587720f38ec717e09bf16d2107ed73`, source checkpoint `df6c3cc`:
+
+| Lane | Verdict | Evidence |
+|---|---|---|
+| Goal/constraints and functional visuals | PASS | Complete source and all eight fresh frames inspected |
+| Independent hands-on QA | PASS |159 activity tests including real native/Godot; aggregate gateway121, activity155 plus four explicit native skips, supervisor19, snapshots3; direct CLI/API/consent probes |
+| Code quality and visual precision | PASS | No critical/major blockers; recording hash/decode and all eight frames independently checked |
+| Security | PASS | No high/critical blockers; policy, executable admission, environment, locking and resource-based pixel boundary inspected |
+| Release-context/provenance | PASS | Exact GitHub/local revisions, documentation-only descendant, hashes, decode and scope aligned |
+
+Ruff, formatting, strict type checks, lock checks, hosted media/build/offline
+checks and CodeQL passed. Existing LSP servers remain unavailable under the
+previous declined-install decision; no diagnostic result was invented.
+
+PR [56](https://github.com/patchwerks/furbomek/pull/56) was marked ready for review,
+and issue55 moved to Review. These model reviews are not provider-enforced GitHub
+approval. Merge still requires a separate approving GitHub account. Do not bypass
+protection, self-approve, silently fast-forward the shared main checkout or claim
+this branch is installed there. This final record changes documentation only.
+
+Before handoff, the operator CLI successfully shuttered the task output, then the
+owned broker, viewer, browser, CLI and disposable native tmux sessions were closed.
+The supported Hermes API stopped only the task profile's dedicated`:21` desktop.
+The task-owned`:28` test server also stopped. A single cleanup audit found no
+task-prefixed process/session left. Existing production Hermes/default desktop
+and unrelated OBS/sessions were not stopped. The managed stream unit remains
+inactive/disabled with `Result=success`; no login startup or public stream was enabled.
+
+Durable private evidence remains at `/data/furbomek-media/window-preview-55/`.
+Temporary profile/configuration under `/tmp/opencode/furbomek55/` is QA state,
+not production enrollment. Agents own deployment after the required approval:
+use the reviewed source and window runbook above, retain default-off until a
+window is explicitly selected, and requalify the full camera path only after the
+Kinect is actually connected. No operator command homework is required.
