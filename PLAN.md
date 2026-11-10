@@ -10,9 +10,11 @@ observer delivery, native Godot/OBS recording, stale/recovery/rejection checks
 and a30-minute native health soak. See the
 [dated implementation/acceptance record](docs/operations/media-integration-2026-10-19.md)
 for source, deployment, commands, hashes and exact qualification limits.
-`bash tools/verify-media.sh` is the non-live gate. Live desktop screenshots remain
-explicitly blocked by the current observer-authority/privacy contract; this is
-not a complete character bus, speech/avatar integration or unattended release.
+`bash tools/verify-media.sh` is the non-live gate. Full-desktop screenshots remain
+blocked. The user approved a separate opt-in exact-window capability on 2026-11-09:
+selected application contents are authorized until shuttered; sibling windows and
+desktop pixels are excluded. See [window-preview qualification](docs/operations/window-preview-2026-11-09.md).
+This is not a complete character bus, speech/avatar integration or unattended release.
 
 **Architecture review, 2026-10-19:** see the
 [current-state map, findings and deepening candidates](docs/operations/architecture-review-2026-10-19.md).
@@ -1041,8 +1043,8 @@ defects now have interface regressions. Real Hermes events and private native
 media acceptance are recorded in the
 [current integration record](docs/operations/media-integration-2026-10-19.md).
 The [earlier assessment](docs/operations/stream-dirty-work-assessment-2026-10-18.md)
-is history, not a current list of unfixed defects. Desktop pixels remain blocked;
-the public text/timeline slice does not need that authority expansion.
+is history, not a current list of unfixed defects. Full-desktop pixels remain blocked;
+the separately authorized exact-window path does not give hooks capture authority.
 
 **Current checkpoint:** native profile-scoped Hermes observation, private public-activity projection, consumer interface tests and managed whole-stack lifecycle now exist alongside camera/tracking/Godot/OBS. The managed path ends on clean viewer/OBS exit and uses bounded restarts for crashes; the foreground launcher delegates to the same lifecycle owner. The full authenticated character bus, real A2UI/Glimpse producer, qualified jabberWERK audio/shared clock and avatar fallback remain unfinished. Those are next integration work; the implementation below is not all complete merely because the text/timeline and private media slice passed. Public/unattended and hardware gates remain separate.
 
