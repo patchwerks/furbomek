@@ -14,6 +14,35 @@ uv run --frozen python broker.py SPOOL PROFILE_HOME OUT_DIR
 uv run --frozen python broker.py SPOOL PROFILE_HOME OUT_DIR --once
 ```
 
+The approved `app-window` path captures only an explicitly shared normal X11
+window through its named XComposite pixmap. Build its private helper into the
+operator profile, then use the independent operator control surface:
+
+```sh
+bash native/build-x11-window-capture.sh PROFILE_HOME/app-window/x11-window-capture
+uv run --frozen python window_share.py PROFILE_HOME OUT_DIR list
+uv run --frozen python broker.py SPOOL PROFILE_HOME OUT_DIR --screen-policy app-window --window-id 4194308
+```
+
+Keep that broker running. From a second terminal, after validating the listed target:
+
+```sh
+uv run --frozen python window_share.py PROFILE_HOME OUT_DIR share --window-id 4194308
+uv run --frozen python window_share.py PROFILE_HOME OUT_DIR shutter
+uv run --frozen python window_share.py PROFILE_HOME OUT_DIR resume --window-id 4194308
+uv run --frozen python window_share.py PROFILE_HOME OUT_DIR status
+```
+
+`share` and `resume` bind owner-only consent to the XID, `_NET_WM_PID`, process
+creation time, current UID, validated profile display generation, and bounded
+window identity. Broker restart creates a new boot nonce and shutters old
+consent; an operator must explicitly resume. Shutter removes both frame slots
+and clears public metadata under the same lock used for capture/publication. A close, unmap, resize, stale
+identity, or target switch clears pixels and requires a new explicit action.
+The native producer captures the named window backing pixmap, not the root
+desktop, so an occluding sibling is excluded. Alpha is composited over a fixed
+color. Same-UID X11 clients remain outside this boundary's threat model.
+
 The uppercase paths are operator-selected arguments. The normal spool is
 `/dev/shm/furbomek-hermes-UID/events.jsonl`; output is the media session's private
 Kinect directory. The supervisor supplies both explicitly. Cursor/privacy state
@@ -44,12 +73,13 @@ Projection does not publish typed text, literal alphanumeric keypresses, command
 contents, file contents, raw tool results or private URL details. Source event
 logs and all media remain local/owner-only and outside Git.
 
-**Desktop screenshots are not qualified.** `--screen-policy off` is the supported
-default. `--screen-policy bot-desktop` deliberately exits2 before capture. Under
-the current observer-only plan, a failed pre-tool observation cannot authorize
-uninspected pixels, and the adapter may not acquire tool-blocking authority to
-make that guarantee. Screen helpers/privacy fixtures are candidate test surfaces,
-not a live-publication capability or a workaround. Do not bypass the CLI refusal.
+**Full-desktop screenshots are not qualified.** `--screen-policy off` remains the
+default and `--screen-policy bot-desktop` deliberately exits2 before capture.
+`--screen-policy app-window` is a separate, explicit operator-consent capability;
+observer hooks neither grant nor revoke it. Consent authorizes the selected
+window hierarchy, including whatever it displays, and does not claim semantic
+secret detection. Screen helpers and legacy Pillow fixtures remain non-live
+full-display candidate surfaces; do not bypass the `bot-desktop` refusal.
 
 ## Verification
 
@@ -62,8 +92,10 @@ uv lock --check
 ```
 
 `bash tools/verify-media.sh` from repository root also runs the actual Godot
-consumer fixtures and the locked supervisor checks. Real Hermes/OBS acceptance
-is separately recorded in `docs/operations/media-integration-2026-10-19.md`.
+consumer fixtures and the locked supervisor checks. Real Hermes/OBS text/timeline
+acceptance is recorded in `docs/operations/media-integration-2026-10-19.md`;
+window-only qualification and review remediation are recorded in
+`docs/operations/window-preview-2026-11-09.md`.
 
 ### Pillow compatibility, 2026-10-30
 

@@ -17,6 +17,7 @@ class ScreenPolicy(StrEnum):
     """Select whether the activity broker may use a dedicated Hermes desktop."""
 
     OFF = "off"
+    APP_WINDOW = "app-window"
     BOT_DESKTOP = "bot-desktop"
 
 

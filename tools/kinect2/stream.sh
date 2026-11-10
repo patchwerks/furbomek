@@ -10,7 +10,7 @@ settings=$state_dir/settings.json
 usage() {
   printf '%s\n' \
     'Usage: bash tools/kinect2/stream.sh {start [options]|stop|status|restart [options]|logs}' \
-    'Options: --record --screen-policy off|bot-desktop --readiness-timeout-s 1..300' \
+    'Options: --record --screen-policy off|app-window --readiness-timeout-s 1..300' \
     'Private Kinect capture, tracking, activity broker, Godot viewer and OBS session.' \
     'Default screen policy is off; no public stream is started.'
 }
@@ -46,7 +46,7 @@ try:
 except (OSError, json.JSONDecodeError):
     document = {}
 record = "true" if document.get("record") is True else "false"
-policy = document.get("screen_policy") if document.get("screen_policy") in ("off", "bot-desktop") else "off"
+policy = document.get("screen_policy") if document.get("screen_policy") in ("off", "app-window", "bot-desktop") else "off"
 timeout = document.get("readiness_timeout_s")
 if not isinstance(timeout, int) or not 1 <= timeout <= 300:
     timeout = 30
@@ -69,10 +69,10 @@ parse_runtime_options() {
         ;;
       --screen-policy)
         shift
-        [[ $# -gt 0 ]] || { printf '%s\n' '--screen-policy requires off or bot-desktop.' >&2; exit 2; }
+        [[ $# -gt 0 ]] || { printf '%s\n' '--screen-policy requires off or app-window.' >&2; exit 2; }
         case $1 in
-          off|bot-desktop) screen_policy=$1; screen_policy_set=true ;;
-          *) printf '%s\n' '--screen-policy requires off or bot-desktop.' >&2; exit 2 ;;
+          off|app-window|bot-desktop) screen_policy=$1; screen_policy_set=true ;;
+          *) printf '%s\n' '--screen-policy requires off or app-window.' >&2; exit 2 ;;
         esac
         if [[ $screen_policy == bot-desktop ]]; then
           printf '%s\n' 'live desktop screen publication is not qualified under observer-only privacy contract.' >&2

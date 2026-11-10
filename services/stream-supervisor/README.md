@@ -30,8 +30,11 @@ fresh READY health. `record_requested` is a request, not a claim of OBS recordin
 No public streaming flag or destination is created. Existing private `Kinect2`
 profile/collection and operator-entered destination settings are preserved.
 
-Screen policy is off. Requests for bot-desktop screenshot publication fail before
-worker or desktop startup; see the activity module's privacy qualification gate.
+Screen policy defaults off. `--screen-policy app-window` passes the opt-in policy
+to the broker, which starts shuttered until an agent explicitly selects a window
+through `services/hermes-activity/window_share.py`. Broker restarts require explicit
+resume. Requests for `bot-desktop` full-desktop publication still fail before worker
+or desktop startup. See the activity module and the window-preview operations record.
 
 ## Lifecycle
 

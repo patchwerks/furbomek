@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-from collections.abc import Mapping
 import os
 from pathlib import Path
 import sys
@@ -15,6 +14,7 @@ from activity_models import ActivityEvent
 from broker import ActivityBroker, RunConfig
 from hermes_feed import SpoolEvent
 from screen import CapturedFrame, DesktopHealth, ScreenPolicy, desktop_health
+from window_capture import NativeWindowCapture, WindowIdentity
 
 NOW = 1_700_000_000_000
 
@@ -28,7 +28,11 @@ class FixedClock:
 
 
 def health(_profile_home: Path) -> DesktopHealth:
-    return DesktopHealth(True, {"DISPLAY": ":1", "XAUTHORITY": "/tmp/bot.xauth"}, "generation-1")
+    return DesktopHealth(True, {"DISPLAY": ":28", "XAUTHORITY": "/tmp/bot.xauth"}, "generation-1")
+
+
+def target(_profile: Path, _window_id: int) -> WindowIdentity:
+    return WindowIdentity(42, 100, os.getuid(), 12.5, ":28", "generation-1", 1, 1, "app", "App")
 
 
 def navigation_events() -> str:
@@ -65,14 +69,16 @@ def test_safe_release_publishes_only_a_fresh_frame(tmp_path: Path, monkeypatch: 
     output = tmp_path / "output"
     monkeypatch.setattr("runtime.desktop_health", health)
 
-    def fake_capture(_env: Mapping[str, str]) -> CapturedFrame:
+    def fake_capture(_self: NativeWindowCapture, _target: WindowIdentity) -> CapturedFrame:
         return CapturedFrame(b"jpeg", 1, 1, NOW)
 
-    monkeypatch.setattr("runtime.capture_frame", fake_capture)
+    monkeypatch.setattr("runtime.NativeWindowCapture.capture", fake_capture)
+    monkeypatch.setattr("runtime.select_window", target)
 
-    ActivityBroker(
-        RunConfig(spool, tmp_path, output, once=True, screen_policy=ScreenPolicy.BOT_DESKTOP), FixedClock()
-    ).run()
+    broker = ActivityBroker(RunConfig(spool, tmp_path, output, screen_policy=ScreenPolicy.APP_WINDOW), FixedClock())
+    assert broker.window_store is not None
+    broker.window_store.share(target(tmp_path, 42))
+    broker.step(NOW)
     event = ActivityEvent.model_validate_json((output / "activity.json").read_text(encoding="utf-8"))
     assert event.payload.screen.state == "live"
     assert event.payload.screen.filename in {"hermes-screen-0.jpg", "hermes-screen-1.jpg"}
@@ -80,36 +86,23 @@ def test_safe_release_publishes_only_a_fresh_frame(tmp_path: Path, monkeypatch: 
     assert event.payload.screen.height <= 800
     assert event.payload.screen.ttl_ms == 2_000
     assert (output / "hermes-screen-1.jpg").is_file()
+    broker.reader.close()
 
 
-def test_sensitive_event_appended_during_capture_is_discarded(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+def test_privacy_release_never_authorizes_unconsented_pixels(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     spool = tmp_path / "events.jsonl"
     spool.write_text(navigation_events(), encoding="utf-8")
     output = tmp_path / "output"
 
-    def capture(_env: Mapping[str, str]) -> CapturedFrame:
-        with spool.open("a", encoding="utf-8") as stream:
-            stream.write(
-                SpoolEvent(
-                    kind="tool",
-                    ts_ms=NOW,
-                    session="s",
-                    phase="running",
-                    category="BROWSER",
-                    action="typing",
-                    detail="text hidden",
-                    call="secret",
-                    shutter=True,
-                ).model_dump_json()
-                + "\n"
-            )
-        return CapturedFrame(b"jpeg", 1, 1, NOW)
+    def forbidden_capture(_self: NativeWindowCapture, _target: WindowIdentity) -> CapturedFrame:
+        message = "observer release cannot authorize window capture"
+        raise AssertionError(message)
 
     monkeypatch.setattr("runtime.desktop_health", health)
-    monkeypatch.setattr("runtime.capture_frame", capture)
+    monkeypatch.setattr("runtime.NativeWindowCapture.capture", forbidden_capture)
 
     ActivityBroker(
-        RunConfig(spool, tmp_path, output, once=True, screen_policy=ScreenPolicy.BOT_DESKTOP), FixedClock()
+        RunConfig(spool, tmp_path, output, once=True, screen_policy=ScreenPolicy.APP_WINDOW), FixedClock()
     ).run()
     event = ActivityEvent.model_validate_json((output / "activity.json").read_text(encoding="utf-8"))
     assert event.payload.screen.state == "shuttered"
@@ -121,14 +114,17 @@ def test_new_frame_is_published_before_heartbeat(tmp_path: Path, monkeypatch: py
     spool.write_text(navigation_events(), encoding="utf-8")
     output = tmp_path / "output"
     monkeypatch.setattr("runtime.desktop_health", health)
-    captures: list[Mapping[str, str]] = []
+    captures: list[WindowIdentity] = []
 
-    def fake_capture(_env: Mapping[str, str]) -> CapturedFrame:
-        captures.append(_env)
+    def fake_capture(_self: NativeWindowCapture, selected: WindowIdentity) -> CapturedFrame:
+        captures.append(selected)
         return CapturedFrame(b"jpeg", 1, 1, NOW)
 
-    monkeypatch.setattr("runtime.capture_frame", fake_capture)
-    broker = ActivityBroker(RunConfig(spool, tmp_path, output, screen_policy=ScreenPolicy.BOT_DESKTOP), FixedClock())
+    monkeypatch.setattr("runtime.NativeWindowCapture.capture", fake_capture)
+    monkeypatch.setattr("runtime.select_window", target)
+    broker = ActivityBroker(RunConfig(spool, tmp_path, output, screen_policy=ScreenPolicy.APP_WINDOW), FixedClock())
+    assert broker.window_store is not None
+    broker.window_store.share(target(tmp_path, 42))
     broker.step(NOW)
     first = ActivityEvent.model_validate_json((output / "activity.json").read_text(encoding="utf-8"))
     broker.step(NOW + 250)
