@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { readFile, mkdtemp, writeFile, symlink, rm, readdir } from 'node:fs/promises';
+import { readFile, mkdtemp, writeFile, symlink, rm, readdir, chmod } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -173,5 +173,96 @@ test('descriptor race checks fail closed and close handles; unsupported flags ne
     assert.equal(opens, scenario === 'unsupported' ? 0 : 1);
     assert.equal(closes, opens);
     assert.ok(reads <= 2);
+  }
+});
+
+test('CLI missing pack and metadata paths have fixed useful diagnostics without path leakage', async () => temporary(async dir => {
+  const missing = join(dir, 'private-\x1b[31m\n\u202e-missing.json');
+  for (const args of [['validate', missing], ['validate', missing, '--json'],
+    ['validate', example, '--metadata', missing, '--json'],
+    ['template', missing, '--author', 'Test Author', '--license', 'MIT']]) {
+    const result = run(args);
+    assert.equal(result.status, 1);
+    if (args.includes('--json')) {
+      assert.deepEqual(JSON.parse(result.stdout), { ok: false, error: 'invalid', message: 'Input file was not found.' });
+      assert.equal(result.stderr, '');
+    } else {
+      assert.equal(result.stderr, 'Validation failed: "Input file was not found."\n');
+      assert.equal(result.stdout, '');
+    }
+    assert.equal((result.stdout + result.stderr).includes(dir), false);
+    assert.equal((result.stdout + result.stderr).includes('private-'), false);
+  }
+  const result = run(['validate', join(example, 'child'), '--json']);
+  assert.equal(result.status, 1);
+  assert.equal(JSON.parse(result.stdout).message, 'An input path component is not a directory.');
+  assert.equal(result.stdout.includes(example), false);
+}));
+
+test('CLI inaccessible regular file reports permission failure without its path', {
+  skip: process.platform === 'win32' || process.getuid?.() === 0 ? 'Requires POSIX permission checks as an unprivileged user' : false,
+}, async () => temporary(async dir => {
+  const path = join(dir, 'private-inaccessible.json');
+  await writeFile(path, await readFile(example));
+  await chmod(path, 0);
+  try {
+    for (const json of [false, true]) {
+      const result = run(['validate', path, ...(json ? ['--json'] : [])]);
+      assert.equal(result.status, 1);
+      if (json) {
+        assert.equal(JSON.parse(result.stdout).message, 'Permission denied while reading input file.');
+        assert.equal(result.stderr, '');
+      } else {
+        assert.equal(result.stderr, 'Validation failed: "Permission denied while reading input file."\n');
+        assert.equal(result.stdout, '');
+      }
+      assert.equal((result.stdout + result.stderr).includes(dir), false);
+      assert.equal((result.stdout + result.stderr).includes('private-inaccessible'), false);
+    }
+  } finally { await chmod(path, 0o600); }
+}));
+
+test('CLI coded filesystem errors never expose raw messages; validation messages stay terminal-safe', async () => {
+  const { SourceTextModule, SyntheticModule, createContext } = await import('node:vm');
+  const source = await readFile(cli, 'utf8');
+  const hostile = 'private-path\x1b[31m\n\u202e';
+  for (const [code, expected] of [
+    ['EACCES', 'Permission denied while reading input file.'],
+    ['EPERM', 'Permission denied while reading input file.'],
+    ['EIO', 'Could not read input file because of an I/O error.'],
+    ['UNKNOWN', 'Could not read input file.'],
+    [undefined, hostile],
+  ]) {
+    for (const json of [false, true]) {
+      let stdout = ''; let stderr = '';
+      const processFixture = { argv: ['node', 'cli', 'validate', 'input', ...(json ? ['--json'] : [])],
+        stdout: { write: value => { stdout += value; } }, stderr: { write: value => { stderr += value; } }, exitCode: undefined };
+      const context = createContext({ process: processFixture, Error });
+      const failure = new Error(hostile);
+      if (code !== undefined) failure.code = code;
+      const modules = {
+        './files.mjs': { readPack: async () => { throw failure; }, readMetadata },
+        './metadata.mjs': { createMetadata, matchMetadata },
+      };
+      const module = new SourceTextModule(source, { context });
+      await module.link(async name => {
+        const values = modules[name]; assert.ok(values, 'only fixed expected imports');
+        return new SyntheticModule(Object.keys(values), function () {
+          for (const [key, value] of Object.entries(values)) this.setExport(key, value);
+        }, { context });
+      });
+      await module.evaluate();
+      assert.equal(processFixture.exitCode, 1);
+      const output = stdout + stderr;
+      assert.equal(output.includes('\x1b'), false); assert.equal(output.includes('\u202e'), false);
+      if (code !== undefined) assert.equal(output.includes('private-path'), false);
+      if (json) {
+        assert.deepEqual(JSON.parse(stdout), { ok: false, error: 'invalid', message: expected });
+        assert.equal(stderr, '');
+      } else {
+        assert.equal(stdout, '');
+        assert.equal(JSON.parse(stderr.slice('Validation failed: '.length)), expected);
+      }
+    }
   }
 });
