@@ -1212,7 +1212,52 @@ screenshots across Chromium/Firefox; no visual correction was required. Final
 documentation-head checks and independent PR 48 acceptance remain pending;
 issue 32 stays open.
 
+## Issue 32 authoring accessibility follow-up, 2026-11-06
+
+**Candidate; execution pending:** accepted main
+`6d829351c305a56fb8104469446ae574a07dec7b` includes pack-authoring PR 48
+(`e19297fa04bbbf30f0cfe60bc48de0e847011549`) and README PR 49. The new bounded
+follow-up preserves the existing Bootstrap design and adds native selects
+without data-URI chevrons, stable UI-only cue identity, predictable keyboard
+focus after Add/Remove, persistent atomic validation/status regions, a quiet
+visual playback clock, and useful path-free CLI filesystem diagnostics.
+No CSP, dependency, parser, export/schema, geometry or live-authority change is
+included. No new imagery is selected.
+
+All 43 prior browser cases remain in the prepared acceptance surface, alongside
+new focus/identity, DOM-announcement-semantics, console/CSP and narrow CSS-viewport
+reflow checks. CLI regressions cover missing/inaccessible files and terminal-safe
+diagnostics. CSS viewport equivalents are not actual browser zoom; DOM semantics
+are not screen-reader qualification. The historical native Space picker timeout
+in run 42161227944 remains unexplained despite an unchanged retry and later
+first-attempt success; added passive diagnostics do not establish a fix.
+Exact-source offline hosted execution, artifact review and independent acceptance
+remain pending. See the [bounded follow-up record](docs/operations/authoring-accessibility-2026-11-06.md).
+
+**Exact-source qualification, 2026-11-06:**
+`4e2baf1439d67e9470f037ea0e5a7b9702b6b9d6` passed all 12 source checks.
+[Viewer run 42187842791](https://github.com/patchwerks/furbomek/actions/runs/42187842791)
+passed attempt 1 on Node 22.22.3 and 26.7.0: targeted lint over 16 files with
+zero errors/warnings, normal/negative-control/restored typechecking, static
+generation, 66 unit cases per job and 54 cases in each Chromium/Firefox
+combination. All 43 previous browser cases remain. CSP/outbound/page-error
+arrays are empty and console errors are zero; WebGL/deprecation warnings remain.
+[Metadata run 42187842684](https://github.com/patchwerks/furbomek/actions/runs/42187842684)
+passed 90 combined tests per job, including actual permission failure, with no
+skips. Verified artifact digests and bounded visual review are recorded in the
+[follow-up record](docs/operations/authoring-accessibility-2026-11-06.md).
+The initial typecheck failure and subsequent successful `c91435a7` run with
+incomplete event names remain historical evidence; corrected diagnostics now
+assert trusted Space down/up and one chooser. The historical picker timeout
+cause remains unresolved, and instrumentation is not a repair claim. Final
+documentation-head checks and independent review remain pending; these results
+do not authorize merge or deployment.
+
 ## Changelog
+
+- 2026-11-06: Recorded exact-source authoring follow-up qualification, verified artifacts and retained diagnostic limits; final documentation-head checks and review remain pending.
+
+- 2026-11-06: Prepared issue 32 keyboard/native-control and CLI diagnostic follow-up; preserved existing evidence and unresolved picker history, with new execution and acceptance pending.
 
 - 2026-11-05: Recorded exact-source browser authoring matrix and combined download/metadata proof; retained visual, final-head and independent acceptance gates.
 
