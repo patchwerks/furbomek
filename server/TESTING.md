@@ -70,3 +70,30 @@ findings remain outside this slice; rollback restores the preceding server lock.
 ## Changelog
 
 - 2026-10-30: Confirmed six passing tests and the original-lockfile failure on checksum-verified official Node.js 22.16.0; corrected creation timestamp to the file creation record.
+
+## Error-boundary follow-up (2026-11-06, candidate)
+
+The historical dependency evidence above remains scoped to its original source.
+The candidate now changes the runtime error boundary; its new tests have only
+been syntax-checked locally. Node 22/26 execution and independent review remain
+pending. See the [current preparation record](../docs/operations/proxy-error-hardening-2026-11-06.md).
+
+The original 13 tests are retained. Additional real-child/Unix-socket tests cover
+transport failures and invalid/non-success statuses across all five routes,
+invalid JSON across all metadata routes, fixed parser 400/413/415 messages and
+unknown middleware 500, hostile error/body/header sentinels, early and late audio
+failure, partial-content success, staged-header failure, large-chunk backpressure,
+client disconnect both during fetch and during streaming, cancellation and
+same-process recovery. Rejected bodies are instrumented to detect JSON parsing;
+response headers/body and captured stdout/stderr are checked for sentinel leaks.
+Successful audio headers and successful metadata fields retain their contract.
+
+Run only on disposable credential-free workers: use the new advisory
+`proxy-error-qualification.yml` workflow for accepted-proxy, lifecycle-disabled
+server-only dependency provisioning followed by a separate offline worker.
+No candidate code or package install runs on a credentialed host. Neither the
+new matrix nor these fixtures exercise live providers or qualify production
+binding, authentication, timeouts, retries, devices or deployment.
+
+- 2026-11-06T10:50:48Z (codex/13-proxy-error-hardening): Appended error-boundary
+  test scope and pending qualification; preserved prior dependency evidence.
