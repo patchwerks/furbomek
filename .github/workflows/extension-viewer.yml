@@ -132,7 +132,7 @@ jobs:
           from pathlib import Path
           root = Path("/scratch/evidence")
           build_allowed = {"ci.log", "prepare.log", "generate.log", "types.log", "types-negative-control.log", "unit.log", "versions.txt", "root-prepare.log", "authoring-lint.json"}
-          browser_allowed = {"browser.log", "browser-version.json", "renderer-diagnostics.json", "webgl.json", "browser-results.json", "desktop-light.png", "desktop-dark.png", "mobile.png", "mid-cue.png", "file-selector-hover.png", "builder-light.png", "builder-dark.png", "builder-mobile.png", "builder-error.png"}
+          browser_allowed = {"browser.log", "browser-version.json", "renderer-diagnostics.json", "webgl.json", "browser-results.json", "browser-metadata-results.json", "desktop-light.png", "desktop-dark.png", "mobile.png", "mid-cue.png", "file-selector-hover.png", "builder-light.png", "builder-dark.png", "builder-mobile.png", "builder-error.png"}
           total = 0
           assert root.is_dir() and not root.is_symlink()
           paths = list(root.iterdir())
@@ -285,6 +285,7 @@ jobs:
                   test "$VIEWER_BROWSER" = chromium
                   timeout 240 node apps/extension-viewer/tests/browser-check.cjs > "$VIEWER_EVIDENCE/browser.log" 2>&1
                 fi
+                timeout 120 node tools/presentation-pack/tests/browser-check.cjs >> "$VIEWER_EVIDENCE/browser.log" 2>&1
               '; then
               :
             else
