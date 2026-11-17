@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import hashlib
+import math
 import os
 import re
 import time
@@ -10,7 +11,7 @@ from dataclasses import dataclass
 from enum import StrEnum
 from io import BytesIO
 from pathlib import Path
-from typing import TYPE_CHECKING, Final, Literal, override
+from typing import TYPE_CHECKING, Final, Literal, cast, override
 
 import psutil
 
@@ -128,8 +129,29 @@ def _require_owner_file(path: Path) -> None:
 
 def _launcher_identity(pid: int) -> tuple[float, str]:
     process = psutil.Process(pid)
-    create_time = process.create_time()
-    identity = " ".join(process.cmdline())
+    # Native psutil metadata is untyped on some platforms; validate that boundary.
+    raw_create_time = cast("object", process.create_time())
+    raw_cmdline = cast("object", process.cmdline())
+    try:
+        return _validated_launcher_metadata(raw_create_time, raw_cmdline)
+    except (TypeError, OverflowError) as exc:
+        raise ValueError("launcher metadata has an invalid type or range") from exc
+
+
+def _validated_launcher_metadata(raw_create_time: object, raw_cmdline: object) -> tuple[float, str]:
+    if isinstance(raw_create_time, bool) or not isinstance(raw_create_time, (int, float)):
+        raise TypeError("launcher creation time is not numeric")
+    create_time = float(raw_create_time)
+    if not math.isfinite(create_time) or create_time <= 0:
+        raise ValueError("launcher creation time is not finite and positive")
+    if not isinstance(raw_cmdline, list):
+        raise TypeError("launcher command line is not a list")
+    arguments: list[str] = []
+    for argument in cast("list[object]", raw_cmdline):
+        if not isinstance(argument, str):
+            raise TypeError("launcher command line contains a non-string argument")
+        arguments.append(argument)
+    identity = " ".join(arguments)
     if not identity or not any(token in identity.lower() for token in ("launcher", "bot-desktop")):
         raise ValueError("process is not the dedicated bot desktop launcher")
     return create_time, identity

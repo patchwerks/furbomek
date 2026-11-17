@@ -23,13 +23,18 @@ def cli(  # noqa: PLR0913 - Keep the existing CLI positional interface plus expl
     once: Annotated[bool, typer.Option("--once")] = False,
     screen_policy: Annotated[ScreenPolicy, typer.Option("--screen-policy")] = ScreenPolicy.OFF,
     character_session: Annotated[str | None, typer.Option("--character-session")] = None,
+    hermes_session: Annotated[str | None, typer.Option("--hermes-session")] = None,
 ) -> None:
     """Consume Hermes events and publish one bounded activity projection."""
     if screen_policy is ScreenPolicy.BOT_DESKTOP:
         raise typer.BadParameter("bot-desktop capture is blocked until the authority/privacy contract is qualified")
     if character_session is not None and re.fullmatch(IDENTIFIER, character_session) is None:
         raise typer.BadParameter("character-session requires a bounded opaque identifier")
-    run(RunConfig(spool, profile_home, out_dir, once, screen_policy, character_session))
+    if hermes_session is not None and re.fullmatch(IDENTIFIER, hermes_session) is None:
+        raise typer.BadParameter("hermes-session requires a bounded opaque identifier")
+    if hermes_session is not None and character_session is not None:
+        raise typer.BadParameter("Hermes and character session modes are mutually exclusive")
+    run(RunConfig(spool, profile_home, out_dir, once, screen_policy, character_session, hermes_session))
 
 
 if __name__ == "__main__":
