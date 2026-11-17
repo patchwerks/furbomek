@@ -154,8 +154,11 @@ hardware evidence, not an invented `CONTEXT.md` or ADR tree. See
 snapshot regressions and the real Godot consumer fixtures. Managed media uses
 `bash tools/kinect2/stream.sh`; agents own deployment and private acceptance.
 See `docs/operations/media-integration-2026-10-19.md` for actual results and limits.
-Desktop screenshots remain unqualified and rejected; do not enable them to make
-a screen placeholder look active. No serial/head action is part of media QA.
+Full-desktop screenshots remain rejected. User-approved `app-window` sharing is
+an explicit, identity-bound window capability, not observer-certified pixels.
+Read `docs/operations/window-preview-2026-11-09.md` before operating it. Never
+broaden a selection automatically or claim selected contents are secret-filtered.
+No serial/head action is part of media QA.
 
 ## Legacy prototype commands
 

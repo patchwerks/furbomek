@@ -12,8 +12,9 @@ Read root guidance, the module README and `docs/operations/kinect2-host.md`.
   owned OBS PID/window and verify the resulting file in live acceptance.
 - Keep the host unit parent-first (`KillMode=mixed`) so cgroup teardown does not
   defeat recording cleanup. Manage host config with Chezmoi; never embed secrets.
-- Screens are off; unqualified live desktop policy must fail before any worker
-  or desktop startup. No public broadcasting, robot reset, head actuation or raw
+- Screens default off. `app-window` permits only separately consented, identity-bound
+  windows; a broker restart requires explicit resume. Legacy full-desktop policy
+  still fails before worker startup. No public broadcasting, robot reset, head actuation or raw
   model controls belong here. Preserve the selected Hermes/jabberWERK authority.
 - Run locked tests, strict checks and root `tools/verify-media.sh`; source fixtures
   do not replace actual private recording and lifecycle qualification.

@@ -12,8 +12,12 @@ not a second planner, raw tool surface, complete A2UI engine or speech stack.
   evidence and default-off behavior. Read `CHARACTER.md`; fixture speaking state
   is not evidence of real Hermes speech or a PCM clock. Never discard retirement
   evidence on disable/re-enable or silently replace a session in its output root.
-- Live desktop screenshot policy is unqualified and rejected before activation.
-  Default off is supported; do not bypass it through helper functions or timeouts.
+- Full-desktop screenshot policy remains unqualified and rejected before activation.
+  Default off is supported; `app-window` is the separate owner-consented named-X11
+  window path. Do not bypass `bot-desktop` through helper functions or timeouts.
+  Explicit consent covers selected hierarchy contents, including typing/private
+  pages; it is not semantic secret detection. Same-UID X11 clients are outside
+  the threat model.
 - Preserve safe-key/URL projection; no raw arguments, results, paths, secrets or pixels
   in public events. Test failure markers without claiming they certify screen privacy.
 - Run the locked pytest, Ruff/format, basedpyright and lock gates. Root

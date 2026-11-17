@@ -73,8 +73,9 @@ unavailable credentials or an actual design decision that tools cannot resolve.
   A2UI/Glimpse/Hermes activity. Their contents are read-only and unprivileged;
   missing real activity is idle/unavailable, never fabricated agent work.
 - The activity observer/broker produces real redacted text/timeline events.
-  Desktop pixels remain unqualified and rejected, not an exception granted by
-  private recording. The native X11/OBS program must be inspected: a healthy
+  Full-desktop pixels remain rejected. User-approved `app-window` sharing requires
+  explicit window selection and consent; read the dated window-preview runbook.
+  Selected contents are visible, not secret-filtered. The native X11/OBS program must be inspected: a healthy
   process list did not prevent black XComposite output on the QA virtual desktop.
 - Record the actual revised OBS program. Compare upright reference and output
   at the same presentation scale, including motion, brackets and insets. A build,

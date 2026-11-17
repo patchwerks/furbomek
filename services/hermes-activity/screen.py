@@ -5,6 +5,7 @@ from __future__ import annotations
 import hashlib
 import os
 import re
+import stat
 import time
 from dataclasses import dataclass
 from enum import StrEnum
@@ -33,6 +34,7 @@ class ScreenPolicy(StrEnum):
 
     OFF = "off"
     BOT_DESKTOP = "bot-desktop"
+    APP_WINDOW = "app-window"
 
 
 @dataclass(frozen=True, slots=True)
@@ -54,11 +56,15 @@ class CapturedFrame:
     captured_at_ms: int
 
 
-@dataclass(frozen=True, slots=True)
 class CaptureError(RuntimeError):
     """Capture failed before publication."""
 
     reason: str
+
+    def __init__(self, reason: str) -> None:
+        """Preserve writable exception traceback fields across context managers."""
+        self.reason = reason
+        super().__init__(reason)
 
     @override
     def __str__(self) -> str:
@@ -104,13 +110,18 @@ def desktop_health(profile_home: Path) -> DesktopHealth:
     try:
         os.kill(pid, 0)
         create_time, identity = _launcher_identity(pid)
+        socket = Path(f"/tmp/.X11-unix/X{display[1:].split('.')[0]}").lstat()  # noqa: S108 - X11 fixes this socket path.
     except (OSError, ValueError, psutil.Error):
         return DesktopHealth(False, env, None)
     if expected_create_time is not None and abs(expected_create_time - create_time) > 1.0:
         return DesktopHealth(False, env, None)
-    if expected_identity is not None and expected_identity not in identity:
+    if (
+        (expected_identity is not None and expected_identity not in identity)
+        or not stat.S_ISSOCK(socket.st_mode)
+        or socket.st_uid != os.getuid()
+    ):
         return DesktopHealth(False, env, None)
-    generation = f"{pid}:{create_time:.3f}:{hashlib.sha256(identity.encode()).hexdigest()}:{display}"
+    generation = f"{pid}:{create_time:.3f}:{hashlib.sha256(identity.encode()).hexdigest()}:{display}:{socket.st_ino}:{socket.st_ctime_ns}"
     return DesktopHealth(True, env, generation)
 
 
@@ -163,7 +174,10 @@ def write_frame(frame: CapturedFrame, out_dir: Path, slot: int) -> str:
     """Atomically publish one already-approved frame into the fixed ring."""
     filename = f"hermes-screen-{slot % SCREEN_RING}.jpg"
     pending = out_dir / f".{filename}.pending"
-    pending.write_bytes(frame.data)
+    descriptor = os.open(pending, os.O_WRONLY | os.O_CREAT | os.O_TRUNC | os.O_NOFOLLOW, 0o600)
+    with os.fdopen(descriptor, "wb") as stream:
+        os.fchmod(stream.fileno(), 0o600)
+        stream.write(frame.data)
     pending.replace(out_dir / filename)
     return filename
 
@@ -206,6 +220,11 @@ def _encode_jpeg(image: Image.Image) -> bytes:
         if len(data) <= SCREEN_MAX_BYTES:
             return data
     raise CaptureError("captured desktop frame exceeds size limit")
+
+
+def encode_jpeg(image: Image.Image) -> bytes:
+    """Encode an already-bounded RGB image for a capture backend."""
+    return _encode_jpeg(image)
 
 
 def _now_ms() -> int:

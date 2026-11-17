@@ -27,6 +27,15 @@ def test_worker_argv_and_recording_are_explicit(tmp_path: Path) -> None:
     assert "--project" in by_key["broker"].argv
 
 
+def test_app_window_policy_reaches_broker_without_desktop_capture(tmp_path: Path) -> None:
+    paths = RuntimePaths.from_environment(tmp_path, {"FURBOMEK_MEDIA_ROOT": str(tmp_path)})
+    settings = RuntimeSettings.model_validate_json('{"screen_policy":"app-window"}')
+    broker = next(
+        worker for worker in build_worker_definitions(settings, paths) if worker.key == "broker"
+    )
+    assert broker.argv[-2:] == ("--screen-policy", "app-window")
+
+
 def test_bot_desktop_policy_is_blocked_before_lock_or_spawn(tmp_path: Path) -> None:
     paths = RuntimePaths.from_environment(
         tmp_path, {"FURBOMEK_MEDIA_ROOT": str(tmp_path / "media")}
