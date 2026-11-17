@@ -35,7 +35,7 @@ jobs:
           ref: ${{ github.event.pull_request.head.sha || github.sha }}
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
         with:
-          ref: 6d829351c305a56fb8104469446ae574a07dec7b
+          ref: 63184419ab5c5437ffc37028ba7829ae53c4f289
           path: baseline
           persist-credentials: false
       - name: Validate source, provision dependencies, then qualify offline (advisory)
@@ -47,52 +47,15 @@ jobs:
           # Treat all candidate input as data. Never run its hooks on the host.
           git -C "$GITHUB_WORKSPACE/candidate" ls-files --stage | awk '$1 == "120000" || $1 == "160000" {bad=1} END {exit bad}'
           if git -C "$GITHUB_WORKSPACE/candidate" ls-files | grep -E '(^|/)(\.npmrc|\.env(\..*)?|\.gitconfig)$'; then exit 1; fi
-          for file in server/package.json server/package-lock.json; do
+          # Exact accepted dependency bytes; future changes need a reviewed admission update.
+          for file in package.json package-lock.json server/package.json server/package-lock.json; do
             cmp "$trusted/$file" "$GITHUB_WORKSPACE/candidate/$file"
           done
           # Existing CI enforcement and dependency proxy must remain accepted bytes.
           diff -r "$trusted/tools/ci" "$GITHUB_WORKSPACE/candidate/tools/ci"
-          python3 -I - "$GITHUB_WORKSPACE/candidate" "$trusted" <<'VALIDATE_SOURCE'
+          python3 -I - "$GITHUB_WORKSPACE/candidate" <<'VALIDATE_SOURCE'
           import json, pathlib, sys
           root = pathlib.Path(sys.argv[1])
-          base = pathlib.Path(sys.argv[2])
-          original = json.loads((base / "package.json").read_text())
-          manifest = json.loads((root / "package.json").read_text())
-          expected = json.loads(json.dumps(original))
-          expected["dependencies"]["nuxt"] = "4.6.4"
-          assert manifest == expected, "Only the reviewed Nuxt patch manifest is admitted"
-          old = json.loads((base / "package-lock.json").read_text())
-          lock = json.loads((root / "package-lock.json").read_text())
-          assert lock["lockfileVersion"] == 3
-          expected_root = json.loads(json.dumps(old["packages"][""]))
-          expected_root["dependencies"]["nuxt"] = "4.6.4"
-          assert lock["packages"][""] == expected_root
-          for group in ["dependencies", "devDependencies"]:
-              assert lock["packages"][""][group] == manifest[group]
-              for name in original.get(group, {}):
-                  if name != "nuxt":
-                      assert lock["packages"]["node_modules/" + name]["version"] == old["packages"]["node_modules/" + name]["version"]
-          assert lock["packages"]["node_modules/nuxt"]["version"] == "4.6.4"
-          assert lock["packages"]["node_modules/nitropack"]["version"] == "2.13.6"
-          patched_family = ["nuxt", "@nuxt/schema", "@nuxt/nitro-server", "@nuxt/vite-server"]
-          for name in patched_family:
-              assert lock["packages"]["node_modules/" + name]["version"] == "4.6.4"
-          for path, item in lock["packages"].items():
-              if path:
-                  for name in patched_family:
-                      if path == "node_modules/" + name or path.endswith("/node_modules/" + name):
-                          assert item["version"] == "4.6.4"
-                  for name in ["@nuxt/webpack-builder", "@nuxt/rspack-builder"]:
-                      assert not (path == "node_modules/" + name or path.endswith("/node_modules/" + name)), "Unexpected optional builder"
-                  assert not item.get("link")
-                  if path == "node_modules/@parcel/watcher-wasm/node_modules/napi-wasm":
-                      assert item == old["packages"][path]
-                      assert lock["packages"]["node_modules/@parcel/watcher-wasm"] == old["packages"]["node_modules/@parcel/watcher-wasm"]
-                      assert item.get("inBundle") is True
-                      continue
-                  assert "inBundle" not in item
-                  assert item["resolved"].startswith("https://registry.npmjs.org/")
-                  assert item["integrity"].startswith("sha512-")
           app = root / "apps/extension-viewer"
           manifest = json.loads((app / "package.json").read_text())
           assert manifest == {"name":"@furbomek/extension-viewer","version":"0.1.0","private":True,"type":"module","dependencies":{"three":"0.187.0"}}
@@ -293,7 +256,7 @@ jobs:
           done
           export_evidence
           git -C "$GITHUB_WORKSPACE/candidate" rev-parse HEAD > evidence/candidate-sha.txt
-          printf '%s\n' 6d829351c305a56fb8104469446ae574a07dec7b > evidence/enforcement-sha.txt
+          printf '%s\n' 63184419ab5c5437ffc37028ba7829ae53c4f289 > evidence/enforcement-sha.txt
           test "$browser_result" = 0
       - name: Upload advisory evidence for source and screenshot review
         if: always()
