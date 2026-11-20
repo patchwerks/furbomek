@@ -16,7 +16,7 @@ for name in embodiment-gateway hermes-activity stream-supervisor; do
   project=$repo/services/$name
   (
     pushd "$project" > /dev/null
-    uv run --frozen pytest -q
+    GODOT_BIN="$godot" uv run --frozen pytest -q
     uv run --frozen ruff check .
     uv run --frozen ruff format --check .
     uv run --frozen basedpyright
