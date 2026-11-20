@@ -73,3 +73,24 @@ femur and knee, and a clear overhead view for hip yaw. Before
 increasing the band, check the support clearance and neutral return
 from that view. The larger bands and hardware endpoints remain
 untested.
+
+## Side-view setup and recovery
+
+The Logitech was moved beside the robot. During setup, the handheld
+USB device re-enumerated at the same path with a different device
+node. The old session's reads failed. The Mac reopened the handheld
+after the owner confirmed physical POWER OFF. Illumination from
+beside the camera made the side links visible. The 720p side preview
+supplied about 10 frames per second with capture timestamps that
+can be compared with Kinect and command timestamps.
+
+The next power-on produced RF BOOT, idle, fault 0 at 7.81 V. The
+ARM-only check did not complete and issued STOP before sending any
+motion command. The last powered status showed FAULT 4, the STOP
+latch. That status identifies the cutoff action. The preceding
+rejected reply was missing from the original runner output.
+
+The owner confirmed physical POWER OFF and the body remained
+untethered. The Mac reopened the handheld with the updated runner
+that preserves the original rejected guard reply. No application
+write was made during the recovery.
