@@ -88,11 +88,11 @@ sequence. Its output is actual rendered 1920x1080 images, not a desktop screensh
 Encode those images privately for decode inspection; this does not measure live
 sensor cadence, glass-to-program latency, OBS rendering lag or audio playback.
 
-**Observed capture limitation:** native OpenGL and ANGLE fixture captures, including
-the native movie path, intermittently omitted text in some frames. The caption is
-therefore not reliable on every standalone frame. Keep these diagnostic artifacts
-private and labelled by their manifest; visual acceptance and installed release
-remain HOLD. No root cause, performance improvement or deployment fix is claimed.
+**Observed Task 22 correction:** the isolated final blank movie frame came from
+freeing the scene before MovieWriter's final draw. The replay harness now retains
+the scene until exit. The bounded replay captures verified that tear-down fix;
+they do not qualify live HOLD/pan performance, OBS lag, or installed playback.
+Live visual acceptance remains HOLD pending private real-program inspection.
 Use `--audio-driver Dummy` for offline movie capture. Its fixed output frame rate
 does not establish real-time cadence or the on-air timing of a wall-clock pulse.
 
@@ -100,3 +100,60 @@ Lua boundary fixtures can run without OBS using a Lua interpreter, or a temporar
 `uv run --with lupa==2.8 python` runtime loading
 `tools/kinect2/effects/tests/obs_effects_test.lua`. These test parsing and default
 mute only; they are not a playback or profile-installation qualification.
+
+## Production bridge (Task 23 candidate)
+
+`production_media.ProductionMedia` is a typed `ReactionAdapter`, constructed with
+an exclusively locked `PrivateMailbox`, the scheduler's `Clock`, and local
+`MediaBinding(actor_id, sfx_enabled=False)`. The directory must already exist,
+be owned by the process user with mode 0700, and be outside Git. Receipt files
+must be regular, single-link, owner-owned 0600 files. Launch candidate OBS with
+an owner-only umask; an unsafe receipt is unavailable, never silently repaired.
+Only four fixed mailbox names are used. No path comes from a cue or web input.
+
+`available(resource)` and `snapshot(resource)` read real bounded receipts.
+`dispatch(Dispatch)` publishes once; `acknowledge(owner)` returns `AppliedAck`
+only after exact consumer epoch, actor, owner, cue, revision, parameters, source
+availability and freshness match. Pass that receipt into the reaction scheduler.
+A restarted consumer requires a new adapter instance. Revision is never invented
+from a submitted command. HUD redacted text remains a separate character-contract
+adapter; robot, voice and face are unavailable in this media adapter.
+
+`release(state, previous)` waits at most 500 ms for actual owner/revision CAS;
+manual changes refuse stale restoration. Captured previous renderer parameters
+are restored with ownership cleared. One-shot audio is stopped, never replayed.
+`stop()` targets this actor's active or queued lease; foreign/manual owners are
+preserved. It does not operate a physical actuator. Manual renderer ownership
+holds scheduler graphics until an explicit authenticated owner edit supersedes it.
+
+Owner UI may send only `production_media_contracts.VisualSettings`: four look IDs,
+point size 0.75–3.6, zoom 0.7–1.5, yaw ±0.55, pitch ±0.32, HUD/inset visibility,
+pulse 0–1 Hz and intensity 0–100. `apply_visual(settings, expected, duration_ms=30000)` returns an
+opaque pending owner token. `visual_receipt(token)` observes exact application;
+Task 14 must redact private receipt metadata and authenticate the caller.
+Neither operation asserts observed state from an input DTO.
+
+Framing is separate: `ProductionFraming(preset, clock).step(Frame)` accepts only
+trusted adapter observations normalized to the scheduler monotonic clock and
+configured source identities. Matching source strings do not authenticate a
+producer. `select_framing(selection)` binds its short-lived decision to the next
+graphics dispatch. Optional `roi`, `transition`, `fallback_roi` and
+`valid_until_ms` are backward-compatible framing fields. Coordinates must fit
+inside the optical frame. Pan and crop-size rates plus transition duration are
+bounded in the real framing consumer. Selection expiry uses its fixed fallback;
+source expiry still hides stale imagery. `hold` preserves the actual prior crop;
+direct fixed RGB always uses the full optical image. Re-evaluate the policy for
+each fresh observation; do not refresh a stale selection's clock.
+
+Candidate SFX must be explicitly enabled locally. Missing consumer, unavailable
+source, mute, stale receipt or default disabled binding returns HOLD. The candidate
+Lua adapter distinguishes `submitted` (media restart invoked) from `playing`
+(observed `OBS_MEDIA_STATE_PLAYING` and unmuted), with a 500 ms opening timeout.
+See the [OBS source media API](https://docs.obsproject.com/reference-sources).
+The Lua API fixture proves handshake behavior only: installed profile integration,
+actual audio capture, peak/loudness and on-air timing remain HOLD for Task 16.
+
+### Changelog
+
+- 2026-11-20: Task 23 adds private observed-state bridge, bounded framing mapping,
+  owner visual controls and candidate SFX state observation; updates Task 22 scope.

@@ -1,18 +1,98 @@
 {
-  "$schema":"https://json-schema.org/draft/2020-12/schema",
-  "$id":"furbomek.sfx.v1",
-  "type":"object","additionalProperties":false,
-  "required":["schema_version","consumer_id","cue_id","owner","expected_revision","revision","issued_ms","duration_ms","preset","gain_percent"],
-  "properties":{
-    "schema_version":{"const":"furbomek.sfx.v1"},
-    "consumer_id":{"type":"string","pattern":"^[a-zA-Z0-9][a-zA-Z0-9_.-]{0,63}$"},
-    "cue_id":{"type":"string","pattern":"^[a-zA-Z0-9][a-zA-Z0-9_.-]{0,63}$"},
-    "owner":{"type":"string","pattern":"^[a-zA-Z0-9][a-zA-Z0-9_.-]{0,63}$"},
-    "expected_revision":{"type":"integer","minimum":0,"maximum":2147483646},
-    "revision":{"type":"integer","minimum":1,"maximum":2147483647},
-    "issued_ms":{"type":"integer","minimum":1,"maximum":9007199254740991,"multipleOf":1000},
-    "duration_ms":{"type":"integer","minimum":1,"maximum":30000},
-    "preset":{"enum":["liquidation","acknowledge"]},
-    "gain_percent":{"type":"integer","minimum":0,"maximum":100}
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "furbomek.sfx.v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "consumer_id",
+    "cue_id",
+    "owner",
+    "expected_revision",
+    "revision",
+    "issued_ms",
+    "duration_ms",
+    "preset",
+    "gain_percent"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "furbomek.sfx.v1"
+    },
+    "consumer_id": {
+      "type": "string",
+      "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.-]{0,63}$"
+    },
+    "cue_id": {
+      "type": "string",
+      "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.-]{0,63}$"
+    },
+    "owner": {
+      "type": "string",
+      "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.-]{0,63}$"
+    },
+    "expected_revision": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 2147483646
+    },
+    "revision": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 2147483647
+    },
+    "issued_ms": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 9007199254740991,
+      "multipleOf": 1000
+    },
+    "duration_ms": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 30000
+    },
+    "preset": {
+      "enum": [
+        "liquidation",
+        "acknowledge"
+      ]
+    },
+    "gain_percent": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 100
+    },
+    "actor_id": {
+      "type": "string",
+      "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.-]{0,63}$"
+    },
+    "expected_owner": {
+      "type": "string",
+      "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.-]{0,63}$"
+    },
+    "operation": {
+      "enum": [
+        "apply",
+        "stop"
+      ]
+    }
+  },
+  "dependentRequired": {
+    "actor_id": [
+      "actor_id",
+      "expected_owner",
+      "operation"
+    ],
+    "expected_owner": [
+      "actor_id",
+      "expected_owner",
+      "operation"
+    ],
+    "operation": [
+      "actor_id",
+      "expected_owner",
+      "operation"
+    ]
   }
 }

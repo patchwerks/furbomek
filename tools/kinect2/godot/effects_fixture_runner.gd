@@ -136,6 +136,47 @@ func run() -> void:
 	hold.zoom = 1.0
 	view.effects.accept(JSON.stringify(hold))
 	check(view.color_surface.get_meta("view_crop") == manual_crop, "new hold preserves actual manual zoom crop")
+	var bounded := request()
+	bounded.actor_id = "fixture-actor"
+	bounded.expected_owner = view.effects.lease_owner
+	bounded.operation = "apply"
+	bounded.framing = {"subject_id":"object-furbomek", "rules":["fixed"], "ttl_ms":300,
+		"roi":{"x":0.5,"y":0.2,"width":0.3,"height":0.4},
+		"transition":{"duration_ms":500,"pan_units_per_second":0.1,"zoom":1.0,"zoom_per_second":0.2}}
+	check(view.effects.accept(JSON.stringify(bounded)) == "applied", "trusted bounded ROI accepted by real consumer")
+	var transition = load("res://effect_framing.gd").new()
+	var parsed = Request.parse(JSON.stringify(bounded))
+	var first: Rect2 = transition.advance(parsed, frame, int(Time.get_unix_time_from_system() * 1000), 1000)
+	var second: Rect2 = transition.advance(parsed, frame, int(Time.get_unix_time_from_system() * 1000), 2000)
+	check(first == Rect2(0,0,1,1) and second != first, "transition begins at actual previous crop")
+	check(first.get_center().distance_to(second.get_center()) <= 0.100001, "pan speed upper bound")
+	check(first.size.distance_to(second.size) <= 0.200001, "zoom speed upper bound")
+	for tick in range(3000, 12000, 1000):
+		transition.advance(parsed, frame, int(Time.get_unix_time_from_system() * 1000), tick)
+	check(transition.crop.is_equal_approx(Rect2(0.5,0.2,0.3,0.4)), "bounded fixed ROI reached")
+	parsed.rules.assign(["hold"])
+	var held: Rect2 = transition.crop
+	check(transition.advance(parsed, frame, int(Time.get_unix_time_from_system() * 1000), 13000) == held, "owner hold preserves actual transitioned crop")
+	parsed.valid_until_ms = 10
+	parsed.fallback_roi = Rect2(0.1,0.1,0.8,0.8)
+	for tick in range(14000, 24000, 1000):
+		transition.advance(parsed, frame, 11, tick)
+	check(transition.crop.is_equal_approx(parsed.fallback_roi), "expired trusted selection uses stable fixed fallback")
+	parsed.valid_until_ms = 0
+	parsed.look = "rgb.fixed.v1"
+	check(transition.advance(parsed, frame, int(Time.get_unix_time_from_system() * 1000), 14000) == Rect2(0,0,1,1), "direct fixed RGB remains independent of advanced ROI")
+	for malformed in [{}, {"duration_ms":"bad"}, {"duration_ms":500.5,"pan_units_per_second":0.1,"zoom":1,"zoom_per_second":0.2}, []]:
+		var nested := request()
+		nested.framing.transition = malformed
+		check(Request.parse(JSON.stringify(nested)) == null, "malformed transition rejected " + JSON.stringify(malformed))
+	var owner_bad := request()
+	owner_bad.expected_owner = "stale-owner"
+	check(view.effects.accept(JSON.stringify(owner_bad)) == "owner_conflict", "actual owner CAS refuses stale owner")
+	bounded.framing.roi.x = 0.9
+	check(Request.parse(JSON.stringify(bounded)) == null, "ROI beyond optical bounds rejected")
+	bounded.framing.roi.x = 0.5
+	bounded.framing.transition.pan_units_per_second = 2
+	check(Request.parse(JSON.stringify(bounded)) == null, "unsafe transition rate rejected")
 	view._hide_stale()
 	check(view.effects.accept(JSON.stringify(request())) == "source_unavailable", "source loss cannot acquire effect")
 	check(not view.cloud.visible and not view.color_surface.visible, "stale geometry and optical hidden")

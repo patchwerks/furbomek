@@ -4,6 +4,30 @@ const Request = preload("res://effect_request.gd")
 var crop := Rect2(0, 0, 1, 1)
 var matched_id := ""
 var reason := "fixed"
+var last_ticks := -1
+
+func advance(request: RefCounted, snapshot: Dictionary, now_ms: int, ticks: int) -> Rect2:
+	var previous := crop
+	var goal: Rect2
+	if request.valid_until_ms > 0 and now_ms >= request.valid_until_ms:
+		goal = Rect2(0,0,1,1) if request.look == "rgb.fixed.v1" else request.fallback_roi
+		matched_id = ""
+		reason = "policy_expired"
+	else:
+		goal = resolve(request, snapshot, now_ms)
+	var delta := maxf(0, float(ticks - last_ticks) / 1000.0) if last_ticks >= 0 else 0.0
+	last_ticks = ticks
+	if request.transition.is_empty() or request.look == "rgb.fixed.v1": return goal
+	if reason.begins_with("hold"):
+		crop = previous
+		return crop
+	var t: Dictionary = request.transition
+	var target_size := goal.size / float(t.zoom)
+	var target_center := goal.get_center()
+	var center := previous.get_center().move_toward(target_center, minf(float(t.pan_units_per_second), 1000.0 / float(t.duration_ms)) * delta)
+	var size := previous.size.move_toward(target_size, minf(float(t.zoom_per_second), 1000.0 / float(t.duration_ms)) * delta)
+	crop = Rect2((center - size * 0.5).clamp(Vector2.ZERO, Vector2.ONE - size), size)
+	return crop
 
 func resolve(request: RefCounted, snapshot: Dictionary, now_ms: int) -> Rect2:
 	matched_id = ""
@@ -14,7 +38,7 @@ func resolve(request: RefCounted, snapshot: Dictionary, now_ms: int) -> Rect2:
 	for rule in request.rules:
 		match rule:
 			"fixed":
-				crop = Rect2(0, 0, 1, 1)
+				crop = request.roi
 				reason = "fixed"
 				return crop
 			"hold":

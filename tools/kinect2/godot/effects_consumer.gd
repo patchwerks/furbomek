@@ -7,6 +7,8 @@ var directory := ""
 var consumer_id := ""
 var revision := 0
 var lease_owner := ""
+var actor_id := ""
+var last_status := "ready"
 var cue_id := ""
 var effective: RefCounted
 var framing := Framing.new()
@@ -46,6 +48,7 @@ func tick() -> void:
 	if now < poll_at:
 		return
 	poll_at = now + 100
+	publish(last_status)
 	var file := FileAccess.open(directory.path_join("effects.json"), FileAccess.READ)
 	if file == null or file.get_length() > 8192:
 		return
@@ -63,6 +66,13 @@ func accept(raw: String) -> String:
 	var age: int = int(Time.get_unix_time_from_system() * 1000) - request.issued_ms
 	if request.consumer_id != consumer_id or request.expected_revision != revision or request.revision != revision + 1:
 		return "conflict"
+	if request.expected_owner != null and request.expected_owner != lease_owner:
+		return "owner_conflict"
+	if request.operation == "stop":
+		if actor_id != request.actor_id: return "owner_conflict"
+		revision = request.revision
+		neutral()
+		return "stopped"
 	if age < 0 or age > 1000 or age >= request.duration_ms:
 		return "expired_request"
 	if not viewer.source_valid:
@@ -70,6 +80,7 @@ func accept(raw: String) -> String:
 	effective = request
 	revision = request.revision
 	lease_owner = request.owner
+	actor_id = request.actor_id
 	cue_id = request.cue_id
 	started_at = Time.get_ticks_msec()
 	expires_at = started_at + request.duration_ms - age
@@ -93,6 +104,10 @@ func accept(raw: String) -> String:
 	viewer.ports.visible = request.hud_visible
 	viewer.hud.set_palette_label(viewer._palette_name())
 	apply_framing()
+	if request.operation == "release":
+		lease_owner = ""
+		actor_id = ""
+		cue_id = ""
 	return "applied"
 
 func update_snapshot(value: Dictionary) -> void:
@@ -102,7 +117,7 @@ func update_snapshot(value: Dictionary) -> void:
 func apply_framing() -> void:
 	if effective == null:
 		return
-	viewer.color_surface.crop = framing.resolve(effective, snapshot, int(Time.get_unix_time_from_system() * 1000))
+	viewer.color_surface.crop = framing.advance(effective, snapshot, int(Time.get_unix_time_from_system() * 1000), Time.get_ticks_msec())
 	viewer.color_surface.zoom = 1.0 if effective.look == "rgb.fixed.v1" else effective.zoom
 	viewer.color_surface._update_crop()
 	if not viewer.hud.subject_lock.is_empty() and framing.matched_id.is_empty() and effective.look != "rgb.fixed.v1":
@@ -119,6 +134,7 @@ func manual_override() -> void:
 	revision += 1
 	effective = null
 	lease_owner = "operator"
+	actor_id = "operator"
 	cue_id = ""
 	pulse.hide()
 	viewer.hud.show()
@@ -133,6 +149,7 @@ func manual_override() -> void:
 func neutral() -> void:
 	effective = null
 	lease_owner = ""
+	actor_id = ""
 	cue_id = ""
 	pulse.hide()
 	viewer._set_palette(0)
@@ -153,11 +170,13 @@ func neutral() -> void:
 	viewer.hud.set_palette_label(viewer._palette_name())
 
 func publish(status: String) -> void:
+	last_status = status
 	var actual_look: String = "rgb.fixed.v1" if viewer.palette == 0 else "rgb.crimson.v1"
 	if not viewer.color_mode:
 		actual_look = "xyz.depth.v1" if viewer.palette == 2 else "xyz.crimson.v1"
 	var receipt := {"schema_version": "furbomek.effects-ack.v1", "consumer_id": consumer_id,
-		"status": status, "revision": revision, "owner": lease_owner, "cue_id": cue_id,
+		"status": status, "actor_id": actor_id, "published_ms": int(Time.get_unix_time_from_system() * 1000),
+		"effective": effective.raw_value if effective != null else null, "revision": revision, "owner": lease_owner, "cue_id": cue_id,
 		"look": actual_look,
 		"source_available": viewer.source_valid, "source_sequence": viewer.sequence,
 		"framing": framing.reason, "matched_id": framing.matched_id,
@@ -168,4 +187,5 @@ func publish(status: String) -> void:
 		return
 	file.store_string(JSON.stringify(receipt))
 	file.close()
+	FileAccess.set_unix_permissions(path, 384)
 	DirAccess.rename_absolute(path, directory.path_join("effects-ack.json"))
