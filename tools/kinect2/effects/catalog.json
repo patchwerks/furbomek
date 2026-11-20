@@ -1,0 +1,40 @@
+{
+  "schema_version": "furbomek.effects-catalog.v1",
+  "request_schema": "control.schema.json",
+  "consumer": "../godot/effects_consumer.gd",
+  "qualification": "offline_candidate_live_release_hold",
+  "fallback": "rgb.fixed.v1",
+  "looks": [
+    {"id":"rgb.fixed.v1","input":"native_rgb","provenance":"sensor_optical_1920x1080","depth_samples":0,"available":true,"framing":"fixed"},
+    {"id":"rgb.crimson.v1","input":"native_rgb","provenance":"rgb_derived_color_samples","depth_samples":0,"available":true,"framing":"ordered_rules"},
+    {"id":"xyz.depth.v1","input":"registered_depth","provenance":"native_measured_xyz_512x424","depth_samples":217088,"available":true,"framing":"bounded_camera"},
+    {"id":"xyz.crimson.v1","input":"registered_depth","provenance":"native_measured_xyz_512x424","depth_samples":217088,"available":true,"framing":"bounded_camera"}
+  ],
+  "compositions": ["look+framing+hud+insets+pulse", "look+program_sfx"],
+  "parameters": {
+    "point_pixels":{"type":"number","minimum":0.75,"maximum":3.6,"default":1.45},
+    "zoom":{"type":"number","minimum":0.7,"maximum":1.5,"default":1.0},
+    "yaw":{"type":"number","minimum":-0.55,"maximum":0.55,"default":0.0},
+    "pitch":{"type":"number","minimum":-0.32,"maximum":0.32,"default":0.0},
+    "pulse_hz":{"type":"number","minimum":0,"maximum":1,"default":0},
+    "intensity_percent":{"type":"integer","minimum":0,"maximum":100,"default":0},
+    "duration_ms":{"type":"integer","minimum":1,"maximum":30000},
+    "hud_visible":{"type":"boolean","default":true},
+    "insets_visible":{"type":"boolean","default":true},
+    "framing":{"rules":["subject","fixed","hold"],"max_rules":3,"ttl_ms":[1,600],"subject_id":"exact stable identity; surface is never substituted for subject"}
+  },
+  "production_mapping": {
+    "graphics.pulse.v1":{"neutral":"rgb.fixed.v1","rgb":"rgb.fixed.v1","xyz":"xyz.depth.v1","liquidation":"rgb.crimson.v1"},
+    "sfx.preset.v1":{"presets":["liquidation","acknowledge"],"consumer":"obs-effects.lua","peak_dbfs":-12,"default_muted":true,"available":false,"reason":"Candidate adapter; dedicated source installation and private OBS acceptance pending"}
+  },
+  "unavailable": [
+    {"id":"ir.native.v1","reason":"Only IR mean is published; no raw IR image consumer ABI"},
+    {"id":"depth.raw.v1","reason":"Native XYZ is available; raw depth image export is absent"},
+    {"id":"sdk.body.v1","reason":"Windows SDK not integrated on this platform"},
+    {"id":"microphone.v1","reason":"No microphone capture authorized or wired"},
+    {"id":"scene.blend.v1","reason":"No qualified second program source"},
+    {"id":"shading.custom.v1","reason":"Only reviewed existing shaders; no arbitrary shader input"}
+  ],
+  "performance":{"baseline_render_lag_percent":16.6,"cause":"unknown","same_load_remeasurement":"HOLD","improvement_claim":false},
+  "limitations":["Availability requires fresh same-sequence source at apply time", "Invalid native depth remains absent", "Fixture rendering does not qualify live accuracy or OBS performance"]
+}

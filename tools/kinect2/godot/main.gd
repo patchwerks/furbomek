@@ -26,6 +26,7 @@ var color_mode := true
 var source_valid := false
 var view_poll_at := 0
 var last_view_request := 0
+var effects = preload("res://effects_consumer.gd").new()
 
 
 func _ready() -> void:
@@ -49,6 +50,8 @@ func _ready() -> void:
 	hud.set_color_surface(color_surface)
 	ports.configure(loader.stream_directory)
 	_apply_camera()
+	add_child(effects)
+	effects.configure(self)
 
 
 func _process(delta: float) -> void:
@@ -60,6 +63,7 @@ func _process(delta: float) -> void:
 	loader.tick()
 	ports.tick()
 	_poll_edge_view()
+	effects.tick()
 
 
 func _poll_edge_view() -> void:
@@ -78,11 +82,14 @@ func _poll_edge_view() -> void:
 	var age := int(Time.get_unix_time_from_system() * 1000) - issued
 	if issued <= last_view_request or age < 0 or age > 5000:
 		return
+	if request.get("view", "") not in ["rgb", "crimson", "xyz"]:
+		return
 	match request.get("view", ""):
 		"rgb": _set_palette(0)
 		"crimson": _set_palette(1)
 		"xyz": _set_palette(2)
 		_: return
+	effects.manual_override()
 	last_view_request = issued
 	hud.set_palette_label(_palette_name())
 
@@ -168,12 +175,15 @@ func _unhandled_input(event: InputEvent) -> void:
 			elif event.button_index == MOUSE_BUTTON_WHEEL_DOWN:
 				color_surface.adjust_zoom(-0.06)
 			hud.queue_redraw()
+			effects.manual_override()
 			return
 		if event.button_index == MOUSE_BUTTON_WHEEL_UP:
 			zoom = clampf(zoom - 0.15, MIN_ZOOM, MAX_ZOOM)
 		elif event.button_index == MOUSE_BUTTON_WHEEL_DOWN:
 			zoom = clampf(zoom + 0.15, MIN_ZOOM, MAX_ZOOM)
 		_apply_camera()
+	if (event is InputEventKey and event.pressed and not event.echo) or (event is InputEventMouseButton and event.pressed):
+		effects.manual_override()
 
 
 func _apply_camera() -> void:

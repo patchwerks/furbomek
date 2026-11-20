@@ -2,7 +2,7 @@
 
 [ext_resource type="Script" path="res://main.gd" id="1_main"]
 [ext_resource type="Script" path="res://stream_loader.gd" id="2_loader"]
-[ext_resource type="Script" path="res://broadcast_hud.gd" id="3_hud"]
+[ext_resource type="Script" path="res://effects_hud.gd" id="3_hud"]
 [ext_resource type="Script" path="res://activity_ports.gd" id="4_ports"]
 [ext_resource type="Script" path="res://color_surface.gd" id="5_color"]
 [ext_resource type="FontFile" path="res://fonts/IoskeleyMono-Regular.ttf" id="6_font"]
