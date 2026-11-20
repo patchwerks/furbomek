@@ -3,9 +3,9 @@
 import math
 import secrets
 from dataclasses import dataclass
-from typing import Annotated, Final, Literal, override
+from typing import Annotated, Final, Literal, Self, override
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, model_validator
 
 from furbomek_gateway.guard_action_poll import shielded_stop, wait_for_completion
 from furbomek_gateway.guard_protocol import (
@@ -20,6 +20,7 @@ _MIN_VOLTAGE: Final = 6.5
 _MAX_VOLTAGE: Final = 8.6
 _MIN_LINK_LENGTH: Final = 1e-6
 _MIN_PROJECTIVE_SCALE: Final = 1e-9
+_WIDE_PROBE_DEGREES: Final = 36
 
 
 class JointProbe(BaseModel, frozen=True, extra="forbid"):
@@ -28,11 +29,29 @@ class JointProbe(BaseModel, frozen=True, extra="forbid"):
     leg: Annotated[int, Field(ge=1, le=6, strict=True)]
     axis: Literal["yaw", "femur", "knee"]
     direction: Literal["negative", "positive"]
-    degrees: Literal[6, 18, 30]
+    degrees: Literal[6, 18, 30, 36]
+    speed: Literal["baseline", "fast"] = "baseline"
+
+    @model_validator(mode="after")
+    def validate_band(self) -> Self:
+        """Reject axis and speed combinations outside the bench profiles."""
+        if (self.degrees == _WIDE_PROBE_DEGREES and self.axis == "femur") or (
+            self.degrees != _WIDE_PROBE_DEGREES and self.speed == "fast"
+        ):
+            raise JointProbeBandError
+        return self
 
     @property
     def code(self) -> int:
         """Map the joint and band to the bench firmware's finite code."""
+        if self.degrees == _WIDE_PROBE_DEGREES:
+            return (
+                119
+                + (self.leg - 1) * 8
+                + (4 if self.axis == "knee" else 0)
+                + (2 if self.direction == "positive" else 0)
+                + int(self.speed == "fast")
+            )
         axis = ("yaw", "femur", "knee").index(self.axis)
         direction = 3 if self.direction == "positive" else 0
         return (
@@ -41,6 +60,13 @@ class JointProbe(BaseModel, frozen=True, extra="forbid"):
             + direction
             + (6, 18, 30).index(self.degrees)
         )
+
+
+class JointProbeBandError(ValueError):
+    """The requested step size or axis is outside the diagnostic band."""
+
+
+type BenchHeight = Literal["low", "middle", "high"]
 
 
 @dataclass(frozen=True, slots=True)
@@ -70,7 +96,7 @@ def _require(reply: GuardReply, status: GuardState, *, busy: bool = False) -> No
 
 
 async def _run(
-    transport: GuardSerialTransport, probe: JointProbe | None, *, arm_only: bool
+    transport: GuardSerialTransport, code: int | None, *, arm_only: bool
 ) -> bool:
     supply = await transport.supply()
     voltage = supply.supply_voltage_volts
@@ -89,10 +115,10 @@ async def _run(
         _require(session, GuardState.SESSION)
         _require(await transport.command(GuardCommand.ARM), GuardState.ARMED)
         if not arm_only:
-            if probe is None:
+            if code is None:
                 launch = await transport.command(GuardCommand.EXEC, action=0)
             else:
-                launch = await transport.execute_joint_probe(probe.code)
+                launch = await transport.execute_bench_action(code)
             _require(launch, GuardState.ARMED, busy=True)
             if not (await wait_for_completion(transport, 2.5, 230)).completed:
                 return False
@@ -116,7 +142,13 @@ async def reference_stance(transport: GuardSerialTransport) -> bool:
 
 async def run_probe(transport: GuardSerialTransport, probe: JointProbe) -> bool:
     """Run one camera-observed probe on the prepared local link."""
-    return await _run(transport, probe, arm_only=False)
+    return await _run(transport, probe.code, arm_only=False)
+
+
+async def run_height(transport: GuardSerialTransport, height: BenchHeight) -> bool:
+    """Apply a supported height preset through the guarded bench session."""
+    code = 167 + ("low", "middle", "high").index(height)
+    return await _run(transport, code, arm_only=False)
 
 
 type Point = tuple[float, float]

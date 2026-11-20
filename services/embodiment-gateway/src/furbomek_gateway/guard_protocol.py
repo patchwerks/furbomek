@@ -210,14 +210,22 @@ def raw_stop() -> bytes:
 
 
 _FIRST_JOINT_PROBE: Final = 11
-_AFTER_LAST_JOINT_PROBE: Final = 119
+_FIRST_WIDE_BENCH_ACTION: Final = 119
+_AFTER_LAST_BENCH_ACTION: Final = 170
 
 
 def encode_joint_bench(sequence: int, code: int) -> bytes:
     """Encode the separate bench-build command family for a local instrument."""
-    if not _FIRST_JOINT_PROBE <= code < _AFTER_LAST_JOINT_PROBE:
+    if not _FIRST_JOINT_PROBE <= code < _AFTER_LAST_BENCH_ACTION:
         raise GuardProtocolError(GuardProtocolErrorCode.ACTION)
-    return _frame(bytes((GuardCommand.EXEC, *_sequence_bytes(sequence), code)))
+    payload: tuple[int, ...] = (
+        GuardCommand.EXEC,
+        *_sequence_bytes(sequence),
+        code & _MAX_DATA_BYTE,
+    )
+    if code >= _FIRST_WIDE_BENCH_ACTION:
+        payload = (*payload, code >> 7)
+    return _frame(bytes(payload))
 
 
 def decode_reply(frame: bytes) -> GuardReply:  # noqa: C901

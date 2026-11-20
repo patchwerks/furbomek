@@ -46,6 +46,34 @@ through the [wired maintenance procedure](../../docs/operations/robot-wired-main
 The production images use a narrower command family. Keep their exact
 rollback artifacts alongside the paired bench build.
 
+## Wide probes and height presets
+
+The revised bench pair adds yaw and knee probes at ±36°. Each new
+probe can use 3.0 or 3.75 mm per 20 ms trajectory update. Keep the
+same direction, endpoints and 130 ms camera dwells for the paired
+comparison. Report camera-observed travel time and settling alongside
+guard completion time. Review clearance at the slower speed before
+repeating the same probe at the faster speed. The 45 mm foot-displacement
+check and existing STOP and lease deadlines continue to apply.
+
+The three bench height commands preserve each foot's X/Y coordinates
+and target Z values of −7, −15 and −25 mm relative to the chassis.
+These represent low, middle and high body positions with feet on
+a level surface. On the center support the chassis stays fixed,
+so a powered view measures the change in foot height. Verify at
+least 15 mm below each foot at the middle preset before issuing
+high and return to middle before any joint probe. Record the
+distinct foot positions and whether the mechanism settled. With
+physical POWER OFF, remove the support only when ready to test
+loaded height on a clear tabletop. Check body clearance, foot
+slip and height during the powered hold and after DISARM.
+
+The wide command format adds a second seven-bit action byte. Both
+paired images must be updated for the new commands. Existing bench
+codes 11–118 keep their original encoding. The expanded actions
+remain on the local bench RF route. Ordinary guard builds continue
+to reject bench actions.
+
 ## Build verification
 
 On 2026-11-21, two independent AVR builds produced matching application
@@ -58,3 +86,11 @@ The build checks establish no physical range of motion.
 | --- | --- | --- |
 | Mega | `74a5c00a464b4358e2fb310716c2588ca0468a703b00591bad2d82488950af44` | `7954f2366ed3dd263429d62296e459f02bb5c9f3af2fef6a5115a0e5d155925b` |
 | Handheld | `8336d68ddf6275c83a53b5667d558346cd6f30d2450ffdd0d4441e548466a095` | `0e0e478804b5dc473bdf14eae7b89c610909b2a4478e8e72679919e1f939b44e` |
+
+The wide-probe candidate also matched across two builds. The ordinary
+guard native tests passed with the bench command family disabled.
+
+| Application | Wide candidate HEX SHA-256 | Wide candidate ELF SHA-256 |
+| --- | --- | --- |
+| Mega | `69abbf917eccda9d8bad4c0a392b0cd38efc604bf4e53e908824795ea736a3d1` | `7db89db6297ca3e258a01ed198f6cc1dbc75b088e9ff8ab27c7162376e71bf5e` |
+| Handheld | `b4c4779be710ab837ed1ad3a54df435c8441b36a591f99b3d7fe0030f61c8019` | `6ee1998e6c8b70e4d2281d227505491c98ccd89e0b7ce8ecf34968875b825092` |

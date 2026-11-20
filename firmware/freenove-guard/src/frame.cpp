@@ -42,9 +42,13 @@ bool command_shape(const Command& command, uint8_t& length) {
     return true;
   }
   if (command.opcode == kExecute) {
+    if (joint_bench_enabled() && wide_bench_action_code(command.action)) {
+      length = 6U;
+      return true;
+    }
     length = 5U;
     return command.action <= static_cast<uint8_t>(Action::TuckPreview) ||
-           (joint_bench_enabled() && joint_probe_code(command.action));
+           (joint_bench_enabled() && bench_action_code(command.action));
   }
   if (command.opcode == kArm || command.opcode == kKeepalive || command.opcode == kStatus ||
       command.opcode == kSupply || command.opcode == kDisarm) {
@@ -80,7 +84,8 @@ bool encode_command(const Command& command, Frame& frame) {
   if (command.opcode == 0x28U) {
     write_id(&frame.bytes[6], command.identifier);
   } else if (command.opcode == 0x2eU) {
-    frame.bytes[6] = command.action;
+    frame.bytes[6] = command.action & 0x7fU;
+    if (length == 6U) frame.bytes[7] = static_cast<uint8_t>(command.action >> 7U);
   }
   const uint16_t sum = crc16(&frame.bytes[1], static_cast<uint8_t>(length + 1U));
   frame.bytes[2U + length] = static_cast<uint8_t>(sum & 0x7fU);
@@ -157,9 +162,16 @@ void FrameDecoder::parse(FrameObserver& observer) {
       }
     }
     read_id(command.identifier, &body_[4]);
+  } else if (command.opcode == kExecute && length_ == 6U && joint_bench_enabled()) {
+    command.action = static_cast<uint8_t>(body_[4] | (body_[5] << 7U));
+    if (body_[5] > 1U || !wide_bench_action_code(command.action)) {
+      error(Result::Unsupported, observer);
+      return;
+    }
   } else if (command.opcode == kExecute && length_ == 5U) {
     if (body_[4] > static_cast<uint8_t>(Action::TuckPreview) &&
-        !(joint_bench_enabled() && joint_probe_code(body_[4]))) {
+        !(joint_bench_enabled() && bench_action_code(body_[4]) &&
+          !wide_bench_action_code(body_[4]))) {
       error(Result::Unsupported, observer);
       return;
     }

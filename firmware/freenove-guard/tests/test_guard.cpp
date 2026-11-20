@@ -143,6 +143,7 @@ int main() {
           assert(decode_joint_probe(code, probe));
           assert(probe.leg == leg && probe.axis == axis);
           assert(probe.offset_deg == (positive ? offsets[i] : -offsets[i]));
+          assert(probe.step_mm == 3.0F);
           Command request{kExecute, 2U, code, {}};
           Frame frame{};
           assert(encode_command(request, frame) == joint_bench_enabled());
@@ -150,7 +151,26 @@ int main() {
       }
     }
   }
-  assert(!joint_probe_code(10U) && !joint_probe_code(119U));
+  assert(!bench_action_code(10U) && !bench_action_code(170U));
+  for (uint8_t code = 119U; code < 167U; ++code) {
+    const auto ordinal = static_cast<uint8_t>(code - 119U);
+    JointProbe probe{};
+    assert(decode_joint_probe(code, probe));
+    assert(probe.leg == ordinal / 8U && probe.axis == 2U * ((ordinal / 4U) % 2U));
+    assert(probe.offset_deg == ((ordinal / 2U) % 2U ? 36 : -36));
+    assert(probe.step_mm == (ordinal % 2U ? 3.75F : 3.0F));
+    Command request{kExecute, 2U, code, {}};
+    Frame frame{};
+    assert(encode_command(request, frame) == joint_bench_enabled());
+    if (joint_bench_enabled()) assert(frame.size == 12U && frame.bytes[7] == code / 128U);
+  }
+  const float heights[] = {-7.0F, -15.0F, -25.0F};
+  for (uint8_t code = 167U; code < 170U; ++code) {
+    float z = 0.0F;
+    JointProbe probe{};
+    assert(!decode_joint_probe(code, probe));
+    assert(decode_bench_height(code, z) && z == heights[code - 167U]);
+  }
   if (joint_bench_enabled()) {
     Motion fixture;
     Replies receipts;
@@ -160,8 +180,12 @@ int main() {
     assert(fixture.commands == 0U);
     send_radio(bench, kRfManualSource, command(kExecute, 2U, 11U), 3U);
     assert(fixture.commands == 0U);
-    send_radio(bench, kRfComputerSource, command(kExecute, 2U, 11U), 4U);
-    assert(fixture.commands == 1U && bench.snapshot(4U).busy);
+    send_usb(bench, command(kExecute, 2U, 169U), 4U);
+    send_radio(bench, kRfManualSource, command(kExecute, 2U, 166U), 5U);
+    assert(fixture.commands == 0U);
+    send_radio(bench, kRfComputerSource, command(kExecute, 2U, 166U), 6U);
+    assert(fixture.commands == 1U && bench.snapshot(6U).busy);
+    assert(static_cast<uint8_t>(fixture.last_action) == 166U);
     bench.tick(502U);
     assert(bench.snapshot(502U).state == State::Fault && fixture.stops == 1U);
   }

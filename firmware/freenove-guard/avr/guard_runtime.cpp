@@ -66,7 +66,7 @@ class Motion final : public freenove_guard::MotionSink {
 
   bool execute(freenove_guard::Action action) override {
     if (freenove_guard::joint_bench_enabled() && action != freenove_guard::Action::Active &&
-        !freenove_guard::joint_probe_code(static_cast<uint8_t>(action))) return false;
+        !freenove_guard::bench_action_code(static_cast<uint8_t>(action))) return false;
     const uint8_t saved_status = SREG;
     cli();
     const bool accepted = deadline_safe_locked() && !action_pending && pending_vendor_size == 0U;

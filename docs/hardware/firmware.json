@@ -1,6 +1,16 @@
 {
   "schema_version": 1,
   "updated_on": "2026-11-21",
+  "joint_bench_wide_candidate": {
+    "date": "2026-11-21",
+    "status": "Paired software candidate. Device installation and powered measurements pending.",
+    "mega_hex_sha256": "69abbf917eccda9d8bad4c0a392b0cd38efc604bf4e53e908824795ea736a3d1",
+    "remote_hex_sha256": "b4c4779be710ab837ed1ad3a54df435c8441b36a591f99b3d7fe0030f61c8019",
+    "verification": "Two matching builds and native bench and ordinary guard tests.",
+    "scope": "36 degree yaw and knee probes at two trajectory speeds and three trial height targets. Local bench RF ingress only. Existing motion bounds and deadlines apply.",
+    "rollback": "Preserve the currently installed paired applications and Mega EEPROM before writing either board.",
+    "evidence": "firmware/freenove-guard/joint-bench.md"
+  },
   "joint_bench_candidate": {
     "date": "2026-11-21",
     "status": "Reproducible candidate installed temporarily for the joint bench. Both applications verified by full device readback.",

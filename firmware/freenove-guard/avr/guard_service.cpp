@@ -130,7 +130,7 @@ bool run_joint_probe(const freenove_guard::JointProbe& probe) {
     if (!leg.CheckPoint(points[index]) ||
         !(Point::GetDistance(initial, points[index]) <= 45.0F)) return false;
   }
-  robot.SetSpeed(3.0F);
+  robot.SetSpeed(probe.step_mm);
   for (const Point& point : points) {
     if (terminal_fault) return false;
     leg.MoveTo(point);
@@ -146,6 +146,37 @@ bool run_joint_probe(const freenove_guard::JointProbe& probe) {
   if (terminal_fault) return false;
   leg.MoveTo(initial);
   leg.WaitUntilFree();
+  return !terminal_fault;
+}
+
+bool run_bench_height(float height) {
+  Robot& robot = robot_action.robot;
+  if (terminal_fault || robot.state != Robot::Action) return false;
+  RobotLegsPoints start;
+  robot.GetPointsNow(start);
+  const float initial_z = start.leg1.z;
+  if (!(initial_z >= -25.0F && initial_z <= -7.0F)) return false;
+  const Point* current[] = {&start.leg1, &start.leg2, &start.leg3,
+                            &start.leg4, &start.leg5, &start.leg6};
+  for (const Point* foot : current) {
+    if (!(foot->z >= initial_z - 0.5F && foot->z <= initial_z + 0.5F)) return false;
+  }
+  RobotLegsPoints targets[3];
+  for (uint8_t index = 0U; index < 3U; ++index) {
+    targets[index] = start;
+    auto& target = targets[index];
+    const float z = initial_z + (height - initial_z) * (index + 1U) / 3.0F;
+    target.leg1.z = target.leg2.z = target.leg3.z = z;
+    target.leg4.z = target.leg5.z = target.leg6.z = z;
+    if (terminal_fault || !robot.CheckPoints(target)) return false;
+  }
+  for (const auto& target : targets) {
+    if (terminal_fault) return false;
+    robot.MoveTo(target, 3.0F);
+    robot.WaitUntilFree();
+  }
+  if (terminal_fault) return false;
+  delay(400U);
   return !terminal_fault;
 }
 #endif
@@ -255,8 +286,13 @@ void guard_action() {
   else {
 #ifdef FURBOMEK_JOINT_BENCH
     freenove_guard::JointProbe probe{};
-    if (freenove_guard::decode_joint_probe(static_cast<uint8_t>(pending.action), probe)) {
-      if (!run_joint_probe(probe)) safe_outputs();
+    float height = 0.0F;
+    const auto code = static_cast<uint8_t>(pending.action);
+    if (freenove_guard::bench_action_code(code)) {
+      const bool completed = freenove_guard::decode_joint_probe(code, probe)
+          ? run_joint_probe(probe)
+          : freenove_guard::decode_bench_height(code, height) && run_bench_height(height);
+      if (!completed) safe_outputs();
       if (!terminal_fault) operation_done_pending = true;
       return;
     }

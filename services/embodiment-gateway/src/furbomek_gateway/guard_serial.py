@@ -160,7 +160,7 @@ class GuardSerialTransport:
                 encode_command(GuardCommand.SUPPLY, 0), GuardReplyOpcode.SUPPLY, None
             )
 
-    async def execute_joint_probe(self, code: int) -> GuardReply:
+    async def execute_bench_action(self, code: int) -> GuardReply:
         """Send one bounded diagnostic frame on an exclusively held local link."""
         async with self._lock:
             sequence = self._next_sequence()

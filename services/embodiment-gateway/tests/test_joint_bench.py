@@ -17,6 +17,7 @@ from furbomek_gateway.joint_bench import (
     arm_only_check,
     observed_travel,
     reference_stance,
+    run_height,
     run_probe,
 )
 from tests.guard_settings import powered_settings
@@ -35,9 +36,14 @@ async def test_probe_uses_separate_wire_family_and_verifies_disarm() -> None:
             assert not board.actions
             assert await reference_stance(port)
             assert await run_probe(port, probe)
+            wide = JointProbe(
+                leg=6, axis="knee", direction="positive", degrees=36, speed="fast"
+            )
+            assert await run_probe(port, wide)
+            assert await run_height(port, "high")
         finally:
             await port.aclose()
-    assert board.actions == [0, 118]
+    assert board.actions == [0, 118, 166, 169]
     assert not board.stop_received.is_set()
 
 
