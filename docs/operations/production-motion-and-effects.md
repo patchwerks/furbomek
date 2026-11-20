@@ -26,6 +26,7 @@ which evidence can change this state.
 | Portable stage | Two independently projected/calibrated synthetic layouts reuse one forward candidate via [stage verification](../../tools/motion-lab/STAGES.md) | Replay only; no second physical stage or transferred permission |
 | Link and stop | [Native/PTY and abstract replay checks](../../services/embodiment-gateway/GUARD_ACCEPTANCE.md) | Installed authenticated origin/integrity/session freshness and measured independent cutoff remain unverified |
 | Studio | Typed preview, owner HTTP and actual fixture-browser controls; [live adapter contract](../../apps/production-studio/README.md#private-owner-http-seam-task-24) | Fixture applied receipts do not establish installed effects, provider sessions or hardware authority |
+| Candidate coordinator | Task 14 non-live stdio MCP → private Unix socket → actual Godot ACK agrees with private owner HTTP state; 464 gateway tests and 41 focused transport/controller tests pass | Candidate software evidence only; installed Mac/Brodex acceptance remains HOLD |
 | Installed Mac/Brodex boundary | Read-only preflight observed seven original MCP tools, idle dedicated OBS and no fresh Kinect source | Original tool discovery does not establish candidate production-tool deployment |
 | Archived GPU rehearsal | Actual Godot mailbox graphics ACK, duplicate refusal, fixed-view restoration and preserved owner override; offline encoded frames decode successfully | Archived-input graphics evidence only; no integrated OBS recording or actual SFX/HUD program output |
 | Performance | Offline [qualification runner](../../tools/stream-qualification/README.md) checks metric arithmetic and fault replay | No actual ≥30-minute representative run, 24-hour soak or physical fault qualification |
@@ -34,13 +35,22 @@ Task 16's private rehearsal used archived inputs through the actual GPU,
 Python scheduler and Godot mailbox. Its offline encoded playback is 4.633 seconds
 at 1920×1080/30, SHA-256
 `e45cf87772e87913d45f5c7cd3f98fd91ab6cc2f9ba46b16aa074b0f96fa5eb8`.
-This is not an OBS program recording. The integrated OBS recording path was not
-established; actual SFX/HUD program output and Brodex candidate deployment remain
-unproven. Task 14's final integrated candidate verification is pending at this
-snapshot. Neither the archived rehearsal nor a future temporary private OBS
-test establishes persistent deployment, a live liquidation, ≥30-minute
-performance, 24-hour operation or physical qualification. Synthetic provider
+The encoding uses variable-timestamp archived GPU frames; its 30 fps is not a
+measured real-time rendering cadence. This is not an OBS program recording.
+The integrated OBS recording path was not established; actual SFX/HUD program
+output and Brodex candidate deployment remain unproven. Task 16 restored the
+dedicated OBS profile and observed idle output. Neither the archived rehearsal
+nor a future temporary private OBS test establishes persistent deployment,
+a live liquidation, ≥30-minute performance, 24-hour operation or physical
+qualification. Synthetic provider
 events remain labelled synthetic; no trade is required or authorized.
+
+Task 14 candidate `f12f4126a1025dff1976e6a4bfb03d06fe968221` has recorded
+non-live integrated acceptance, source bindings and passing lint/format/types.
+The real fixture transports and Godot receipts establish candidate behavior;
+they do not establish installed Mac/Brodex deployment, actual provider enrollment,
+camera/audio acceptance or a physical permit. The execution owner's final
+independent review remains pending at this snapshot.
 
 The inspected documentation/qualification source baseline is
 `843d4e13cf925c48910eb426991931d5d71eadf2`; it is not an installed runtime claim.
