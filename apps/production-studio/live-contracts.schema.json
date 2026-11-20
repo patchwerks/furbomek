@@ -1,0 +1,3439 @@
+{
+  "framingPreset": {
+    "$defs": {
+      "Fixed": {
+        "additionalProperties": false,
+        "description": "Owner-approved fixed normalized shot.",
+        "properties": {
+          "kind": {
+            "const": "fixed",
+            "title": "Kind",
+            "type": "string"
+          },
+          "roi": {
+            "$ref": "#/$defs/Roi"
+          }
+        },
+        "required": [
+          "kind",
+          "roi"
+        ],
+        "title": "Fixed",
+        "type": "object"
+      },
+      "Roi": {
+        "additionalProperties": false,
+        "description": "Normalized camera coordinates, independent of stage geometry.",
+        "properties": {
+          "height": {
+            "exclusiveMinimum": 0,
+            "maximum": 1,
+            "title": "Height",
+            "type": "number"
+          },
+          "width": {
+            "exclusiveMinimum": 0,
+            "maximum": 1,
+            "title": "Width",
+            "type": "number"
+          },
+          "x": {
+            "maximum": 1,
+            "minimum": 0,
+            "title": "X",
+            "type": "number"
+          },
+          "y": {
+            "maximum": 1,
+            "minimum": 0,
+            "title": "Y",
+            "type": "number"
+          }
+        },
+        "required": [
+          "x",
+          "y",
+          "width",
+          "height"
+        ],
+        "title": "Roi",
+        "type": "object"
+      },
+      "Rule": {
+        "additionalProperties": false,
+        "description": "Continuous qualification followed by bounded release hysteresis.",
+        "properties": {
+          "dwell_ms": {
+            "default": 500,
+            "maximum": 600000,
+            "minimum": 0,
+            "title": "Dwell Ms",
+            "type": "integer"
+          },
+          "id": {
+            "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.-]{0,63}$",
+            "title": "Id",
+            "type": "string"
+          },
+          "priority": {
+            "maximum": 100,
+            "minimum": 1,
+            "title": "Priority",
+            "type": "integer"
+          },
+          "release_ms": {
+            "default": 1000,
+            "maximum": 600000,
+            "minimum": 0,
+            "title": "Release Ms",
+            "type": "integer"
+          },
+          "target": {
+            "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.-]{0,63}$",
+            "title": "Target",
+            "type": "string"
+          },
+          "trigger": {
+            "$ref": "#/$defs/Trigger"
+          }
+        },
+        "required": [
+          "id",
+          "target",
+          "trigger",
+          "priority"
+        ],
+        "title": "Rule",
+        "type": "object"
+      },
+      "Shot": {
+        "additionalProperties": false,
+        "description": "Stable preset-local shot reference.",
+        "properties": {
+          "id": {
+            "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.-]{0,63}$",
+            "title": "Id",
+            "type": "string"
+          },
+          "target": {
+            "discriminator": {
+              "mapping": {
+                "fixed": "#/$defs/Fixed",
+                "object": "#/$defs/Subject",
+                "person": "#/$defs/Subject"
+              },
+              "propertyName": "kind"
+            },
+            "oneOf": [
+              {
+                "$ref": "#/$defs/Subject"
+              },
+              {
+                "$ref": "#/$defs/Fixed"
+              }
+            ],
+            "title": "Target"
+          }
+        },
+        "required": [
+          "id",
+          "target"
+        ],
+        "title": "Shot",
+        "type": "object"
+      },
+      "Subject": {
+        "additionalProperties": false,
+        "description": "Owner-approved tracked person or object identity.",
+        "properties": {
+          "id": {
+            "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.-]{0,63}$",
+            "title": "Id",
+            "type": "string"
+          },
+          "kind": {
+            "enum": [
+              "person",
+              "object"
+            ],
+            "title": "Kind",
+            "type": "string"
+          }
+        },
+        "required": [
+          "kind",
+          "id"
+        ],
+        "title": "Subject",
+        "type": "object"
+      },
+      "Transition": {
+        "additionalProperties": false,
+        "description": "Renderer must enforce these limits; policy emits intent only.",
+        "properties": {
+          "duration_ms": {
+            "default": 500,
+            "maximum": 10000,
+            "minimum": 100,
+            "title": "Duration Ms",
+            "type": "integer"
+          },
+          "pan_units_per_second": {
+            "default": 0.25,
+            "exclusiveMinimum": 0,
+            "maximum": 1,
+            "title": "Pan Units Per Second",
+            "type": "number"
+          },
+          "zoom": {
+            "default": 1.0,
+            "maximum": 4,
+            "minimum": 1,
+            "title": "Zoom",
+            "type": "number"
+          },
+          "zoom_per_second": {
+            "default": 0.5,
+            "exclusiveMinimum": 0,
+            "maximum": 1,
+            "title": "Zoom Per Second",
+            "type": "number"
+          }
+        },
+        "title": "Transition",
+        "type": "object"
+      },
+      "Trigger": {
+        "additionalProperties": false,
+        "description": "Closed predicate on an authenticated adapter's typed signal.",
+        "properties": {
+          "confidence": {
+            "default": 0.8,
+            "maximum": 1,
+            "minimum": 0,
+            "title": "Confidence",
+            "type": "number"
+          },
+          "event": {
+            "default": "attention",
+            "enum": [
+              "attention",
+              "activity",
+              "reaction"
+            ],
+            "title": "Event",
+            "type": "string"
+          },
+          "kind": {
+            "enum": [
+              "observation",
+              "event"
+            ],
+            "title": "Kind",
+            "type": "string"
+          },
+          "max_age_ms": {
+            "default": 1000,
+            "maximum": 10000,
+            "minimum": 1,
+            "title": "Max Age Ms",
+            "type": "integer"
+          },
+          "source": {
+            "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.-]{0,63}$",
+            "title": "Source",
+            "type": "string"
+          },
+          "subject": {
+            "$ref": "#/$defs/Subject"
+          }
+        },
+        "required": [
+          "kind",
+          "source",
+          "subject"
+        ],
+        "title": "Trigger",
+        "type": "object"
+      }
+    },
+    "additionalProperties": false,
+    "description": "Persist only this validated configuration, never timers or authority.",
+    "properties": {
+      "default": {
+        "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.-]{0,63}$",
+        "title": "Default",
+        "type": "string"
+      },
+      "fallback": {
+        "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.-]{0,63}$",
+        "title": "Fallback",
+        "type": "string"
+      },
+      "hold_ms": {
+        "default": 1000,
+        "maximum": 600000,
+        "minimum": 0,
+        "title": "Hold Ms",
+        "type": "integer"
+      },
+      "id": {
+        "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.-]{0,63}$",
+        "title": "Id",
+        "type": "string"
+      },
+      "lock_age_ms": {
+        "default": 300,
+        "maximum": 600,
+        "minimum": 1,
+        "title": "Lock Age Ms",
+        "type": "integer"
+      },
+      "lock_confidence": {
+        "default": 0.8,
+        "maximum": 1,
+        "minimum": 0,
+        "title": "Lock Confidence",
+        "type": "number"
+      },
+      "minimum_shot_ms": {
+        "default": 1000,
+        "maximum": 600000,
+        "minimum": 100,
+        "title": "Minimum Shot Ms",
+        "type": "integer"
+      },
+      "output_ttl_ms": {
+        "default": 300,
+        "maximum": 600,
+        "minimum": 1,
+        "title": "Output Ttl Ms",
+        "type": "integer"
+      },
+      "rules": {
+        "default": [],
+        "items": {
+          "$ref": "#/$defs/Rule"
+        },
+        "maxItems": 32,
+        "title": "Rules",
+        "type": "array"
+      },
+      "sample_gap_ms": {
+        "default": 1000,
+        "maximum": 10000,
+        "minimum": 1,
+        "title": "Sample Gap Ms",
+        "type": "integer"
+      },
+      "schema_version": {
+        "const": "furbomek.framing.v1",
+        "default": "furbomek.framing.v1",
+        "title": "Schema Version",
+        "type": "string"
+      },
+      "shots": {
+        "items": {
+          "$ref": "#/$defs/Shot"
+        },
+        "maxItems": 32,
+        "minItems": 1,
+        "title": "Shots",
+        "type": "array"
+      },
+      "tracking_source": {
+        "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.-]{0,63}$",
+        "title": "Tracking Source",
+        "type": "string"
+      },
+      "transition": {
+        "$ref": "#/$defs/Transition",
+        "default": {
+          "duration_ms": 500,
+          "pan_units_per_second": 0.25,
+          "zoom": 1.0,
+          "zoom_per_second": 0.5
+        }
+      },
+      "ttl_ms": {
+        "default": 30000,
+        "maximum": 600000,
+        "minimum": 1,
+        "title": "Ttl Ms",
+        "type": "integer"
+      }
+    },
+    "required": [
+      "id",
+      "shots",
+      "default",
+      "fallback",
+      "tracking_source"
+    ],
+    "title": "FramingPreset",
+    "type": "object"
+  },
+  "manual": {
+    "additionalProperties": false,
+    "description": "Owner-authorized override, always bounded by preset TTL.",
+    "properties": {
+      "duration_ms": {
+        "maximum": 600000,
+        "minimum": 1,
+        "title": "Duration Ms",
+        "type": "integer"
+      },
+      "target": {
+        "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.-]{0,63}$",
+        "title": "Target",
+        "type": "string"
+      }
+    },
+    "required": [
+      "target",
+      "duration_ms"
+    ],
+    "title": "Manual",
+    "type": "object"
+  },
+  "ownerAction": {
+    "$defs": {
+      "EffectRequest": {
+        "additionalProperties": false,
+        "description": "Bounded safe effect preview or apply.",
+        "properties": {
+          "action": {
+            "enum": [
+              "preview",
+              "apply"
+            ],
+            "title": "Action",
+            "type": "string"
+          },
+          "effect": {
+            "discriminator": {
+              "mapping": {
+                "graphics.pulse.v1": "#/$defs/GraphicsEffect",
+                "hud.redacted.v1": "#/$defs/HudEffect",
+                "sfx.preset.v1": "#/$defs/SfxEffect"
+              },
+              "propertyName": "capability"
+            },
+            "oneOf": [
+              {
+                "$ref": "#/$defs/GraphicsEffect"
+              },
+              {
+                "$ref": "#/$defs/HudEffect"
+              },
+              {
+                "$ref": "#/$defs/SfxEffect"
+              }
+            ],
+            "title": "Effect"
+          },
+          "epoch": {
+            "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.-]{0,63}$",
+            "title": "Epoch",
+            "type": "string"
+          },
+          "revision": {
+            "minimum": 0,
+            "title": "Revision",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "epoch",
+          "revision",
+          "action",
+          "effect"
+        ],
+        "title": "EffectRequest",
+        "type": "object"
+      },
+      "Fixed": {
+        "additionalProperties": false,
+        "description": "Owner-approved fixed normalized shot.",
+        "properties": {
+          "kind": {
+            "const": "fixed",
+            "title": "Kind",
+            "type": "string"
+          },
+          "roi": {
+            "$ref": "#/$defs/Roi"
+          }
+        },
+        "required": [
+          "kind",
+          "roi"
+        ],
+        "title": "Fixed",
+        "type": "object"
+      },
+      "FramingPreset": {
+        "additionalProperties": false,
+        "description": "Persist only this validated configuration, never timers or authority.",
+        "properties": {
+          "default": {
+            "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.-]{0,63}$",
+            "title": "Default",
+            "type": "string"
+          },
+          "fallback": {
+            "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.-]{0,63}$",
+            "title": "Fallback",
+            "type": "string"
+          },
+          "hold_ms": {
+            "default": 1000,
+            "maximum": 600000,
+            "minimum": 0,
+            "title": "Hold Ms",
+            "type": "integer"
+          },
+          "id": {
+            "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.-]{0,63}$",
+            "title": "Id",
+            "type": "string"
+          },
+          "lock_age_ms": {
+            "default": 300,
+            "maximum": 600,
+            "minimum": 1,
+            "title": "Lock Age Ms",
+            "type": "integer"
+          },
+          "lock_confidence": {
+            "default": 0.8,
+            "maximum": 1,
+            "minimum": 0,
+            "title": "Lock Confidence",
+            "type": "number"
+          },
+          "minimum_shot_ms": {
+            "default": 1000,
+            "maximum": 600000,
+            "minimum": 100,
+            "title": "Minimum Shot Ms",
+            "type": "integer"
+          },
+          "output_ttl_ms": {
+            "default": 300,
+            "maximum": 600,
+            "minimum": 1,
+            "title": "Output Ttl Ms",
+            "type": "integer"
+          },
+          "rules": {
+            "default": [],
+            "items": {
+              "$ref": "#/$defs/Rule"
+            },
+            "maxItems": 32,
+            "title": "Rules",
+            "type": "array"
+          },
+          "sample_gap_ms": {
+            "default": 1000,
+            "maximum": 10000,
+            "minimum": 1,
+            "title": "Sample Gap Ms",
+            "type": "integer"
+          },
+          "schema_version": {
+            "const": "furbomek.framing.v1",
+            "default": "furbomek.framing.v1",
+            "title": "Schema Version",
+            "type": "string"
+          },
+          "shots": {
+            "items": {
+              "$ref": "#/$defs/Shot"
+            },
+            "maxItems": 32,
+            "minItems": 1,
+            "title": "Shots",
+            "type": "array"
+          },
+          "tracking_source": {
+            "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.-]{0,63}$",
+            "title": "Tracking Source",
+            "type": "string"
+          },
+          "transition": {
+            "$ref": "#/$defs/Transition",
+            "default": {
+              "duration_ms": 500,
+              "pan_units_per_second": 0.25,
+              "zoom": 1.0,
+              "zoom_per_second": 0.5
+            }
+          },
+          "ttl_ms": {
+            "default": 30000,
+            "maximum": 600000,
+            "minimum": 1,
+            "title": "Ttl Ms",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id",
+          "shots",
+          "default",
+          "fallback",
+          "tracking_source"
+        ],
+        "title": "FramingPreset",
+        "type": "object"
+      },
+      "FramingRequest": {
+        "additionalProperties": false,
+        "description": "Validated versioned framing configuration for the owning controller.",
+        "properties": {
+          "action": {
+            "enum": [
+              "framing-preview",
+              "framing-apply",
+              "framing-save"
+            ],
+            "title": "Action",
+            "type": "string"
+          },
+          "epoch": {
+            "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.-]{0,63}$",
+            "title": "Epoch",
+            "type": "string"
+          },
+          "framing": {
+            "$ref": "#/$defs/FramingPreset"
+          },
+          "revision": {
+            "minimum": 0,
+            "title": "Revision",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "epoch",
+          "revision",
+          "action",
+          "framing"
+        ],
+        "title": "FramingRequest",
+        "type": "object"
+      },
+      "GraphicsEffect": {
+        "additionalProperties": false,
+        "description": "Reviewed renderer presets; no renderer commands or asset paths.",
+        "properties": {
+          "capability": {
+            "const": "graphics.pulse.v1",
+            "title": "Capability",
+            "type": "string"
+          },
+          "duration_ms": {
+            "maximum": 30000,
+            "minimum": 1,
+            "title": "Duration Ms",
+            "type": "integer"
+          },
+          "intensity_percent": {
+            "maximum": 100,
+            "minimum": 0,
+            "title": "Intensity Percent",
+            "type": "integer"
+          },
+          "preset": {
+            "enum": [
+              "liquidation",
+              "neutral",
+              "rgb",
+              "xyz"
+            ],
+            "title": "Preset",
+            "type": "string"
+          }
+        },
+        "required": [
+          "capability",
+          "preset",
+          "intensity_percent",
+          "duration_ms"
+        ],
+        "title": "GraphicsEffect",
+        "type": "object"
+      },
+      "HudEffect": {
+        "additionalProperties": false,
+        "description": "Only locally curated redacted text templates are projectable.",
+        "properties": {
+          "capability": {
+            "const": "hud.redacted.v1",
+            "title": "Capability",
+            "type": "string"
+          },
+          "duration_ms": {
+            "maximum": 30000,
+            "minimum": 1,
+            "title": "Duration Ms",
+            "type": "integer"
+          },
+          "template": {
+            "enum": [
+              "liquidation",
+              "neutral"
+            ],
+            "title": "Template",
+            "type": "string"
+          }
+        },
+        "required": [
+          "capability",
+          "template",
+          "duration_ms"
+        ],
+        "title": "HudEffect",
+        "type": "object"
+      },
+      "Manual": {
+        "additionalProperties": false,
+        "description": "Owner-authorized override, always bounded by preset TTL.",
+        "properties": {
+          "duration_ms": {
+            "maximum": 600000,
+            "minimum": 1,
+            "title": "Duration Ms",
+            "type": "integer"
+          },
+          "target": {
+            "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.-]{0,63}$",
+            "title": "Target",
+            "type": "string"
+          }
+        },
+        "required": [
+          "target",
+          "duration_ms"
+        ],
+        "title": "Manual",
+        "type": "object"
+      },
+      "ManualRequest": {
+        "additionalProperties": false,
+        "description": "Bounded owner framing override, never physical admission.",
+        "properties": {
+          "action": {
+            "const": "framing-manual",
+            "title": "Action",
+            "type": "string"
+          },
+          "epoch": {
+            "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.-]{0,63}$",
+            "title": "Epoch",
+            "type": "string"
+          },
+          "manual": {
+            "$ref": "#/$defs/Manual"
+          },
+          "revision": {
+            "minimum": 0,
+            "title": "Revision",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "epoch",
+          "revision",
+          "action",
+          "manual"
+        ],
+        "title": "ManualRequest",
+        "type": "object"
+      },
+      "OwnerSaved": {
+        "additionalProperties": false,
+        "description": "Owner-safe preset; no executable cue or physical authority.",
+        "properties": {
+          "effect": {
+            "discriminator": {
+              "mapping": {
+                "graphics.pulse.v1": "#/$defs/GraphicsEffect",
+                "hud.redacted.v1": "#/$defs/HudEffect",
+                "sfx.preset.v1": "#/$defs/SfxEffect"
+              },
+              "propertyName": "capability"
+            },
+            "oneOf": [
+              {
+                "$ref": "#/$defs/GraphicsEffect"
+              },
+              {
+                "$ref": "#/$defs/HudEffect"
+              },
+              {
+                "$ref": "#/$defs/SfxEffect"
+              }
+            ],
+            "title": "Effect"
+          },
+          "framing": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/FramingPreset"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          }
+        },
+        "required": [
+          "effect"
+        ],
+        "title": "OwnerSaved",
+        "type": "object"
+      },
+      "Roi": {
+        "additionalProperties": false,
+        "description": "Normalized camera coordinates, independent of stage geometry.",
+        "properties": {
+          "height": {
+            "exclusiveMinimum": 0,
+            "maximum": 1,
+            "title": "Height",
+            "type": "number"
+          },
+          "width": {
+            "exclusiveMinimum": 0,
+            "maximum": 1,
+            "title": "Width",
+            "type": "number"
+          },
+          "x": {
+            "maximum": 1,
+            "minimum": 0,
+            "title": "X",
+            "type": "number"
+          },
+          "y": {
+            "maximum": 1,
+            "minimum": 0,
+            "title": "Y",
+            "type": "number"
+          }
+        },
+        "required": [
+          "x",
+          "y",
+          "width",
+          "height"
+        ],
+        "title": "Roi",
+        "type": "object"
+      },
+      "Rule": {
+        "additionalProperties": false,
+        "description": "Continuous qualification followed by bounded release hysteresis.",
+        "properties": {
+          "dwell_ms": {
+            "default": 500,
+            "maximum": 600000,
+            "minimum": 0,
+            "title": "Dwell Ms",
+            "type": "integer"
+          },
+          "id": {
+            "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.-]{0,63}$",
+            "title": "Id",
+            "type": "string"
+          },
+          "priority": {
+            "maximum": 100,
+            "minimum": 1,
+            "title": "Priority",
+            "type": "integer"
+          },
+          "release_ms": {
+            "default": 1000,
+            "maximum": 600000,
+            "minimum": 0,
+            "title": "Release Ms",
+            "type": "integer"
+          },
+          "target": {
+            "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.-]{0,63}$",
+            "title": "Target",
+            "type": "string"
+          },
+          "trigger": {
+            "$ref": "#/$defs/Trigger"
+          }
+        },
+        "required": [
+          "id",
+          "target",
+          "trigger",
+          "priority"
+        ],
+        "title": "Rule",
+        "type": "object"
+      },
+      "SaveRequest": {
+        "additionalProperties": false,
+        "description": "Persist typed authoring configuration without dispatch.",
+        "properties": {
+          "action": {
+            "const": "save",
+            "title": "Action",
+            "type": "string"
+          },
+          "epoch": {
+            "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.-]{0,63}$",
+            "title": "Epoch",
+            "type": "string"
+          },
+          "revision": {
+            "minimum": 0,
+            "title": "Revision",
+            "type": "integer"
+          },
+          "saved": {
+            "$ref": "#/$defs/OwnerSaved"
+          }
+        },
+        "required": [
+          "epoch",
+          "revision",
+          "action",
+          "saved"
+        ],
+        "title": "SaveRequest",
+        "type": "object"
+      },
+      "SfxEffect": {
+        "additionalProperties": false,
+        "description": "A local sound catalog reference, never a file or URL.",
+        "properties": {
+          "capability": {
+            "const": "sfx.preset.v1",
+            "title": "Capability",
+            "type": "string"
+          },
+          "duration_ms": {
+            "maximum": 30000,
+            "minimum": 1,
+            "title": "Duration Ms",
+            "type": "integer"
+          },
+          "gain_percent": {
+            "maximum": 100,
+            "minimum": 0,
+            "title": "Gain Percent",
+            "type": "integer"
+          },
+          "preset": {
+            "enum": [
+              "liquidation",
+              "acknowledge"
+            ],
+            "title": "Preset",
+            "type": "string"
+          }
+        },
+        "required": [
+          "capability",
+          "preset",
+          "gain_percent",
+          "duration_ms"
+        ],
+        "title": "SfxEffect",
+        "type": "object"
+      },
+      "Shot": {
+        "additionalProperties": false,
+        "description": "Stable preset-local shot reference.",
+        "properties": {
+          "id": {
+            "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.-]{0,63}$",
+            "title": "Id",
+            "type": "string"
+          },
+          "target": {
+            "discriminator": {
+              "mapping": {
+                "fixed": "#/$defs/Fixed",
+                "object": "#/$defs/Subject",
+                "person": "#/$defs/Subject"
+              },
+              "propertyName": "kind"
+            },
+            "oneOf": [
+              {
+                "$ref": "#/$defs/Subject"
+              },
+              {
+                "$ref": "#/$defs/Fixed"
+              }
+            ],
+            "title": "Target"
+          }
+        },
+        "required": [
+          "id",
+          "target"
+        ],
+        "title": "Shot",
+        "type": "object"
+      },
+      "SimpleRequest": {
+        "additionalProperties": false,
+        "description": "Closed commands; no operational admission, paths or navigation.",
+        "properties": {
+          "action": {
+            "enum": [
+              "revert",
+              "cancel"
+            ],
+            "title": "Action",
+            "type": "string"
+          },
+          "epoch": {
+            "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.-]{0,63}$",
+            "title": "Epoch",
+            "type": "string"
+          },
+          "revision": {
+            "minimum": 0,
+            "title": "Revision",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "epoch",
+          "revision",
+          "action"
+        ],
+        "title": "SimpleRequest",
+        "type": "object"
+      },
+      "Subject": {
+        "additionalProperties": false,
+        "description": "Owner-approved tracked person or object identity.",
+        "properties": {
+          "id": {
+            "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.-]{0,63}$",
+            "title": "Id",
+            "type": "string"
+          },
+          "kind": {
+            "enum": [
+              "person",
+              "object"
+            ],
+            "title": "Kind",
+            "type": "string"
+          }
+        },
+        "required": [
+          "kind",
+          "id"
+        ],
+        "title": "Subject",
+        "type": "object"
+      },
+      "Transition": {
+        "additionalProperties": false,
+        "description": "Renderer must enforce these limits; policy emits intent only.",
+        "properties": {
+          "duration_ms": {
+            "default": 500,
+            "maximum": 10000,
+            "minimum": 100,
+            "title": "Duration Ms",
+            "type": "integer"
+          },
+          "pan_units_per_second": {
+            "default": 0.25,
+            "exclusiveMinimum": 0,
+            "maximum": 1,
+            "title": "Pan Units Per Second",
+            "type": "number"
+          },
+          "zoom": {
+            "default": 1.0,
+            "maximum": 4,
+            "minimum": 1,
+            "title": "Zoom",
+            "type": "number"
+          },
+          "zoom_per_second": {
+            "default": 0.5,
+            "exclusiveMinimum": 0,
+            "maximum": 1,
+            "title": "Zoom Per Second",
+            "type": "number"
+          }
+        },
+        "title": "Transition",
+        "type": "object"
+      },
+      "Trigger": {
+        "additionalProperties": false,
+        "description": "Closed predicate on an authenticated adapter's typed signal.",
+        "properties": {
+          "confidence": {
+            "default": 0.8,
+            "maximum": 1,
+            "minimum": 0,
+            "title": "Confidence",
+            "type": "number"
+          },
+          "event": {
+            "default": "attention",
+            "enum": [
+              "attention",
+              "activity",
+              "reaction"
+            ],
+            "title": "Event",
+            "type": "string"
+          },
+          "kind": {
+            "enum": [
+              "observation",
+              "event"
+            ],
+            "title": "Kind",
+            "type": "string"
+          },
+          "max_age_ms": {
+            "default": 1000,
+            "maximum": 10000,
+            "minimum": 1,
+            "title": "Max Age Ms",
+            "type": "integer"
+          },
+          "source": {
+            "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.-]{0,63}$",
+            "title": "Source",
+            "type": "string"
+          },
+          "subject": {
+            "$ref": "#/$defs/Subject"
+          }
+        },
+        "required": [
+          "kind",
+          "source",
+          "subject"
+        ],
+        "title": "Trigger",
+        "type": "object"
+      },
+      "VisualRequest": {
+        "additionalProperties": false,
+        "description": "Safe visual settings without renderer mailbox authority.",
+        "properties": {
+          "action": {
+            "enum": [
+              "visual-preview",
+              "visual-apply"
+            ],
+            "title": "Action",
+            "type": "string"
+          },
+          "duration_ms": {
+            "maximum": 30000,
+            "minimum": 1,
+            "title": "Duration Ms",
+            "type": "integer"
+          },
+          "epoch": {
+            "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.-]{0,63}$",
+            "title": "Epoch",
+            "type": "string"
+          },
+          "revision": {
+            "minimum": 0,
+            "title": "Revision",
+            "type": "integer"
+          },
+          "visual": {
+            "$ref": "#/$defs/VisualSettings"
+          }
+        },
+        "required": [
+          "epoch",
+          "revision",
+          "action",
+          "visual",
+          "duration_ms"
+        ],
+        "title": "VisualRequest",
+        "type": "object"
+      },
+      "VisualSettings": {
+        "additionalProperties": false,
+        "description": "Public-safe controls; authority and observations never travel here.",
+        "properties": {
+          "hud_visible": {
+            "default": true,
+            "title": "Hud Visible",
+            "type": "boolean"
+          },
+          "insets_visible": {
+            "default": true,
+            "title": "Insets Visible",
+            "type": "boolean"
+          },
+          "intensity_percent": {
+            "default": 0,
+            "maximum": 100,
+            "minimum": 0,
+            "title": "Intensity Percent",
+            "type": "integer"
+          },
+          "look": {
+            "default": "rgb.fixed.v1",
+            "enum": [
+              "rgb.fixed.v1",
+              "rgb.crimson.v1",
+              "xyz.depth.v1",
+              "xyz.crimson.v1"
+            ],
+            "title": "Look",
+            "type": "string"
+          },
+          "pitch": {
+            "default": 0.0,
+            "maximum": 0.32,
+            "minimum": -0.32,
+            "title": "Pitch",
+            "type": "number"
+          },
+          "point_pixels": {
+            "default": 1.45,
+            "maximum": 3.6,
+            "minimum": 0.75,
+            "title": "Point Pixels",
+            "type": "number"
+          },
+          "pulse_hz": {
+            "default": 0.0,
+            "maximum": 1,
+            "minimum": 0,
+            "title": "Pulse Hz",
+            "type": "number"
+          },
+          "yaw": {
+            "default": 0.0,
+            "maximum": 0.55,
+            "minimum": -0.55,
+            "title": "Yaw",
+            "type": "number"
+          },
+          "zoom": {
+            "default": 1.0,
+            "maximum": 1.5,
+            "minimum": 0.7,
+            "title": "Zoom",
+            "type": "number"
+          }
+        },
+        "title": "VisualSettings",
+        "type": "object"
+      }
+    },
+    "discriminator": {
+      "mapping": {
+        "apply": "#/$defs/EffectRequest",
+        "cancel": "#/$defs/SimpleRequest",
+        "framing-apply": "#/$defs/FramingRequest",
+        "framing-manual": "#/$defs/ManualRequest",
+        "framing-preview": "#/$defs/FramingRequest",
+        "framing-save": "#/$defs/FramingRequest",
+        "preview": "#/$defs/EffectRequest",
+        "revert": "#/$defs/SimpleRequest",
+        "save": "#/$defs/SaveRequest",
+        "visual-apply": "#/$defs/VisualRequest",
+        "visual-preview": "#/$defs/VisualRequest"
+      },
+      "propertyName": "action"
+    },
+    "oneOf": [
+      {
+        "$ref": "#/$defs/EffectRequest"
+      },
+      {
+        "$ref": "#/$defs/SaveRequest"
+      },
+      {
+        "$ref": "#/$defs/SimpleRequest"
+      },
+      {
+        "$ref": "#/$defs/FramingRequest"
+      },
+      {
+        "$ref": "#/$defs/VisualRequest"
+      },
+      {
+        "$ref": "#/$defs/ManualRequest"
+      }
+    ]
+  },
+  "ownerResult": {
+    "$defs": {
+      "AppliedAck": {
+        "additionalProperties": false,
+        "description": "Property ownership receipt, not proof of physical motion or perception.",
+        "properties": {
+          "available": {
+            "const": true,
+            "title": "Available",
+            "type": "boolean"
+          },
+          "capability": {
+            "enum": [
+              "hud.redacted.v1",
+              "graphics.pulse.v1",
+              "sfx.preset.v1",
+              "motion.qualified.v1",
+              "voice.reserved.v1",
+              "face.reserved.v1"
+            ],
+            "title": "Capability",
+            "type": "string"
+          },
+          "cue_id": {
+            "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.-]{0,63}$",
+            "title": "Cue Id",
+            "type": "string"
+          },
+          "effective": {
+            "discriminator": {
+              "mapping": {
+                "face.reserved.v1": "#/$defs/FaceEffect",
+                "graphics.pulse.v1": "#/$defs/GraphicsEffect",
+                "hud.redacted.v1": "#/$defs/HudEffect",
+                "motion.qualified.v1": "#/$defs/MotionEffect",
+                "sfx.preset.v1": "#/$defs/SfxEffect",
+                "voice.reserved.v1": "#/$defs/VoiceEffect"
+              },
+              "propertyName": "capability"
+            },
+            "oneOf": [
+              {
+                "$ref": "#/$defs/HudEffect"
+              },
+              {
+                "$ref": "#/$defs/GraphicsEffect"
+              },
+              {
+                "$ref": "#/$defs/SfxEffect"
+              },
+              {
+                "$ref": "#/$defs/MotionEffect"
+              },
+              {
+                "$ref": "#/$defs/VoiceEffect"
+              },
+              {
+                "$ref": "#/$defs/FaceEffect"
+              }
+            ],
+            "title": "Effective"
+          },
+          "owner": {
+            "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.-]{0,63}$",
+            "title": "Owner",
+            "type": "string"
+          },
+          "previous_revision": {
+            "minimum": 0,
+            "title": "Previous Revision",
+            "type": "integer"
+          },
+          "resource": {
+            "enum": [
+              "hud",
+              "graphics",
+              "sfx",
+              "robot",
+              "voice",
+              "face"
+            ],
+            "title": "Resource",
+            "type": "string"
+          },
+          "revision": {
+            "minimum": 1,
+            "title": "Revision",
+            "type": "integer"
+          },
+          "schema_version": {
+            "const": 1,
+            "default": 1,
+            "title": "Schema Version",
+            "type": "integer"
+          },
+          "status": {
+            "const": "applied",
+            "title": "Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "status",
+          "cue_id",
+          "capability",
+          "resource",
+          "owner",
+          "previous_revision",
+          "revision",
+          "effective",
+          "available"
+        ],
+        "title": "AppliedAck",
+        "type": "object"
+      },
+      "FaceEffect": {
+        "additionalProperties": false,
+        "description": "Reserved face contract; unavailable in this version.",
+        "properties": {
+          "capability": {
+            "const": "face.reserved.v1",
+            "title": "Capability",
+            "type": "string"
+          },
+          "duration_ms": {
+            "maximum": 30000,
+            "minimum": 1,
+            "title": "Duration Ms",
+            "type": "integer"
+          },
+          "preset": {
+            "const": "reserved",
+            "title": "Preset",
+            "type": "string"
+          }
+        },
+        "required": [
+          "capability",
+          "preset",
+          "duration_ms"
+        ],
+        "title": "FaceEffect",
+        "type": "object"
+      },
+      "Fixed": {
+        "additionalProperties": false,
+        "description": "Owner-approved fixed normalized shot.",
+        "properties": {
+          "kind": {
+            "const": "fixed",
+            "title": "Kind",
+            "type": "string"
+          },
+          "roi": {
+            "$ref": "#/$defs/Roi"
+          }
+        },
+        "required": [
+          "kind",
+          "roi"
+        ],
+        "title": "Fixed",
+        "type": "object"
+      },
+      "FramingPreset": {
+        "additionalProperties": false,
+        "description": "Persist only this validated configuration, never timers or authority.",
+        "properties": {
+          "default": {
+            "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.-]{0,63}$",
+            "title": "Default",
+            "type": "string"
+          },
+          "fallback": {
+            "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.-]{0,63}$",
+            "title": "Fallback",
+            "type": "string"
+          },
+          "hold_ms": {
+            "default": 1000,
+            "maximum": 600000,
+            "minimum": 0,
+            "title": "Hold Ms",
+            "type": "integer"
+          },
+          "id": {
+            "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.-]{0,63}$",
+            "title": "Id",
+            "type": "string"
+          },
+          "lock_age_ms": {
+            "default": 300,
+            "maximum": 600,
+            "minimum": 1,
+            "title": "Lock Age Ms",
+            "type": "integer"
+          },
+          "lock_confidence": {
+            "default": 0.8,
+            "maximum": 1,
+            "minimum": 0,
+            "title": "Lock Confidence",
+            "type": "number"
+          },
+          "minimum_shot_ms": {
+            "default": 1000,
+            "maximum": 600000,
+            "minimum": 100,
+            "title": "Minimum Shot Ms",
+            "type": "integer"
+          },
+          "output_ttl_ms": {
+            "default": 300,
+            "maximum": 600,
+            "minimum": 1,
+            "title": "Output Ttl Ms",
+            "type": "integer"
+          },
+          "rules": {
+            "default": [],
+            "items": {
+              "$ref": "#/$defs/Rule"
+            },
+            "maxItems": 32,
+            "title": "Rules",
+            "type": "array"
+          },
+          "sample_gap_ms": {
+            "default": 1000,
+            "maximum": 10000,
+            "minimum": 1,
+            "title": "Sample Gap Ms",
+            "type": "integer"
+          },
+          "schema_version": {
+            "const": "furbomek.framing.v1",
+            "default": "furbomek.framing.v1",
+            "title": "Schema Version",
+            "type": "string"
+          },
+          "shots": {
+            "items": {
+              "$ref": "#/$defs/Shot"
+            },
+            "maxItems": 32,
+            "minItems": 1,
+            "title": "Shots",
+            "type": "array"
+          },
+          "tracking_source": {
+            "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.-]{0,63}$",
+            "title": "Tracking Source",
+            "type": "string"
+          },
+          "transition": {
+            "$ref": "#/$defs/Transition",
+            "default": {
+              "duration_ms": 500,
+              "pan_units_per_second": 0.25,
+              "zoom": 1.0,
+              "zoom_per_second": 0.5
+            }
+          },
+          "ttl_ms": {
+            "default": 30000,
+            "maximum": 600000,
+            "minimum": 1,
+            "title": "Ttl Ms",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id",
+          "shots",
+          "default",
+          "fallback",
+          "tracking_source"
+        ],
+        "title": "FramingPreset",
+        "type": "object"
+      },
+      "GraphicsEffect": {
+        "additionalProperties": false,
+        "description": "Reviewed renderer presets; no renderer commands or asset paths.",
+        "properties": {
+          "capability": {
+            "const": "graphics.pulse.v1",
+            "title": "Capability",
+            "type": "string"
+          },
+          "duration_ms": {
+            "maximum": 30000,
+            "minimum": 1,
+            "title": "Duration Ms",
+            "type": "integer"
+          },
+          "intensity_percent": {
+            "maximum": 100,
+            "minimum": 0,
+            "title": "Intensity Percent",
+            "type": "integer"
+          },
+          "preset": {
+            "enum": [
+              "liquidation",
+              "neutral",
+              "rgb",
+              "xyz"
+            ],
+            "title": "Preset",
+            "type": "string"
+          }
+        },
+        "required": [
+          "capability",
+          "preset",
+          "intensity_percent",
+          "duration_ms"
+        ],
+        "title": "GraphicsEffect",
+        "type": "object"
+      },
+      "HudEffect": {
+        "additionalProperties": false,
+        "description": "Only locally curated redacted text templates are projectable.",
+        "properties": {
+          "capability": {
+            "const": "hud.redacted.v1",
+            "title": "Capability",
+            "type": "string"
+          },
+          "duration_ms": {
+            "maximum": 30000,
+            "minimum": 1,
+            "title": "Duration Ms",
+            "type": "integer"
+          },
+          "template": {
+            "enum": [
+              "liquidation",
+              "neutral"
+            ],
+            "title": "Template",
+            "type": "string"
+          }
+        },
+        "required": [
+          "capability",
+          "template",
+          "duration_ms"
+        ],
+        "title": "HudEffect",
+        "type": "object"
+      },
+      "MotionEffect": {
+        "additionalProperties": false,
+        "description": "Optional intent requiring separate motion admission and qualification.",
+        "properties": {
+          "action": {
+            "enum": [
+              "active",
+              "sleep",
+              "forward",
+              "backward",
+              "left",
+              "right",
+              "turn_left",
+              "turn_right"
+            ],
+            "title": "Action",
+            "type": "string"
+          },
+          "capability": {
+            "const": "motion.qualified.v1",
+            "title": "Capability",
+            "type": "string"
+          },
+          "duration_ms": {
+            "maximum": 1000,
+            "minimum": 1,
+            "title": "Duration Ms",
+            "type": "integer"
+          },
+          "qualification": {
+            "const": "operator_present_supported_bench",
+            "title": "Qualification",
+            "type": "string"
+          }
+        },
+        "required": [
+          "capability",
+          "action",
+          "duration_ms",
+          "qualification"
+        ],
+        "title": "MotionEffect",
+        "type": "object"
+      },
+      "OwnerSaved": {
+        "additionalProperties": false,
+        "description": "Owner-safe preset; no executable cue or physical authority.",
+        "properties": {
+          "effect": {
+            "discriminator": {
+              "mapping": {
+                "graphics.pulse.v1": "#/$defs/GraphicsEffect",
+                "hud.redacted.v1": "#/$defs/HudEffect",
+                "sfx.preset.v1": "#/$defs/SfxEffect"
+              },
+              "propertyName": "capability"
+            },
+            "oneOf": [
+              {
+                "$ref": "#/$defs/GraphicsEffect"
+              },
+              {
+                "$ref": "#/$defs/HudEffect"
+              },
+              {
+                "$ref": "#/$defs/SfxEffect"
+              }
+            ],
+            "title": "Effect"
+          },
+          "framing": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/FramingPreset"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          }
+        },
+        "required": [
+          "effect"
+        ],
+        "title": "OwnerSaved",
+        "type": "object"
+      },
+      "OwnerState": {
+        "additionalProperties": false,
+        "description": "Only observed applied effects belong here; unavailable starts null.",
+        "properties": {
+          "applied": {
+            "anyOf": [
+              {
+                "discriminator": {
+                  "mapping": {
+                    "graphics.pulse.v1": "#/$defs/GraphicsEffect",
+                    "hud.redacted.v1": "#/$defs/HudEffect",
+                    "sfx.preset.v1": "#/$defs/SfxEffect"
+                  },
+                  "propertyName": "capability"
+                },
+                "oneOf": [
+                  {
+                    "$ref": "#/$defs/GraphicsEffect"
+                  },
+                  {
+                    "$ref": "#/$defs/HudEffect"
+                  },
+                  {
+                    "$ref": "#/$defs/SfxEffect"
+                  }
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Applied"
+          },
+          "epoch": {
+            "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.-]{0,63}$",
+            "title": "Epoch",
+            "type": "string"
+          },
+          "framing": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/FramingPreset"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          },
+          "framing_available": {
+            "default": false,
+            "title": "Framing Available",
+            "type": "boolean"
+          },
+          "health": {
+            "enum": [
+              "fresh",
+              "held",
+              "unavailable"
+            ],
+            "title": "Health",
+            "type": "string"
+          },
+          "mode": {
+            "const": "live",
+            "default": "live",
+            "title": "Mode",
+            "type": "string"
+          },
+          "origin": {
+            "enum": [
+              "controller",
+              "injected-test-fixture"
+            ],
+            "title": "Origin",
+            "type": "string"
+          },
+          "owner": {
+            "const": "local-owner",
+            "default": "local-owner",
+            "title": "Owner",
+            "type": "string"
+          },
+          "previous": {
+            "anyOf": [
+              {
+                "discriminator": {
+                  "mapping": {
+                    "graphics.pulse.v1": "#/$defs/GraphicsEffect",
+                    "hud.redacted.v1": "#/$defs/HudEffect",
+                    "sfx.preset.v1": "#/$defs/SfxEffect"
+                  },
+                  "propertyName": "capability"
+                },
+                "oneOf": [
+                  {
+                    "$ref": "#/$defs/GraphicsEffect"
+                  },
+                  {
+                    "$ref": "#/$defs/HudEffect"
+                  },
+                  {
+                    "$ref": "#/$defs/SfxEffect"
+                  }
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Previous"
+          },
+          "reason": {
+            "default": "unavailable",
+            "enum": [
+              "observed",
+              "held",
+              "unavailable",
+              "unsupported"
+            ],
+            "title": "Reason",
+            "type": "string"
+          },
+          "receipt": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/AppliedAck"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          },
+          "revision": {
+            "minimum": 0,
+            "title": "Revision",
+            "type": "integer"
+          },
+          "saved": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/OwnerSaved"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          },
+          "visual": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/VisualSettings"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          },
+          "visual_available": {
+            "default": false,
+            "title": "Visual Available",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "origin",
+          "epoch",
+          "revision",
+          "health"
+        ],
+        "title": "OwnerState",
+        "type": "object"
+      },
+      "Roi": {
+        "additionalProperties": false,
+        "description": "Normalized camera coordinates, independent of stage geometry.",
+        "properties": {
+          "height": {
+            "exclusiveMinimum": 0,
+            "maximum": 1,
+            "title": "Height",
+            "type": "number"
+          },
+          "width": {
+            "exclusiveMinimum": 0,
+            "maximum": 1,
+            "title": "Width",
+            "type": "number"
+          },
+          "x": {
+            "maximum": 1,
+            "minimum": 0,
+            "title": "X",
+            "type": "number"
+          },
+          "y": {
+            "maximum": 1,
+            "minimum": 0,
+            "title": "Y",
+            "type": "number"
+          }
+        },
+        "required": [
+          "x",
+          "y",
+          "width",
+          "height"
+        ],
+        "title": "Roi",
+        "type": "object"
+      },
+      "Rule": {
+        "additionalProperties": false,
+        "description": "Continuous qualification followed by bounded release hysteresis.",
+        "properties": {
+          "dwell_ms": {
+            "default": 500,
+            "maximum": 600000,
+            "minimum": 0,
+            "title": "Dwell Ms",
+            "type": "integer"
+          },
+          "id": {
+            "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.-]{0,63}$",
+            "title": "Id",
+            "type": "string"
+          },
+          "priority": {
+            "maximum": 100,
+            "minimum": 1,
+            "title": "Priority",
+            "type": "integer"
+          },
+          "release_ms": {
+            "default": 1000,
+            "maximum": 600000,
+            "minimum": 0,
+            "title": "Release Ms",
+            "type": "integer"
+          },
+          "target": {
+            "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.-]{0,63}$",
+            "title": "Target",
+            "type": "string"
+          },
+          "trigger": {
+            "$ref": "#/$defs/Trigger"
+          }
+        },
+        "required": [
+          "id",
+          "target",
+          "trigger",
+          "priority"
+        ],
+        "title": "Rule",
+        "type": "object"
+      },
+      "SfxEffect": {
+        "additionalProperties": false,
+        "description": "A local sound catalog reference, never a file or URL.",
+        "properties": {
+          "capability": {
+            "const": "sfx.preset.v1",
+            "title": "Capability",
+            "type": "string"
+          },
+          "duration_ms": {
+            "maximum": 30000,
+            "minimum": 1,
+            "title": "Duration Ms",
+            "type": "integer"
+          },
+          "gain_percent": {
+            "maximum": 100,
+            "minimum": 0,
+            "title": "Gain Percent",
+            "type": "integer"
+          },
+          "preset": {
+            "enum": [
+              "liquidation",
+              "acknowledge"
+            ],
+            "title": "Preset",
+            "type": "string"
+          }
+        },
+        "required": [
+          "capability",
+          "preset",
+          "gain_percent",
+          "duration_ms"
+        ],
+        "title": "SfxEffect",
+        "type": "object"
+      },
+      "Shot": {
+        "additionalProperties": false,
+        "description": "Stable preset-local shot reference.",
+        "properties": {
+          "id": {
+            "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.-]{0,63}$",
+            "title": "Id",
+            "type": "string"
+          },
+          "target": {
+            "discriminator": {
+              "mapping": {
+                "fixed": "#/$defs/Fixed",
+                "object": "#/$defs/Subject",
+                "person": "#/$defs/Subject"
+              },
+              "propertyName": "kind"
+            },
+            "oneOf": [
+              {
+                "$ref": "#/$defs/Subject"
+              },
+              {
+                "$ref": "#/$defs/Fixed"
+              }
+            ],
+            "title": "Target"
+          }
+        },
+        "required": [
+          "id",
+          "target"
+        ],
+        "title": "Shot",
+        "type": "object"
+      },
+      "Subject": {
+        "additionalProperties": false,
+        "description": "Owner-approved tracked person or object identity.",
+        "properties": {
+          "id": {
+            "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.-]{0,63}$",
+            "title": "Id",
+            "type": "string"
+          },
+          "kind": {
+            "enum": [
+              "person",
+              "object"
+            ],
+            "title": "Kind",
+            "type": "string"
+          }
+        },
+        "required": [
+          "kind",
+          "id"
+        ],
+        "title": "Subject",
+        "type": "object"
+      },
+      "Transition": {
+        "additionalProperties": false,
+        "description": "Renderer must enforce these limits; policy emits intent only.",
+        "properties": {
+          "duration_ms": {
+            "default": 500,
+            "maximum": 10000,
+            "minimum": 100,
+            "title": "Duration Ms",
+            "type": "integer"
+          },
+          "pan_units_per_second": {
+            "default": 0.25,
+            "exclusiveMinimum": 0,
+            "maximum": 1,
+            "title": "Pan Units Per Second",
+            "type": "number"
+          },
+          "zoom": {
+            "default": 1.0,
+            "maximum": 4,
+            "minimum": 1,
+            "title": "Zoom",
+            "type": "number"
+          },
+          "zoom_per_second": {
+            "default": 0.5,
+            "exclusiveMinimum": 0,
+            "maximum": 1,
+            "title": "Zoom Per Second",
+            "type": "number"
+          }
+        },
+        "title": "Transition",
+        "type": "object"
+      },
+      "Trigger": {
+        "additionalProperties": false,
+        "description": "Closed predicate on an authenticated adapter's typed signal.",
+        "properties": {
+          "confidence": {
+            "default": 0.8,
+            "maximum": 1,
+            "minimum": 0,
+            "title": "Confidence",
+            "type": "number"
+          },
+          "event": {
+            "default": "attention",
+            "enum": [
+              "attention",
+              "activity",
+              "reaction"
+            ],
+            "title": "Event",
+            "type": "string"
+          },
+          "kind": {
+            "enum": [
+              "observation",
+              "event"
+            ],
+            "title": "Kind",
+            "type": "string"
+          },
+          "max_age_ms": {
+            "default": 1000,
+            "maximum": 10000,
+            "minimum": 1,
+            "title": "Max Age Ms",
+            "type": "integer"
+          },
+          "source": {
+            "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.-]{0,63}$",
+            "title": "Source",
+            "type": "string"
+          },
+          "subject": {
+            "$ref": "#/$defs/Subject"
+          }
+        },
+        "required": [
+          "kind",
+          "source",
+          "subject"
+        ],
+        "title": "Trigger",
+        "type": "object"
+      },
+      "VisualSettings": {
+        "additionalProperties": false,
+        "description": "Public-safe controls; authority and observations never travel here.",
+        "properties": {
+          "hud_visible": {
+            "default": true,
+            "title": "Hud Visible",
+            "type": "boolean"
+          },
+          "insets_visible": {
+            "default": true,
+            "title": "Insets Visible",
+            "type": "boolean"
+          },
+          "intensity_percent": {
+            "default": 0,
+            "maximum": 100,
+            "minimum": 0,
+            "title": "Intensity Percent",
+            "type": "integer"
+          },
+          "look": {
+            "default": "rgb.fixed.v1",
+            "enum": [
+              "rgb.fixed.v1",
+              "rgb.crimson.v1",
+              "xyz.depth.v1",
+              "xyz.crimson.v1"
+            ],
+            "title": "Look",
+            "type": "string"
+          },
+          "pitch": {
+            "default": 0.0,
+            "maximum": 0.32,
+            "minimum": -0.32,
+            "title": "Pitch",
+            "type": "number"
+          },
+          "point_pixels": {
+            "default": 1.45,
+            "maximum": 3.6,
+            "minimum": 0.75,
+            "title": "Point Pixels",
+            "type": "number"
+          },
+          "pulse_hz": {
+            "default": 0.0,
+            "maximum": 1,
+            "minimum": 0,
+            "title": "Pulse Hz",
+            "type": "number"
+          },
+          "yaw": {
+            "default": 0.0,
+            "maximum": 0.55,
+            "minimum": -0.55,
+            "title": "Yaw",
+            "type": "number"
+          },
+          "zoom": {
+            "default": 1.0,
+            "maximum": 1.5,
+            "minimum": 0.7,
+            "title": "Zoom",
+            "type": "number"
+          }
+        },
+        "title": "VisualSettings",
+        "type": "object"
+      },
+      "VoiceEffect": {
+        "additionalProperties": false,
+        "description": "Reserved jabberwerk adapter contract; unavailable in this version.",
+        "properties": {
+          "capability": {
+            "const": "voice.reserved.v1",
+            "title": "Capability",
+            "type": "string"
+          },
+          "duration_ms": {
+            "maximum": 30000,
+            "minimum": 1,
+            "title": "Duration Ms",
+            "type": "integer"
+          },
+          "preset": {
+            "const": "reserved",
+            "title": "Preset",
+            "type": "string"
+          }
+        },
+        "required": [
+          "capability",
+          "preset",
+          "duration_ms"
+        ],
+        "title": "VoiceEffect",
+        "type": "object"
+      }
+    },
+    "additionalProperties": false,
+    "description": "Controller receipt, including refusals; transport never invents success.",
+    "properties": {
+      "framing_preview": {
+        "anyOf": [
+          {
+            "$ref": "#/$defs/FramingPreset"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null
+      },
+      "outcome": {
+        "enum": [
+          "accepted",
+          "rejected"
+        ],
+        "title": "Outcome",
+        "type": "string"
+      },
+      "preview": {
+        "anyOf": [
+          {
+            "discriminator": {
+              "mapping": {
+                "graphics.pulse.v1": "#/$defs/GraphicsEffect",
+                "hud.redacted.v1": "#/$defs/HudEffect",
+                "sfx.preset.v1": "#/$defs/SfxEffect"
+              },
+              "propertyName": "capability"
+            },
+            "oneOf": [
+              {
+                "$ref": "#/$defs/GraphicsEffect"
+              },
+              {
+                "$ref": "#/$defs/HudEffect"
+              },
+              {
+                "$ref": "#/$defs/SfxEffect"
+              }
+            ]
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Preview"
+      },
+      "reason": {
+        "enum": [
+          "previewed",
+          "applied",
+          "saved",
+          "cancelled",
+          "reverted",
+          "held",
+          "unavailable",
+          "stale",
+          "busy",
+          "unsupported"
+        ],
+        "title": "Reason",
+        "type": "string"
+      },
+      "state": {
+        "$ref": "#/$defs/OwnerState"
+      },
+      "visual_preview": {
+        "anyOf": [
+          {
+            "$ref": "#/$defs/VisualSettings"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null
+      }
+    },
+    "required": [
+      "outcome",
+      "reason",
+      "state"
+    ],
+    "title": "OwnerResult",
+    "type": "object"
+  },
+  "ownerState": {
+    "$defs": {
+      "AppliedAck": {
+        "additionalProperties": false,
+        "description": "Property ownership receipt, not proof of physical motion or perception.",
+        "properties": {
+          "available": {
+            "const": true,
+            "title": "Available",
+            "type": "boolean"
+          },
+          "capability": {
+            "enum": [
+              "hud.redacted.v1",
+              "graphics.pulse.v1",
+              "sfx.preset.v1",
+              "motion.qualified.v1",
+              "voice.reserved.v1",
+              "face.reserved.v1"
+            ],
+            "title": "Capability",
+            "type": "string"
+          },
+          "cue_id": {
+            "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.-]{0,63}$",
+            "title": "Cue Id",
+            "type": "string"
+          },
+          "effective": {
+            "discriminator": {
+              "mapping": {
+                "face.reserved.v1": "#/$defs/FaceEffect",
+                "graphics.pulse.v1": "#/$defs/GraphicsEffect",
+                "hud.redacted.v1": "#/$defs/HudEffect",
+                "motion.qualified.v1": "#/$defs/MotionEffect",
+                "sfx.preset.v1": "#/$defs/SfxEffect",
+                "voice.reserved.v1": "#/$defs/VoiceEffect"
+              },
+              "propertyName": "capability"
+            },
+            "oneOf": [
+              {
+                "$ref": "#/$defs/HudEffect"
+              },
+              {
+                "$ref": "#/$defs/GraphicsEffect"
+              },
+              {
+                "$ref": "#/$defs/SfxEffect"
+              },
+              {
+                "$ref": "#/$defs/MotionEffect"
+              },
+              {
+                "$ref": "#/$defs/VoiceEffect"
+              },
+              {
+                "$ref": "#/$defs/FaceEffect"
+              }
+            ],
+            "title": "Effective"
+          },
+          "owner": {
+            "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.-]{0,63}$",
+            "title": "Owner",
+            "type": "string"
+          },
+          "previous_revision": {
+            "minimum": 0,
+            "title": "Previous Revision",
+            "type": "integer"
+          },
+          "resource": {
+            "enum": [
+              "hud",
+              "graphics",
+              "sfx",
+              "robot",
+              "voice",
+              "face"
+            ],
+            "title": "Resource",
+            "type": "string"
+          },
+          "revision": {
+            "minimum": 1,
+            "title": "Revision",
+            "type": "integer"
+          },
+          "schema_version": {
+            "const": 1,
+            "default": 1,
+            "title": "Schema Version",
+            "type": "integer"
+          },
+          "status": {
+            "const": "applied",
+            "title": "Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "status",
+          "cue_id",
+          "capability",
+          "resource",
+          "owner",
+          "previous_revision",
+          "revision",
+          "effective",
+          "available"
+        ],
+        "title": "AppliedAck",
+        "type": "object"
+      },
+      "FaceEffect": {
+        "additionalProperties": false,
+        "description": "Reserved face contract; unavailable in this version.",
+        "properties": {
+          "capability": {
+            "const": "face.reserved.v1",
+            "title": "Capability",
+            "type": "string"
+          },
+          "duration_ms": {
+            "maximum": 30000,
+            "minimum": 1,
+            "title": "Duration Ms",
+            "type": "integer"
+          },
+          "preset": {
+            "const": "reserved",
+            "title": "Preset",
+            "type": "string"
+          }
+        },
+        "required": [
+          "capability",
+          "preset",
+          "duration_ms"
+        ],
+        "title": "FaceEffect",
+        "type": "object"
+      },
+      "Fixed": {
+        "additionalProperties": false,
+        "description": "Owner-approved fixed normalized shot.",
+        "properties": {
+          "kind": {
+            "const": "fixed",
+            "title": "Kind",
+            "type": "string"
+          },
+          "roi": {
+            "$ref": "#/$defs/Roi"
+          }
+        },
+        "required": [
+          "kind",
+          "roi"
+        ],
+        "title": "Fixed",
+        "type": "object"
+      },
+      "FramingPreset": {
+        "additionalProperties": false,
+        "description": "Persist only this validated configuration, never timers or authority.",
+        "properties": {
+          "default": {
+            "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.-]{0,63}$",
+            "title": "Default",
+            "type": "string"
+          },
+          "fallback": {
+            "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.-]{0,63}$",
+            "title": "Fallback",
+            "type": "string"
+          },
+          "hold_ms": {
+            "default": 1000,
+            "maximum": 600000,
+            "minimum": 0,
+            "title": "Hold Ms",
+            "type": "integer"
+          },
+          "id": {
+            "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.-]{0,63}$",
+            "title": "Id",
+            "type": "string"
+          },
+          "lock_age_ms": {
+            "default": 300,
+            "maximum": 600,
+            "minimum": 1,
+            "title": "Lock Age Ms",
+            "type": "integer"
+          },
+          "lock_confidence": {
+            "default": 0.8,
+            "maximum": 1,
+            "minimum": 0,
+            "title": "Lock Confidence",
+            "type": "number"
+          },
+          "minimum_shot_ms": {
+            "default": 1000,
+            "maximum": 600000,
+            "minimum": 100,
+            "title": "Minimum Shot Ms",
+            "type": "integer"
+          },
+          "output_ttl_ms": {
+            "default": 300,
+            "maximum": 600,
+            "minimum": 1,
+            "title": "Output Ttl Ms",
+            "type": "integer"
+          },
+          "rules": {
+            "default": [],
+            "items": {
+              "$ref": "#/$defs/Rule"
+            },
+            "maxItems": 32,
+            "title": "Rules",
+            "type": "array"
+          },
+          "sample_gap_ms": {
+            "default": 1000,
+            "maximum": 10000,
+            "minimum": 1,
+            "title": "Sample Gap Ms",
+            "type": "integer"
+          },
+          "schema_version": {
+            "const": "furbomek.framing.v1",
+            "default": "furbomek.framing.v1",
+            "title": "Schema Version",
+            "type": "string"
+          },
+          "shots": {
+            "items": {
+              "$ref": "#/$defs/Shot"
+            },
+            "maxItems": 32,
+            "minItems": 1,
+            "title": "Shots",
+            "type": "array"
+          },
+          "tracking_source": {
+            "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.-]{0,63}$",
+            "title": "Tracking Source",
+            "type": "string"
+          },
+          "transition": {
+            "$ref": "#/$defs/Transition",
+            "default": {
+              "duration_ms": 500,
+              "pan_units_per_second": 0.25,
+              "zoom": 1.0,
+              "zoom_per_second": 0.5
+            }
+          },
+          "ttl_ms": {
+            "default": 30000,
+            "maximum": 600000,
+            "minimum": 1,
+            "title": "Ttl Ms",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id",
+          "shots",
+          "default",
+          "fallback",
+          "tracking_source"
+        ],
+        "title": "FramingPreset",
+        "type": "object"
+      },
+      "GraphicsEffect": {
+        "additionalProperties": false,
+        "description": "Reviewed renderer presets; no renderer commands or asset paths.",
+        "properties": {
+          "capability": {
+            "const": "graphics.pulse.v1",
+            "title": "Capability",
+            "type": "string"
+          },
+          "duration_ms": {
+            "maximum": 30000,
+            "minimum": 1,
+            "title": "Duration Ms",
+            "type": "integer"
+          },
+          "intensity_percent": {
+            "maximum": 100,
+            "minimum": 0,
+            "title": "Intensity Percent",
+            "type": "integer"
+          },
+          "preset": {
+            "enum": [
+              "liquidation",
+              "neutral",
+              "rgb",
+              "xyz"
+            ],
+            "title": "Preset",
+            "type": "string"
+          }
+        },
+        "required": [
+          "capability",
+          "preset",
+          "intensity_percent",
+          "duration_ms"
+        ],
+        "title": "GraphicsEffect",
+        "type": "object"
+      },
+      "HudEffect": {
+        "additionalProperties": false,
+        "description": "Only locally curated redacted text templates are projectable.",
+        "properties": {
+          "capability": {
+            "const": "hud.redacted.v1",
+            "title": "Capability",
+            "type": "string"
+          },
+          "duration_ms": {
+            "maximum": 30000,
+            "minimum": 1,
+            "title": "Duration Ms",
+            "type": "integer"
+          },
+          "template": {
+            "enum": [
+              "liquidation",
+              "neutral"
+            ],
+            "title": "Template",
+            "type": "string"
+          }
+        },
+        "required": [
+          "capability",
+          "template",
+          "duration_ms"
+        ],
+        "title": "HudEffect",
+        "type": "object"
+      },
+      "MotionEffect": {
+        "additionalProperties": false,
+        "description": "Optional intent requiring separate motion admission and qualification.",
+        "properties": {
+          "action": {
+            "enum": [
+              "active",
+              "sleep",
+              "forward",
+              "backward",
+              "left",
+              "right",
+              "turn_left",
+              "turn_right"
+            ],
+            "title": "Action",
+            "type": "string"
+          },
+          "capability": {
+            "const": "motion.qualified.v1",
+            "title": "Capability",
+            "type": "string"
+          },
+          "duration_ms": {
+            "maximum": 1000,
+            "minimum": 1,
+            "title": "Duration Ms",
+            "type": "integer"
+          },
+          "qualification": {
+            "const": "operator_present_supported_bench",
+            "title": "Qualification",
+            "type": "string"
+          }
+        },
+        "required": [
+          "capability",
+          "action",
+          "duration_ms",
+          "qualification"
+        ],
+        "title": "MotionEffect",
+        "type": "object"
+      },
+      "OwnerSaved": {
+        "additionalProperties": false,
+        "description": "Owner-safe preset; no executable cue or physical authority.",
+        "properties": {
+          "effect": {
+            "discriminator": {
+              "mapping": {
+                "graphics.pulse.v1": "#/$defs/GraphicsEffect",
+                "hud.redacted.v1": "#/$defs/HudEffect",
+                "sfx.preset.v1": "#/$defs/SfxEffect"
+              },
+              "propertyName": "capability"
+            },
+            "oneOf": [
+              {
+                "$ref": "#/$defs/GraphicsEffect"
+              },
+              {
+                "$ref": "#/$defs/HudEffect"
+              },
+              {
+                "$ref": "#/$defs/SfxEffect"
+              }
+            ],
+            "title": "Effect"
+          },
+          "framing": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/FramingPreset"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          }
+        },
+        "required": [
+          "effect"
+        ],
+        "title": "OwnerSaved",
+        "type": "object"
+      },
+      "Roi": {
+        "additionalProperties": false,
+        "description": "Normalized camera coordinates, independent of stage geometry.",
+        "properties": {
+          "height": {
+            "exclusiveMinimum": 0,
+            "maximum": 1,
+            "title": "Height",
+            "type": "number"
+          },
+          "width": {
+            "exclusiveMinimum": 0,
+            "maximum": 1,
+            "title": "Width",
+            "type": "number"
+          },
+          "x": {
+            "maximum": 1,
+            "minimum": 0,
+            "title": "X",
+            "type": "number"
+          },
+          "y": {
+            "maximum": 1,
+            "minimum": 0,
+            "title": "Y",
+            "type": "number"
+          }
+        },
+        "required": [
+          "x",
+          "y",
+          "width",
+          "height"
+        ],
+        "title": "Roi",
+        "type": "object"
+      },
+      "Rule": {
+        "additionalProperties": false,
+        "description": "Continuous qualification followed by bounded release hysteresis.",
+        "properties": {
+          "dwell_ms": {
+            "default": 500,
+            "maximum": 600000,
+            "minimum": 0,
+            "title": "Dwell Ms",
+            "type": "integer"
+          },
+          "id": {
+            "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.-]{0,63}$",
+            "title": "Id",
+            "type": "string"
+          },
+          "priority": {
+            "maximum": 100,
+            "minimum": 1,
+            "title": "Priority",
+            "type": "integer"
+          },
+          "release_ms": {
+            "default": 1000,
+            "maximum": 600000,
+            "minimum": 0,
+            "title": "Release Ms",
+            "type": "integer"
+          },
+          "target": {
+            "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.-]{0,63}$",
+            "title": "Target",
+            "type": "string"
+          },
+          "trigger": {
+            "$ref": "#/$defs/Trigger"
+          }
+        },
+        "required": [
+          "id",
+          "target",
+          "trigger",
+          "priority"
+        ],
+        "title": "Rule",
+        "type": "object"
+      },
+      "SfxEffect": {
+        "additionalProperties": false,
+        "description": "A local sound catalog reference, never a file or URL.",
+        "properties": {
+          "capability": {
+            "const": "sfx.preset.v1",
+            "title": "Capability",
+            "type": "string"
+          },
+          "duration_ms": {
+            "maximum": 30000,
+            "minimum": 1,
+            "title": "Duration Ms",
+            "type": "integer"
+          },
+          "gain_percent": {
+            "maximum": 100,
+            "minimum": 0,
+            "title": "Gain Percent",
+            "type": "integer"
+          },
+          "preset": {
+            "enum": [
+              "liquidation",
+              "acknowledge"
+            ],
+            "title": "Preset",
+            "type": "string"
+          }
+        },
+        "required": [
+          "capability",
+          "preset",
+          "gain_percent",
+          "duration_ms"
+        ],
+        "title": "SfxEffect",
+        "type": "object"
+      },
+      "Shot": {
+        "additionalProperties": false,
+        "description": "Stable preset-local shot reference.",
+        "properties": {
+          "id": {
+            "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.-]{0,63}$",
+            "title": "Id",
+            "type": "string"
+          },
+          "target": {
+            "discriminator": {
+              "mapping": {
+                "fixed": "#/$defs/Fixed",
+                "object": "#/$defs/Subject",
+                "person": "#/$defs/Subject"
+              },
+              "propertyName": "kind"
+            },
+            "oneOf": [
+              {
+                "$ref": "#/$defs/Subject"
+              },
+              {
+                "$ref": "#/$defs/Fixed"
+              }
+            ],
+            "title": "Target"
+          }
+        },
+        "required": [
+          "id",
+          "target"
+        ],
+        "title": "Shot",
+        "type": "object"
+      },
+      "Subject": {
+        "additionalProperties": false,
+        "description": "Owner-approved tracked person or object identity.",
+        "properties": {
+          "id": {
+            "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.-]{0,63}$",
+            "title": "Id",
+            "type": "string"
+          },
+          "kind": {
+            "enum": [
+              "person",
+              "object"
+            ],
+            "title": "Kind",
+            "type": "string"
+          }
+        },
+        "required": [
+          "kind",
+          "id"
+        ],
+        "title": "Subject",
+        "type": "object"
+      },
+      "Transition": {
+        "additionalProperties": false,
+        "description": "Renderer must enforce these limits; policy emits intent only.",
+        "properties": {
+          "duration_ms": {
+            "default": 500,
+            "maximum": 10000,
+            "minimum": 100,
+            "title": "Duration Ms",
+            "type": "integer"
+          },
+          "pan_units_per_second": {
+            "default": 0.25,
+            "exclusiveMinimum": 0,
+            "maximum": 1,
+            "title": "Pan Units Per Second",
+            "type": "number"
+          },
+          "zoom": {
+            "default": 1.0,
+            "maximum": 4,
+            "minimum": 1,
+            "title": "Zoom",
+            "type": "number"
+          },
+          "zoom_per_second": {
+            "default": 0.5,
+            "exclusiveMinimum": 0,
+            "maximum": 1,
+            "title": "Zoom Per Second",
+            "type": "number"
+          }
+        },
+        "title": "Transition",
+        "type": "object"
+      },
+      "Trigger": {
+        "additionalProperties": false,
+        "description": "Closed predicate on an authenticated adapter's typed signal.",
+        "properties": {
+          "confidence": {
+            "default": 0.8,
+            "maximum": 1,
+            "minimum": 0,
+            "title": "Confidence",
+            "type": "number"
+          },
+          "event": {
+            "default": "attention",
+            "enum": [
+              "attention",
+              "activity",
+              "reaction"
+            ],
+            "title": "Event",
+            "type": "string"
+          },
+          "kind": {
+            "enum": [
+              "observation",
+              "event"
+            ],
+            "title": "Kind",
+            "type": "string"
+          },
+          "max_age_ms": {
+            "default": 1000,
+            "maximum": 10000,
+            "minimum": 1,
+            "title": "Max Age Ms",
+            "type": "integer"
+          },
+          "source": {
+            "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.-]{0,63}$",
+            "title": "Source",
+            "type": "string"
+          },
+          "subject": {
+            "$ref": "#/$defs/Subject"
+          }
+        },
+        "required": [
+          "kind",
+          "source",
+          "subject"
+        ],
+        "title": "Trigger",
+        "type": "object"
+      },
+      "VisualSettings": {
+        "additionalProperties": false,
+        "description": "Public-safe controls; authority and observations never travel here.",
+        "properties": {
+          "hud_visible": {
+            "default": true,
+            "title": "Hud Visible",
+            "type": "boolean"
+          },
+          "insets_visible": {
+            "default": true,
+            "title": "Insets Visible",
+            "type": "boolean"
+          },
+          "intensity_percent": {
+            "default": 0,
+            "maximum": 100,
+            "minimum": 0,
+            "title": "Intensity Percent",
+            "type": "integer"
+          },
+          "look": {
+            "default": "rgb.fixed.v1",
+            "enum": [
+              "rgb.fixed.v1",
+              "rgb.crimson.v1",
+              "xyz.depth.v1",
+              "xyz.crimson.v1"
+            ],
+            "title": "Look",
+            "type": "string"
+          },
+          "pitch": {
+            "default": 0.0,
+            "maximum": 0.32,
+            "minimum": -0.32,
+            "title": "Pitch",
+            "type": "number"
+          },
+          "point_pixels": {
+            "default": 1.45,
+            "maximum": 3.6,
+            "minimum": 0.75,
+            "title": "Point Pixels",
+            "type": "number"
+          },
+          "pulse_hz": {
+            "default": 0.0,
+            "maximum": 1,
+            "minimum": 0,
+            "title": "Pulse Hz",
+            "type": "number"
+          },
+          "yaw": {
+            "default": 0.0,
+            "maximum": 0.55,
+            "minimum": -0.55,
+            "title": "Yaw",
+            "type": "number"
+          },
+          "zoom": {
+            "default": 1.0,
+            "maximum": 1.5,
+            "minimum": 0.7,
+            "title": "Zoom",
+            "type": "number"
+          }
+        },
+        "title": "VisualSettings",
+        "type": "object"
+      },
+      "VoiceEffect": {
+        "additionalProperties": false,
+        "description": "Reserved jabberwerk adapter contract; unavailable in this version.",
+        "properties": {
+          "capability": {
+            "const": "voice.reserved.v1",
+            "title": "Capability",
+            "type": "string"
+          },
+          "duration_ms": {
+            "maximum": 30000,
+            "minimum": 1,
+            "title": "Duration Ms",
+            "type": "integer"
+          },
+          "preset": {
+            "const": "reserved",
+            "title": "Preset",
+            "type": "string"
+          }
+        },
+        "required": [
+          "capability",
+          "preset",
+          "duration_ms"
+        ],
+        "title": "VoiceEffect",
+        "type": "object"
+      }
+    },
+    "additionalProperties": false,
+    "description": "Only observed applied effects belong here; unavailable starts null.",
+    "properties": {
+      "applied": {
+        "anyOf": [
+          {
+            "discriminator": {
+              "mapping": {
+                "graphics.pulse.v1": "#/$defs/GraphicsEffect",
+                "hud.redacted.v1": "#/$defs/HudEffect",
+                "sfx.preset.v1": "#/$defs/SfxEffect"
+              },
+              "propertyName": "capability"
+            },
+            "oneOf": [
+              {
+                "$ref": "#/$defs/GraphicsEffect"
+              },
+              {
+                "$ref": "#/$defs/HudEffect"
+              },
+              {
+                "$ref": "#/$defs/SfxEffect"
+              }
+            ]
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Applied"
+      },
+      "epoch": {
+        "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.-]{0,63}$",
+        "title": "Epoch",
+        "type": "string"
+      },
+      "framing": {
+        "anyOf": [
+          {
+            "$ref": "#/$defs/FramingPreset"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null
+      },
+      "framing_available": {
+        "default": false,
+        "title": "Framing Available",
+        "type": "boolean"
+      },
+      "health": {
+        "enum": [
+          "fresh",
+          "held",
+          "unavailable"
+        ],
+        "title": "Health",
+        "type": "string"
+      },
+      "mode": {
+        "const": "live",
+        "default": "live",
+        "title": "Mode",
+        "type": "string"
+      },
+      "origin": {
+        "enum": [
+          "controller",
+          "injected-test-fixture"
+        ],
+        "title": "Origin",
+        "type": "string"
+      },
+      "owner": {
+        "const": "local-owner",
+        "default": "local-owner",
+        "title": "Owner",
+        "type": "string"
+      },
+      "previous": {
+        "anyOf": [
+          {
+            "discriminator": {
+              "mapping": {
+                "graphics.pulse.v1": "#/$defs/GraphicsEffect",
+                "hud.redacted.v1": "#/$defs/HudEffect",
+                "sfx.preset.v1": "#/$defs/SfxEffect"
+              },
+              "propertyName": "capability"
+            },
+            "oneOf": [
+              {
+                "$ref": "#/$defs/GraphicsEffect"
+              },
+              {
+                "$ref": "#/$defs/HudEffect"
+              },
+              {
+                "$ref": "#/$defs/SfxEffect"
+              }
+            ]
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Previous"
+      },
+      "reason": {
+        "default": "unavailable",
+        "enum": [
+          "observed",
+          "held",
+          "unavailable",
+          "unsupported"
+        ],
+        "title": "Reason",
+        "type": "string"
+      },
+      "receipt": {
+        "anyOf": [
+          {
+            "$ref": "#/$defs/AppliedAck"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null
+      },
+      "revision": {
+        "minimum": 0,
+        "title": "Revision",
+        "type": "integer"
+      },
+      "saved": {
+        "anyOf": [
+          {
+            "$ref": "#/$defs/OwnerSaved"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null
+      },
+      "visual": {
+        "anyOf": [
+          {
+            "$ref": "#/$defs/VisualSettings"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null
+      },
+      "visual_available": {
+        "default": false,
+        "title": "Visual Available",
+        "type": "boolean"
+      }
+    },
+    "required": [
+      "origin",
+      "epoch",
+      "revision",
+      "health"
+    ],
+    "title": "OwnerState",
+    "type": "object"
+  },
+  "visualSettings": {
+    "additionalProperties": false,
+    "description": "Public-safe controls; authority and observations never travel here.",
+    "properties": {
+      "hud_visible": {
+        "default": true,
+        "title": "Hud Visible",
+        "type": "boolean"
+      },
+      "insets_visible": {
+        "default": true,
+        "title": "Insets Visible",
+        "type": "boolean"
+      },
+      "intensity_percent": {
+        "default": 0,
+        "maximum": 100,
+        "minimum": 0,
+        "title": "Intensity Percent",
+        "type": "integer"
+      },
+      "look": {
+        "default": "rgb.fixed.v1",
+        "enum": [
+          "rgb.fixed.v1",
+          "rgb.crimson.v1",
+          "xyz.depth.v1",
+          "xyz.crimson.v1"
+        ],
+        "title": "Look",
+        "type": "string"
+      },
+      "pitch": {
+        "default": 0.0,
+        "maximum": 0.32,
+        "minimum": -0.32,
+        "title": "Pitch",
+        "type": "number"
+      },
+      "point_pixels": {
+        "default": 1.45,
+        "maximum": 3.6,
+        "minimum": 0.75,
+        "title": "Point Pixels",
+        "type": "number"
+      },
+      "pulse_hz": {
+        "default": 0.0,
+        "maximum": 1,
+        "minimum": 0,
+        "title": "Pulse Hz",
+        "type": "number"
+      },
+      "yaw": {
+        "default": 0.0,
+        "maximum": 0.55,
+        "minimum": -0.55,
+        "title": "Yaw",
+        "type": "number"
+      },
+      "zoom": {
+        "default": 1.0,
+        "maximum": 1.5,
+        "minimum": 0.7,
+        "title": "Zoom",
+        "type": "number"
+      }
+    },
+    "title": "VisualSettings",
+    "type": "object"
+  }
+}

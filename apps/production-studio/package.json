@@ -6,7 +6,7 @@
   "engines": { "node": ">=22.22.3" },
   "scripts": {
     "contracts": "node scripts/generate-contracts.mjs",
-    "build": "node scripts/generate-contracts.mjs --check && vue-tsc --noEmit && vite build",
+    "build": "node scripts/generate-contracts.mjs --check && node scripts/generate-live-contracts.mjs --check && vue-tsc --noEmit && vite build",
     "fixture": "node fixture/serve.ts",
     "qa": "node tests/qa.ts"
   },

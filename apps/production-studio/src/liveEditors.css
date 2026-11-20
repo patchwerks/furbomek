@@ -1,0 +1,17 @@
+.live-editor{min-width:0;color:var(--ink);font:inherit;margin-block:var(--s8)}
+.live-editor h2{margin-bottom:var(--s3)}
+.editor-status{color:var(--muted);overflow-wrap:anywhere}
+.live-editor fieldset{border:0;padding:0;margin:var(--s8) 0;min-width:0}
+.live-editor legend{font-size:var(--h3);font-weight:650;margin-bottom:var(--s4);padding:0}
+.editor-fields{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr));gap:var(--s4)}
+.editor-fields label{display:flex;flex-direction:column;gap:var(--s2);min-width:0}
+.editor-fields input,.editor-fields select{width:100%;font-variant-numeric:tabular-nums}
+.editor-fields small{font-family:Ioskeley,monospace;color:var(--muted)}
+.editor-actions{display:flex;flex-wrap:wrap;gap:var(--s2);align-items:center;margin-top:var(--s4)}
+.editor-check{display:flex;flex-direction:row;align-items:center;gap:var(--s2);min-height:44px;margin-right:var(--s4)}
+.editor-check input{width:24px;height:24px;min-height:24px;accent-color:var(--accent)}
+.editor-list{list-style:none;padding:0;margin:0;display:grid;gap:var(--s8)}
+.editor-list>li{min-width:0;border-top:1px solid var(--line);padding-top:var(--s4)}
+.editor-list h3{margin-bottom:var(--s4)}
+.editor-note{color:var(--muted);text-wrap:pretty}
+@media(max-width:600px){.editor-actions button{flex:1 1 auto}.editor-fields{grid-template-columns:1fr}}

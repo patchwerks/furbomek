@@ -34,3 +34,10 @@ Both themes, visible focus, no drag-only editing, 44px controls, semantic landma
 
 ## 9. Grounding ledger
 New surface: no before capture exists. Review must inspect default/effect, reaction, framing, stale and disconnected states, with end-of-page captures and light/dark reflow. No stock media, decorative charts, metrics or fake live views.
+
+## Changelog
+
+- 2026-11-20: Added a separate `mode=live` owner surface using the same tokens,
+  native controls and reflow. It shows local bootstrap login, actual observed
+  revision/health, explicit injected-test provenance when present, and historical
+  state on disconnect. No synthetic RGB view is shown in live mode.
