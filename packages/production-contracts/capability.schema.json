@@ -1,0 +1,64 @@
+{
+  "additionalProperties": false,
+  "description": "Registry metadata fixed by reviewed code, never by a provider.",
+  "properties": {
+    "available": {
+      "title": "Available",
+      "type": "boolean"
+    },
+    "capability": {
+      "enum": [
+        "hud.redacted.v1",
+        "graphics.pulse.v1",
+        "sfx.preset.v1",
+        "motion.qualified.v1",
+        "voice.reserved.v1",
+        "face.reserved.v1"
+      ],
+      "title": "Capability",
+      "type": "string"
+    },
+    "max_duration_ms": {
+      "maximum": 30000,
+      "minimum": 1,
+      "title": "Max Duration Ms",
+      "type": "integer"
+    },
+    "physical": {
+      "title": "Physical",
+      "type": "boolean"
+    },
+    "required_state": {
+      "enum": [
+        "renderer_ready",
+        "audio_ready",
+        "qualified_bench",
+        "unavailable"
+      ],
+      "title": "Required State",
+      "type": "string"
+    },
+    "resource": {
+      "enum": [
+        "hud",
+        "graphics",
+        "sfx",
+        "robot",
+        "voice",
+        "face"
+      ],
+      "title": "Resource",
+      "type": "string"
+    }
+  },
+  "required": [
+    "capability",
+    "resource",
+    "required_state",
+    "available",
+    "physical",
+    "max_duration_ms"
+  ],
+  "title": "CapabilityDefinition",
+  "type": "object"
+}

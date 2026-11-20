@@ -1,0 +1,249 @@
+{
+  "$defs": {
+    "FaceEffect": {
+      "additionalProperties": false,
+      "description": "Reserved face contract; unavailable in this version.",
+      "properties": {
+        "capability": {
+          "const": "face.reserved.v1",
+          "title": "Capability",
+          "type": "string"
+        },
+        "duration_ms": {
+          "maximum": 30000,
+          "minimum": 1,
+          "title": "Duration Ms",
+          "type": "integer"
+        },
+        "preset": {
+          "const": "reserved",
+          "title": "Preset",
+          "type": "string"
+        }
+      },
+      "required": [
+        "capability",
+        "preset",
+        "duration_ms"
+      ],
+      "title": "FaceEffect",
+      "type": "object"
+    },
+    "GraphicsEffect": {
+      "additionalProperties": false,
+      "description": "Reviewed renderer presets; no renderer commands or asset paths.",
+      "properties": {
+        "capability": {
+          "const": "graphics.pulse.v1",
+          "title": "Capability",
+          "type": "string"
+        },
+        "duration_ms": {
+          "maximum": 30000,
+          "minimum": 1,
+          "title": "Duration Ms",
+          "type": "integer"
+        },
+        "intensity_percent": {
+          "maximum": 100,
+          "minimum": 0,
+          "title": "Intensity Percent",
+          "type": "integer"
+        },
+        "preset": {
+          "enum": [
+            "liquidation",
+            "neutral",
+            "rgb",
+            "xyz"
+          ],
+          "title": "Preset",
+          "type": "string"
+        }
+      },
+      "required": [
+        "capability",
+        "preset",
+        "intensity_percent",
+        "duration_ms"
+      ],
+      "title": "GraphicsEffect",
+      "type": "object"
+    },
+    "HudEffect": {
+      "additionalProperties": false,
+      "description": "Only locally curated redacted text templates are projectable.",
+      "properties": {
+        "capability": {
+          "const": "hud.redacted.v1",
+          "title": "Capability",
+          "type": "string"
+        },
+        "duration_ms": {
+          "maximum": 30000,
+          "minimum": 1,
+          "title": "Duration Ms",
+          "type": "integer"
+        },
+        "template": {
+          "enum": [
+            "liquidation",
+            "neutral"
+          ],
+          "title": "Template",
+          "type": "string"
+        }
+      },
+      "required": [
+        "capability",
+        "template",
+        "duration_ms"
+      ],
+      "title": "HudEffect",
+      "type": "object"
+    },
+    "MotionEffect": {
+      "additionalProperties": false,
+      "description": "Optional intent requiring separate motion admission and qualification.",
+      "properties": {
+        "action": {
+          "enum": [
+            "active",
+            "sleep",
+            "forward",
+            "backward",
+            "left",
+            "right",
+            "turn_left",
+            "turn_right"
+          ],
+          "title": "Action",
+          "type": "string"
+        },
+        "capability": {
+          "const": "motion.qualified.v1",
+          "title": "Capability",
+          "type": "string"
+        },
+        "duration_ms": {
+          "maximum": 1000,
+          "minimum": 1,
+          "title": "Duration Ms",
+          "type": "integer"
+        },
+        "qualification": {
+          "const": "operator_present_supported_bench",
+          "title": "Qualification",
+          "type": "string"
+        }
+      },
+      "required": [
+        "capability",
+        "action",
+        "duration_ms",
+        "qualification"
+      ],
+      "title": "MotionEffect",
+      "type": "object"
+    },
+    "SfxEffect": {
+      "additionalProperties": false,
+      "description": "A local sound catalog reference, never a file or URL.",
+      "properties": {
+        "capability": {
+          "const": "sfx.preset.v1",
+          "title": "Capability",
+          "type": "string"
+        },
+        "duration_ms": {
+          "maximum": 30000,
+          "minimum": 1,
+          "title": "Duration Ms",
+          "type": "integer"
+        },
+        "gain_percent": {
+          "maximum": 100,
+          "minimum": 0,
+          "title": "Gain Percent",
+          "type": "integer"
+        },
+        "preset": {
+          "enum": [
+            "liquidation",
+            "acknowledge"
+          ],
+          "title": "Preset",
+          "type": "string"
+        }
+      },
+      "required": [
+        "capability",
+        "preset",
+        "gain_percent",
+        "duration_ms"
+      ],
+      "title": "SfxEffect",
+      "type": "object"
+    },
+    "VoiceEffect": {
+      "additionalProperties": false,
+      "description": "Reserved jabberwerk adapter contract; unavailable in this version.",
+      "properties": {
+        "capability": {
+          "const": "voice.reserved.v1",
+          "title": "Capability",
+          "type": "string"
+        },
+        "duration_ms": {
+          "maximum": 30000,
+          "minimum": 1,
+          "title": "Duration Ms",
+          "type": "integer"
+        },
+        "preset": {
+          "const": "reserved",
+          "title": "Preset",
+          "type": "string"
+        }
+      },
+      "required": [
+        "capability",
+        "preset",
+        "duration_ms"
+      ],
+      "title": "VoiceEffect",
+      "type": "object"
+    }
+  },
+  "discriminator": {
+    "mapping": {
+      "face.reserved.v1": "#/$defs/FaceEffect",
+      "graphics.pulse.v1": "#/$defs/GraphicsEffect",
+      "hud.redacted.v1": "#/$defs/HudEffect",
+      "motion.qualified.v1": "#/$defs/MotionEffect",
+      "sfx.preset.v1": "#/$defs/SfxEffect",
+      "voice.reserved.v1": "#/$defs/VoiceEffect"
+    },
+    "propertyName": "capability"
+  },
+  "oneOf": [
+    {
+      "$ref": "#/$defs/HudEffect"
+    },
+    {
+      "$ref": "#/$defs/GraphicsEffect"
+    },
+    {
+      "$ref": "#/$defs/SfxEffect"
+    },
+    {
+      "$ref": "#/$defs/MotionEffect"
+    },
+    {
+      "$ref": "#/$defs/VoiceEffect"
+    },
+    {
+      "$ref": "#/$defs/FaceEffect"
+    }
+  ]
+}

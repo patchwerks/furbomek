@@ -1,0 +1,78 @@
+{
+  "additionalProperties": false,
+  "description": "Trusted-adapter envelope; identity is private and never renderer output.",
+  "properties": {
+    "causation_id": {
+      "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.-]{0,63}$",
+      "title": "Causation Id",
+      "type": "string"
+    },
+    "max_age_ms": {
+      "default": 10000,
+      "maximum": 10000,
+      "minimum": 1,
+      "title": "Max Age Ms",
+      "type": "integer"
+    },
+    "occurred_ms": {
+      "minimum": 0,
+      "title": "Occurred Ms",
+      "type": "integer"
+    },
+    "origin": {
+      "const": "adapter",
+      "title": "Origin",
+      "type": "string"
+    },
+    "received_ms": {
+      "minimum": 0,
+      "title": "Received Ms",
+      "type": "integer"
+    },
+    "replay_window_ms": {
+      "default": 60000,
+      "maximum": 86400000,
+      "minimum": 10000,
+      "title": "Replay Window Ms",
+      "type": "integer"
+    },
+    "route": {
+      "const": "curated_preset",
+      "default": "curated_preset",
+      "title": "Route",
+      "type": "string"
+    },
+    "schema_version": {
+      "const": 1,
+      "default": 1,
+      "title": "Schema Version",
+      "type": "integer"
+    },
+    "scope": {
+      "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.-]{0,63}$",
+      "title": "Scope",
+      "type": "string"
+    },
+    "source": {
+      "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.-]{0,63}$",
+      "title": "Source",
+      "type": "string"
+    },
+    "stable_id": {
+      "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.-]{0,63}$",
+      "title": "Stable Id",
+      "type": "string"
+    }
+  },
+  "required": [
+    "source",
+    "scope",
+    "stable_id",
+    "causation_id",
+    "origin",
+    "occurred_ms",
+    "received_ms"
+  ],
+  "title": "PrivateEvent",
+  "type": "object"
+}
