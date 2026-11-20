@@ -30,7 +30,11 @@ class Presets(Contract):
 
     def save(self) -> bytes:
         """Return validated bytes; caller owns atomic storage and permissions."""
-        return self.model_dump_json().encode()
+        raw = self.model_dump_json().encode()
+        if len(raw) > MAX_STORE_BYTES:
+            msg = "preset storage exceeds size limit"
+            raise ValueError(msg)
+        return raw
 
     @classmethod
     def load(cls, raw: bytes) -> "Presets":
