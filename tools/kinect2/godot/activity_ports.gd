@@ -23,6 +23,8 @@ var preview: ImageTexture
 var screen_texture: ImageTexture
 var screen_sequence := -1
 var screen_was_stale := false
+var browser_texture: ImageTexture
+var browser_timestamp := 0
 
 
 func configure(directory: String) -> void:
@@ -44,10 +46,40 @@ func tick() -> void:
 	if now - last_poll < POLL_MSEC:
 		return
 	last_poll = now
+	_poll_browser_frame()
 	var result := reader.poll()
 	if not result.get("changed", false):
 		return
 	_apply_activity(result.get("activity", {}))
+
+
+func _poll_browser_frame() -> void:
+	var file := FileAccess.open(stream_directory.path_join("browser-test.bin"), FileAccess.READ)
+	var timestamp := 0
+	if file != null and file.get_length() > 8 and file.get_length() <= 512 * 1024:
+		timestamp = file.get_64()
+	var age := int(Time.get_unix_time_from_system() * 1000) - timestamp
+	if timestamp == 0 or age < 0 or age > 1000:
+		if browser_texture != null:
+			browser_texture = null
+			queue_redraw()
+		browser_timestamp = 0
+		return
+	if timestamp == browser_timestamp:
+		return
+	var frame := Image.new()
+	if frame.load_jpg_from_buffer(file.get_buffer(file.get_length() - 8)) != OK or frame.get_size() != Vector2i(960, 540):
+		if browser_texture != null:
+			browser_texture = null
+			browser_timestamp = 0
+			queue_redraw()
+		return
+	if browser_texture == null:
+		browser_texture = ImageTexture.create_from_image(frame)
+	else:
+		browser_texture.update(frame)
+	browser_timestamp = timestamp
+	queue_redraw()
 
 
 func _refresh_freshness() -> void:
@@ -133,6 +165,10 @@ func _draw_screen_port() -> void:
 	var screen_rect := Rect2(46, 162, 420, 236)
 	var screen_status := _screen_label()
 	var color := _screen_color()
+	if browser_texture != null:
+		_draw_port(panel, "HERMES / LIVE BROWSER", "X.COM", HOT)
+		draw_texture_rect(browser_texture, screen_rect, false)
+		return
 	_draw_port(panel, "HERMES / LIVE SCREEN", screen_status, color)
 	if _screen_is_live():
 		draw_texture_rect(screen_texture, screen_rect, false, SCREEN_TINT)

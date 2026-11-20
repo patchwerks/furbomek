@@ -7,9 +7,7 @@ uniform int palette_index = 1;
 uniform float point_pixels = 1.45;
 uniform vec4 subject_box = vec4(-2.0, -2.0, 0.0, 0.0);
 
-void fragment() {
-	vec2 uv = source_crop.xy + UV * source_crop.zw;
-	vec3 optical = texture(optical_image, uv).rgb;
+vec3 crimson_surface(vec2 uv, vec3 optical, vec2 screen_uv, vec2 screen_position) {
 	vec2 texel = 1.0 / vec2(textureSize(optical_image, 0));
 	float luma = dot(optical, vec3(0.2126, 0.7152, 0.0722));
 	vec3 weights = vec3(0.2126, 0.7152, 0.0722);
@@ -23,7 +21,7 @@ void fragment() {
 	float dark_detail = smoothstep(0.01, 0.065, range) * (1.0 - smoothstep(0.20, 0.50, luma));
 	vec2 border = min(uv - subject_box.xy, subject_box.xy + subject_box.zw - uv);
 	float subject = smoothstep(-0.018, 0.018, min(border.x, border.y)) * (1.0 - smoothstep(0.20, 0.65, luma));
-	vec2 grid = FRAGCOORD.xy / vec2(point_pixels * 1.38, point_pixels * 1.08);
+	vec2 grid = screen_position / vec2(point_pixels * 1.38, point_pixels * 1.08);
 	vec2 cell = floor(grid);
 	float seed = fract(sin(dot(cell, vec2(12.9898, 78.233))) * 43758.5453);
 	vec2 p = abs(fract(grid) - vec2(0.5) + vec2(seed - 0.5, fract(seed * 7.1) - 0.5) * 0.62);
@@ -32,9 +30,17 @@ void fragment() {
 	stroke *= step(seed, occupancy);
 	float detail = clamp(0.06 + subject * 0.64 + contrast * 0.50 + edge * 0.40 + dark_detail * 0.22, 0.0, 1.0);
 	vec3 color = mix(vec3(0.025, 0.001, 0.004), vec3(1.0, 0.055, 0.13), detail);
-	if (palette_index == 0) color = optical;
-	float vignette = 1.0 - smoothstep(0.40, 0.73, length(UV - vec2(0.5)));
+	float vignette = 1.0 - smoothstep(0.40, 0.73, length(screen_uv - vec2(0.5)));
 	float environment = smoothstep(0.30, 0.85, luma) * (1.0 - subject);
 	vec3 ambient_surface = vec3(0.065, 0.0015, 0.005) * environment * luma;
-	COLOR = vec4((color * stroke * mix(0.78, 1.0, seed) + ambient_surface) * vignette, 1.0);
+	return (color * stroke * mix(0.78, 1.0, seed) + ambient_surface) * vignette;
+}
+
+void fragment() {
+	vec2 uv = source_crop.xy + UV * source_crop.zw;
+	vec3 optical = texture(optical_image, uv).rgb;
+	if (palette_index != 0) {
+		optical = crimson_surface(uv, optical, UV, FRAGCOORD.xy);
+	}
+	COLOR = vec4(optical, 1.0);
 }

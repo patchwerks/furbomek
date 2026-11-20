@@ -24,11 +24,19 @@ var point_pixels := 1.45
 var sequence := -1
 var color_mode := true
 var source_valid := false
+var view_poll_at := 0
+var last_view_request := 0
 
 
 func _ready() -> void:
 	if DisplayServer.get_name() != "headless":
-		get_window().mode = Window.MODE_FULLSCREEN
+		var program_window := get_window()
+		if OS.get_name() == "macOS":
+			program_window.borderless = true
+			program_window.content_scale_mode = Window.CONTENT_SCALE_MODE_VIEWPORT
+			program_window.size = Vector2i(1280, 720)
+		else:
+			program_window.mode = Window.MODE_FULLSCREEN
 	material = ShaderMaterial.new()
 	material.shader = preload("res://point_cloud.gdshader")
 	material.set_shader_parameter("palette_index", palette)
@@ -51,6 +59,32 @@ func _process(delta: float) -> void:
 		_apply_camera()
 	loader.tick()
 	ports.tick()
+	_poll_edge_view()
+
+
+func _poll_edge_view() -> void:
+	var now := Time.get_ticks_msec()
+	if now < view_poll_at:
+		return
+	view_poll_at = now + 125
+	var path: String = loader.stream_directory.path_join("view.json")
+	var file := FileAccess.open(path, FileAccess.READ)
+	if file == null or file.get_length() > 256:
+		return
+	var request: Variant = JSON.parse_string(file.get_as_text())
+	if not request is Dictionary:
+		return
+	var issued := int(request.get("issued_ms", 0))
+	var age := int(Time.get_unix_time_from_system() * 1000) - issued
+	if issued <= last_view_request or age < 0 or age > 5000:
+		return
+	match request.get("view", ""):
+		"rgb": _set_palette(0)
+		"crimson": _set_palette(1)
+		"xyz": _set_palette(2)
+		_: return
+	last_view_request = issued
+	hud.set_palette_label(_palette_name())
 
 
 func _apply_snapshot(snapshot: Dictionary) -> void:
@@ -68,7 +102,7 @@ func _apply_snapshot(snapshot: Dictionary) -> void:
 	sequence = int(snapshot["sequence"])
 	source_valid = true
 	cloud.visible = not color_mode
-	hud.set_snapshot(snapshot, _palette_name())
+	hud.set_snapshot(snapshot, _palette_name(), color_mode and palette == 0)
 	color_surface.set_snapshot(snapshot, hud.get_selected_track())
 	color_surface.set_active(color_mode)
 	hud.set_color_mode(color_mode)
@@ -166,10 +200,12 @@ func _use_native_view() -> void:
 
 
 func _set_point_pixels(value: float) -> void:
-	point_pixels = clampf(value, 0.75, 2.2)
+	point_pixels = clampf(value, 0.75, 3.6)
 	material.set_shader_parameter("point_pixels", point_pixels)
 	color_surface.set_point_pixels(point_pixels)
 
 
 func _palette_name() -> String:
+	if color_mode and palette == 0:
+		return "RGB VIDEO"
 	return ["RGB", "CRIMSON", "DEPTH"][palette] + (" SAMPLES" if color_mode else " XYZ")

@@ -20,6 +20,7 @@
 #include <stdexcept>
 #include <string>
 #include <sys/stat.h>
+#include <time.h>
 #include <unistd.h>
 #include <vector>
 
@@ -29,6 +30,69 @@ void stop(int) { running = 0; }
 using Clock = std::chrono::steady_clock;
 constexpr std::uint32_t slots = 512 * 424;
 constexpr std::size_t floats_per_slot = 16;
+constexpr std::size_t depth_width = 512;
+constexpr std::size_t depth_height = 424;
+
+using Vector = std::array<float, 3>;
+
+Vector position_delta(const float *to, const float *from) {
+  return {to[3] - from[3], to[7] - from[7], to[11] - from[11]};
+}
+
+Vector cross(const Vector &left, const Vector &right) {
+  return {left[1] * right[2] - left[2] * right[1],
+          left[2] * right[0] - left[0] * right[2],
+          left[0] * right[1] - left[1] * right[0]};
+}
+
+bool normalize(Vector &value) {
+  const float squared = value[0] * value[0] + value[1] * value[1] + value[2] * value[2];
+  if (squared < 1e-12f) return false;
+  const float scale = 1.0f / std::sqrt(squared);
+  for (float &coordinate : value) coordinate *= scale;
+  return true;
+}
+
+void estimate_surface_bases(std::vector<float> &points) {
+  constexpr auto row_stride = floats_per_slot * depth_width;
+  for (std::size_t row = 1; row + 1 < depth_height; ++row) {
+    for (std::size_t column = 1; column + 1 < depth_width; ++column) {
+      float *point = points.data() + (row * depth_width + column) * floats_per_slot;
+      if (point[15] == 0.0f) continue;
+      const float *left = point - floats_per_slot;
+      const float *right = point + floats_per_slot;
+      const float *above = point - row_stride;
+      const float *below = point + row_stride;
+      const float depth_step = 0.030f + (-point[11]) * 0.012f;
+      const auto same_surface = [point, depth_step](const float *neighbor) {
+        return neighbor[15] != 0.0f && std::abs(neighbor[11] - point[11]) <= depth_step;
+      };
+      if (!same_surface(left) || !same_surface(right) ||
+          !same_surface(above) || !same_surface(below)) continue;
+      auto tangent = position_delta(right, left);
+      auto upward = position_delta(above, below);
+      if (!normalize(tangent) || !normalize(upward)) continue;
+      auto normal = cross(tangent, upward);
+      if (!normalize(normal)) continue;
+      const auto bitangent = cross(normal, tangent);
+      for (std::size_t axis = 0; axis < 3; ++axis) {
+        point[axis * 4] = tangent[axis];
+        point[axis * 4 + 1] = bitangent[axis];
+        point[axis * 4 + 2] = normal[axis];
+      }
+    }
+  }
+}
+
+std::uint64_t capture_monotonic_ns() {
+#ifdef __APPLE__
+  // Python's monotonic_ns uses mach_absolute_time, which excludes system sleep.
+  return clock_gettime_nsec_np(CLOCK_UPTIME_RAW);
+#else
+  return std::chrono::duration_cast<std::chrono::nanoseconds>(
+      Clock::now().time_since_epoch()).count();
+#endif
+}
 
 struct CameraSession {
   libfreenect2::Freenect2Device *device;
@@ -90,8 +154,8 @@ int capture(int seconds) {
   libfreenect2::Freenect2 context;
   if (context.enumerateDevices() == 0)
     throw std::runtime_error("No accessible Kinect v2. Check USB3/power and the user device ACL.");
-  libfreenect2::OpenGLPacketPipeline pipeline;
-  auto *device = context.openDefaultDevice(&pipeline);
+  // libfreenect2 takes ownership of the pipeline, including on open failure.
+  auto *device = context.openDefaultDevice(new libfreenect2::OpenGLPacketPipeline());
   if (!device) throw std::runtime_error("Unable to open Kinect v2.");
   libfreenect2::SyncMultiFrameListener listener(
       libfreenect2::Frame::Color | libfreenect2::Frame::Ir | libfreenect2::Frame::Depth);
@@ -114,7 +178,7 @@ int capture(int seconds) {
     if (!listener.waitForNewFrame(frames, 2000))
       throw std::runtime_error("No synchronized RGB/IR/depth frame for 2 seconds.");
     FrameLease lease{listener, frames};
-    const auto captured = Clock::now();
+    const auto monotonic_ns = capture_monotonic_ns();
     const auto *rgb = frames.at(libfreenect2::Frame::Color);
     const auto *depth = frames.at(libfreenect2::Frame::Depth);
     const auto *ir = frames.at(libfreenect2::Frame::Ir);
@@ -155,6 +219,7 @@ int capture(int seconds) {
         far_z = std::max(far_z, z);
       }
     }
+    estimate_surface_bases(points);
     publish(directory, ++sequence, points);
     const auto stem = "frame-" + std::to_string(sequence % 4);
     publish_image(directory / (stem + ".jpg.bin"), sequence, registered);
@@ -167,7 +232,6 @@ int capture(int seconds) {
     map_stream.close();
     std::filesystem::rename(directory / "next.map", directory / (stem + ".map.bin"));
     const double elapsed = std::chrono::duration<double>(Clock::now() - start).count();
-    const auto monotonic_ns = std::chrono::duration_cast<std::chrono::nanoseconds>(captured.time_since_epoch()).count();
     std::ofstream metadata(directory / "next.json");
     metadata.exceptions(std::ios::failbit | std::ios::badbit);
     metadata << "{\"sequence\":" << sequence << ",\"frames\":" << sequence
