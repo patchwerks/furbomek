@@ -30,6 +30,9 @@ enum class Action : uint8_t {
   CrawlRight = 5,
   TurnLeft = 6,
   TurnRight = 7,
+  Poke = 8,
+  DefensiveBrace = 9,
+  TuckPreview = 10,
 };
 
 enum class Result : uint8_t {

@@ -86,7 +86,9 @@ build_native() {
   mkdir -p "$native_dir"
   "$native_cxx" "${native_flags[@]}" "$root_dir/src/frame.cpp" "$root_dir/src/frame_decode.cpp" "$root_dir/src/guard.cpp" "$root_dir/src/rf_link.cpp" \
     "$root_dir/src/manual.cpp" "$root_dir/src/dispatcher.cpp" "$root_dir/src/scheduler.cpp" "$root_dir/src/esp_diag.cpp" "$root_dir/src/metadata.cpp" \
-    "$root_dir/tests/test_guard.cpp" "$root_dir/tests/test_stop_routes.cpp" -o "$native_dir/freenove-guard-tests"
+    "$root_dir/src/expressive_motion.cpp" "$root_dir/tests/test_guard.cpp" \
+    "$root_dir/tests/test_stop_routes.cpp" "$root_dir/tests/test_expressive_motion.cpp" \
+    -o "$native_dir/freenove-guard-tests"
   "$native_cxx" "${native_flags[@]}" "$root_dir/src/frame.cpp" "$root_dir/src/frame_decode.cpp" "$root_dir/src/guard.cpp" "$root_dir/src/rf_link.cpp" \
     "$root_dir/src/manual.cpp" "$root_dir/src/dispatcher.cpp" "$root_dir/src/scheduler.cpp" "$root_dir/src/esp_diag.cpp" "$root_dir/src/metadata.cpp" \
     "$root_dir/tools/driver.cpp" -o "$native_dir/freenove-guard-driver"
@@ -156,6 +158,7 @@ build_avr() {
     -I "$core_dir/libraries/SPI/src" -I "$deps/FlexiTimer2" -I "$deps/RF24" -I "$deps/FNHR/src" -I "$root_dir/include")
   local sources=(
     "$root_dir/src/frame.cpp" "$root_dir/src/frame_decode.cpp" "$root_dir/src/guard.cpp" "$root_dir/src/rf_link.cpp" "$root_dir/src/manual.cpp" "$root_dir/src/dispatcher.cpp" "$root_dir/src/scheduler.cpp" "$root_dir/src/esp_diag.cpp" "$root_dir/src/metadata.cpp"
+    "$root_dir/src/expressive_motion.cpp"
     "$root_dir/avr/guard_main.cpp" "$root_dir/avr/guard_runtime.cpp" "$root_dir/avr/guard_service.cpp"
     "$deps/FNHR/src/FNHRBasic.cpp" "$deps/Servo/src/avr/Servo.cpp" "$deps/FlexiTimer2/FlexiTimer2.cpp"
     "$deps/RF24/RF24.cpp" "$core_dir/libraries/SPI/src/SPI.cpp"

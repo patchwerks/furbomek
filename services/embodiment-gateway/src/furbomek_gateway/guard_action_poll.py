@@ -28,6 +28,9 @@ WIRE_ACTIONS: dict[ActionName, GuardAction] = {
     "right": GuardAction.RIGHT,
     "turn_left": GuardAction.TURN_LEFT,
     "turn_right": GuardAction.TURN_RIGHT,
+    "poke": GuardAction.POKE,
+    "defensive_brace": GuardAction.DEFENSIVE_BRACE,
+    "tuck_preview": GuardAction.TUCK_PREVIEW,
 }
 
 

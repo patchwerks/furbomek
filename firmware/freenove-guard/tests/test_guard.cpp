@@ -127,8 +127,11 @@ void begin_and_arm(Dispatcher& dispatcher, Replies& replies, uint8_t source) {
 
 }
 
+void test_expressive_motion();
+
 int main() {
   test_stop_routes();
+  test_expressive_motion();
   assert(metadata_supported(1U, 30U));
   assert(metadata_supported(1U, 31U));
   assert(metadata_supported(1U, 32U));
@@ -228,7 +231,7 @@ int main() {
   Replies action_replies;
   Dispatcher actions(action_motion, action_replies);
   begin_and_arm(actions, action_replies, kRfComputerSource);
-  for (uint8_t action = 0U; action <= static_cast<uint8_t>(Action::TurnRight); ++action) {
+  for (uint8_t action = 0U; action <= static_cast<uint8_t>(Action::TuckPreview); ++action) {
     send_radio(actions, kRfComputerSource, command(kExecute, static_cast<uint32_t>(action) + 2U, action),
                static_cast<uint32_t>(action) + 2U);
     assert(action_replies.reply().result == Result::Accepted);

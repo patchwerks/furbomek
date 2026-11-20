@@ -42,7 +42,7 @@ bool command_shape(const Command& command, uint8_t& length) {
   }
   if (command.opcode == kExecute) {
     length = 5U;
-    return command.action <= static_cast<uint8_t>(Action::TurnRight);
+    return command.action <= static_cast<uint8_t>(Action::TuckPreview);
   }
   if (command.opcode == kArm || command.opcode == kKeepalive || command.opcode == kStatus ||
       command.opcode == kSupply || command.opcode == kDisarm) {
@@ -156,7 +156,7 @@ void FrameDecoder::parse(FrameObserver& observer) {
     }
     read_id(command.identifier, &body_[4]);
   } else if (command.opcode == kExecute && length_ == 5U) {
-    if (body_[4] > static_cast<uint8_t>(Action::TurnRight)) {
+    if (body_[4] > static_cast<uint8_t>(Action::TuckPreview)) {
       error(Result::Unsupported, observer);
       return;
     }

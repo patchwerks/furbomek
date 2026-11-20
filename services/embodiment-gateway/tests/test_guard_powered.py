@@ -10,7 +10,7 @@ from tests.guard_settings import powered_settings
 from tests.guard_support import PtyGuardBoard
 
 if TYPE_CHECKING:
-    from furbomek_gateway.guard_models import PoweredActionResult
+    from furbomek_gateway.guard_models import ActionName, PoweredActionResult
 
 
 @pytest.mark.anyio
@@ -58,18 +58,41 @@ async def test_powered_action_resumes_global_sequence_after_service_restart() ->
 
 
 @pytest.mark.anyio
-async def test_powered_policy_refusal_does_not_begin_or_stop() -> None:
+@pytest.mark.parametrize(
+    "action", ["forward", "poke", "defensive_brace", "tuck_preview"]
+)
+async def test_powered_policy_refusal_does_not_begin_or_stop(
+    action: ActionName,
+) -> None:
     with PtyGuardBoard(supply_centivolts=900, strict_sequence=True) as board:
         service = GuardService(powered_settings(board.path))
         await service.open()
         try:
-            result = await service.perform_action("forward")
+            result = await service.perform_action(action)
         finally:
             await service.aclose()
 
     assert result.decision == "refused"
     assert result.reason == "action_not_qualified"
     assert board.received == []
+
+
+@pytest.mark.anyio
+async def test_allowed_expressive_poses_send_fixed_codes() -> None:
+    actions: tuple[ActionName, ...] = ("poke", "defensive_brace", "tuck_preview")
+    with PtyGuardBoard(supply_centivolts=800, strict_sequence=True) as board:
+        service = GuardService(powered_settings(board.path, actions))
+        await service.open()
+        try:
+            for action in actions:
+                result = await service.perform_action(action)
+                assert result.action_completed
+                assert result.disarm_acknowledged
+        finally:
+            await service.aclose()
+
+    assert board.actions == [8, 9, 10]
+    assert not board.stop_received.is_set()
 
 
 @pytest.mark.anyio

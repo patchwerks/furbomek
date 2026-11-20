@@ -3,6 +3,7 @@
 
 #include "guard_state.h"
 #include "freenove_guard/esp_diag.h"
+#include "freenove_guard/expressive_motion.h"
 #include "freenove_guard/scheduler.h"
 
 namespace {
@@ -48,6 +49,60 @@ bool compatibility_byte(uint8_t value, uint8_t& count, uint8_t& order) {
   }
   count = value == 0x80U ? 1U : 0U;
   return false;
+}
+
+Point vendor_point(const freenove_guard::FootPoint& foot) {
+  return Point(foot.x, foot.y, foot.z);
+}
+
+RobotLegsPoints vendor_stance(const freenove_guard::Stance& stance) {
+  return RobotLegsPoints(vendor_point(stance.feet[0]), vendor_point(stance.feet[1]),
+                         vendor_point(stance.feet[2]), vendor_point(stance.feet[3]),
+                         vendor_point(stance.feet[4]), vendor_point(stance.feet[5]));
+}
+
+freenove_guard::FootPoint foot_point(const Point& point) {
+  return {point.x, point.y, point.z};
+}
+
+class ExpressiveRobot final : public freenove_guard::ExpressiveSink {
+ public:
+  explicit ExpressiveRobot(Robot& robot)
+      : robot_(robot), legs_{&robot.leg1, &robot.leg2, &robot.leg3, &robot.leg4,
+                            &robot.leg5, &robot.leg6} {}
+
+  bool reachable(uint8_t leg_index, const freenove_guard::FootPoint& foot) override {
+    return !terminal_fault && legs_[leg_index]->CheckPoint(vendor_point(foot));
+  }
+
+  bool move(const freenove_guard::Stance& stance, float step_mm) override {
+    if (terminal_fault) return false;
+    robot_.MoveTo(vendor_stance(stance), step_mm);
+    robot_.WaitUntilFree();
+    return !terminal_fault;
+  }
+
+  bool hold(uint16_t milliseconds) override {
+    if (terminal_fault) return false;
+    delay(milliseconds);
+    return !terminal_fault;
+  }
+
+ private:
+  Robot& robot_;
+  RobotLeg* const legs_[6];
+};
+
+bool run_expressive_action(freenove_guard::Action action) {
+  Robot& robot = robot_action.robot;
+  if (robot.state != Robot::Action) return false;
+  RobotLegsPoints points;
+  robot.GetPointsNow(points);
+  const freenove_guard::Stance initial{{foot_point(points.leg1), foot_point(points.leg2),
+      foot_point(points.leg3), foot_point(points.leg4), foot_point(points.leg5),
+      foot_point(points.leg6)}};
+  ExpressiveRobot sink(robot);
+  return freenove_guard::run_expressive(action, initial, sink);
 }
 
 void receive_serial(uint8_t value, freenove_guard::ClockSample clock) {
@@ -162,6 +217,11 @@ void guard_action() {
       case freenove_guard::Action::CrawlRight: robot_action.CrawlRight(); break;
       case freenove_guard::Action::TurnLeft: robot_action.TurnLeft(); break;
       case freenove_guard::Action::TurnRight: robot_action.TurnRight(); break;
+      case freenove_guard::Action::Poke:
+      case freenove_guard::Action::DefensiveBrace:
+      case freenove_guard::Action::TuckPreview:
+        if (!run_expressive_action(pending.action)) safe_outputs();
+        break;
     }
   }
   if (!terminal_fault) operation_done_pending = true;
