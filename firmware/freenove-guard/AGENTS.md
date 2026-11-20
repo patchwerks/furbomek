@@ -42,6 +42,12 @@ toolchain. Never describe an artifact as preserving the installed gait release:
 the installed application release is unknown. The package preserves the
 pinned vendor reference gait source through a reproducible overlay only.
 
+When movement phases, trajectory, cadence, or measured behavior changes,
+update the matching numbered movement schematic under
+`.schematics/movements/` in the primary project checkout. Use the imagegen
+skill to revise the illustration and verify phase order, joint roles, foot
+contacts and directions against the exact targets and camera evidence.
+
 Normal DISARM must quiesce hardware before ACK and may resume only through exact
 next global sequence plus changed session ID. It never clears Fault. Emergency
 STOP, parser faults and expired deadlines stay reset-only. Save/restore only

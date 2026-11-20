@@ -15,6 +15,19 @@
     "evidence": "docs/operations/robot-stop-ack-2026-10-18.md",
     "maintenance_protocol": "docs/operations/robot-wired-maintenance.md"
   },
+  "expressive_motion_candidate": {
+    "date": "2026-11-20",
+    "status": "Historical initial candidate and software verification. Subsequent deployment and replacement are recorded on the Mac deployment branch.",
+    "source_base": "931d9d5",
+    "candidate_actions": ["poke", "defensive_brace", "tuck_preview"],
+    "mega_hex_sha256": "7de1946726fadccdc5b2e335e5379e3fbefc205f2cfa172e19b8331389276b54",
+    "mega_elf_sha256": "5e4e15f95ef25f9a7316bc2ee0b50907517f066a5be2cb8712164d601b90ce7b",
+    "remote_hex_sha256": "840934a268f93cee31f11bae196ab4fff1e97fd09b7501b6c14bc0d1677ae39e",
+    "remote_elf_sha256": "4a9aa9f61f4010a5bddf0a5ba9d18b531d68d83f01bd0dfe1137e91f40949ae2",
+    "verification": "Two identical AVR builds, Guard native checks and 125 gateway tests. No device read, flash or powered verification",
+    "rollback_limits": "A hardware update requires fresh full-image and EEPROM readback on both boards. Keep the last verified installed images and their bootloader boundaries",
+    "evidence": "firmware/freenove-guard/expressive-motion.md"
+  },
   "active_deployment": {
     "status": "User confirmed POWER OFF. Operator deliberately reset the robot controller over its existing USB link and verified BOOT/sequence0/fault0/notbusy through the handheld RF bridge. Emergency-test latch cleared; not armed, no action scheduled",
     "latest_operator_reset": "2026-10-17: user could not locate RESET button; with explicit POWER-OFF confirmation, operator used robot USB DTR reset, then radio STATUS confirmed BOOT. No firmware/EEPROM write or BEGIN/ARM/EXEC. Automatic/model reset remains disabled",

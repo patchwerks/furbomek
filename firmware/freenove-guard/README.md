@@ -137,6 +137,9 @@ all other legacy stock frames are rejected by omission from the build.
 
 ## Qualification boundary
 
+The three candidate expressive actions, their offsets and their build evidence
+are documented in the [expressive motion candidate](expressive-motion.md).
+
 **SUPPORTED OPERATOR-PRESENT CONTROL ONLY.** The installed guard/RF bridge and
 current Hermes profile actually passed all eight bounded powered commands. This
 does not authorize unattended use or certify physical cutoff latency/current,
