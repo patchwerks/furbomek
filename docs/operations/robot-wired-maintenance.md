@@ -14,16 +14,12 @@ authorization or actions that cannot safely be performed from the host.
 | Application update | Program a reviewed application-only artifact, verify and roll back if needed | All preceding gates plus preserved/verified current images, reproducible candidate, exact board/port mapping and tested recovery method |
 | Powered acceptance | Staged ARM and explicitly selected bounded actions | Separate authorization, supported chassis/legs free, operator at physical POWER cutoff; never implicit in an update |
 
-Charging is **not** a fifth authorization tier. The archived
+The owner charges the chassis cells in a separate box after removing them
+from the robot. The installed robot has no connection to that charger. The
 [V3 battery guide](../hardware/vendor/freenove/battery/AboutBattery_for_V3.pdf)
-(About Battery, PDF page2) says USB does not charge the cells; use the appropriate
-separate charger and vendor charging procedure. Software-only work can proceed
-while cells charge separately. Simultaneous USB plus an active charger connected
-to the robot has **not** been qualified: charger identity, rail/backfeed isolation
-and electrical safety are unknown. Do not flash/reset/test in that arrangement
-or invent a wiring workaround. Establish the documented isolated maintenance
-arrangement first; otherwise remain software-only. No new tools are required
-merely to repeat established software tests.
+also states that USB does not charge the cells. During charging, use the
+maintenance tier appropriate to the requested work and confirm the robot's
+physical POWER and cell-installation state where required.
 
 ## 2. Reserve ownership and capture the starting state
 
@@ -46,7 +42,8 @@ merely to repeat established software tests.
 5. Map each physical board to its current stable port and expected MCU. Both
    CH340 bridges have the same generic VID/PID: `/dev/ttyUSB0` vs `1` is not an
    identity. Record robot Mega2560/signature1e9801 vs handheld328P/1e950f,
-   current application hashes, power/charger condition and backup provenance.
+   current application hashes, physical power and cell-installation state, and
+   backup provenance.
    Recheck changed cabling; do not redo established photographs or discovery.
 
 ## 3. Edit and validate without hardware

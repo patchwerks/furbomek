@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_on": "2026-10-18",
+  "updated_on": "2026-11-20",
   "pending_deployment": {
     "date": "2026-10-18",
     "status": "STOP ACK routing fixed and software-tested; NOT FLASHED. active_deployment remains authoritative for installed images",
@@ -16,6 +16,25 @@
     "maintenance_protocol": "docs/operations/robot-wired-maintenance.md"
   },
   "active_deployment": {
+    "status": "Larger expressive Mega application installed and verified on 2026-11-21. First supported powered pass verified normal DISARM for Active, Poke, Defensive Brace and Tuck Preview, with all three gestures visibly observed",
+    "source_directory": "firmware/freenove-guard",
+    "candidate_source_base": "931d9d5, codex/expressive-motion-candidate working tree",
+    "mega_hex_sha256": "07f2e7149bf6945c4b9b9015a70e536a6639e28ea768d6eb2a44dd7f13a06ca3",
+    "mega_elf_sha256": "05fa457494c0ffef5bbdd0b1510e0916cf7ce27d7c76ec622660b04d9ab94bd3",
+    "remote_hex_sha256": "840934a268f93cee31f11bae196ab4fff1e97fd09b7501b6c14bc0d1677ae39e",
+    "remote_elf_sha256": "4a9aa9f61f4010a5bddf0a5ba9d18b531d68d83f01bd0dfe1137e91f40949ae2",
+    "mega_full_flash_sha256": "6c9f593fb45a6f04a5d0408896cca1a284b6a34773163c936d259315b3229db5",
+    "remote_full_flash_sha256": "48c74f21a0902995a20732604eea4eda4dbb95124db1f477236d86d675a74f48",
+    "verification": "Exact Mega application match and equality for all other flash bytes and Mega EEPROM. Handheld image unchanged. Handheld bootloader aliases EEPROM reads to flash, so actual handheld EEPROM remains unverified",
+    "authorization": "Owner authorized the larger expressive Mega-only update with physical POWER OFF. Hermes names and local supervised admission are the existing ones",
+    "prior_expressive_pass": "docs/operations/macos-expressive-firmware-2026-11-20.md#first-supported-motion-pass",
+    "previous_software_supported_pass": "docs/operations/macos-expressive-motion-r2-2026-11-21.md#supported-powered-retest",
+    "previous_software_hermes_tabletop_pass": "docs/operations/macos-brodex-edge-2026-11-20.md#supervised-bare-table-pass",
+    "larger_gesture_supported_pass": "8.08 V reported. Active 1095 ms, Poke 889 ms, Defensive Brace 2396 ms and Tuck 2416 ms completed with verified DISARM. Regular Mac bridge held read-only with DISARMED, idle and fault 0. This pass is scoped to the supported chassis",
+    "rollback": "Previous Mega full flash and EEPROM independently verified immediately before update, exact touched-page rollback prefix preserved. Never use the handheld EEPROM alias captures as EEPROM restoration data",
+    "evidence": "docs/operations/macos-expressive-gesture-tempo-2026-11-21.md"
+  },
+  "previous_supported_guard_deployment": {
     "status": "User confirmed POWER OFF. Operator deliberately reset the robot controller over its existing USB link and verified BOOT/sequence0/fault0/notbusy through the handheld RF bridge. Emergency-test latch cleared; not armed, no action scheduled",
     "latest_operator_reset": "2026-10-17: user could not locate RESET button; with explicit POWER-OFF confirmation, operator used robot USB DTR reset, then radio STATUS confirmed BOOT. No firmware/EEPROM write or BEGIN/ARM/EXEC. Automatic/model reset remains disabled",
     "source_directory": "firmware/freenove-guard",
@@ -203,6 +222,99 @@
     "rollback": "No device changes; preserve installed image and private backups. Remove prototype source if abandoned. No bootloader, EEPROM, fuse or lock writes occurred."
   },
   "history": [
+    {
+      "date": "2026-11-21",
+      "change": "Ran the first supported powered check of the larger expressive gestures",
+      "verification": "All four actions verified normal DISARM. Kinect showed a visible Poke lift and reach, Brace widening and Tuck contraction. Read-only bridge retained at DISARMED, idle and fault 0",
+      "device_changes": "No writes, resets or reconnects during the pass",
+      "evidence": "docs/operations/macos-expressive-gesture-tempo-2026-11-21.md#powered-supported-pass"
+    },
+    {
+      "date": "2026-11-21",
+      "change": "Installed the larger expressive Mega application",
+      "verification": "Verified preceding full memory read before application write. New application, untouched flash and Mega EEPROM verified exactly. Held handheld reported healthy BOOT at 0.0 V",
+      "device_changes": "Mega application only. Handheld and host admission configuration untouched",
+      "evidence": "docs/operations/macos-expressive-gesture-tempo-2026-11-21.md#installed-mega-and-motor-off-check"
+    },
+    {
+      "date": "2026-11-21",
+      "change": "Enrolled and tested the expressive motions on the supervised Brodex furbomek MCP route",
+      "verification": "Bare-table Active, Poke, Defensive Brace and Tuck Preview plus one Poke repeat verified DISARM. Brace and Tuck visibly returned. Low-angle Poke repeat measured sideways foot movement. Bridge retained read-only standby after each window",
+      "device_changes": "No firmware writes or hardware resets",
+      "evidence": "docs/operations/macos-brodex-edge-2026-11-20.md#supervised-bare-table-pass"
+    },
+    {
+      "date": "2026-11-21",
+      "change": "Ran a supervised supported-chassis retest of the reduced-preflight firmware",
+      "verification": "ARM-only and all four moves verified DISARM. Fixed camera confirmed Active, Brace and Tuck leg movement. The brief Poke foot path was not visually verified. Final powered state was DISARMED, idle and fault 0",
+      "device_changes": "No writes or resets during the retest",
+      "evidence": "docs/operations/macos-expressive-motion-r2-2026-11-21.md#supported-powered-retest"
+    },
+    {
+      "date": "2026-11-21",
+      "change": "Installed the reduced-preflight Mega application with physical POWER OFF",
+      "verification": "Exact full flash comparison and Mega EEPROM check passed. Handheld firmware unchanged. Motor-off RF reported BOOT, idle, fault 0 and 0.0 V",
+      "evidence": "docs/operations/macos-expressive-motion-r2-2026-11-21.md"
+    },
+    {
+      "date": "2026-11-20",
+      "change": "Ran the first supervised supported-chassis expressive pass",
+      "verification": "ARM-only, Active and Poke verified DISARM. Defensive Brace timed out and STOP verified FAULT 4. Tuck was not dispatched. User confirmed POWER OFF",
+      "device_changes": "No firmware writes or recovery reset in this pass",
+      "evidence": "docs/operations/macos-expressive-firmware-2026-11-20.md#first-supported-motion-pass"
+    },
+    {
+      "date": "2026-11-20",
+      "change": "Installed both expressive candidate applications with physical POWER OFF",
+      "verification": "AVRDUDE verified both applications, full post-write flash comparison preserved untouched bytes and Mega EEPROM matches. The handheld reports flash for EEPROM requests",
+      "evidence": "docs/operations/macos-expressive-firmware-2026-11-20.md"
+    },
+    {
+      "date": "2026-11-20",
+      "change": "Ran all eight installed guarded actions on the supervised bare tabletop through one persistent Mac USB/RF bridge",
+      "verification": "All actions verified normal DISARM. The expired window retained a read-only bridge with DISARMED and fault 0. The Logitech captured the final Sleep lowering",
+      "device_changes": "No firmware write, readback or deliberate reset. The prior active deployment remains the verified firmware checkpoint",
+      "evidence": "docs/operations/macos-persistent-bridge-tabletop-2026-11-20.md"
+    },
+    {
+      "date": "2026-11-20",
+      "change": "Observed seven bounded Guard actions on the supervised bare tabletop using the deployed Mac gateway and handheld RF bridge",
+      "verification": "ARM-only and all dispatched commands verified normal DISARM. Video shows chassis rise during Active and forward travel during the two-phase Forward. Sleep was not dispatched before the bridge deadline",
+      "device_changes": "No candidate image, flash, reset or new installed-image readback. The recorded active deployment is the last verified firmware checkpoint",
+      "evidence": "docs/operations/macos-tagless-tabletop-map-2026-11-20.md"
+    },
+    {
+      "date": "2026-11-20",
+      "change": "Ran an untethered, supervised bare-table gait with both alternating tripod phases",
+      "verification": "One armed session reported Active and two forward phases completed, then verified DISARM. A fixed optical recording supports short chassis advance toward the camera",
+      "device_changes": "No firmware write, readback, or deliberate reset. The test kept the installed heartbeat, deadlines and terminal STOP handling",
+      "evidence": "docs/operations/macos-table-walk-and-media-2026-11-20.md"
+    },
+    {
+      "date": "2026-11-20",
+      "change": "Ran one supervised forward protocol trial with the untethered robot standing on a bare tabletop",
+      "verification": "ARM-only and one forward command verified DISARM. Observed a posture change without clear evidence of translation",
+      "device_changes": "No new readback, firmware candidate, write or deliberate reset. Prior installed image records remain authoritative",
+      "evidence": "docs/operations/macos-table-forward-2026-11-20.md"
+    },
+    {
+      "date": "2026-11-20",
+      "change": "Qualified telemetry and one guarded Active request across the Brodex-to-Mac control route",
+      "before": "Installed guard was idle and DISARMED. The local operator confirmed physical power isolation and admitted telemetry only",
+      "after": "Local ARM-only verified DISARM, then a single Brodex Active request completed and verified DISARM. Operator confirmed POWER OFF. The bench lease expired and closed the serial owner",
+      "device_changes": "No new firmware candidate, readback, flash, or deliberate robot reset. Existing installed artifact identities remain the active_deployment entries",
+      "safety": "Supported operator-present scope. Operator could not confirm the visible motion. Emergency STOP, watchdog reset, and unattended behavior were outside this test",
+      "evidence": "docs/operations/macos-brodex-edge-2026-11-20.md"
+    },
+    {
+      "date": "2026-11-19",
+      "change": "Exercised the installed guard from a macOS host over the handheld USB/RF bridge",
+      "before": "Guard BOOT, fault 0 and idle with physical POWER OFF",
+      "after": "ARM-only and all eight bounded actions verified normal DISARM. Operator confirmed visible motion, then physical POWER OFF. Final CRC-validated DISARMED, fault 0, idle, sequence 118",
+      "device_changes": "Shifted the handheld USB connection to another port. No robot controller reset, firmware build or flash, calibration, EEPROM, bootloader, fuse, or lock change. Installed image hashes are the existing active_deployment records, with no new flash readback",
+      "safety": "Operator-present supported bench only. No new STOP-path, watchdog-reset, floor, head or unattended acceptance",
+      "evidence": "docs/operations/macos-furbomek-2026-11-19.md"
+    },
     {
       "date": "2026-10-18",
       "change": "Prepared unflashed STOP ACK route fix and mandatory wired downtime maintenance protocol",

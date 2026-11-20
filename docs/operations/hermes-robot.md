@@ -7,8 +7,10 @@ POWER cutoff. All eight bounded actions passed recorded native powered checks
 after40 sequential motor-off cycles. The `furbomek` profile now selects
 `supervised_powered_bench` with the explicit qualified allowlist: `active`,
 `sleep`, `forward`, `backward`, `left`, `right`, `turn_left`, `turn_right`.
-Each direction/turn is one vendor gait quantum, not continuous walking or a
-measured travel distance. Actual powered Hermes verification passed below.
+`forward` runs both vendor tripod phases as one bounded gait cycle. Other
+directions and turns each run one vendor gait quantum. Controller completion
+does not measure travel distance. The older powered Hermes verification below
+used one vendor quantum per direction.
 
 ### Actual powered Hermes result
 
@@ -43,8 +45,12 @@ unattended operation remain unqualified.
 
 `robot_perform_action(action)` replaces the motor-off-only check in this mode.
 It requires fresh controller-reported6.5–8.6V plus the operator-present profile,
-executes one action with100ms heartbeats and a2.5s host limit, then verifies normal
-DISARM. Firmware retains3s operation,500ms link and30s session limits. The next
+executes a bounded action with100ms heartbeats and a2.5s host limit per vendor
+operation, then verifies normal DISARM. The two forward phases run under one
+ARM. The gateway requires healthy first-phase completion and sufficient lease
+time for the second EXEC and following heartbeat. Faults, timeouts, and
+unconfirmed completion prevent further phases and use terminal STOP. Firmware
+retains3s operation,500ms link and30s session limits. The next
 normal action resumes with a higher global sequence and changed correlation ID,
 not a controller reset. This finite ordering is not authentication. Emergency
 STOP, unexpected lease loss and faults remain latched; no tool clears them.

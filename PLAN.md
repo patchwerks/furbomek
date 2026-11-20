@@ -516,6 +516,42 @@ Run the full stack on one Ubuntu machine, initially with USB serial, but preserv
 
 Omarchy can also be installed directly on Linux hardware, but then it replaces Ubuntu rather than running on top of it. Consider this only after the VM profile passes the exact GPU/media soak, an OS/update/rollback ADR is accepted, and the same service isolation, credential separation, backup/restore, and hardware-safety tests pass. Bare metal improves direct device access but gives up the VM quarantine boundary.
 
+#### Profile E: macOS device host with a remote Hermes harness
+
+Use this profile when the robot and Kinect v2 are in a different location from Brodex.
+The Mac owns Kinect USB capture and registration, object tracking, the Godot
+broadcast window, OBS encoding and platform ingest. The Mac also owns the
+handheld USB/RF bridge and runs the existing guarded robot gateway locally.
+The installed robot guard retains final motion deadlines, interlocks and STOP.
+
+Brodex retains the Hermes `furbomek` profile, planning, inference and background
+agent workloads. The activity broker publishes the redacted text and timeline
+contract for the Mac HUD. Route semantic media and robot requests over
+authenticated, narrowly scoped Tailscale connections. Heartbeats and DISARM
+stay local to the robot link. Expire remote requests on disconnect and require
+a new operator-present session after reconnect. Preserve the observer-only
+privacy policy for the HUD.
+
+Keep the Mac awake with an active desktop session while camera or stream
+output is scheduled. Hermes remains available when the Mac sleeps or leaves.
+Continuous capture requires an always-on device at the robot. If centralized
+OBS becomes useful, evaluate sending one encoded program feed to Brodex over
+SRT and measure the added delay and loss. Keep Kinect USB and native motion
+transport local in both cases.
+
+Qualify a repeatable native build and launch, capture/restart, frame freshness,
+tracking loss/reacquisition, measured XYZ views, a private OBS recording and
+Twitch bandwidth test. Separately verify authenticated Brodex requests and HUD
+delivery, including Mac sleep/disconnect and recovery. See the
+[macOS bring-up record](docs/operations/macos-furbomek-2026-11-19.md) for the
+initial observed results and the
+[Brodex edge record](docs/operations/macos-brodex-edge-2026-11-20.md) for
+the profile-scoped implementation and its acceptance. The
+[expressive firmware installation](docs/operations/macos-expressive-firmware-2026-11-20.md)
+records the two-board update and first supported pass. The
+[reduced-preflight update](docs/operations/macos-expressive-motion-r2-2026-11-21.md)
+records the Mega-only revision and its verification.
+
 ### 5.3 Network and credential boundaries
 
 ```mermaid
@@ -1013,6 +1049,7 @@ Deliverables:
 - signed/versioned OCI images and SBOMs;
 - KVM/libvirt deployment with pinned Omarchy full-guest and Ubuntu recovery profiles plus optional VFIO;
 - bare-metal Ubuntu installer/provisioner;
+- native macOS device-host profile for Kinect, Godot, OBS and the guarded robot gateway, with remote Hermes on Brodex;
 - optional bare-metal Omarchy profile only after its ADR and soak gate;
 - root `HERMES.md` plus `docs/operations/hermes-one-shot.md` as the exact clone-to-running entrypoint;
 - one idempotent bootstrap/doctor command that selects a declared profile, verifies pins/hardware/secrets, builds immutable artifacts, runs tests, stages configuration, and reports every blocked gate;
@@ -1096,6 +1133,32 @@ list retains the broader full-autonomy dependencies, not an unchecked restart.
 13. Add platform adapters one at a time with a private soak test and revocable credential.
 14. Inventory AIRI/OpenGolem capabilities as direct services first; add an A2A specialist or broader advisory swarm only after single-Hermes authority and every side-effect boundary are proven.
 15. Attempt reversible embedded-camera and site-specific 1–3 mile trials only after baseline autonomy is stable.
+
+### 9.3 Phuket motion qualification for streaming
+
+Start from the installed Guard and the measured two-phase tabletop advance.
+The Mac gateway now runs both forward phases in one armed session and the
+Brodex profile reaches it. A protocol acknowledgement reports controller
+progress. Physical travel requires camera evidence. The Kinect remains the
+broadcast view. The external webcam is the private measurement view.
+
+| Milestone | Evidence required before advancing |
+|---|---|
+| Measure pose in a contained test area | Lock an elevated camera mount, keep the robot and all test boundaries in frame, and calibrate the view with fixed metric references. Track a rigid chassis marker for position and heading. Verify known translation, rotation and stationary noise. Camera movement, stale frames, occlusion and lost identity produce an invalid result. |
+| Map the motion verbs | Run scripted powered trials in a contained area with an independent power cut. Map Active and Sleep separately from forward, backward, lateral steps and both turns. Record commanded phase, ACK, voltage, speed, start/end body pose, travel along/across heading, yaw, time to settle, and test video. Repeat from different headings and across the intended battery range. Promote a verb only if it produces repeatable signed movement above measured camera noise, with a measured stopping envelope. |
+| Make the test verdict automatic | Use a Mac-side runner to align Guard events and private camera measurements on a monotonic timeline. Log pass, unexpected direction, no travel, fault and unmeasurable outcomes separately. Verify injected camera, process, RF, tunnel and power losses in the lowest-risk appropriate fixture before the same tests in the contained area. The robot-local watchdog and cutoff still own stopping. No automatic retry after an ambiguous action and no automatic reset of a fault. |
+| Qualify smooth Hermes control | Run short sequences of verified verbs at local cadence under one bounded lease, with priority STOP and budget checks between phases. Hermes sends intent through MCP and receives measured motion and stop reasons. The Mac checks tracking freshness and test-area clearance before dispatch. Test command cancellation, pause, reversal, boundary clearance and reconnect while OBS is encoding. |
+| Release unattended streaming motion | Pass a private soak with the real Brodex profile, Kinect, overhead watcher, and OBS under representative battery and link conditions. A lost feed or unsafe pose stops motion and the HUD shows the reason. Require a robot-local stop with the Mac and Brodex unavailable, then promote only qualified verbs in the defined streaming area. Battery changes are physical maintenance. Test verdicts and ordinary motion decisions belong to the software. |
+
+The next deliverable is one automatically scored forward trial with calibrated
+travel and heading, then repeated forward trials before adding the other verbs.
+Collect data on the table only with a qualified boundary and cutoff. Use a
+contained floor area for a wider walking map. Head and face movements have a
+separate electrical, sensing and interlock gate under Phase 3. Continue using
+the existing semantic MCP and Guard path while building these checks. The
+[overhead camera check](docs/operations/macos-table-walk-and-media-2026-11-20.md#overhead-camera-and-motion-scoring)
+records the current webcam mode and scoring evidence. The proposed marker
+calibration uses [OpenCV ArUco boards](https://docs.opencv.org/4.11.0/db/da9/tutorial_aruco_board_detection.html).
 
 ## 10. Definition of "fully autonomous"
 

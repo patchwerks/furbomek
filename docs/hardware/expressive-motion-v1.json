@@ -1,0 +1,184 @@
+{
+  "schema_version": 1,
+  "date": "2026-11-20",
+  "scope": "Character motion definitions for Furb-o-Mek and the current evidence for their constituent moves. This catalog grants no actuator authority.",
+  "evidence": {
+    "tabletop_video": {
+      "file": "table-pass.mkv",
+      "sha256": "bd4e1d47d48679966fea672b8066505c9ea43eb8d3123fa1fce80c680754c2b9",
+      "trace_sha256": "d3a9ff65f9ad02fffb9b5cbc9b95331dcc07df96dff041fe0cfd4772b67f25c1",
+      "camera": "Fixed oblique Logitech C930e, 640 × 480, 15 fps, flashlight",
+      "method": "Match chassis features to the pose immediately before each command, subtract background motion and cross-check with two independently selected chassis regions. Use the median of twelve settled video frames when available. Frame indices are zero-based and inclusive.",
+      "coordinates": "Screen right and down are positive. Projected clockwise rotation is positive. Values are image displacement, with no metric scale or table dimensions.",
+      "limits": "One trial per guard action. Some feet were obscured. Guard elapsed time and video settling time are independent."
+    },
+    "persistent_bridge_tabletop": {
+      "record": "../operations/macos-persistent-bridge-tabletop-2026-11-20.md",
+      "video_sha256": "b247947c71306b17b1502504ba3d7d8046a7fce777e49b46ce636de81b8522c7",
+      "trace_sha256": "8d331a474180d4cb68979344e9d161d7b50aafcf535e46fb9bf21768fa3ef977"
+    },
+    "expressive_supported_pass": {
+      "record": "../operations/macos-expressive-firmware-2026-11-20.md#first-supported-motion-pass",
+      "video_sha256": "be8ef867c4faf16d86a226b79331cd9fbbaf5e06bd9dc12be18815b496213b3c",
+      "trace_sha256": "91453db586d39cd2e81c4281a6e0c6ac846cfd7430a2a8a253e5462843924068",
+      "scope": "One supervised pass with the chassis supported. No new tabletop qualification."
+    },
+    "reduced_preflight_supported_pass": {
+      "record": "../operations/macos-expressive-motion-r2-2026-11-21.md#supported-powered-retest",
+      "video_sha256": "ed396bb075083d5d3e4849d6cd8d2d0a40fe6ed700613f9b065c8a9d6fef34c8",
+      "trace_sha256": "1ee218c1bf77b0882b4ebdee55c35be8186f5c4902c85b9927f6d73ab903b94c",
+      "scope": "One supervised supported pass, with all four actions completed and verified DISARM."
+    },
+    "hermes_bare_table_pass": {
+      "record": "../operations/macos-brodex-edge-2026-11-20.md#supervised-bare-table-pass",
+      "video_sha256": "c5f68441330425ef2ae94149f11a7ba5ec60251eac0e39a0c7b9ef1651adb0e8",
+      "trace_sha256": "54507383f9ba803ba2f717159d4c55c15a00ee2c5ffaaa80aa2b7f93d9bda505",
+      "scope": "Actual profile MCP, supervised bare table, same power-up."
+    },
+    "hermes_bare_table_poke_front_view": {
+      "record": "../operations/macos-brodex-edge-2026-11-20.md#kinect-front-view-poke-repeat",
+      "video_sha256": "08a339b7299508f71a71a06b2178eb9e4844a81240ef9a1bb7e456d42a268140",
+      "trace_sha256": "acbb14e72a1e220e6f4eb44a2c54befb18cd5b0d226322e578caf0275e08a56e",
+      "scope": "One additional supervised Poke with a low front view."
+    },
+    "larger_expressive_supported_pass": {
+      "record": "../operations/macos-expressive-gesture-tempo-2026-11-21.md#powered-supported-pass",
+      "video_sha256": "5cee83c6af0e3acaed3f4bbf3c3cc929d8ec47080530b39186647bd37ded8822",
+      "trace_sha256": "a7b3c5f537ba16e47da13e492d486d6868d8abd94e1f23f017be9ae3c01e2b4e",
+      "scope": "Larger installed Mega gestures, one supervised supported pass with visible movement and verified normal DISARM."
+    },
+    "supported_bench": {
+      "record": "../operations/macos-furbomek-2026-11-19.md",
+      "sleep": "Verified guard completion and DISARM with the chassis supported. Operator confirmed the movement. No quantified stance or leg fold was recorded."
+    }
+  },
+  "tabletop_observations": {
+    "active": {
+      "guard_elapsed_ms": 1084,
+      "settled_frames": [1415, 1426],
+      "chassis_image_delta_px": [-0.55, -7.27],
+      "result": "Legs extend and the chassis rises. The vertical screen shift is a height proxy."
+    },
+    "forward": {
+      "guard_elapsed_ms": 1813,
+      "phases": 2,
+      "settled_frames": [1703, 1714],
+      "chassis_image_delta_px": [27.34, 1.32],
+      "image_rotation_deg": 0.59,
+      "result": "Forward travel across both alternating tripod phases."
+    },
+    "backward": {
+      "guard_elapsed_ms": 889,
+      "phases": 1,
+      "settled_frames": [1878, 1889],
+      "chassis_image_delta_px": [-11.52, -2.06],
+      "image_rotation_deg": 1.11,
+      "result": "Reverse travel, with some recoil toward the starting position before settling."
+    },
+    "left": {
+      "guard_elapsed_ms": 1085,
+      "phases": 1,
+      "settled_frames": [2097, 2108],
+      "chassis_image_delta_px": [0.57, -11.26],
+      "image_rotation_deg": -2.36,
+      "result": "Predominantly lateral travel with a small accompanying turn."
+    },
+    "right": {
+      "guard_elapsed_ms": 993,
+      "phases": 1,
+      "settled_frames": [2283, 2294],
+      "chassis_image_delta_px": [0.78, 9.51],
+      "image_rotation_deg": -0.58,
+      "result": "Lateral travel in the opposite direction from Left."
+    },
+    "turn_left": {
+      "guard_elapsed_ms": 982,
+      "phases": 1,
+      "settled_frames": [2523, 2534],
+      "chassis_image_delta_px": [1.37, -0.02],
+      "image_rotation_deg": -3.36,
+      "result": "Counterclockwise rotation. The first snapshot missed the settled turn."
+    },
+    "turn_right": {
+      "guard_elapsed_ms": 1000,
+      "phases": 1,
+      "last_visible_frame": 2729,
+      "last_visible_image_rotation_deg": 2.96,
+      "result": "Clockwise rotation visible at the end of the recording. Settled rotation is unknown."
+    }
+  },
+  "movements": {
+    "scuttle": {
+      "kind": "sequence_candidate",
+      "intent": "A short burst of quick alternating steps followed by a clear stop.",
+      "start_pose": "Standing",
+      "end_pose": "Standing and settled",
+      "guard_reference": ["forward"],
+      "evidence": "One two-phase forward cycle moved about 27 px in 1.81 s. This is the baseline; pace and chained cycles remain to be measured.",
+      "next_measurement": "Measure alternating steps, no-load and loaded cadence, forward travel, yaw drift, peak and stopping excursion. Compare cadence against a normal Forward on the same surface before naming a distinct speed preset."
+    },
+    "strafe_left": {
+      "kind": "guard_alias",
+      "intent": "Move left relative to the body while maintaining heading.",
+      "start_pose": "Standing",
+      "end_pose": "Standing and settled",
+      "guard_reference": ["left"],
+      "evidence": "One observed phase moved roughly 11 px laterally with about 2° of projected turn.",
+      "next_measurement": "Check both starting tripod phases and score lateral travel, forward drift and yaw separately."
+    },
+    "strafe_right": {
+      "kind": "guard_alias",
+      "intent": "Move right relative to the body while maintaining heading.",
+      "start_pose": "Standing",
+      "end_pose": "Standing and settled",
+      "guard_reference": ["right"],
+      "evidence": "One observed phase moved roughly 10 px laterally with about 0.6° of projected turn.",
+      "next_measurement": "Check both starting tripod phases and score lateral travel, forward drift and yaw separately."
+    },
+    "heighten": {
+      "kind": "guard_alias",
+      "intent": "Rise out of the low stance into the normal standing pose.",
+      "start_pose": "Low stance",
+      "end_pose": "Normal standing height",
+      "guard_reference": ["active"],
+      "evidence": "Active extended the legs. The chassis rose about 7 px in projection over the tabletop pass.",
+      "next_measurement": "Measure rise, settle and ground contact from a low side or oblique view. A taller-than-normal pose requires a separate bounded preset and its own trial."
+    },
+    "poke": {
+      "kind": "new_guard_pose",
+      "intent": "Lift one front foot, reach into clear air, retract and replant it once.",
+      "start_pose": "Standing",
+      "end_pose": "Standing with all six feet planted",
+      "guard_reference": [],
+      "evidence": "The supported and bare-table Guard requests verified DISARM. The low front Kinect view on the bare-table repeat measured roughly 4 px of sideways motion and 3 px residual shift in the screen-left foot region. The lift and forward reach were not resolved.",
+      "next_measurement": "Score reach, lift, return placement, support from the other five feet, and chassis drift. A controlled test needs an unobstructed view of the reaching foot."
+    },
+    "defensive_posture": {
+      "kind": "new_guard_pose",
+      "intent": "Lower and widen in a short brace, then return to the starting stance.",
+      "start_pose": "Standing",
+      "end_pose": "Starting stance",
+      "guard_reference": ["defensive_brace"],
+      "evidence": "The supported brace completed with verified DISARM in 2310 ms and about 11 px peak image travel. A bare-table run through Hermes verified DISARM, with about 7 px near-front travel and return.",
+      "next_measurement": "Score chassis drop, stance width, foot contact, drift and return to standing as a separate transition."
+    },
+    "curl_up": {
+      "kind": "new_guard_pose",
+      "intent": "Lower the chassis and bring the legs inward into a compact rest.",
+      "start_pose": "Standing",
+      "end_pose": "Low and compact",
+      "guard_reference": ["sleep", "tuck_preview"],
+      "evidence": "Sleep lowered the chassis about 7 px on the tabletop. Tuck Preview verified DISARM in the supported pass with about 15 px near-front travel. It later verified DISARM on the bare table through Hermes, with about 9 px near-front travel and return.",
+      "next_measurement": "Map the compact leg fold as a separate bounded pose and score the change in footprint independently of chassis height."
+    },
+    "recoil": {
+      "kind": "guard_alias",
+      "intent": "One short retreat followed by a settled pose.",
+      "start_pose": "Standing",
+      "end_pose": "Standing and settled",
+      "guard_reference": ["backward"],
+      "evidence": "One observed reverse phase moved about 12 px after settling.",
+      "next_measurement": "Measure repeatability, peak reverse travel and slip between first motion and settle."
+    }
+  }
+}
