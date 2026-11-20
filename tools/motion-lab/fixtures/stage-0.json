@@ -1,0 +1,2348 @@
+{
+  "request": {
+    "schema_version": 1,
+    "mode": "replay_comparison",
+    "comparison_id": "synthetic-two-stages-v1",
+    "context": {
+      "profile": {
+        "schema_version": 1,
+        "units": "mm_deg",
+        "body_frame": "x_forward_y_left_yaw_ccw",
+        "robot_revision": "synthetic-robot",
+        "installed_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "gait_revision": "synthetic-gait",
+        "action": "forward",
+        "start_pose": "synthetic-start",
+        "end_pose": "synthetic-end",
+        "power_regime": "synthetic-voltage",
+        "load_class": "synthetic-load",
+        "surface": {
+          "material_id": "synthetic-coupon",
+          "finish_id": "matte",
+          "slope_deg": [
+            0.0,
+            1.0
+          ],
+          "static_traction": [
+            0.4,
+            0.8
+          ],
+          "traction_units": "coefficient"
+        },
+        "delta": {
+          "x_mm": 20.000000446010905,
+          "y_mm": -1.7360442751945535e-6,
+          "yaw_deg": -5.88870875617431e-8
+        },
+        "swept_radius_mm": 30.00000157909981,
+        "stopping_distance_mm": 0.0,
+        "interval_travel_mm": 2.0,
+        "uncertainty_mm": 3.08308962508317,
+        "sample_count": 10,
+        "assumptions": [
+          "offline_replay_only",
+          "independent_clearance_required",
+          "voltage-6.0:6.5-7.0:7.5"
+        ],
+        "evidence": [
+          {
+            "schema_version": 1,
+            "trial_id": "synthetic-forward-0",
+            "calibration_id": "synthetic-camera-0",
+            "artifact_sha256": "bf57c3dcfba97a0c3b352b82d16efe714bb5eb255b45633fcdc2d63442c25662",
+            "provenance": "synthetic",
+            "sample_count": 1
+          },
+          {
+            "schema_version": 1,
+            "trial_id": "synthetic-forward-1",
+            "calibration_id": "synthetic-camera-0",
+            "artifact_sha256": "7dfd52c9058c98a21a42706dd606074d8bd1ffec520102933d061e497a18dd65",
+            "provenance": "synthetic",
+            "sample_count": 1
+          },
+          {
+            "schema_version": 1,
+            "trial_id": "synthetic-forward-2",
+            "calibration_id": "synthetic-camera-0",
+            "artifact_sha256": "fe15d1b14eeaf3218ecfd26ed05b6401bd6b7b6f3944d624f8803e739ef53730",
+            "provenance": "synthetic",
+            "sample_count": 1
+          },
+          {
+            "schema_version": 1,
+            "trial_id": "synthetic-forward-3",
+            "calibration_id": "synthetic-camera-0",
+            "artifact_sha256": "0ff011fad553b0d77046c320149ddeb7b1012b4f1c62d37a8c711cf9290e0818",
+            "provenance": "synthetic",
+            "sample_count": 1
+          },
+          {
+            "schema_version": 1,
+            "trial_id": "synthetic-forward-4",
+            "calibration_id": "synthetic-camera-0",
+            "artifact_sha256": "7433ad633da404bae62d3c79c29db3f8c5e96a3911e5f46632fa9bcf03e26ea5",
+            "provenance": "synthetic",
+            "sample_count": 1
+          },
+          {
+            "schema_version": 1,
+            "trial_id": "synthetic-forward-5",
+            "calibration_id": "synthetic-camera-0",
+            "artifact_sha256": "b645eb0b0888a5a50440a823ca6d5857b20cf52f993ef8e8f87f41854d5880f7",
+            "provenance": "synthetic",
+            "sample_count": 1
+          },
+          {
+            "schema_version": 1,
+            "trial_id": "synthetic-forward-6",
+            "calibration_id": "synthetic-camera-0",
+            "artifact_sha256": "337c59a21a7e389cc84b5d2b4056daf16ff722f05457c54df4743d0422da156f",
+            "provenance": "synthetic",
+            "sample_count": 1
+          },
+          {
+            "schema_version": 1,
+            "trial_id": "synthetic-forward-7",
+            "calibration_id": "synthetic-camera-0",
+            "artifact_sha256": "9bd806486b468a8d4000ee487c3795c90ecfe6875744e4d14c7e7ffed994d3f0",
+            "provenance": "synthetic",
+            "sample_count": 1
+          },
+          {
+            "schema_version": 1,
+            "trial_id": "synthetic-forward-8",
+            "calibration_id": "synthetic-camera-0",
+            "artifact_sha256": "1b3dc9795f9366d4fb069ded080bd858bfec5178c65518492a6bd44932b90418",
+            "provenance": "synthetic",
+            "sample_count": 1
+          },
+          {
+            "schema_version": 1,
+            "trial_id": "synthetic-forward-9",
+            "calibration_id": "synthetic-camera-0",
+            "artifact_sha256": "0677c1f088d7a63bb07734df9e09bcd14d5e4bfd8c686ae34ab21c86e09dc93e",
+            "provenance": "synthetic",
+            "sample_count": 1
+          }
+        ]
+      },
+      "stage": {
+        "schema_version": 1,
+        "units": "mm_deg",
+        "stage_id": "synthetic-stage-0",
+        "stage_frame_id": "board-v1",
+        "calibration_id": "synthetic-calibration-0",
+        "profile_id": "motion-v1-0401a802bdb65bdd56b71e90951c58d0118d4717893cb4b55dc8a1c07c429eee",
+        "robot_revision": "synthetic-robot",
+        "installed_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "surface": {
+          "material_id": "synthetic-coupon",
+          "finish_id": "matte",
+          "slope_deg": [
+            0.0,
+            1.0
+          ],
+          "static_traction": [
+            0.4,
+            0.8
+          ],
+          "traction_units": "coefficient"
+        },
+        "usable_polygon": {
+          "vertices": [
+            [
+              -60.0,
+              -60.0
+            ],
+            [
+              180.0,
+              -60.0
+            ],
+            [
+              180.0,
+              180.0
+            ],
+            [
+              -60.0,
+              180.0
+            ]
+          ]
+        },
+        "containment_evidence_sha256": "895dbd5f0c552426a6e36084d5d9edcf8b5479862aa73132897c34755477aead",
+        "hazards": [],
+        "survey_sha256": "29f7c70a2d72e3971f208eb9459c6cbfaaa99fb92468b8f87c20c19797aa18a8"
+      },
+      "calibration": {
+        "schema_version": 1,
+        "units": "mm_deg",
+        "calibration_id": "synthetic-calibration-0",
+        "stage_id": "synthetic-stage-0",
+        "stage_frame_id": "board-v1",
+        "observation_revision": "camera-a",
+        "observation_to_stage": {
+          "x_mm": 0.0,
+          "y_mm": 0.0,
+          "yaw_deg": 0.0
+        },
+        "coverage": {
+          "vertices": [
+            [
+              -60.0,
+              -60.0
+            ],
+            [
+              180.0,
+              -60.0
+            ],
+            [
+              180.0,
+              180.0
+            ],
+            [
+              -60.0,
+              180.0
+            ]
+          ]
+        },
+        "valid_from_ms": 10000,
+        "valid_until_ms": 10600,
+        "translation_error_mm": 1.0,
+        "yaw_error_deg": 1.0,
+        "minimum_translation_mm": 25.0,
+        "minimum_yaw_deg": 10.0,
+        "independent_validation_sha256": "0b2097dc68bbe546246f4a1ba78c47da21c20ae6d87cc98341b740a6bc10ea7f",
+        "observable_poses": [
+          "synthetic-start",
+          "synthetic-end"
+        ]
+      },
+      "observation_revision": "camera-a",
+      "now_ms": 10000
+    },
+    "survey": {
+      "stage_id": "synthetic-stage-0",
+      "revision": "synthetic-survey-v1",
+      "stage_frame_id": "board-v1",
+      "usable_polygon": {
+        "vertices": [
+          [
+            -60.0,
+            -60.0
+          ],
+          [
+            180.0,
+            -60.0
+          ],
+          [
+            180.0,
+            180.0
+          ],
+          [
+            -60.0,
+            180.0
+          ]
+        ]
+      },
+      "surface": {
+        "material_id": "synthetic-coupon",
+        "finish_id": "matte",
+        "slope_deg": [
+          0.0,
+          1.0
+        ],
+        "static_traction": [
+          0.4,
+          0.8
+        ],
+        "traction_units": "coefficient"
+      },
+      "obstacles": [],
+      "source_sha256": "fc75b0478b836c08a231fea26e018092d88ea40db25037d1925507e766e7398e"
+    },
+    "containment": {
+      "stage_id": "synthetic-stage-0",
+      "survey_sha256": "29f7c70a2d72e3971f208eb9459c6cbfaaa99fb92468b8f87c20c19797aa18a8",
+      "contained_polygon": {
+        "vertices": [
+          [
+            -60.0,
+            -60.0
+          ],
+          [
+            180.0,
+            -60.0
+          ],
+          [
+            180.0,
+            180.0
+          ],
+          [
+            -60.0,
+            180.0
+          ]
+        ]
+      },
+      "source_sha256": "c1ba6622fd65cf081532ffa07e6d11d4e0fc35b62ec58735211f027dc707616f"
+    },
+    "current": {
+      "robot_revision": "synthetic-robot",
+      "installed_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "gait_revision": "synthetic-gait",
+      "power_regime": "synthetic-voltage",
+      "load_class": "synthetic-load",
+      "surface": {
+        "material_id": "synthetic-coupon",
+        "finish_id": "matte",
+        "slope_deg": [
+          0.0,
+          1.0
+        ],
+        "static_traction": [
+          0.4,
+          0.8
+        ],
+        "traction_units": "coefficient"
+      },
+      "pose": "synthetic-start",
+      "footprint_radius_mm": 10.0,
+      "start": {
+        "x_mm": 60.0,
+        "y_mm": 60.0,
+        "yaw_deg": 0.0
+      },
+      "observed_ms": 10000,
+      "maximum_age_ms": 600,
+      "survey_revision": "synthetic-survey-v1"
+    },
+    "approved_profile_ids": [
+      "motion-v1-0401a802bdb65bdd56b71e90951c58d0118d4717893cb4b55dc8a1c07c429eee"
+    ],
+    "invalidated": false,
+    "clearance_margin_mm": 1.0
+  },
+  "calibration_input": {
+    "schema_version": 1,
+    "provenance": "synthetic",
+    "camera": "Logitech Webcam C930e",
+    "image_size": [
+      640,
+      480
+    ],
+    "fps": 15,
+    "pixel_format": "yuyv422",
+    "camera_revision": "camera-a",
+    "reference_revision": "board-v1",
+    "stage_id": "synthetic-stage-0",
+    "measured_reference_side_mm": 40.0,
+    "measured_target_side_mm": 40.0,
+    "measured_baseline_mm": 120.0,
+    "minimum_translation_mm": 25.0,
+    "minimum_yaw_deg": 10.0,
+    "measurement_uncertainty_mm": 0.5,
+    "measurement_uncertainty_deg": 0.2,
+    "containment_verified": true,
+    "setup": "clearance",
+    "intrinsic_views": [
+      {
+        "image_file": null,
+        "image_sha256": null,
+        "markers": [
+          {
+            "marker_id": 0,
+            "corners": [
+              [
+                198.89700761646407,
+                137.56295705432626
+              ],
+              [
+                252.95166860398476,
+                131.60332548199068
+              ],
+              [
+                267.20510056105473,
+                175.89157862692502
+              ],
+              [
+                211.03374330029766,
+                183.4391348299689
+              ]
+            ]
+          },
+          {
+            "marker_id": 1,
+            "corners": [
+              [
+                352.0980222919531,
+                121.65996926997651
+              ],
+              [
+                396.96598155719334,
+                117.57970090223088
+              ],
+              [
+                415.5095825908336,
+                157.20270820517538
+              ],
+              [
+                369.54090671260025,
+                162.80290121023936
+              ]
+            ]
+          },
+          {
+            "marker_id": 2,
+            "corners": [
+              [
+                408.3145864807491,
+                255.94996441966964
+              ],
+              [
+                456.1784040227421,
+                246.40142227859772
+              ],
+              [
+                478.1627027864858,
+                296.0223978782026
+              ],
+              [
+                429.5667448882061,
+                308.036842699572
+              ]
+            ]
+          },
+          {
+            "marker_id": 3,
+            "corners": [
+              [
+                239.77187964922217,
+                288.95357788756274
+              ],
+              [
+                300.05611811065006,
+                277.2586514762745
+              ],
+              [
+                318.74645048040406,
+                334.5009678136313
+              ],
+              [
+                256.5767788480665,
+                348.7902255796063
+              ]
+            ]
+          },
+          {
+            "marker_id": 10,
+            "corners": [
+              [
+                314.58648329421436,
+                132.78039275806321
+              ],
+              [
+                373.5643207476506,
+                126.87370733533805
+              ],
+              [
+                396.3426660354206,
+                178.59583032876495
+              ],
+              [
+                335.33584726933907,
+                187.0412187265133
+              ]
+            ]
+          }
+        ],
+        "captured_ms": 10000,
+        "camera_revision": "camera-a",
+        "reference_revision": "board-v1",
+        "boundary_visible": true,
+        "all_feet_visible": true,
+        "contact_label": "contact"
+      },
+      {
+        "image_file": null,
+        "image_sha256": null,
+        "markers": [
+          {
+            "marker_id": 0,
+            "corners": [
+              [
+                223.45841798656144,
+                136.87950032526047
+              ],
+              [
+                272.89524843438016,
+                147.73256761522785
+              ],
+              [
+                259.54222494856833,
+                192.94801207012597
+              ],
+              [
+                211.34991914212287,
+                183.59055841155927
+              ]
+            ]
+          },
+          {
+            "marker_id": 1,
+            "corners": [
+              [
+                364.2233429060258,
+                168.41791605067425
+              ],
+              [
+                405.9099925095492,
+                178.1337405532
+              ],
+              [
+                389.91816107061203,
+                218.790084574457
+              ],
+              [
+                348.9301642959548,
+                210.5831038205141
+              ]
+            ]
+          },
+          {
+            "marker_id": 2,
+            "corners": [
+              [
+                320.8103159384879,
+                287.7685167156384
+              ],
+              [
+                360.20428966000424,
+                293.430831338403
+              ],
+              [
+                346.52172467446775,
+                327.4195249574836
+              ],
+              [
+                307.9932311125957,
+                322.80363687163356
+              ]
+            ]
+          },
+          {
+            "marker_id": 3,
+            "corners": [
+              [
+                190.1220336535476,
+                268.46352079520403
+              ],
+              [
+                235.66422423845887,
+                275.2822101308764
+              ],
+              [
+                225.07371445480322,
+                312.43398749344544
+              ],
+              [
+                180.89142028170505,
+                306.66327319014385
+              ]
+            ]
+          },
+          {
+            "marker_id": 10,
+            "corners": [
+              [
+                286.62218701464997,
+                249.94784676531057
+              ],
+              [
+                336.4650041753132,
+                258.2115149965548
+              ],
+              [
+                320.5366324211235,
+                301.3547261471321
+              ],
+              [
+                272.08609285474733,
+                294.70943471660473
+              ]
+            ]
+          }
+        ],
+        "captured_ms": 10000,
+        "camera_revision": "camera-a",
+        "reference_revision": "board-v1",
+        "boundary_visible": true,
+        "all_feet_visible": true,
+        "contact_label": "contact"
+      },
+      {
+        "image_file": null,
+        "image_sha256": null,
+        "markers": [
+          {
+            "marker_id": 0,
+            "corners": [
+              [
+                223.65344600489624,
+                131.15144983849325
+              ],
+              [
+                268.7813556285185,
+                139.2168018049016
+              ],
+              [
+                244.7434127223517,
+                186.13340128384786
+              ],
+              [
+                199.31588615352354,
+                175.72113580023756
+              ]
+            ]
+          },
+          {
+            "marker_id": 1,
+            "corners": [
+              [
+                372.2631275924668,
+                158.5411131947604
+              ],
+              [
+                430.8607582902813,
+                169.9973957073766
+              ],
+              [
+                409.91609956589923,
+                224.82183339410219
+              ],
+              [
+                349.8585612083506,
+                210.60461714234864
+              ]
+            ]
+          },
+          {
+            "marker_id": 2,
+            "corners": [
+              [
+                299.55844062326844,
+                326.884662333752
+              ],
+              [
+                361.68993796475485,
+                347.8911405784632
+              ],
+              [
+                334.57916904703876,
+                415.2416163150907
+              ],
+              [
+                271.95789560763353,
+                390.33422079406387
+              ]
+            ]
+          },
+          {
+            "marker_id": 3,
+            "corners": [
+              [
+                147.32040223823728,
+                273.6813614032271
+              ],
+              [
+                192.69312146668094,
+                289.7991990231884
+              ],
+              [
+                165.10308998921437,
+                345.9675145234544
+              ],
+              [
+                120.10598093629355,
+                326.5608663146296
+              ]
+            ]
+          },
+          {
+            "marker_id": 10,
+            "corners": [
+              [
+                209.89170044921886,
+                155.43258491959688
+              ],
+              [
+                268.1729288238892,
+                167.45227968109134
+              ],
+              [
+                236.526466813819,
+                230.89181177401866
+              ],
+              [
+                177.93607916446808,
+                214.66442633798738
+              ]
+            ]
+          }
+        ],
+        "captured_ms": 10000,
+        "camera_revision": "camera-a",
+        "reference_revision": "board-v1",
+        "boundary_visible": true,
+        "all_feet_visible": true,
+        "contact_label": "contact"
+      },
+      {
+        "image_file": null,
+        "image_sha256": null,
+        "markers": [
+          {
+            "marker_id": 0,
+            "corners": [
+              [
+                210.13277817643404,
+                151.30331990406393
+              ],
+              [
+                251.63596271186057,
+                135.463600170169
+              ],
+              [
+                274.2633116215013,
+                180.29732868523956
+              ],
+              [
+                233.0074779829087,
+                193.9866458569075
+              ]
+            ]
+          },
+          {
+            "marker_id": 1,
+            "corners": [
+              [
+                345.41342087852865,
+                100.70907108780497
+              ],
+              [
+                397.7647058186735,
+                81.93372097140886
+              ],
+              [
+                418.3195696980986,
+                133.72907367936094
+              ],
+              [
+                366.9028621722012,
+                150.1291932572659
+              ]
+            ]
+          },
+          {
+            "marker_id": 2,
+            "corners": [
+              [
+                405.3658575244997,
+                240.3315610075826
+              ],
+              [
+                454.46032111142495,
+                228.03452683050992
+              ],
+              [
+                470.16103530993934,
+                270.38461797417847
+              ],
+              [
+                422.3802182171354,
+                280.9739487005967
+              ]
+            ]
+          },
+          {
+            "marker_id": 3,
+            "corners": [
+              [
+                275.51029005283283,
+                272.6071620338097
+              ],
+              [
+                315.8672668329445,
+                262.6149102693395
+              ],
+              [
+                334.7770190732086,
+                299.9801617183843
+              ],
+              [
+                295.03481275760277,
+                308.4315115614762
+              ]
+            ]
+          },
+          {
+            "marker_id": 10,
+            "corners": [
+              [
+                271.59878963309933,
+                232.09127721068694
+              ],
+              [
+                322.48625046005776,
+                217.62021295250568
+              ],
+              [
+                345.9840791279348,
+                266.3331190995409
+              ],
+              [
+                296.0081047120156,
+                278.27534746745795
+              ]
+            ]
+          }
+        ],
+        "captured_ms": 10000,
+        "camera_revision": "camera-a",
+        "reference_revision": "board-v1",
+        "boundary_visible": true,
+        "all_feet_visible": true,
+        "contact_label": "contact"
+      },
+      {
+        "image_file": null,
+        "image_sha256": null,
+        "markers": [
+          {
+            "marker_id": 0,
+            "corners": [
+              [
+                216.49998288852726,
+                134.97867228958654
+              ],
+              [
+                265.24064491081316,
+                139.25655076157264
+              ],
+              [
+                261.30035902673575,
+                190.01249845637727
+              ],
+              [
+                212.85546010241094,
+                187.89508571793652
+              ]
+            ]
+          },
+          {
+            "marker_id": 1,
+            "corners": [
+              [
+                351.53679416284245,
+                147.46807034464913
+              ],
+              [
+                389.46945595931163,
+                151.3346909845807
+              ],
+              [
+                385.0037288579787,
+                196.01356863293688
+              ],
+              [
+                347.19215774785096,
+                194.08885098782272
+              ]
+            ]
+          },
+          {
+            "marker_id": 2,
+            "corners": [
+              [
+                338.5514228972543,
+                284.76342061301153
+              ],
+              [
+                375.89093302398095,
+                283.0327506533283
+              ],
+              [
+                371.3129029273337,
+                324.89073356547243
+              ],
+              [
+                334.3158672029555,
+                328.2758412230854
+              ]
+            ]
+          },
+          {
+            "marker_id": 3,
+            "corners": [
+              [
+                206.7226056275291,
+                290.37449996417376
+              ],
+              [
+                254.12386273677367,
+                288.44673828994144
+              ],
+              [
+                250.9134024860184,
+                335.4410513116977
+              ],
+              [
+                204.22993083810428,
+                339.1684848457115
+              ]
+            ]
+          },
+          {
+            "marker_id": 10,
+            "corners": [
+              [
+                316.9719397350643,
+                220.89820064719115
+              ],
+              [
+                363.96182511699,
+                221.86695390203312
+              ],
+              [
+                358.6838118857026,
+                274.32256215811657
+              ],
+              [
+                312.11505014907755,
+                275.9661706370448
+              ]
+            ]
+          }
+        ],
+        "captured_ms": 10000,
+        "camera_revision": "camera-a",
+        "reference_revision": "board-v1",
+        "boundary_visible": true,
+        "all_feet_visible": true,
+        "contact_label": "contact"
+      },
+      {
+        "image_file": null,
+        "image_sha256": null,
+        "markers": [
+          {
+            "marker_id": 0,
+            "corners": [
+              [
+                219.6217348231138,
+                127.79503409673221
+              ],
+              [
+                269.861720446839,
+                144.10587326546215
+              ],
+              [
+                244.74831322129378,
+                185.38230802842588
+              ],
+              [
+                192.58020784541378,
+                167.29975978118253
+              ]
+            ]
+          },
+          {
+            "marker_id": 1,
+            "corners": [
+              [
+                376.98489438654065,
+                179.74882924494352
+              ],
+              [
+                432.979734334387,
+                198.84889057425812
+              ],
+              [
+                415.74361035373545,
+                245.45177142452627
+              ],
+              [
+                356.8267208904431,
+                224.61718935518377
+              ]
+            ]
+          },
+          {
+            "marker_id": 2,
+            "corners": [
+              [
+                308.9121689867211,
+                330.49165230111885
+              ],
+              [
+                373.9449139463985,
+                355.5141894591709
+              ],
+              [
+                348.902740544385,
+                419.55992126475087
+              ],
+              [
+                280.808731111562,
+                392.0872126415487
+              ]
+            ]
+          },
+          {
+            "marker_id": 3,
+            "corners": [
+              [
+                131.03963843426592,
+                259.6629491217409
+              ],
+              [
+                186.84786201117194,
+                282.2688794365366
+              ],
+              [
+                153.98575938863843,
+                338.3824784627093
+              ],
+              [
+                96.59812815322633,
+                312.9581726760488
+              ]
+            ]
+          },
+          {
+            "marker_id": 10,
+            "corners": [
+              [
+                248.29112492817308,
+                143.9769677634098
+              ],
+              [
+                314.52121923902433,
+                165.9291172202774
+              ],
+              [
+                284.55940748789715,
+                221.86301751537695
+              ],
+              [
+                214.77355575974366,
+                196.91168362500673
+              ]
+            ]
+          }
+        ],
+        "captured_ms": 10000,
+        "camera_revision": "camera-a",
+        "reference_revision": "board-v1",
+        "boundary_visible": true,
+        "all_feet_visible": true,
+        "contact_label": "contact"
+      },
+      {
+        "image_file": null,
+        "image_sha256": null,
+        "markers": [
+          {
+            "marker_id": 0,
+            "corners": [
+              [
+                230.0506502443896,
+                129.82960396162022
+              ],
+              [
+                271.8638127622252,
+                151.9433632087334
+              ],
+              [
+                250.71293185388646,
+                198.57206337252
+              ],
+              [
+                210.28741925183851,
+                175.56925213930015
+              ]
+            ]
+          },
+          {
+            "marker_id": 1,
+            "corners": [
+              [
+                362.92075494148776,
+                200.6872694778559
+              ],
+              [
+                411.7431131282219,
+                227.15270736035737
+              ],
+              [
+                385.91296391803013,
+                275.66002017486034
+              ],
+              [
+                338.71467618057596,
+                248.72151095636266
+              ]
+            ]
+          },
+          {
+            "marker_id": 2,
+            "corners": [
+              [
+                293.49754394661545,
+                338.01396384153617
+              ],
+              [
+                337.3545685640145,
+                365.40915639305547
+              ],
+              [
+                314.8839392023128,
+                406.31690654586265
+              ],
+              [
+                272.6841971165564,
+                378.9237246954223
+              ]
+            ]
+          },
+          {
+            "marker_id": 3,
+            "corners": [
+              [
+                174.0128226767243,
+                261.79447169900334
+              ],
+              [
+                211.673072842324,
+                286.0710605819174
+              ],
+              [
+                193.8883785727382,
+                326.5747271984393
+              ],
+              [
+                157.57090611706016,
+                301.91005515051705
+              ]
+            ]
+          },
+          {
+            "marker_id": 10,
+            "corners": [
+              [
+                215.71422521393362,
+                231.78266551057865
+              ],
+              [
+                264.34382986358196,
+                261.1581885258957
+              ],
+              [
+                240.38394475086915,
+                312.43301127027246
+              ],
+              [
+                193.82692236492784,
+                282.4006375791632
+              ]
+            ]
+          }
+        ],
+        "captured_ms": 10000,
+        "camera_revision": "camera-a",
+        "reference_revision": "board-v1",
+        "boundary_visible": true,
+        "all_feet_visible": true,
+        "contact_label": "contact"
+      },
+      {
+        "image_file": null,
+        "image_sha256": null,
+        "markers": [
+          {
+            "marker_id": 0,
+            "corners": [
+              [
+                197.99978504715293,
+                146.90279766242784
+              ],
+              [
+                247.9125796948411,
+                127.07766829275795
+              ],
+              [
+                271.9117577148183,
+                170.35272762246262
+              ],
+              [
+                220.97513159668716,
+                191.7673665587742
+              ]
+            ]
+          },
+          {
+            "marker_id": 1,
+            "corners": [
+              [
+                341.2728499770126,
+                91.18909663894519
+              ],
+              [
+                384.30434162983016,
+                75.17142528265083
+              ],
+              [
+                410.1217370116241,
+                113.76566178341328
+              ],
+              [
+                366.688669719294,
+                131.30779744098666
+              ]
+            ]
+          },
+          {
+            "marker_id": 2,
+            "corners": [
+              [
+                421.1231098661092,
+                218.88843147074644
+              ],
+              [
+                464.9043503103004,
+                197.86571237931918
+              ],
+              [
+                493.50129253097066,
+                243.01713495205027
+              ],
+              [
+                449.7960363709709,
+                265.9579092634364
+              ]
+            ]
+          },
+          {
+            "marker_id": 3,
+            "corners": [
+              [
+                271.94634326175765,
+                290.02687770916094
+              ],
+              [
+                324.4570894470884,
+                265.07143902893097
+              ],
+              [
+                352.73547681988936,
+                316.028449548346
+              ],
+              [
+                299.73091035333533,
+                342.8773057418427
+              ]
+            ]
+          },
+          {
+            "marker_id": 10,
+            "corners": [
+              [
+                309.32158746587,
+                133.52293337155436
+              ],
+              [
+                364.6194038715224,
+                111.59625517280972
+              ],
+              [
+                396.5451810618217,
+                161.9214191888325
+              ],
+              [
+                340.5402000487915,
+                186.29090533192328
+              ]
+            ]
+          }
+        ],
+        "captured_ms": 10000,
+        "camera_revision": "camera-a",
+        "reference_revision": "board-v1",
+        "boundary_visible": true,
+        "all_feet_visible": true,
+        "contact_label": "contact"
+      },
+      {
+        "image_file": null,
+        "image_sha256": null,
+        "markers": [
+          {
+            "marker_id": 0,
+            "corners": [
+              [
+                209.39115130529188,
+                153.92670555243387
+              ],
+              [
+                256.35916865296815,
+                135.71275505558728
+              ],
+              [
+                275.3457270007333,
+                178.77692397960553
+              ],
+              [
+                229.9322992535315,
+                195.89400595986376
+              ]
+            ]
+          },
+          {
+            "marker_id": 1,
+            "corners": [
+              [
+                352.83887522636735,
+                99.41870776820093
+              ],
+              [
+                401.543714540402,
+                81.67167062082623
+              ],
+              [
+                415.2554050794281,
+                127.32052946721326
+              ],
+              [
+                368.36822533317957,
+                144.34852691585172
+              ]
+            ]
+          },
+          {
+            "marker_id": 2,
+            "corners": [
+              [
+                395.6285384584349,
+                224.7968161006612
+              ],
+              [
+                438.99396444009716,
+                209.17930997675754
+              ],
+              [
+                449.2096698005911,
+                245.589840855974
+              ],
+              [
+                407.5182520007367,
+                260.5358389003296
+              ]
+            ]
+          },
+          {
+            "marker_id": 3,
+            "corners": [
+              [
+                267.04585888130873,
+                270.973729246327
+              ],
+              [
+                309.36651844598293,
+                255.79681145325742
+              ],
+              [
+                324.49451457386385,
+                289.9862721864027
+              ],
+              [
+                283.67657539216395,
+                304.3149553081469
+              ]
+            ]
+          },
+          {
+            "marker_id": 10,
+            "corners": [
+              [
+                305.6198818403477,
+                224.85873482669254
+              ],
+              [
+                357.79279576059406,
+                205.89457629863904
+              ],
+              [
+                373.9224909062586,
+                249.69342115213834
+              ],
+              [
+                324.0260476146788,
+                267.509817053679
+              ]
+            ]
+          }
+        ],
+        "captured_ms": 10000,
+        "camera_revision": "camera-a",
+        "reference_revision": "board-v1",
+        "boundary_visible": true,
+        "all_feet_visible": true,
+        "contact_label": "contact"
+      },
+      {
+        "image_file": null,
+        "image_sha256": null,
+        "markers": [
+          {
+            "marker_id": 0,
+            "corners": [
+              [
+                221.6824372251567,
+                134.91367735935847
+              ],
+              [
+                263.1482203553194,
+                137.59287211494694
+              ],
+              [
+                256.2634146471874,
+                191.00208667952586
+              ],
+              [
+                215.24572830199585,
+                185.7470481518503
+              ]
+            ]
+          },
+          {
+            "marker_id": 1,
+            "corners": [
+              [
+                359.8843637682982,
+                144.59063451696267
+              ],
+              [
+                415.86588786596343,
+                149.11857269641854
+              ],
+              [
+                407.4029484453642,
+                211.0910810036441
+              ],
+              [
+                351.9820147084123,
+                203.59238343223458
+              ]
+            ]
+          },
+          {
+            "marker_id": 2,
+            "corners": [
+              [
+                336.07143675436396,
+                319.7013159333136
+              ],
+              [
+                389.6772732362977,
+                332.8247053063694
+              ],
+              [
+                380.66167304603414,
+                391.1604551923281
+              ],
+              [
+                328.2448476501471,
+                375.5705633828794
+              ]
+            ]
+          },
+          {
+            "marker_id": 3,
+            "corners": [
+              [
+                203.42325806615406,
+                286.23615125270413
+              ],
+              [
+                243.2787504979878,
+                296.43990494919154
+              ],
+              [
+                237.27567094199986,
+                347.53536265889335
+              ],
+              [
+                198.10776965606792,
+                335.0802219758218
+              ]
+            ]
+          },
+          {
+            "marker_id": 10,
+            "corners": [
+              [
+                211.02323450366032,
+                209.35832460738325
+              ],
+              [
+                261.70302162772884,
+                217.38312846034444
+              ],
+              [
+                253.5706522110953,
+                282.94260503468826
+              ],
+              [
+                203.79760881105733,
+                271.1489582470244
+              ]
+            ]
+          }
+        ],
+        "captured_ms": 10000,
+        "camera_revision": "camera-a",
+        "reference_revision": "board-v1",
+        "boundary_visible": true,
+        "all_feet_visible": true,
+        "contact_label": "contact"
+      }
+    ],
+    "reference": {
+      "image_file": null,
+      "image_sha256": null,
+      "markers": [
+        {
+          "marker_id": 0,
+          "corners": [
+            [
+              243.76046969470275,
+              162.5297427099605
+            ],
+            [
+              281.4672072662317,
+              167.09102197030504
+            ],
+            [
+              276.20239773034683,
+              204.34417922863298
+            ],
+            [
+              238.81667579559422,
+              200.51109707796255
+            ]
+          ]
+        },
+        {
+          "marker_id": 1,
+          "corners": [
+            [
+              352.77881593345114,
+              176.0273682405828
+            ],
+            [
+              386.25531836426376,
+              180.36237366332986
+            ],
+            [
+              380.24277685374364,
+              215.29764343633397
+            ],
+            [
+              346.9790572128038,
+              211.7498046502394
+            ]
+          ]
+        },
+        {
+          "marker_id": 2,
+          "corners": [
+            [
+              335.64541745939187,
+              280.8831852119037
+            ],
+            [
+              368.36163536296766,
+              282.9579174956445
+            ],
+            [
+              362.53992953014244,
+              315.4798839239262
+            ],
+            [
+              330.1520914905401,
+              314.07926413785407
+            ]
+          ]
+        },
+        {
+          "marker_id": 3,
+          "corners": [
+            [
+              229.63636156007527,
+              273.8807753284018
+            ],
+            [
+              266.22000951901373,
+              276.3456665524834
+            ],
+            [
+              261.52582336007293,
+              310.85391914064115
+            ],
+            [
+              225.41222233624023,
+              309.0156991122622
+            ]
+          ]
+        },
+        {
+          "marker_id": 10,
+          "corners": [
+            [
+              307.9728275270494,
+              238.16928892392175
+            ],
+            [
+              346.58918941641133,
+              241.56330781974208
+            ],
+            [
+              340.21993055162704,
+              279.9320024082106
+            ],
+            [
+              302.0210176809678,
+              277.43703775749543
+            ]
+          ]
+        }
+      ],
+      "captured_ms": 10000,
+      "camera_revision": "camera-a",
+      "reference_revision": "board-v1",
+      "boundary_visible": true,
+      "all_feet_visible": true,
+      "contact_label": "contact"
+    },
+    "validations": [
+      {
+        "frame": {
+          "image_file": null,
+          "image_sha256": null,
+          "markers": [
+            {
+              "marker_id": 0,
+              "corners": [
+                [
+                  243.76046969470275,
+                  162.5297427099605
+                ],
+                [
+                  281.4672072662317,
+                  167.09102197030504
+                ],
+                [
+                  276.20239773034683,
+                  204.34417922863298
+                ],
+                [
+                  238.81667579559422,
+                  200.51109707796255
+                ]
+              ]
+            },
+            {
+              "marker_id": 1,
+              "corners": [
+                [
+                  352.77881593345114,
+                  176.0273682405828
+                ],
+                [
+                  386.25531836426376,
+                  180.36237366332986
+                ],
+                [
+                  380.24277685374364,
+                  215.29764343633397
+                ],
+                [
+                  346.9790572128038,
+                  211.7498046502394
+                ]
+              ]
+            },
+            {
+              "marker_id": 2,
+              "corners": [
+                [
+                  335.64541745939187,
+                  280.8831852119037
+                ],
+                [
+                  368.36163536296766,
+                  282.9579174956445
+                ],
+                [
+                  362.53992953014244,
+                  315.4798839239262
+                ],
+                [
+                  330.1520914905401,
+                  314.07926413785407
+                ]
+              ]
+            },
+            {
+              "marker_id": 3,
+              "corners": [
+                [
+                  229.63636156007527,
+                  273.8807753284018
+                ],
+                [
+                  266.22000951901373,
+                  276.3456665524834
+                ],
+                [
+                  261.52582336007293,
+                  310.85391914064115
+                ],
+                [
+                  225.41222233624023,
+                  309.0156991122622
+                ]
+              ]
+            },
+            {
+              "marker_id": 10,
+              "corners": [
+                [
+                  177.7688110245267,
+                  69.46409447489114
+                ],
+                [
+                  223.2278666632121,
+                  76.18461870097971
+                ],
+                [
+                  217.37726013576028,
+                  120.79674452708387
+                ],
+                [
+                  172.20901565283148,
+                  114.91419159789925
+                ]
+              ]
+            }
+          ],
+          "captured_ms": 10000,
+          "camera_revision": "camera-a",
+          "reference_revision": "board-v1",
+          "boundary_visible": true,
+          "all_feet_visible": true,
+          "contact_label": "contact"
+        },
+        "expected": {
+          "x_mm": -80.0,
+          "y_mm": -80.0,
+          "z_mm": -65.0,
+          "yaw_deg": 0.0
+        }
+      },
+      {
+        "frame": {
+          "image_file": null,
+          "image_sha256": null,
+          "markers": [
+            {
+              "marker_id": 0,
+              "corners": [
+                [
+                  243.76046969470275,
+                  162.5297427099605
+                ],
+                [
+                  281.4672072662317,
+                  167.09102197030504
+                ],
+                [
+                  276.20239773034683,
+                  204.34417922863298
+                ],
+                [
+                  238.81667579559422,
+                  200.51109707796255
+                ]
+              ]
+            },
+            {
+              "marker_id": 1,
+              "corners": [
+                [
+                  352.77881593345114,
+                  176.0273682405828
+                ],
+                [
+                  386.25531836426376,
+                  180.36237366332986
+                ],
+                [
+                  380.24277685374364,
+                  215.29764343633397
+                ],
+                [
+                  346.9790572128038,
+                  211.7498046502394
+                ]
+              ]
+            },
+            {
+              "marker_id": 2,
+              "corners": [
+                [
+                  335.64541745939187,
+                  280.8831852119037
+                ],
+                [
+                  368.36163536296766,
+                  282.9579174956445
+                ],
+                [
+                  362.53992953014244,
+                  315.4798839239262
+                ],
+                [
+                  330.1520914905401,
+                  314.07926413785407
+                ]
+              ]
+            },
+            {
+              "marker_id": 3,
+              "corners": [
+                [
+                  229.63636156007527,
+                  273.8807753284018
+                ],
+                [
+                  266.22000951901373,
+                  276.3456665524834
+                ],
+                [
+                  261.52582336007293,
+                  310.85391914064115
+                ],
+                [
+                  225.41222233624023,
+                  309.0156991122622
+                ]
+              ]
+            },
+            {
+              "marker_id": 10,
+              "corners": [
+                [
+                  465.66919763923704,
+                  113.5592266617269
+                ],
+                [
+                  495.26554370040526,
+                  129.5691765645768
+                ],
+                [
+                  480.26343418757267,
+                  164.32918394356827
+                ],
+                [
+                  450.28217230807866,
+                  149.28378482537465
+                ]
+              ]
+            }
+          ],
+          "captured_ms": 10000,
+          "camera_revision": "camera-a",
+          "reference_revision": "board-v1",
+          "boundary_visible": true,
+          "all_feet_visible": true,
+          "contact_label": "contact"
+        },
+        "expected": {
+          "x_mm": 200.0,
+          "y_mm": -80.0,
+          "z_mm": -65.0,
+          "yaw_deg": 15.0
+        }
+      },
+      {
+        "frame": {
+          "image_file": null,
+          "image_sha256": null,
+          "markers": [
+            {
+              "marker_id": 0,
+              "corners": [
+                [
+                  243.76046969470275,
+                  162.5297427099605
+                ],
+                [
+                  281.4672072662317,
+                  167.09102197030504
+                ],
+                [
+                  276.20239773034683,
+                  204.34417922863298
+                ],
+                [
+                  238.81667579559422,
+                  200.51109707796255
+                ]
+              ]
+            },
+            {
+              "marker_id": 1,
+              "corners": [
+                [
+                  352.77881593345114,
+                  176.0273682405828
+                ],
+                [
+                  386.25531836426376,
+                  180.36237366332986
+                ],
+                [
+                  380.24277685374364,
+                  215.29764343633397
+                ],
+                [
+                  346.9790572128038,
+                  211.7498046502394
+                ]
+              ]
+            },
+            {
+              "marker_id": 2,
+              "corners": [
+                [
+                  335.64541745939187,
+                  280.8831852119037
+                ],
+                [
+                  368.36163536296766,
+                  282.9579174956445
+                ],
+                [
+                  362.53992953014244,
+                  315.4798839239262
+                ],
+                [
+                  330.1520914905401,
+                  314.07926413785407
+                ]
+              ]
+            },
+            {
+              "marker_id": 3,
+              "corners": [
+                [
+                  229.63636156007527,
+                  273.8807753284018
+                ],
+                [
+                  266.22000951901373,
+                  276.3456665524834
+                ],
+                [
+                  261.52582336007293,
+                  310.85391914064115
+                ],
+                [
+                  225.41222233624023,
+                  309.0156991122622
+                ]
+              ]
+            },
+            {
+              "marker_id": 10,
+              "corners": [
+                [
+                  421.9456751525435,
+                  364.9722599376952
+                ],
+                [
+                  445.21287230061716,
+                  380.8908673714889
+                ],
+                [
+                  423.7363827787338,
+                  408.1846473188723
+                ],
+                [
+                  399.9162309908867,
+                  393.0830950099818
+                ]
+              ]
+            }
+          ],
+          "captured_ms": 10000,
+          "camera_revision": "camera-a",
+          "reference_revision": "board-v1",
+          "boundary_visible": true,
+          "all_feet_visible": true,
+          "contact_label": "contact"
+        },
+        "expected": {
+          "x_mm": 200.0,
+          "y_mm": 200.0,
+          "z_mm": -65.0,
+          "yaw_deg": 30.0
+        }
+      },
+      {
+        "frame": {
+          "image_file": null,
+          "image_sha256": null,
+          "markers": [
+            {
+              "marker_id": 0,
+              "corners": [
+                [
+                  243.76046969470275,
+                  162.5297427099605
+                ],
+                [
+                  281.4672072662317,
+                  167.09102197030504
+                ],
+                [
+                  276.20239773034683,
+                  204.34417922863298
+                ],
+                [
+                  238.81667579559422,
+                  200.51109707796255
+                ]
+              ]
+            },
+            {
+              "marker_id": 1,
+              "corners": [
+                [
+                  352.77881593345114,
+                  176.0273682405828
+                ],
+                [
+                  386.25531836426376,
+                  180.36237366332986
+                ],
+                [
+                  380.24277685374364,
+                  215.29764343633397
+                ],
+                [
+                  346.9790572128038,
+                  211.7498046502394
+                ]
+              ]
+            },
+            {
+              "marker_id": 2,
+              "corners": [
+                [
+                  335.64541745939187,
+                  280.8831852119037
+                ],
+                [
+                  368.36163536296766,
+                  282.9579174956445
+                ],
+                [
+                  362.53992953014244,
+                  315.4798839239262
+                ],
+                [
+                  330.1520914905401,
+                  314.07926413785407
+                ]
+              ]
+            },
+            {
+              "marker_id": 3,
+              "corners": [
+                [
+                  229.63636156007527,
+                  273.8807753284018
+                ],
+                [
+                  266.22000951901373,
+                  276.3456665524834
+                ],
+                [
+                  261.52582336007293,
+                  310.85391914064115
+                ],
+                [
+                  225.41222233624023,
+                  309.0156991122622
+                ]
+              ]
+            },
+            {
+              "marker_id": 10,
+              "corners": [
+                [
+                  141.5738995660468,
+                  373.52723563357824
+                ],
+                [
+                  181.77046371194163,
+                  362.12087322194697
+                ],
+                [
+                  192.46645902964173,
+                  396.6249237148006
+                ],
+                [
+                  153.33494564961342,
+                  408.01354348554185
+                ]
+              ]
+            }
+          ],
+          "captured_ms": 10000,
+          "camera_revision": "camera-a",
+          "reference_revision": "board-v1",
+          "boundary_visible": true,
+          "all_feet_visible": true,
+          "contact_label": "contact"
+        },
+        "expected": {
+          "x_mm": -80.0,
+          "y_mm": 200.0,
+          "z_mm": -65.0,
+          "yaw_deg": -20.0
+        }
+      }
+    ],
+    "current": {
+      "image_file": null,
+      "image_sha256": null,
+      "markers": [
+        {
+          "marker_id": 0,
+          "corners": [
+            [
+              243.76046969470275,
+              162.5297427099605
+            ],
+            [
+              281.4672072662317,
+              167.09102197030504
+            ],
+            [
+              276.20239773034683,
+              204.34417922863298
+            ],
+            [
+              238.81667579559422,
+              200.51109707796255
+            ]
+          ]
+        },
+        {
+          "marker_id": 1,
+          "corners": [
+            [
+              352.77881593345114,
+              176.0273682405828
+            ],
+            [
+              386.25531836426376,
+              180.36237366332986
+            ],
+            [
+              380.24277685374364,
+              215.29764343633397
+            ],
+            [
+              346.9790572128038,
+              211.7498046502394
+            ]
+          ]
+        },
+        {
+          "marker_id": 2,
+          "corners": [
+            [
+              335.64541745939187,
+              280.8831852119037
+            ],
+            [
+              368.36163536296766,
+              282.9579174956445
+            ],
+            [
+              362.53992953014244,
+              315.4798839239262
+            ],
+            [
+              330.1520914905401,
+              314.07926413785407
+            ]
+          ]
+        },
+        {
+          "marker_id": 3,
+          "corners": [
+            [
+              229.63636156007527,
+              273.8807753284018
+            ],
+            [
+              266.22000951901373,
+              276.3456665524834
+            ],
+            [
+              261.52582336007293,
+              310.85391914064115
+            ],
+            [
+              225.41222233624023,
+              309.0156991122622
+            ]
+          ]
+        },
+        {
+          "marker_id": 10,
+          "corners": [
+            [
+              307.9728275270494,
+              238.16928892392175
+            ],
+            [
+              346.58918941641133,
+              241.56330781974208
+            ],
+            [
+              340.21993055162704,
+              279.9320024082106
+            ],
+            [
+              302.0210176809678,
+              277.43703775749543
+            ]
+          ]
+        }
+      ],
+      "captured_ms": 10000,
+      "camera_revision": "camera-a",
+      "reference_revision": "board-v1",
+      "boundary_visible": true,
+      "all_feet_visible": true,
+      "contact_label": "contact"
+    },
+    "maximum_age_ms": 600
+  },
+  "calibration_receipt": {
+    "schema_version": 1,
+    "status": "CALIBRATED_REPLAY",
+    "reasons": [],
+    "motion_admitted": false,
+    "provenance": "synthetic",
+    "translation_error_mm": 0.5001309638313204,
+    "yaw_error_deg": 0.2000049606739765,
+    "intrinsic_rms_px": 9.005228692120516e-6,
+    "camera_matrix": [
+      [
+        579.9999701836373,
+        0.0,
+        317.9999060381618
+      ],
+      [
+        0.0,
+        575.0000150496459,
+        241.00000708951782
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion": [
+      -0.17999913475051527,
+      0.03998518592169556,
+      0.0009999920773116253,
+      -0.0010000450751734805,
+      -0.005954712481085832
+    ],
+    "recovered_poses": [
+      {
+        "x_mm": -79.99999749705309,
+        "y_mm": -80.00001162257739,
+        "z_mm": -65.00005117254464,
+        "yaw_deg": 4.960673974793246e-6
+      },
+      {
+        "x_mm": 200.00000456568367,
+        "y_mm": -80.0000061818864,
+        "z_mm": -65.00000977355604,
+        "yaw_deg": 14.999996823344222
+      },
+      {
+        "x_mm": 200.0000037509547,
+        "y_mm": 199.9999826173381,
+        "z_mm": -65.00002780899433,
+        "yaw_deg": 29.999999050594642
+      },
+      {
+        "x_mm": -80.00001326051792,
+        "y_mm": 199.99994798000864,
+        "z_mm": -65.00011945544892,
+        "yaw_deg": -19.999996069934017
+      },
+      {
+        "x_mm": 60.00000602865617,
+        "y_mm": 59.99998967731763,
+        "z_mm": -65.00000452417837,
+        "yaw_deg": -6.171470020230519e-7
+      }
+    ],
+    "input_sha256": "d95b8cebd0a0cfe6fbf4eaae830b9df1ee09555de1bb0549de90f71a5dcc2cbe",
+    "stage_id": "synthetic-stage-0",
+    "camera_revision": "camera-a",
+    "reference_revision": "board-v1",
+    "reference_to_camera_rotation": [
+      [
+        0.9474375437424647,
+        -0.1492549188108692,
+        -0.2829930563070516
+      ],
+      [
+        0.0828900316573466,
+        0.968825821607575,
+        -0.23346470833565233
+      ],
+      [
+        0.30901673637375915,
+        0.19773592641998058,
+        0.9302737016834038
+      ]
+    ],
+    "reference_to_camera_translation_mm": [
+      -59.9999047877892,
+      -60.000004911002875,
+      600.0000098776085
+    ]
+  }
+}
