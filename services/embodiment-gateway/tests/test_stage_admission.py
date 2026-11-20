@@ -10,6 +10,17 @@ from pydantic import ValidationError
 from furbomek_gateway.stage_admission import verify_stage
 from furbomek_gateway.stage_models import StageRequest
 
+type FixtureValue = (
+    str
+    | float
+    | bool
+    | list[str]
+    | list[float]
+    | tuple[FixtureValue, ...]
+    | dict[str, FixtureValue]
+    | None
+)
+
 
 def request(view: int = 0) -> StageRequest:
     path = (
@@ -82,13 +93,15 @@ def test_two_independent_stages_select_identical_body_profile() -> None:
 )
 def test_changed_evidence_holds_selected_step(
     path: tuple[str, ...],
-    value: str | float | bool | None | list[str] | list[float],
+    value: str | float | bool | list[str] | list[float] | None,
     reason: str,
 ) -> None:
-    raw = request().model_dump()
+    raw: dict[str, FixtureValue] = request().model_dump()
     cursor = raw
     for key in path[:-1]:
-        cursor = cursor[key]
+        child = cursor[key]
+        assert isinstance(child, dict)
+        cursor = child
     cursor[path[-1]] = value
     result = verify_stage(StageRequest.model_validate(raw))
     assert result.status == "HOLD"
@@ -127,8 +140,8 @@ def test_geometry_is_rechecked_after_content_rebinding(
             raw["survey"]["obstacles"] = [polygon]
         case "containment":
             raw["containment"]["contained_polygon"] = polygon
-        case unreachable:
-            assert_never(unreachable)
+        case _:
+            assert_never(kind)
     data = StageRequest.model_validate(raw)
     raw["containment"]["survey_sha256"] = data.survey.digest
     raw["context"]["stage"]["survey_sha256"] = data.survey.digest
