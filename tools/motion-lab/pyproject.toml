@@ -1,0 +1,44 @@
+[project]
+name = "furbomek-motion-lab"
+version = "0.1.0"
+requires-python = ">=3.12,<3.13"
+dependencies = ["numpy==1.26.4", "opencv-contrib-python-headless==4.11.0.86", "pydantic==2.12.4", "typer==0.24.1"]
+
+[dependency-groups]
+dev = ["pytest==9.0.2", "ruff==0.15.2", "basedpyright==1.38.2"]
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+addopts = ["--strict-config", "--strict-markers"]
+filterwarnings = ["error"]
+
+[tool.ruff.lint]
+select = ["ALL"]
+# Typed reason codes do not repeat stack text; numeric gates are audited inline.
+ignore = ["COM812", "D203", "D213", "EM101", "PLR2004", "TRY301", "FBT002"]
+
+[tool.ruff.lint.mccabe]
+max-complexity = 15
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*.py" = ["S101", "PLR2004", "D", "C901", "PLR0912", "S603"]
+# Argument arrays have a fixed executable/flags; output paths never enter a shell.
+"calibration_images.py" = ["S603"]
+# SVG text serialization preserves exact physical units on long element lines.
+"print_tags.py" = ["E501"]
+# Keep sequential named rejection gates and exhaustive variant arms auditable.
+"calibration_solver.py" = ["C901", "PLR0912"]
+# Typer owns the CLI parameter signature; this is the single I/O error boundary.
+"calibrate.py" = ["C901", "PLR0912", "PLR0915"]
+
+[tool.basedpyright]
+typeCheckingMode = "all"
+pythonVersion = "3.12"
+
+# NumPy 1.26 array arithmetic and Pydantic.model_dump expose Any in upstream stubs.
+# Closed Pydantic input/output contracts retain runtime validation at those edges.
+reportAny = false
+# Typer and pytest's public callable annotations have partially unknown signatures.
+reportUnknownMemberType = false
+# OpenCV's imread/detectMarkers annotations omit the actual None failure result.
+reportUnnecessaryComparison = false
