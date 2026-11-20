@@ -6,11 +6,34 @@ import anyio
 import pytest
 
 from furbomek_gateway.guard_gateway import GuardService
+from furbomek_gateway.guard_protocol import GuardAction, GuardCommand
 from tests.guard_settings import powered_settings
 from tests.guard_support import PtyGuardBoard
 
 if TYPE_CHECKING:
     from furbomek_gateway.guard_models import PoweredActionResult
+
+
+@pytest.mark.anyio
+@pytest.mark.parametrize("bad_disarm_ack", [False, True])
+async def test_arm_only_never_executes_and_stops_on_a_bad_disarm(
+    bad_disarm_ack: bool,
+) -> None:
+    with PtyGuardBoard(
+        supply_centivolts=800, strict_sequence=True, bad_disarm_ack=bad_disarm_ack
+    ) as board:
+        service = GuardService(powered_settings(board.path))
+        await service.open()
+        try:
+            verified = await service.verify_bench_arm()
+            state = await service.get_state()
+        finally:
+            await service.aclose()
+
+    assert not board.actions
+    assert verified is not bad_disarm_ack
+    assert board.stop_received.is_set() == bad_disarm_ack
+    assert state.guard_state == ("fault" if bad_disarm_ack else "disarmed")
 
 
 @pytest.mark.anyio
@@ -30,8 +53,58 @@ async def test_two_powered_actions_return_to_disarmed_without_panic_stop() -> No
     assert second.decision == "completed"
     assert second.disarm_acknowledged
     assert second.physical_reset_required is False
-    assert board.actions == [0, 2]
+    assert board.actions == [
+        GuardAction.ACTIVE,
+        GuardAction.FORWARD,
+        GuardAction.FORWARD,
+    ]
+    lifecycle = (
+        GuardCommand.ARM,
+        GuardCommand.EXEC,
+        GuardCommand.KEEPALIVE,
+        GuardCommand.DISARM,
+    )
+    assert [frame[2] for frame in board.received if frame[2] in lifecycle] == [
+        GuardCommand.ARM,
+        GuardCommand.EXEC,
+        GuardCommand.KEEPALIVE,
+        GuardCommand.DISARM,
+        GuardCommand.ARM,
+        GuardCommand.EXEC,
+        GuardCommand.KEEPALIVE,
+        GuardCommand.EXEC,
+        GuardCommand.KEEPALIVE,
+        GuardCommand.DISARM,
+    ]
     assert b"\x80\x30\x81" not in board.received
+
+
+@pytest.mark.anyio
+@pytest.mark.parametrize(
+    ("fault_on_completion", "query_remaining_ms"), [(False, 190), (True, 500)]
+)
+async def test_forward_stops_before_second_phase_without_safe_completion(
+    fault_on_completion: bool,
+    query_remaining_ms: int,
+) -> None:
+    with PtyGuardBoard(
+        supply_centivolts=800,
+        strict_sequence=True,
+        fault_on_completion=fault_on_completion,
+        query_remaining_ms=query_remaining_ms,
+    ) as board:
+        service = GuardService(powered_settings(board.path, ("forward",)))
+        await service.open()
+        try:
+            result = await service.perform_action("forward")
+        finally:
+            await service.aclose()
+
+    assert board.actions == [GuardAction.FORWARD]
+    assert result.action_accepted
+    assert not result.action_completed
+    assert not result.disarm_acknowledged
+    assert result.stop_frame_sent
 
 
 @pytest.mark.anyio

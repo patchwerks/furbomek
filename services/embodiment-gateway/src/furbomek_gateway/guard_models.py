@@ -13,6 +13,9 @@ type ActionName = Literal[
     "right",
     "turn_left",
     "turn_right",
+    "poke",
+    "defensive_brace",
+    "tuck_preview",
 ]
 type PoweredActionDecision = Literal["completed", "refused", "unavailable"]
 type PoweredActionReason = Literal[

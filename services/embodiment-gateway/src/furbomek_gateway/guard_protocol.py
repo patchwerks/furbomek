@@ -13,7 +13,6 @@ _MAX_SEQUENCE: Final = 0x1FFFFF
 _MAX_DATA_BYTE: Final = 0x7F
 _MAX_CRC_HIGH: Final = 3
 _CORRELATION_BYTES: Final = 8
-_MAX_ACTION: Final = 7
 
 
 class GuardCommand(IntEnum):
@@ -80,6 +79,9 @@ class GuardAction(IntEnum):
     RIGHT = 5
     TURN_LEFT = 6
     TURN_RIGHT = 7
+    POKE = 8
+    DEFENSIVE_BRACE = 9
+    TUCK_PREVIEW = 10
 
 
 class GuardProtocolErrorCode(StrEnum):
@@ -195,7 +197,7 @@ def encode_command(
                 raise GuardProtocolError(GuardProtocolErrorCode.ACTION)
             return _frame(bytes((command,)) + sequence_bytes)
         case GuardCommand.EXEC:
-            if action is None or not 0 <= action <= _MAX_ACTION:
+            if action is None or not 0 <= action <= GuardAction.TUCK_PREVIEW:
                 raise GuardProtocolError(GuardProtocolErrorCode.ACTION)
             return _frame(bytes((command,)) + sequence_bytes + bytes((action,)))
         case GuardCommand.BEGIN | GuardCommand.STOP:

@@ -51,6 +51,9 @@ class PtyGuardBoard(PtyLink):
             self._state = 5
             self._sequence = 20
 
+    def simulate_reboot(self) -> None:
+        self._state, self._sequence, self._busy = 0, 0, False
+
     def _receive_stop(self) -> None:
         self.received.append(b"\x80\x30\x81")
         self._state, self._busy = 4, False

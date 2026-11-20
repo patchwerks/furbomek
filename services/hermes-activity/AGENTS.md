@@ -16,6 +16,9 @@ not a second planner, raw tool surface, complete A2UI engine or speech stack.
   Default off is supported; do not bypass it through helper functions or timeouts.
 - Preserve safe-key/URL projection; no raw arguments, results, paths, secrets or pixels
   in public events. Test failure markers without claiming they certify screen privacy.
+- The Brodex reverse SSH relay publishes this broker's text and timeline only.
+  Preserve its durable sequence and the Mac consumer's freshness and disconnect
+  checks. See the [deployed edge record](../../docs/operations/macos-brodex-edge-2026-11-20.md).
 - Run the locked pytest, Ruff/format, basedpyright and lock gates. Root
   `tools/verify-media.sh` includes consumer fixtures. Live qualification belongs in
   the operations record; no robot/serial/head access is needed for these tests.

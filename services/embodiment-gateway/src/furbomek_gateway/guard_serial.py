@@ -93,7 +93,11 @@ class GuardSerialTransport:
             return reply
 
     async def begin_state_aware(
-        self, correlation: bytes, attempt: BeginAttempt | None = None
+        self,
+        correlation: bytes,
+        attempt: BeginAttempt | None = None,
+        *,
+        require_disarmed: bool = False,
     ) -> GuardReply:
         """Synchronize BOOT or DISARMED state before allocating BEGIN sequence."""
         async with self._lock:
@@ -104,6 +108,8 @@ class GuardSerialTransport:
                 raise GuardSerialError(GuardSerialErrorCode.PROTOCOL)
             match status.state:
                 case GuardState.BOOT:
+                    if require_disarmed:
+                        raise GuardSerialError(GuardSerialErrorCode.PROTOCOL)
                     begin_sequence = 0
                 case GuardState.DISARMED:
                     begin_sequence = status.sequence + 1

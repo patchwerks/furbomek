@@ -20,6 +20,23 @@ serial, GPIO, reset or arbitrary actuator operations as model tools.
   camera frames, logs and `.venv` outside project Git. The Chezmoi overlay owns
   only its marked `mcp_servers.furbomek` entry and preserves unrelated text.
 
+## Mac edge and Brodex profile
+
+See the [deployed edge record](../../docs/operations/macos-brodex-edge-2026-11-20.md).
+The Mac owns the device and OBS controls. Brodex reaches only the owner-only
+semantic socket, while bench preparation and enable use a separate local socket.
+Cancel an in-flight request on peer loss. Bridge ownership persists independently
+of the motion window and is released on local close or process shutdown. Preserve
+the short powered window, ARM-only and DISARM checks, and the dedicated OBS
+bandwidth-test boundary. A controller BOOT reply during a motion window requires
+fresh local admission. A fresh Kinect tracker lock can be required for an
+observed pass but does not establish stage geometry or unattended qualification.
+
+When action mappings, timing or movement tests change what is depicted,
+update the matching numbered schematic under `.schematics/movements/` in
+the primary project checkout. Use the imagegen skill to revise its phase
+illustration and check it against the installed firmware and camera evidence.
+
 ## Guard serial adapter
 
 `serve-guard` is a separate, operator-local UART MCP process with motor-off and
