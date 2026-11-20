@@ -209,6 +209,17 @@ def raw_stop() -> bytes:
     return bytes((_START, GuardCommand.STOP, _END))
 
 
+_FIRST_JOINT_PROBE: Final = 11
+_AFTER_LAST_JOINT_PROBE: Final = 119
+
+
+def encode_joint_bench(sequence: int, code: int) -> bytes:
+    """Encode the separate bench-build command family for a local instrument."""
+    if not _FIRST_JOINT_PROBE <= code < _AFTER_LAST_JOINT_PROBE:
+        raise GuardProtocolError(GuardProtocolErrorCode.ACTION)
+    return _frame(bytes((GuardCommand.EXEC, *_sequence_bytes(sequence), code)))
+
+
 def decode_reply(frame: bytes) -> GuardReply:  # noqa: C901
     """Decode one complete CRC-validated Guard reply frame."""
     if len(frame) < _FRAME_OVERHEAD or frame[0] != _START or frame[-1] != _END:

@@ -16,6 +16,7 @@ from furbomek_gateway.guard_protocol import (
     GuardState,
     encode_begin,
     encode_command,
+    encode_joint_bench,
     raw_stop,
 )
 from furbomek_gateway.guard_serial_errors import GuardSerialError, GuardSerialErrorCode
@@ -93,7 +94,11 @@ class GuardSerialTransport:
             return reply
 
     async def begin_state_aware(
-        self, correlation: bytes, attempt: BeginAttempt | None = None
+        self,
+        correlation: bytes,
+        attempt: BeginAttempt | None = None,
+        *,
+        require_disarmed: bool = False,
     ) -> GuardReply:
         """Synchronize BOOT or DISARMED state before allocating BEGIN sequence."""
         async with self._lock:
@@ -104,6 +109,8 @@ class GuardSerialTransport:
                 raise GuardSerialError(GuardSerialErrorCode.PROTOCOL)
             match status.state:
                 case GuardState.BOOT:
+                    if require_disarmed:
+                        raise GuardSerialError(GuardSerialErrorCode.PROTOCOL)
                     begin_sequence = 0
                 case GuardState.DISARMED:
                     begin_sequence = status.sequence + 1
@@ -152,6 +159,16 @@ class GuardSerialTransport:
             return await self._exchange_locked(
                 encode_command(GuardCommand.SUPPLY, 0), GuardReplyOpcode.SUPPLY, None
             )
+
+    async def execute_joint_probe(self, code: int) -> GuardReply:
+        """Send one bounded diagnostic frame on an exclusively held local link."""
+        async with self._lock:
+            sequence = self._next_sequence()
+            reply = await self._exchange_locked(
+                encode_joint_bench(sequence, code), GuardReplyOpcode.EXEC, sequence
+            )
+            self._last_accepted_sequence = reply.sequence
+            return reply
 
     async def status_sync(self) -> GuardReply:
         """Read BOOT, DISARMED, or FAULT status without consuming a sequence."""
