@@ -12,6 +12,7 @@ fi
 godot=${FURBOMEK_GODOT:-/data/furbomek-media/godot/godot}
 command -v uv > /dev/null || { printf '%s\n' 'Missing prerequisite: uv' >&2; exit 2; }
 [[ -x $godot ]] || { printf '%s\n' 'Missing prerequisite: set FURBOMEK_GODOT to Godot 4.7' >&2; exit 2; }
+"$godot" --headless --editor --path "$repo/tools/kinect2/godot" --import
 for name in embodiment-gateway hermes-activity stream-supervisor; do
   project=$repo/services/$name
   (
