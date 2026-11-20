@@ -46,10 +46,10 @@ func get_selected_track() -> Dictionary:
 	return selected
 
 
-func set_snapshot(value: Dictionary, next_palette: String) -> void:
+func set_snapshot(value: Dictionary, next_palette: String, robot_only := false) -> void:
 	snapshot = value
 	palette_label = next_palette
-	selected = _select_track(value.get("tracks", []))
+	selected = _select_track(value.get("tracks", []), robot_only)
 	_update_insets()
 	queue_redraw()
 
@@ -79,7 +79,7 @@ func _make_inset(style: int) -> TextureRect:
 	return rect
 
 
-func _select_track(tracks: Array) -> Dictionary:
+func _select_track(tracks: Array, robot_only := false) -> Dictionary:
 	var retained: Dictionary = {}
 	var preferred: Dictionary = {}
 	var preferred_rank := 9
@@ -87,6 +87,8 @@ func _select_track(tracks: Array) -> Dictionary:
 		if not track_value is Dictionary:
 			continue
 		var track: Dictionary = track_value
+		if robot_only and track.get("kind", "") != "object":
+			continue
 		if str(track.get("id", "")) == selected_id:
 			retained = track
 		var kind := str(track.get("kind", "surface"))
@@ -161,7 +163,10 @@ func _draw() -> void:
 
 func _draw_header() -> void:
 	_draw_text(Vector2(52, 54), "FURB-O-MEK / LIVE SENSOR ARRAY", 19, INK)
-	_draw_text(Vector2(52, 77), "COLOR SAMPLES / DEPTH-PROBED TRACKS" if color_mode else "MEASURED XYZ / REGISTERED COLOR", 10, MUTED)
+	var source_label := "MEASURED XYZ / REGISTERED COLOR"
+	if color_mode:
+		source_label = "RGB VIDEO / FIXED FRAME" if palette_label == "RGB VIDEO" else "COLOR SAMPLES / DEPTH-PROBED TRACKS"
+	_draw_text(Vector2(52, 77), source_label, 10, MUTED)
 	var live_text := "LIVE / SEQ %06d / %s" % [int(snapshot.get("sequence", 0)), palette_label] if not snapshot.is_empty() else "OFFLINE / STALE HIDDEN"
 	_draw_text(Vector2(1506, 54), live_text, 13, HOT if not snapshot.is_empty() else Color("7e2630"))
 	draw_line(Vector2(52, 94), Vector2(1868, 94), Color(CRIMSON, 0.45), 2.0)

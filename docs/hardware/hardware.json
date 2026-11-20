@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_on": "2026-10-19",
+  "updated_on": "2026-11-20",
   "maintenance": {
     "protocol": "docs/operations/robot-wired-maintenance.md",
     "latest_software_record": "docs/operations/robot-stop-ack-2026-10-18.md",
@@ -288,6 +288,53 @@
       "active-after.jpg": "ce7508a8c54d9b82d3aff498864ffd9a3abb00dbcc3af6662d80a78a06faa013"
     },
     "limits": "No walking, torque/current, measured rail cutoff latency, manual gesture, watchdog-reset or ESP diagnostic acceptance. Rear-right symptom not diagnosed. Hermes MCP motion denied. No further movement this test."
+  },
+  "macos_supported_bench_acceptance": {
+    "date": "2026-11-19",
+    "evidence_status": "observed protocol results and operator-confirmed physical movements",
+    "transport": "Apple Silicon macOS host to the existing handheld USB/RF bridge and installed robot guard",
+    "conditions": "Operator confirmed charger disconnected, physical POWER OFF for serial opening, stable center support with legs clear, and presence at the physical cutoff for powered tests",
+    "before": "CRC-validated BOOT, no fault, idle, reported 0.0 V before actuation. Initial handheld serial preflight became stable after the operator changed ports and moved the handheld closer",
+    "powered_result": "Operator reported no movement at power-on or during ARM-only. Active, Sleep, Forward, Backward, Left, Right, Turn Left and Turn Right each completed and verified normal DISARM at reported 8.21–8.22 V. Operator confirmed all eight visible motions looked right",
+    "after": "Operator confirmed physical POWER OFF. Guard reply DISARMED, fault 0, idle, sequence 118, reported 0.22 V. Held serial port closed normally",
+    "limits": "Local supported-bench movements only. No new emergency STOP, watchdog-reset, floor, head, direct robot USB, Wi-Fi actuation, or Brodex-controlled movement qualification",
+    "evidence": "docs/operations/macos-furbomek-2026-11-19.md"
+  },
+  "brodex_edge_bench_acceptance": {
+    "date": "2026-11-20",
+    "evidence_status": "real protocol readback and operator reports",
+    "transport": "Brodex Furbomek MCP profile via the Mac-initiated reverse SSH Unix socket, macOS local gateway and the installed handheld USB/RF bridge",
+    "before": "Operator confirmed physical POWER OFF, no charger and supported chassis with legs free. Brodex read DISARMED and reported 0.0 V in the read-only window. The Mac rejected attempted remote admission and powered action while the window was read-only",
+    "powered_result": "Operator confirmed stillness at power-on and during ARM-only. Local ARM-only verified DISARM at reported 8.22 V. One separately authorized Brodex Active request completed and verified DISARM at 8.21 V in 781 ms measured at the client",
+    "after": "Operator confirmed physical POWER OFF and said visible motion was unclear. The powered lease closed before post-off telemetry, and explicit local close confirmed the bench was closed",
+    "limits": "The new route proves guarded protocol completion. No visible confirmation for this move, additional gait trials, emergency STOP, fault reset, independent cutoff timing, measured floor travel, head control or unattended motion",
+    "evidence": "docs/operations/macos-brodex-edge-2026-11-20.md"
+  },
+  "macos_table_forward_trial": {
+    "date": "2026-11-20",
+    "evidence_status": "Guard protocol and camera evidence with operator-confirmed physical conditions",
+    "scope": "Single supervised, untethered forward gait request while the robot stood on a cleared bare tabletop",
+    "result": "Off-state gate reported 0.06 V. ARM-only and one forward request verified DISARM at 8.19 V. Video and optical stills show a change in leg and chassis posture. Forward translation was not established",
+    "after": "Last telemetry DISARMED, idle and fault 0. The exclusive port closed and the operator confirmed physical POWER OFF",
+    "evidence": "docs/operations/macos-table-forward-2026-11-20.md"
+  },
+  "macos_two_phase_table_walk": {
+    "date": "2026-11-20",
+    "scope": "Supervised untethered bare-table trial with Active and two forward phases in one armed session",
+    "result": "Both tripod phases completed with verified final DISARM. Fixed optical chassis BGR features moved and enlarged relative to stationary background, supporting a short advance toward the camera. Absolute distance and repeatability were not measured",
+    "after": "Physical POWER OFF confirmed after recording. The pressure of pressing the switch was outside the footage used for analysis",
+    "evidence": "docs/operations/macos-table-walk-and-media-2026-11-20.md"
+  },
+  "macos_overhead_webcam": {
+    "date": "2026-11-20",
+    "evidence_status": "observed USB and AVFoundation identity, real video and offline image-space measurements",
+    "device": "Logitech Webcam C930e",
+    "host_capture": "640x480, 15 fps requested, YUYV422, video-only",
+    "before": "No overhead webcam acceptance. First higher-resolution and default-format attempts delivered no frames",
+    "after": "121 frames in 8.022 seconds. Elevated oblique viewpoint shows chassis but crops nearest feet and the near test boundary. Stationary chassis p95 jitter 0.084 pixels and 0.010 degrees of image rotation",
+    "video_sha256": "6f2d5beb566efcb28b19636b97113873e91d410dfcdb7084464fa2f07521704f",
+    "limits": "Private temporary capture only. No metric calibration, continuous monitor, approved motion clearance, powered trial or firmware change. Capture process exited normally",
+    "evidence": "docs/operations/macos-table-walk-and-media-2026-11-20.md#overhead-camera-and-motion-scoring"
   },
   "last_test_conditions": {
     "date": "2026-10-15",

@@ -1,5 +1,6 @@
 """Safety policy for the separate guarded UART MCP server."""
 
+import secrets
 from typing import final
 
 import anyio
@@ -22,11 +23,13 @@ from furbomek_gateway.guard_motor_off import MotorOffContext, MotorOffRunner
 from furbomek_gateway.guard_protocol import GuardCommand, GuardResult, GuardState
 from furbomek_gateway.guard_results import (
     PoweredActionFacts,
+    armed,
     powered_action_result,
     state_name,
     stop_result,
 )
 from furbomek_gateway.guard_serial import (
+    BeginAttempt,
     GuardSerialTransport,
     StopExchange,
 )
@@ -232,6 +235,39 @@ class GuardService:
         if self._motor_off is None:
             raise GuardSerialError(GuardSerialErrorCode.CONNECTION)
         return await self._motor_off.run()
+
+    async def verify_bench_arm(self) -> bool:
+        """ARM and DISARM once for the local operator without sending an action."""
+        if self._settings.mode != "supervised_powered_bench":
+            return False
+        attempt = BeginAttempt()
+        disarmed = False
+        try:
+            async with self._operation_gate:
+                transport = self._transport_or_error()
+                with anyio.fail_after(1):
+                    begin = await transport.begin_state_aware(
+                        secrets.token_bytes(8), attempt
+                    )
+                    if (
+                        begin.result is GuardResult.ACCEPTED
+                        and begin.state is GuardState.SESSION
+                    ):
+                        arm = await transport.command(GuardCommand.ARM)
+                        if armed(arm) and not arm.busy:
+                            end = await transport.command(GuardCommand.DISARM)
+                            disarmed = (
+                                end.result is GuardResult.ACCEPTED
+                                and end.state is GuardState.DISARMED
+                                and end.fault == 0
+                                and not end.busy
+                            )
+        except (GuardSerialError, TimeoutError):
+            return False
+        finally:
+            if attempt.write_started and not disarmed:
+                _ = await self._shielded_stop()
+        return disarmed
 
     async def _shielded_stop(self) -> StopExchange | None:
         with anyio.CancelScope(shield=True):

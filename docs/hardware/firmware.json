@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_on": "2026-10-18",
+  "updated_on": "2026-11-20",
   "pending_deployment": {
     "date": "2026-10-18",
     "status": "STOP ACK routing fixed and software-tested; NOT FLASHED. active_deployment remains authoritative for installed images",
@@ -203,6 +203,38 @@
     "rollback": "No device changes; preserve installed image and private backups. Remove prototype source if abandoned. No bootloader, EEPROM, fuse or lock writes occurred."
   },
   "history": [
+    {
+      "date": "2026-11-20",
+      "change": "Ran an untethered, supervised bare-table gait with both alternating tripod phases",
+      "verification": "One armed session reported Active and two forward phases completed, then verified DISARM. A fixed optical recording supports short chassis advance toward the camera",
+      "device_changes": "No firmware write, readback, or deliberate reset. The test kept the installed heartbeat, deadlines and terminal STOP handling",
+      "evidence": "docs/operations/macos-table-walk-and-media-2026-11-20.md"
+    },
+    {
+      "date": "2026-11-20",
+      "change": "Ran one supervised forward protocol trial with the untethered robot standing on a bare tabletop",
+      "verification": "ARM-only and one forward command verified DISARM. Observed a posture change without clear evidence of translation",
+      "device_changes": "No new readback, firmware candidate, write or deliberate reset. Prior installed image records remain authoritative",
+      "evidence": "docs/operations/macos-table-forward-2026-11-20.md"
+    },
+    {
+      "date": "2026-11-20",
+      "change": "Qualified telemetry and one guarded Active request across the Brodex-to-Mac control route",
+      "before": "Installed guard was idle and DISARMED. The local operator confirmed physical power isolation and admitted telemetry only",
+      "after": "Local ARM-only verified DISARM, then a single Brodex Active request completed and verified DISARM. Operator confirmed POWER OFF. The bench lease expired and closed the serial owner",
+      "device_changes": "No new firmware candidate, readback, flash, or deliberate robot reset. Existing installed artifact identities remain the active_deployment entries",
+      "safety": "Supported operator-present scope. Operator could not confirm the visible motion. Emergency STOP, watchdog reset, and unattended behavior were outside this test",
+      "evidence": "docs/operations/macos-brodex-edge-2026-11-20.md"
+    },
+    {
+      "date": "2026-11-19",
+      "change": "Exercised the installed guard from a macOS host over the handheld USB/RF bridge",
+      "before": "Guard BOOT, fault 0 and idle with physical POWER OFF",
+      "after": "ARM-only and all eight bounded actions verified normal DISARM. Operator confirmed visible motion, then physical POWER OFF. Final CRC-validated DISARMED, fault 0, idle, sequence 118",
+      "device_changes": "Shifted the handheld USB connection to another port. No robot controller reset, firmware build or flash, calibration, EEPROM, bootloader, fuse, or lock change. Installed image hashes are the existing active_deployment records, with no new flash readback",
+      "safety": "Operator-present supported bench only. No new STOP-path, watchdog-reset, floor, head or unattended acceptance",
+      "evidence": "docs/operations/macos-furbomek-2026-11-19.md"
+    },
     {
       "date": "2026-10-18",
       "change": "Prepared unflashed STOP ACK route fix and mandatory wired downtime maintenance protocol",

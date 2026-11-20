@@ -20,6 +20,14 @@ serial, GPIO, reset or arbitrary actuator operations as model tools.
   camera frames, logs and `.venv` outside project Git. The Chezmoi overlay owns
   only its marked `mcp_servers.furbomek` entry and preserves unrelated text.
 
+## Mac edge and Brodex profile
+
+See the [deployed edge record](../../docs/operations/macos-brodex-edge-2026-11-20.md).
+The Mac owns the device and OBS controls. Brodex reaches only the owner-only
+semantic socket, while bench preparation and enable use a separate local socket.
+Cancel an in-flight request on peer loss. Preserve the short powered window,
+ARM-only and DISARM checks, and the dedicated OBS bandwidth-test boundary.
+
 ## Guard serial adapter
 
 `serve-guard` is a separate, operator-local UART MCP process with motor-off and

@@ -4,6 +4,7 @@ import sys
 from pathlib import Path
 from typing import Annotated
 
+import anyio
 import typer
 from pydantic import ValidationError
 
@@ -12,6 +13,9 @@ from furbomek_gateway.config_overlay import (
     McpServerEntry,
     overlay_mcp_server,
 )
+from furbomek_gateway.edge_client import create_edge_client
+from furbomek_gateway.edge_host import EdgeSettings, run_edge
+from furbomek_gateway.edge_protocol import OperatorRequest, exchange, unix_ms
 from furbomek_gateway.guard_server import create_guard_server
 from furbomek_gateway.plugin_overlay import ObserverOverlayError, overlay_observer
 from furbomek_gateway.server import create_server
@@ -83,6 +87,37 @@ def overlay_observer_command() -> None:
     except (ObserverOverlayError, UnicodeError):
         raise typer.Exit(code=2) from None
     _ = sys.stdout.write(result)
+
+
+@app.command("edge-mcp")
+def edge_mcp(socket: Path) -> None:
+    """Serve the narrow Mac edge tools from the Brodex profile."""
+    create_edge_client(socket).run(transport="stdio")
+
+
+@app.command("edge-host")
+def edge_host(settings: Path) -> None:
+    """Run the Mac edge and its existing-account reverse SSH tunnel."""
+    try:
+        config = EdgeSettings.model_validate_json(settings.read_bytes())
+        anyio.run(run_edge, config)
+    except (OSError, ValidationError):
+        raise typer.Exit(code=2) from None
+
+
+@app.command("edge-operator")
+def edge_operator(socket: Path, command: str) -> None:
+    """Open, enable, or close a bench window from the local operator session."""
+    try:
+        request = OperatorRequest.model_validate(
+            {"command": command, "issued_ms": unix_ms()}
+        )
+    except ValidationError:
+        raise typer.Exit(code=2) from None
+    reply = anyio.run(exchange, socket, request)
+    typer.echo(reply.model_dump_json(exclude_none=True))
+    if reply.result != "ok":
+        raise typer.Exit(code=1)
 
 
 def main() -> None:

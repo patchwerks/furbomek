@@ -5,6 +5,7 @@
 [ext_resource type="Script" path="res://broadcast_hud.gd" id="3_hud"]
 [ext_resource type="Script" path="res://activity_ports.gd" id="4_ports"]
 [ext_resource type="Script" path="res://color_surface.gd" id="5_color"]
+[ext_resource type="FontFile" path="res://fonts/IoskeleyMono-Regular.ttf" id="6_font"]
 
 [sub_resource type="Environment" id="Environment_stage"]
 background_mode = 1
@@ -13,11 +14,8 @@ ambient_light_source = 3
 ambient_light_color = Color(0.12, 0.01, 0.025, 1)
 ambient_light_energy = 0.18
 
-[sub_resource type="SystemFont" id="Font_hud"]
-font_names = PackedStringArray("DejaVu Sans Mono", "Liberation Mono")
-
 [sub_resource type="Theme" id="Theme_hud"]
-default_font = SubResource("Font_hud")
+default_font = ExtResource("6_font")
 
 [node name="PointCloudBroadcast" type="Node3D"]
 script = ExtResource("1_main")

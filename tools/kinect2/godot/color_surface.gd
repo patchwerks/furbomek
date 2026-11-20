@@ -1,11 +1,12 @@
 extends ColorRect
 
 var shader_material: ShaderMaterial
-var crop := Rect2(0.2, 0.2, 0.6, 0.6)
+var crop := Rect2(0.0, 0.0, 1.0, 1.0)
 var anchor_id := ""
 var zoom := 1.0
 var active := true
 var source_valid := false
+var full_frame := false
 
 
 func _ready() -> void:
@@ -22,7 +23,10 @@ func set_snapshot(snapshot: Dictionary, track: Dictionary) -> void:
 		hide()
 		return
 	var box_value = track.get("optical_box", [])
-	if box_value is Array and box_value.size() == 4 and str(track.get("id", "")) != anchor_id:
+	if full_frame or track.get("kind", "") != "object":
+		anchor_id = ""
+		crop = Rect2(0.0, 0.0, 1.0, 1.0)
+	elif box_value is Array and box_value.size() == 4 and str(track.get("id", "")) != anchor_id:
 		anchor_id = str(track.get("id", ""))
 		var center := Vector2(float(box_value[0]) + float(box_value[2]) * 0.5, float(box_value[1]) + float(box_value[3]) * 0.5)
 		var span := clampf(float(box_value[2]) / 0.45, 0.52, 0.9)
@@ -50,6 +54,9 @@ func clear_snapshot() -> void:
 
 
 func set_palette(value: int) -> void:
+	full_frame = value == 0
+	if full_frame:
+		zoom = 1.0
 	shader_material.set_shader_parameter("palette_index", value)
 
 
