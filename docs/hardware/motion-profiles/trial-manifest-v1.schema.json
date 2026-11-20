@@ -1,0 +1,1127 @@
+{
+  "$defs": {
+    "ActionName": {
+      "enum": [
+        "active",
+        "sleep",
+        "forward",
+        "backward",
+        "left",
+        "right",
+        "turn_left",
+        "turn_right"
+      ],
+      "type": "string"
+    },
+    "CalibrationInput": {
+      "additionalProperties": false,
+      "description": "One fixed site plus diverse board views for intrinsic recovery.",
+      "properties": {
+        "schema_version": {
+          "const": 1,
+          "title": "Schema Version",
+          "type": "integer"
+        },
+        "provenance": {
+          "enum": [
+            "synthetic",
+            "measured"
+          ],
+          "title": "Provenance",
+          "type": "string"
+        },
+        "camera": {
+          "const": "Logitech Webcam C930e",
+          "title": "Camera",
+          "type": "string"
+        },
+        "image_size": {
+          "maxItems": 2,
+          "minItems": 2,
+          "prefixItems": [
+            {
+              "const": 640,
+              "type": "integer"
+            },
+            {
+              "const": 480,
+              "type": "integer"
+            }
+          ],
+          "title": "Image Size",
+          "type": "array"
+        },
+        "fps": {
+          "const": 15,
+          "title": "Fps",
+          "type": "integer"
+        },
+        "pixel_format": {
+          "const": "yuyv422",
+          "title": "Pixel Format",
+          "type": "string"
+        },
+        "camera_revision": {
+          "minLength": 1,
+          "title": "Camera Revision",
+          "type": "string"
+        },
+        "reference_revision": {
+          "minLength": 1,
+          "title": "Reference Revision",
+          "type": "string"
+        },
+        "stage_id": {
+          "minLength": 1,
+          "title": "Stage Id",
+          "type": "string"
+        },
+        "measured_reference_side_mm": {
+          "exclusiveMinimum": 0,
+          "title": "Measured Reference Side Mm",
+          "type": "number"
+        },
+        "measured_target_side_mm": {
+          "exclusiveMinimum": 0,
+          "title": "Measured Target Side Mm",
+          "type": "number"
+        },
+        "measured_baseline_mm": {
+          "exclusiveMinimum": 0,
+          "title": "Measured Baseline Mm",
+          "type": "number"
+        },
+        "minimum_translation_mm": {
+          "exclusiveMinimum": 0,
+          "title": "Minimum Translation Mm",
+          "type": "number"
+        },
+        "minimum_yaw_deg": {
+          "exclusiveMinimum": 0,
+          "title": "Minimum Yaw Deg",
+          "type": "number"
+        },
+        "measurement_uncertainty_mm": {
+          "exclusiveMinimum": 0,
+          "title": "Measurement Uncertainty Mm",
+          "type": "number"
+        },
+        "measurement_uncertainty_deg": {
+          "exclusiveMinimum": 0,
+          "title": "Measurement Uncertainty Deg",
+          "type": "number"
+        },
+        "containment_verified": {
+          "title": "Containment Verified",
+          "type": "boolean"
+        },
+        "setup": {
+          "enum": [
+            "clearance",
+            "rear_diagnostic"
+          ],
+          "title": "Setup",
+          "type": "string"
+        },
+        "intrinsic_views": {
+          "items": {
+            "$ref": "#/$defs/Frame"
+          },
+          "minItems": 8,
+          "title": "Intrinsic Views",
+          "type": "array"
+        },
+        "reference": {
+          "$ref": "#/$defs/Frame"
+        },
+        "validations": {
+          "items": {
+            "$ref": "#/$defs/ValidationPose"
+          },
+          "minItems": 3,
+          "title": "Validations",
+          "type": "array"
+        },
+        "current": {
+          "$ref": "#/$defs/Frame"
+        },
+        "maximum_age_ms": {
+          "default": 600,
+          "exclusiveMinimum": 0,
+          "maximum": 600,
+          "title": "Maximum Age Ms",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "schema_version",
+        "provenance",
+        "camera",
+        "image_size",
+        "fps",
+        "pixel_format",
+        "camera_revision",
+        "reference_revision",
+        "stage_id",
+        "measured_reference_side_mm",
+        "measured_target_side_mm",
+        "measured_baseline_mm",
+        "minimum_translation_mm",
+        "minimum_yaw_deg",
+        "measurement_uncertainty_mm",
+        "measurement_uncertainty_deg",
+        "containment_verified",
+        "setup",
+        "intrinsic_views",
+        "reference",
+        "validations",
+        "current"
+      ],
+      "title": "CalibrationInput",
+      "type": "object"
+    },
+    "ClockAnchor": {
+      "additionalProperties": false,
+      "description": "Independently sampled PTS/local-monotonic pair, never wall time.",
+      "properties": {
+        "pts_ms": {
+          "maximum": 1000000000000.0,
+          "minimum": 0,
+          "title": "Pts Ms",
+          "type": "number"
+        },
+        "monotonic_ms": {
+          "maximum": 1000000000000.0,
+          "minimum": 0,
+          "title": "Monotonic Ms",
+          "type": "number"
+        }
+      },
+      "required": [
+        "pts_ms",
+        "monotonic_ms"
+      ],
+      "title": "ClockAnchor",
+      "type": "object"
+    },
+    "ClockMapping": {
+      "additionalProperties": false,
+      "description": "At least three pairs check drift/residual over the complete replay span.",
+      "properties": {
+        "clock_id": {
+          "maxLength": 128,
+          "minLength": 1,
+          "title": "Clock Id",
+          "type": "string"
+        },
+        "anchors": {
+          "items": {
+            "$ref": "#/$defs/ClockAnchor"
+          },
+          "minItems": 3,
+          "title": "Anchors",
+          "type": "array"
+        },
+        "measurement_uncertainty_ms": {
+          "exclusiveMinimum": 0,
+          "title": "Measurement Uncertainty Ms",
+          "type": "number"
+        },
+        "maximum_uncertainty_ms": {
+          "default": 25,
+          "exclusiveMinimum": 0,
+          "maximum": 100,
+          "title": "Maximum Uncertainty Ms",
+          "type": "number"
+        },
+        "maximum_frame_delay_ms": {
+          "default": 200,
+          "exclusiveMinimum": 0,
+          "maximum": 600,
+          "title": "Maximum Frame Delay Ms",
+          "type": "number"
+        }
+      },
+      "required": [
+        "clock_id",
+        "anchors",
+        "measurement_uncertainty_ms"
+      ],
+      "title": "ClockMapping",
+      "type": "object"
+    },
+    "Digest": {
+      "pattern": "^[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "ExpectedMotion": {
+      "additionalProperties": false,
+      "description": "Predeclared body-relative displacement; zero axes constrain cross motion.",
+      "properties": {
+        "x_forward_mm": {
+          "title": "X Forward Mm",
+          "type": "number"
+        },
+        "y_left_mm": {
+          "title": "Y Left Mm",
+          "type": "number"
+        },
+        "yaw_ccw_deg": {
+          "title": "Yaw Ccw Deg",
+          "type": "number"
+        },
+        "height_up_mm": {
+          "title": "Height Up Mm",
+          "type": "number"
+        },
+        "translation_tolerance_mm": {
+          "default": 3,
+          "exclusiveMinimum": 0,
+          "title": "Translation Tolerance Mm",
+          "type": "number"
+        },
+        "angular_tolerance_deg": {
+          "default": 1,
+          "exclusiveMinimum": 0,
+          "title": "Angular Tolerance Deg",
+          "type": "number"
+        },
+        "settle_window_ms": {
+          "default": 200,
+          "exclusiveMinimum": 0,
+          "minimum": 200,
+          "title": "Settle Window Ms",
+          "type": "number"
+        }
+      },
+      "required": [
+        "x_forward_mm",
+        "y_left_mm",
+        "yaw_ccw_deg",
+        "height_up_mm"
+      ],
+      "title": "ExpectedMotion",
+      "type": "object"
+    },
+    "Finite": {
+      "maximum": 1000000000.0,
+      "minimum": -1000000000.0,
+      "type": "number"
+    },
+    "Frame": {
+      "additionalProperties": false,
+      "description": "Private detector output bound to a view and capture timestamp.",
+      "properties": {
+        "image_file": {
+          "anyOf": [
+            {
+              "pattern": "^[a-zA-Z0-9_-]+\\.png$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Image File"
+        },
+        "image_sha256": {
+          "anyOf": [
+            {
+              "pattern": "^[a-f0-9]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Image Sha256"
+        },
+        "markers": {
+          "items": {
+            "$ref": "#/$defs/Marker"
+          },
+          "title": "Markers",
+          "type": "array"
+        },
+        "captured_ms": {
+          "minimum": 0,
+          "title": "Captured Ms",
+          "type": "integer"
+        },
+        "camera_revision": {
+          "title": "Camera Revision",
+          "type": "string"
+        },
+        "reference_revision": {
+          "title": "Reference Revision",
+          "type": "string"
+        },
+        "boundary_visible": {
+          "title": "Boundary Visible",
+          "type": "boolean"
+        },
+        "all_feet_visible": {
+          "title": "All Feet Visible",
+          "type": "boolean"
+        },
+        "contact_label": {
+          "enum": [
+            "unknown",
+            "supported",
+            "contact",
+            "airborne"
+          ],
+          "title": "Contact Label",
+          "type": "string"
+        }
+      },
+      "required": [
+        "markers",
+        "captured_ms",
+        "camera_revision",
+        "reference_revision",
+        "boundary_visible",
+        "all_feet_visible",
+        "contact_label"
+      ],
+      "title": "Frame",
+      "type": "object"
+    },
+    "GuardPhase": {
+      "additionalProperties": false,
+      "description": "Wire state stays independent from optical measurements and cutoff.",
+      "properties": {
+        "clock_id": {
+          "maxLength": 128,
+          "minLength": 1,
+          "title": "Clock Id",
+          "type": "string"
+        },
+        "session_id": {
+          "maxLength": 128,
+          "minLength": 1,
+          "title": "Session Id",
+          "type": "string"
+        },
+        "command_id": {
+          "maxLength": 128,
+          "minLength": 1,
+          "title": "Command Id",
+          "type": "string"
+        },
+        "phase_id": {
+          "maxLength": 128,
+          "minLength": 1,
+          "title": "Phase Id",
+          "type": "string"
+        },
+        "start_ms": {
+          "maximum": 1000000000000.0,
+          "minimum": 0,
+          "title": "Start Ms",
+          "type": "number"
+        },
+        "stop_ms": {
+          "maximum": 1000000000000.0,
+          "minimum": 0,
+          "title": "Stop Ms",
+          "type": "number"
+        },
+        "observed_until_ms": {
+          "maximum": 1000000000000.0,
+          "minimum": 0,
+          "title": "Observed Until Ms",
+          "type": "number"
+        },
+        "timestamp_uncertainty_ms": {
+          "maximum": 1000000.0,
+          "minimum": 0,
+          "title": "Timestamp Uncertainty Ms",
+          "type": "number"
+        },
+        "wire_status": {
+          "enum": [
+            "completed",
+            "held",
+            "disarmed",
+            "in_progress",
+            "fault"
+          ],
+          "title": "Wire Status",
+          "type": "string"
+        }
+      },
+      "required": [
+        "clock_id",
+        "session_id",
+        "command_id",
+        "phase_id",
+        "start_ms",
+        "stop_ms",
+        "observed_until_ms",
+        "timestamp_uncertainty_ms",
+        "wire_status"
+      ],
+      "title": "GuardPhase",
+      "type": "object"
+    },
+    "Identifier": {
+      "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.:-]{0,127}$",
+      "type": "string"
+    },
+    "Marker": {
+      "additionalProperties": false,
+      "description": "Decoded clockwise corners, starting at marker top left.",
+      "properties": {
+        "marker_id": {
+          "exclusiveMaximum": 50,
+          "minimum": 0,
+          "title": "Marker Id",
+          "type": "integer"
+        },
+        "corners": {
+          "maxItems": 4,
+          "minItems": 4,
+          "prefixItems": [
+            {
+              "maxItems": 2,
+              "minItems": 2,
+              "prefixItems": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "number"
+                }
+              ],
+              "type": "array"
+            },
+            {
+              "maxItems": 2,
+              "minItems": 2,
+              "prefixItems": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "number"
+                }
+              ],
+              "type": "array"
+            },
+            {
+              "maxItems": 2,
+              "minItems": 2,
+              "prefixItems": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "number"
+                }
+              ],
+              "type": "array"
+            },
+            {
+              "maxItems": 2,
+              "minItems": 2,
+              "prefixItems": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "number"
+                }
+              ],
+              "type": "array"
+            }
+          ],
+          "title": "Corners",
+          "type": "array"
+        }
+      },
+      "required": [
+        "marker_id",
+        "corners"
+      ],
+      "title": "Marker",
+      "type": "object"
+    },
+    "Nonnegative": {
+      "maximum": 1000000000.0,
+      "minimum": 0,
+      "type": "number"
+    },
+    "Point": {
+      "maxItems": 2,
+      "minItems": 2,
+      "prefixItems": [
+        {
+          "$ref": "#/$defs/Finite"
+        },
+        {
+          "$ref": "#/$defs/Finite"
+        }
+      ],
+      "type": "array"
+    },
+    "Polygon": {
+      "additionalProperties": false,
+      "description": "Strict convex counterclockwise polygon; concave surveys need subdivision.",
+      "properties": {
+        "vertices": {
+          "items": {
+            "$ref": "#/$defs/Point"
+          },
+          "maxItems": 128,
+          "minItems": 3,
+          "title": "Vertices",
+          "type": "array"
+        }
+      },
+      "required": [
+        "vertices"
+      ],
+      "title": "Polygon",
+      "type": "object"
+    },
+    "Pose": {
+      "additionalProperties": false,
+      "description": "Independent surveyed chassis target position in the reference frame.",
+      "properties": {
+        "x_mm": {
+          "title": "X Mm",
+          "type": "number"
+        },
+        "y_mm": {
+          "title": "Y Mm",
+          "type": "number"
+        },
+        "z_mm": {
+          "title": "Z Mm",
+          "type": "number"
+        },
+        "yaw_deg": {
+          "title": "Yaw Deg",
+          "type": "number"
+        }
+      },
+      "required": [
+        "x_mm",
+        "y_mm",
+        "z_mm",
+        "yaw_deg"
+      ],
+      "title": "Pose",
+      "type": "object"
+    },
+    "ProfileConditions": {
+      "additionalProperties": false,
+      "description": "Portable identity and predeclared bounds, independent of the stage.",
+      "properties": {
+        "action": {
+          "$ref": "#/$defs/ActionName"
+        },
+        "start_pose": {
+          "maxLength": 128,
+          "minLength": 1,
+          "title": "Start Pose",
+          "type": "string"
+        },
+        "end_pose": {
+          "maxLength": 128,
+          "minLength": 1,
+          "title": "End Pose",
+          "type": "string"
+        },
+        "robot_revision": {
+          "maxLength": 128,
+          "minLength": 1,
+          "title": "Robot Revision",
+          "type": "string"
+        },
+        "installed_sha256": {
+          "pattern": "^[a-f0-9]{64}$",
+          "title": "Installed Sha256",
+          "type": "string"
+        },
+        "gait_revision": {
+          "maxLength": 128,
+          "minLength": 1,
+          "title": "Gait Revision",
+          "type": "string"
+        },
+        "power_regime": {
+          "maxLength": 128,
+          "minLength": 1,
+          "title": "Power Regime",
+          "type": "string"
+        },
+        "load_class": {
+          "maxLength": 128,
+          "minLength": 1,
+          "title": "Load Class",
+          "type": "string"
+        },
+        "surface": {
+          "$ref": "#/$defs/SurfaceClass"
+        },
+        "voltage_bands": {
+          "items": {
+            "maxItems": 2,
+            "minItems": 2,
+            "prefixItems": [
+              {
+                "exclusiveMinimum": 0,
+                "type": "number"
+              },
+              {
+                "exclusiveMinimum": 0,
+                "type": "number"
+              }
+            ],
+            "type": "array"
+          },
+          "minItems": 1,
+          "title": "Voltage Bands",
+          "type": "array"
+        },
+        "limited_voltage_evidence": {
+          "anyOf": [
+            {
+              "pattern": "^[a-f0-9]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Limited Voltage Evidence"
+        },
+        "swept_radius_mm": {
+          "exclusiveMinimum": 0,
+          "title": "Swept Radius Mm",
+          "type": "number"
+        },
+        "interval_travel_mm": {
+          "maximum": 1000000.0,
+          "minimum": 0,
+          "title": "Interval Travel Mm",
+          "type": "number"
+        }
+      },
+      "required": [
+        "action",
+        "start_pose",
+        "end_pose",
+        "robot_revision",
+        "installed_sha256",
+        "gait_revision",
+        "power_regime",
+        "load_class",
+        "surface",
+        "voltage_bands",
+        "swept_radius_mm",
+        "interval_travel_mm"
+      ],
+      "title": "ProfileConditions",
+      "type": "object"
+    },
+    "ScoreInput": {
+      "additionalProperties": false,
+      "description": "One isolated command phase; no camera or actuator access is implemented.",
+      "properties": {
+        "schema_version": {
+          "const": 1,
+          "title": "Schema Version",
+          "type": "integer"
+        },
+        "calibration_id": {
+          "maxLength": 128,
+          "minLength": 1,
+          "title": "Calibration Id",
+          "type": "string"
+        },
+        "calibration": {
+          "$ref": "#/$defs/CalibrationInput"
+        },
+        "calibration_valid_from_ms": {
+          "maximum": 1000000000000.0,
+          "minimum": 0,
+          "title": "Calibration Valid From Ms",
+          "type": "number"
+        },
+        "calibration_valid_until_ms": {
+          "maximum": 1000000000000.0,
+          "minimum": 0,
+          "title": "Calibration Valid Until Ms",
+          "type": "number"
+        },
+        "marker_x_to_body_forward_deg": {
+          "title": "Marker X To Body Forward Deg",
+          "type": "number"
+        },
+        "clock": {
+          "$ref": "#/$defs/ClockMapping"
+        },
+        "guard": {
+          "$ref": "#/$defs/GuardPhase"
+        },
+        "expected": {
+          "$ref": "#/$defs/ExpectedMotion"
+        },
+        "frames": {
+          "items": {
+            "$ref": "#/$defs/ScoringFrame"
+          },
+          "minItems": 4,
+          "title": "Frames",
+          "type": "array"
+        }
+      },
+      "required": [
+        "schema_version",
+        "calibration_id",
+        "calibration",
+        "calibration_valid_from_ms",
+        "calibration_valid_until_ms",
+        "marker_x_to_body_forward_deg",
+        "clock",
+        "guard",
+        "expected",
+        "frames"
+      ],
+      "title": "ScoreInput",
+      "type": "object"
+    },
+    "ScoringFrame": {
+      "additionalProperties": false,
+      "description": "Independent image identity plus phase/clock bindings and decoded geometry.",
+      "properties": {
+        "sequence": {
+          "minimum": 0,
+          "title": "Sequence",
+          "type": "integer"
+        },
+        "pts_ms": {
+          "maximum": 1000000000000.0,
+          "minimum": 0,
+          "title": "Pts Ms",
+          "type": "number"
+        },
+        "received_monotonic_ms": {
+          "maximum": 1000000000000.0,
+          "minimum": 0,
+          "title": "Received Monotonic Ms",
+          "type": "number"
+        },
+        "session_id": {
+          "maxLength": 128,
+          "minLength": 1,
+          "title": "Session Id",
+          "type": "string"
+        },
+        "command_id": {
+          "maxLength": 128,
+          "minLength": 1,
+          "title": "Command Id",
+          "type": "string"
+        },
+        "phase_id": {
+          "maxLength": 128,
+          "minLength": 1,
+          "title": "Phase Id",
+          "type": "string"
+        },
+        "content_sha256": {
+          "pattern": "^[a-f0-9]{64}$",
+          "title": "Content Sha256",
+          "type": "string"
+        },
+        "observation": {
+          "$ref": "#/$defs/Frame"
+        }
+      },
+      "required": [
+        "sequence",
+        "pts_ms",
+        "received_monotonic_ms",
+        "session_id",
+        "command_id",
+        "phase_id",
+        "content_sha256",
+        "observation"
+      ],
+      "title": "ScoringFrame",
+      "type": "object"
+    },
+    "StageProfile": {
+      "additionalProperties": false,
+      "description": "Surveyed site with explicit evidence; no default geometry or admission.",
+      "properties": {
+        "schema_version": {
+          "const": 1,
+          "title": "Schema Version",
+          "type": "integer"
+        },
+        "units": {
+          "const": "mm_deg",
+          "default": "mm_deg",
+          "title": "Units",
+          "type": "string"
+        },
+        "stage_id": {
+          "$ref": "#/$defs/Identifier"
+        },
+        "stage_frame_id": {
+          "$ref": "#/$defs/Identifier"
+        },
+        "calibration_id": {
+          "$ref": "#/$defs/Identifier"
+        },
+        "profile_id": {
+          "$ref": "#/$defs/Identifier"
+        },
+        "robot_revision": {
+          "$ref": "#/$defs/Identifier"
+        },
+        "installed_sha256": {
+          "$ref": "#/$defs/Digest"
+        },
+        "surface": {
+          "$ref": "#/$defs/SurfaceClass"
+        },
+        "usable_polygon": {
+          "$ref": "#/$defs/Polygon"
+        },
+        "containment_evidence_sha256": {
+          "$ref": "#/$defs/Digest"
+        },
+        "hazards": {
+          "items": {
+            "$ref": "#/$defs/Identifier"
+          },
+          "title": "Hazards",
+          "type": "array"
+        },
+        "survey_sha256": {
+          "$ref": "#/$defs/Digest"
+        }
+      },
+      "required": [
+        "schema_version",
+        "stage_id",
+        "stage_frame_id",
+        "calibration_id",
+        "profile_id",
+        "robot_revision",
+        "installed_sha256",
+        "surface",
+        "usable_polygon",
+        "containment_evidence_sha256",
+        "hazards",
+        "survey_sha256"
+      ],
+      "title": "StageProfile",
+      "type": "object"
+    },
+    "SurfaceClass": {
+      "additionalProperties": false,
+      "description": "Measured uncertainty-inclusive intervals for a specific material/finish.",
+      "properties": {
+        "material_id": {
+          "$ref": "#/$defs/Identifier"
+        },
+        "finish_id": {
+          "$ref": "#/$defs/Identifier"
+        },
+        "slope_deg": {
+          "maxItems": 2,
+          "minItems": 2,
+          "prefixItems": [
+            {
+              "$ref": "#/$defs/Nonnegative"
+            },
+            {
+              "$ref": "#/$defs/Nonnegative"
+            }
+          ],
+          "title": "Slope Deg",
+          "type": "array"
+        },
+        "static_traction": {
+          "maxItems": 2,
+          "minItems": 2,
+          "prefixItems": [
+            {
+              "$ref": "#/$defs/Nonnegative"
+            },
+            {
+              "$ref": "#/$defs/Nonnegative"
+            }
+          ],
+          "title": "Static Traction",
+          "type": "array"
+        },
+        "traction_units": {
+          "const": "coefficient",
+          "default": "coefficient",
+          "title": "Traction Units",
+          "type": "string"
+        }
+      },
+      "required": [
+        "material_id",
+        "finish_id",
+        "slope_deg",
+        "static_traction"
+      ],
+      "title": "SurfaceClass",
+      "type": "object"
+    },
+    "Trial": {
+      "additionalProperties": false,
+      "description": "One attempt, including rejected or unscorable observations.",
+      "properties": {
+        "trial_id": {
+          "maxLength": 128,
+          "minLength": 1,
+          "title": "Trial Id",
+          "type": "string"
+        },
+        "conditions": {
+          "$ref": "#/$defs/ProfileConditions"
+        },
+        "stage": {
+          "$ref": "#/$defs/StageProfile"
+        },
+        "stage_start_mm": {
+          "maxItems": 2,
+          "minItems": 2,
+          "prefixItems": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "number"
+            }
+          ],
+          "title": "Stage Start Mm",
+          "type": "array"
+        },
+        "independent_clearance_sha256": {
+          "pattern": "^[a-f0-9]{64}$",
+          "title": "Independent Clearance Sha256",
+          "type": "string"
+        },
+        "independent_cutoff_sha256": {
+          "pattern": "^[a-f0-9]{64}$",
+          "title": "Independent Cutoff Sha256",
+          "type": "string"
+        },
+        "observed_surface": {
+          "$ref": "#/$defs/SurfaceClass"
+        },
+        "observed_voltage": {
+          "exclusiveMinimum": 0,
+          "title": "Observed Voltage",
+          "type": "number"
+        },
+        "start_pose": {
+          "maxLength": 128,
+          "minLength": 1,
+          "title": "Start Pose",
+          "type": "string"
+        },
+        "end_pose": {
+          "maxLength": 128,
+          "minLength": 1,
+          "title": "End Pose",
+          "type": "string"
+        },
+        "normal_disarm": {
+          "title": "Normal Disarm",
+          "type": "boolean"
+        },
+        "score": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ScoreInput"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "trial_id",
+        "conditions",
+        "stage",
+        "stage_start_mm",
+        "independent_clearance_sha256",
+        "independent_cutoff_sha256",
+        "observed_surface",
+        "observed_voltage",
+        "start_pose",
+        "end_pose",
+        "normal_disarm",
+        "score"
+      ],
+      "title": "Trial",
+      "type": "object"
+    },
+    "ValidationPose": {
+      "additionalProperties": false,
+      "description": "Held-out target observation paired with an independent survey.",
+      "properties": {
+        "frame": {
+          "$ref": "#/$defs/Frame"
+        },
+        "expected": {
+          "$ref": "#/$defs/Pose"
+        }
+      },
+      "required": [
+        "frame",
+        "expected"
+      ],
+      "title": "ValidationPose",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "description": "Replay payload; measurement provenance remains in each optical input.",
+  "properties": {
+    "schema_version": {
+      "const": 1,
+      "title": "Schema Version",
+      "type": "integer"
+    },
+    "profiles": {
+      "items": {
+        "$ref": "#/$defs/ProfileConditions"
+      },
+      "minItems": 1,
+      "title": "Profiles",
+      "type": "array"
+    },
+    "trials": {
+      "items": {
+        "$ref": "#/$defs/Trial"
+      },
+      "title": "Trials",
+      "type": "array"
+    }
+  },
+  "required": [
+    "schema_version",
+    "profiles",
+    "trials"
+  ],
+  "title": "TrialManifest",
+  "type": "object"
+}

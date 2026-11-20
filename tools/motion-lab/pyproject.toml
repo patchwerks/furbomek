@@ -33,6 +33,7 @@ max-complexity = 15
 
 [tool.basedpyright]
 typeCheckingMode = "all"
+extraPaths = ["../../services/embodiment-gateway/src"]
 pythonVersion = "3.12"
 
 # NumPy 1.26 array arithmetic and Pydantic.model_dump expose Any in upstream stubs.

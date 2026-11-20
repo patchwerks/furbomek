@@ -1,0 +1,294 @@
+{
+  "schema_version": 1,
+  "profiles": [
+    {
+      "action": "forward",
+      "start_pose": "synthetic-start",
+      "end_pose": "synthetic-end",
+      "robot_revision": "synthetic-robot",
+      "installed_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "gait_revision": "synthetic-gait",
+      "power_regime": "synthetic-voltage",
+      "load_class": "synthetic-load",
+      "surface": {
+        "material_id": "synthetic-coupon",
+        "finish_id": "matte",
+        "slope_deg": [
+          0.0,
+          1.0
+        ],
+        "static_traction": [
+          0.4,
+          0.8
+        ],
+        "traction_units": "coefficient"
+      },
+      "voltage_bands": [
+        [
+          6.0,
+          6.5
+        ],
+        [
+          7.0,
+          7.5
+        ]
+      ],
+      "limited_voltage_evidence": null,
+      "swept_radius_mm": 10.0,
+      "interval_travel_mm": 2.0
+    },
+    {
+      "action": "backward",
+      "start_pose": "synthetic-start",
+      "end_pose": "synthetic-end",
+      "robot_revision": "synthetic-robot",
+      "installed_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "gait_revision": "synthetic-gait",
+      "power_regime": "synthetic-voltage",
+      "load_class": "synthetic-load",
+      "surface": {
+        "material_id": "synthetic-coupon",
+        "finish_id": "matte",
+        "slope_deg": [
+          0.0,
+          1.0
+        ],
+        "static_traction": [
+          0.4,
+          0.8
+        ],
+        "traction_units": "coefficient"
+      },
+      "voltage_bands": [
+        [
+          6.0,
+          6.5
+        ],
+        [
+          7.0,
+          7.5
+        ]
+      ],
+      "limited_voltage_evidence": null,
+      "swept_radius_mm": 10.0,
+      "interval_travel_mm": 2.0
+    },
+    {
+      "action": "left",
+      "start_pose": "synthetic-start",
+      "end_pose": "synthetic-end",
+      "robot_revision": "synthetic-robot",
+      "installed_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "gait_revision": "synthetic-gait",
+      "power_regime": "synthetic-voltage",
+      "load_class": "synthetic-load",
+      "surface": {
+        "material_id": "synthetic-coupon",
+        "finish_id": "matte",
+        "slope_deg": [
+          0.0,
+          1.0
+        ],
+        "static_traction": [
+          0.4,
+          0.8
+        ],
+        "traction_units": "coefficient"
+      },
+      "voltage_bands": [
+        [
+          6.0,
+          6.5
+        ],
+        [
+          7.0,
+          7.5
+        ]
+      ],
+      "limited_voltage_evidence": null,
+      "swept_radius_mm": 10.0,
+      "interval_travel_mm": 2.0
+    },
+    {
+      "action": "right",
+      "start_pose": "synthetic-start",
+      "end_pose": "synthetic-end",
+      "robot_revision": "synthetic-robot",
+      "installed_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "gait_revision": "synthetic-gait",
+      "power_regime": "synthetic-voltage",
+      "load_class": "synthetic-load",
+      "surface": {
+        "material_id": "synthetic-coupon",
+        "finish_id": "matte",
+        "slope_deg": [
+          0.0,
+          1.0
+        ],
+        "static_traction": [
+          0.4,
+          0.8
+        ],
+        "traction_units": "coefficient"
+      },
+      "voltage_bands": [
+        [
+          6.0,
+          6.5
+        ],
+        [
+          7.0,
+          7.5
+        ]
+      ],
+      "limited_voltage_evidence": null,
+      "swept_radius_mm": 10.0,
+      "interval_travel_mm": 2.0
+    },
+    {
+      "action": "turn_left",
+      "start_pose": "synthetic-start",
+      "end_pose": "synthetic-end",
+      "robot_revision": "synthetic-robot",
+      "installed_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "gait_revision": "synthetic-gait",
+      "power_regime": "synthetic-voltage",
+      "load_class": "synthetic-load",
+      "surface": {
+        "material_id": "synthetic-coupon",
+        "finish_id": "matte",
+        "slope_deg": [
+          0.0,
+          1.0
+        ],
+        "static_traction": [
+          0.4,
+          0.8
+        ],
+        "traction_units": "coefficient"
+      },
+      "voltage_bands": [
+        [
+          6.0,
+          6.5
+        ],
+        [
+          7.0,
+          7.5
+        ]
+      ],
+      "limited_voltage_evidence": null,
+      "swept_radius_mm": 10.0,
+      "interval_travel_mm": 2.0
+    },
+    {
+      "action": "turn_right",
+      "start_pose": "synthetic-start",
+      "end_pose": "synthetic-end",
+      "robot_revision": "synthetic-robot",
+      "installed_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "gait_revision": "synthetic-gait",
+      "power_regime": "synthetic-voltage",
+      "load_class": "synthetic-load",
+      "surface": {
+        "material_id": "synthetic-coupon",
+        "finish_id": "matte",
+        "slope_deg": [
+          0.0,
+          1.0
+        ],
+        "static_traction": [
+          0.4,
+          0.8
+        ],
+        "traction_units": "coefficient"
+      },
+      "voltage_bands": [
+        [
+          6.0,
+          6.5
+        ],
+        [
+          7.0,
+          7.5
+        ]
+      ],
+      "limited_voltage_evidence": null,
+      "swept_radius_mm": 10.0,
+      "interval_travel_mm": 2.0
+    },
+    {
+      "action": "active",
+      "start_pose": "synthetic-start",
+      "end_pose": "synthetic-end",
+      "robot_revision": "synthetic-robot",
+      "installed_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "gait_revision": "synthetic-gait",
+      "power_regime": "synthetic-voltage",
+      "load_class": "synthetic-load",
+      "surface": {
+        "material_id": "synthetic-coupon",
+        "finish_id": "matte",
+        "slope_deg": [
+          0.0,
+          1.0
+        ],
+        "static_traction": [
+          0.4,
+          0.8
+        ],
+        "traction_units": "coefficient"
+      },
+      "voltage_bands": [
+        [
+          6.0,
+          6.5
+        ],
+        [
+          7.0,
+          7.5
+        ]
+      ],
+      "limited_voltage_evidence": null,
+      "swept_radius_mm": 10.0,
+      "interval_travel_mm": 2.0
+    },
+    {
+      "action": "sleep",
+      "start_pose": "synthetic-start",
+      "end_pose": "synthetic-end",
+      "robot_revision": "synthetic-robot",
+      "installed_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "gait_revision": "synthetic-gait",
+      "power_regime": "synthetic-voltage",
+      "load_class": "synthetic-load",
+      "surface": {
+        "material_id": "synthetic-coupon",
+        "finish_id": "matte",
+        "slope_deg": [
+          0.0,
+          1.0
+        ],
+        "static_traction": [
+          0.4,
+          0.8
+        ],
+        "traction_units": "coefficient"
+      },
+      "voltage_bands": [
+        [
+          6.0,
+          6.5
+        ],
+        [
+          7.0,
+          7.5
+        ]
+      ],
+      "limited_voltage_evidence": null,
+      "swept_radius_mm": 10.0,
+      "interval_travel_mm": 2.0
+    }
+  ],
+  "trials": []
+}

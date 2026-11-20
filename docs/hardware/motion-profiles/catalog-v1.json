@@ -1,0 +1,137 @@
+{
+  "schema_version": 1,
+  "evidence_status": "observed_software_only",
+  "supervised_status": "HOLD",
+  "unattended_status": "HOLD",
+  "measured_profiles": [],
+  "verbs": {
+    "forward": {
+      "status": "HOLD",
+      "valid_physical_trials": 0,
+      "units": null,
+      "usable_range": null,
+      "maximum_stopping_excursion": null,
+      "uncertainty": null,
+      "reason": "calibrated_whole_set_trials_unavailable",
+      "expected_direction": {
+        "axis": "x_forward",
+        "sign": 1,
+        "evidence_status": "proposed_trial_target"
+      },
+      "protocol_outcome": "historical_supported_bench_only",
+      "private_evidence_digest": null
+    },
+    "backward": {
+      "status": "HOLD",
+      "valid_physical_trials": 0,
+      "units": null,
+      "usable_range": null,
+      "maximum_stopping_excursion": null,
+      "uncertainty": null,
+      "reason": "calibrated_whole_set_trials_unavailable",
+      "expected_direction": {
+        "axis": "x_forward",
+        "sign": -1,
+        "evidence_status": "proposed_trial_target"
+      },
+      "protocol_outcome": "historical_supported_bench_only",
+      "private_evidence_digest": null
+    },
+    "left": {
+      "status": "HOLD",
+      "valid_physical_trials": 0,
+      "units": null,
+      "usable_range": null,
+      "maximum_stopping_excursion": null,
+      "uncertainty": null,
+      "reason": "calibrated_whole_set_trials_unavailable",
+      "expected_direction": {
+        "axis": "y_left",
+        "sign": 1,
+        "evidence_status": "proposed_trial_target"
+      },
+      "protocol_outcome": "historical_supported_bench_only",
+      "private_evidence_digest": null
+    },
+    "right": {
+      "status": "HOLD",
+      "valid_physical_trials": 0,
+      "units": null,
+      "usable_range": null,
+      "maximum_stopping_excursion": null,
+      "uncertainty": null,
+      "reason": "calibrated_whole_set_trials_unavailable",
+      "expected_direction": {
+        "axis": "y_left",
+        "sign": -1,
+        "evidence_status": "proposed_trial_target"
+      },
+      "protocol_outcome": "historical_supported_bench_only",
+      "private_evidence_digest": null
+    },
+    "turn_left": {
+      "status": "HOLD",
+      "valid_physical_trials": 0,
+      "units": null,
+      "usable_range": null,
+      "maximum_stopping_excursion": null,
+      "uncertainty": null,
+      "reason": "calibrated_whole_set_trials_unavailable",
+      "expected_direction": {
+        "axis": "yaw_ccw",
+        "sign": 1,
+        "evidence_status": "proposed_trial_target"
+      },
+      "protocol_outcome": "historical_supported_bench_only",
+      "private_evidence_digest": null
+    },
+    "turn_right": {
+      "status": "HOLD",
+      "valid_physical_trials": 0,
+      "units": null,
+      "usable_range": null,
+      "maximum_stopping_excursion": null,
+      "uncertainty": null,
+      "reason": "calibrated_whole_set_trials_unavailable",
+      "expected_direction": {
+        "axis": "yaw_ccw",
+        "sign": -1,
+        "evidence_status": "proposed_trial_target"
+      },
+      "protocol_outcome": "historical_supported_bench_only",
+      "private_evidence_digest": null
+    },
+    "active": {
+      "status": "HOLD",
+      "valid_physical_trials": 0,
+      "units": null,
+      "usable_range": null,
+      "maximum_stopping_excursion": null,
+      "uncertainty": null,
+      "reason": "calibrated_whole_set_trials_unavailable",
+      "expected_direction": {
+        "axis": "height_up",
+        "sign": 1,
+        "evidence_status": "proposed_trial_target"
+      },
+      "protocol_outcome": "historical_supported_bench_only",
+      "private_evidence_digest": null
+    },
+    "sleep": {
+      "status": "HOLD",
+      "valid_physical_trials": 0,
+      "units": null,
+      "usable_range": null,
+      "maximum_stopping_excursion": null,
+      "uncertainty": null,
+      "reason": "calibrated_whole_set_trials_unavailable",
+      "expected_direction": {
+        "axis": "height_up",
+        "sign": -1,
+        "evidence_status": "proposed_trial_target"
+      },
+      "protocol_outcome": "historical_supported_bench_only",
+      "private_evidence_digest": null
+    }
+  }
+}

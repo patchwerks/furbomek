@@ -1,0 +1,899 @@
+{
+  "$defs": {
+    "ActionName": {
+      "enum": [
+        "active",
+        "sleep",
+        "forward",
+        "backward",
+        "left",
+        "right",
+        "turn_left",
+        "turn_right"
+      ],
+      "type": "string"
+    },
+    "Digest": {
+      "pattern": "^[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "GuardPhase": {
+      "additionalProperties": false,
+      "description": "Wire state stays independent from optical measurements and cutoff.",
+      "properties": {
+        "clock_id": {
+          "maxLength": 128,
+          "minLength": 1,
+          "title": "Clock Id",
+          "type": "string"
+        },
+        "session_id": {
+          "maxLength": 128,
+          "minLength": 1,
+          "title": "Session Id",
+          "type": "string"
+        },
+        "command_id": {
+          "maxLength": 128,
+          "minLength": 1,
+          "title": "Command Id",
+          "type": "string"
+        },
+        "phase_id": {
+          "maxLength": 128,
+          "minLength": 1,
+          "title": "Phase Id",
+          "type": "string"
+        },
+        "start_ms": {
+          "maximum": 1000000000000.0,
+          "minimum": 0,
+          "title": "Start Ms",
+          "type": "number"
+        },
+        "stop_ms": {
+          "maximum": 1000000000000.0,
+          "minimum": 0,
+          "title": "Stop Ms",
+          "type": "number"
+        },
+        "observed_until_ms": {
+          "maximum": 1000000000000.0,
+          "minimum": 0,
+          "title": "Observed Until Ms",
+          "type": "number"
+        },
+        "timestamp_uncertainty_ms": {
+          "maximum": 1000000.0,
+          "minimum": 0,
+          "title": "Timestamp Uncertainty Ms",
+          "type": "number"
+        },
+        "wire_status": {
+          "enum": [
+            "completed",
+            "held",
+            "disarmed",
+            "in_progress",
+            "fault"
+          ],
+          "title": "Wire Status",
+          "type": "string"
+        }
+      },
+      "required": [
+        "clock_id",
+        "session_id",
+        "command_id",
+        "phase_id",
+        "start_ms",
+        "stop_ms",
+        "observed_until_ms",
+        "timestamp_uncertainty_ms",
+        "wire_status"
+      ],
+      "title": "GuardPhase",
+      "type": "object"
+    },
+    "Identifier": {
+      "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.:-]{0,127}$",
+      "type": "string"
+    },
+    "Metric": {
+      "additionalProperties": false,
+      "description": "Measured scalar and conservative absolute error bound, not confidence.",
+      "properties": {
+        "value": {
+          "title": "Value",
+          "type": "number"
+        },
+        "uncertainty": {
+          "maximum": 1000000.0,
+          "minimum": 0,
+          "title": "Uncertainty",
+          "type": "number"
+        },
+        "unit": {
+          "enum": [
+            "mm",
+            "deg",
+            "ms"
+          ],
+          "title": "Unit",
+          "type": "string"
+        }
+      },
+      "required": [
+        "value",
+        "uncertainty",
+        "unit"
+      ],
+      "title": "Metric",
+      "type": "object"
+    },
+    "MotionMetrics": {
+      "additionalProperties": false,
+      "description": "Planar body motion, independent height posture, excursion and settling.",
+      "properties": {
+        "x_forward": {
+          "$ref": "#/$defs/Metric"
+        },
+        "y_left": {
+          "$ref": "#/$defs/Metric"
+        },
+        "yaw_ccw": {
+          "$ref": "#/$defs/Metric"
+        },
+        "height_up": {
+          "$ref": "#/$defs/Metric"
+        },
+        "peak_excursion": {
+          "$ref": "#/$defs/Metric"
+        },
+        "post_stop_excursion": {
+          "$ref": "#/$defs/Metric"
+        },
+        "settle_time": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Metric"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "x_forward",
+        "y_left",
+        "yaw_ccw",
+        "height_up",
+        "peak_excursion",
+        "post_stop_excursion",
+        "settle_time"
+      ],
+      "title": "MotionMetrics",
+      "type": "object"
+    },
+    "MotionProfile": {
+      "additionalProperties": false,
+      "description": "Robot-relative envelope identity independent of site and camera.",
+      "properties": {
+        "schema_version": {
+          "const": 1,
+          "title": "Schema Version",
+          "type": "integer"
+        },
+        "units": {
+          "const": "mm_deg",
+          "default": "mm_deg",
+          "title": "Units",
+          "type": "string"
+        },
+        "body_frame": {
+          "const": "x_forward_y_left_yaw_ccw",
+          "default": "x_forward_y_left_yaw_ccw",
+          "title": "Body Frame",
+          "type": "string"
+        },
+        "robot_revision": {
+          "$ref": "#/$defs/Identifier"
+        },
+        "installed_sha256": {
+          "$ref": "#/$defs/Digest"
+        },
+        "gait_revision": {
+          "$ref": "#/$defs/Identifier"
+        },
+        "action": {
+          "$ref": "#/$defs/ActionName"
+        },
+        "start_pose": {
+          "$ref": "#/$defs/Identifier"
+        },
+        "end_pose": {
+          "$ref": "#/$defs/Identifier"
+        },
+        "power_regime": {
+          "$ref": "#/$defs/Identifier"
+        },
+        "load_class": {
+          "$ref": "#/$defs/Identifier"
+        },
+        "surface": {
+          "$ref": "#/$defs/SurfaceClass"
+        },
+        "delta": {
+          "$ref": "#/$defs/Transform"
+        },
+        "swept_radius_mm": {
+          "$ref": "#/$defs/Positive"
+        },
+        "stopping_distance_mm": {
+          "$ref": "#/$defs/Nonnegative"
+        },
+        "interval_travel_mm": {
+          "$ref": "#/$defs/Nonnegative"
+        },
+        "uncertainty_mm": {
+          "$ref": "#/$defs/Nonnegative"
+        },
+        "sample_count": {
+          "exclusiveMinimum": 0,
+          "title": "Sample Count",
+          "type": "integer"
+        },
+        "assumptions": {
+          "items": {
+            "$ref": "#/$defs/Identifier"
+          },
+          "minItems": 1,
+          "title": "Assumptions",
+          "type": "array"
+        },
+        "evidence": {
+          "items": {
+            "$ref": "#/$defs/TrialEvidence"
+          },
+          "minItems": 1,
+          "title": "Evidence",
+          "type": "array"
+        }
+      },
+      "required": [
+        "schema_version",
+        "robot_revision",
+        "installed_sha256",
+        "gait_revision",
+        "action",
+        "start_pose",
+        "end_pose",
+        "power_regime",
+        "load_class",
+        "surface",
+        "delta",
+        "swept_radius_mm",
+        "stopping_distance_mm",
+        "interval_travel_mm",
+        "uncertainty_mm",
+        "sample_count",
+        "assumptions",
+        "evidence"
+      ],
+      "title": "MotionProfile",
+      "type": "object"
+    },
+    "Nonnegative": {
+      "maximum": 1000000000.0,
+      "minimum": 0,
+      "type": "number"
+    },
+    "Positive": {
+      "exclusiveMinimum": 0,
+      "maximum": 1000000000.0,
+      "minimum": -1000000000.0,
+      "type": "number"
+    },
+    "ProfileConditions": {
+      "additionalProperties": false,
+      "description": "Portable identity and predeclared bounds, independent of the stage.",
+      "properties": {
+        "action": {
+          "$ref": "#/$defs/ActionName"
+        },
+        "start_pose": {
+          "maxLength": 128,
+          "minLength": 1,
+          "title": "Start Pose",
+          "type": "string"
+        },
+        "end_pose": {
+          "maxLength": 128,
+          "minLength": 1,
+          "title": "End Pose",
+          "type": "string"
+        },
+        "robot_revision": {
+          "maxLength": 128,
+          "minLength": 1,
+          "title": "Robot Revision",
+          "type": "string"
+        },
+        "installed_sha256": {
+          "pattern": "^[a-f0-9]{64}$",
+          "title": "Installed Sha256",
+          "type": "string"
+        },
+        "gait_revision": {
+          "maxLength": 128,
+          "minLength": 1,
+          "title": "Gait Revision",
+          "type": "string"
+        },
+        "power_regime": {
+          "maxLength": 128,
+          "minLength": 1,
+          "title": "Power Regime",
+          "type": "string"
+        },
+        "load_class": {
+          "maxLength": 128,
+          "minLength": 1,
+          "title": "Load Class",
+          "type": "string"
+        },
+        "surface": {
+          "$ref": "#/$defs/SurfaceClass"
+        },
+        "voltage_bands": {
+          "items": {
+            "maxItems": 2,
+            "minItems": 2,
+            "prefixItems": [
+              {
+                "exclusiveMinimum": 0,
+                "type": "number"
+              },
+              {
+                "exclusiveMinimum": 0,
+                "type": "number"
+              }
+            ],
+            "type": "array"
+          },
+          "minItems": 1,
+          "title": "Voltage Bands",
+          "type": "array"
+        },
+        "limited_voltage_evidence": {
+          "anyOf": [
+            {
+              "pattern": "^[a-f0-9]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Limited Voltage Evidence"
+        },
+        "swept_radius_mm": {
+          "exclusiveMinimum": 0,
+          "title": "Swept Radius Mm",
+          "type": "number"
+        },
+        "interval_travel_mm": {
+          "maximum": 1000000.0,
+          "minimum": 0,
+          "title": "Interval Travel Mm",
+          "type": "number"
+        }
+      },
+      "required": [
+        "action",
+        "start_pose",
+        "end_pose",
+        "robot_revision",
+        "installed_sha256",
+        "gait_revision",
+        "power_regime",
+        "load_class",
+        "surface",
+        "voltage_bands",
+        "swept_radius_mm",
+        "interval_travel_mm"
+      ],
+      "title": "ProfileConditions",
+      "type": "object"
+    },
+    "ProfileOutcome": {
+      "additionalProperties": false,
+      "description": "Portable candidate plus separately retained collection evidence.",
+      "properties": {
+        "conditions": {
+          "$ref": "#/$defs/ProfileConditions"
+        },
+        "status": {
+          "enum": [
+            "HOLD",
+            "REPLAY_COMPLETE"
+          ],
+          "title": "Status",
+          "type": "string"
+        },
+        "reasons": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Reasons",
+          "type": "array"
+        },
+        "total_attempts": {
+          "title": "Total Attempts",
+          "type": "integer"
+        },
+        "valid_trials": {
+          "title": "Valid Trials",
+          "type": "integer"
+        },
+        "candidate": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/MotionProfile"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "profile_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Profile Id"
+        }
+      },
+      "required": [
+        "conditions",
+        "status",
+        "reasons",
+        "total_attempts",
+        "valid_trials"
+      ],
+      "title": "ProfileOutcome",
+      "type": "object"
+    },
+    "ScoreResult": {
+      "additionalProperties": false,
+      "description": "Scored observation or unmeasurable outcome; neither grants authority.",
+      "properties": {
+        "schema_version": {
+          "const": 1,
+          "default": 1,
+          "title": "Schema Version",
+          "type": "integer"
+        },
+        "outcome": {
+          "enum": [
+            "motion",
+            "partial",
+            "unexpected",
+            "no_travel",
+            "unmeasurable"
+          ],
+          "title": "Outcome",
+          "type": "string"
+        },
+        "motion_kind": {
+          "enum": [
+            "translation",
+            "turn",
+            "posture",
+            "mixed",
+            "stationary",
+            "unmeasurable"
+          ],
+          "title": "Motion Kind",
+          "type": "string"
+        },
+        "reasons": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "title": "Reasons",
+          "type": "array"
+        },
+        "physical_motion_authorized": {
+          "const": false,
+          "default": false,
+          "title": "Physical Motion Authorized",
+          "type": "boolean"
+        },
+        "provenance": {
+          "enum": [
+            "synthetic",
+            "measured",
+            "unavailable"
+          ],
+          "title": "Provenance",
+          "type": "string"
+        },
+        "recording_sha256": {
+          "anyOf": [
+            {
+              "pattern": "^[a-f0-9]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Recording Sha256"
+        },
+        "calibration_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Calibration Id"
+        },
+        "calibration_sha256": {
+          "anyOf": [
+            {
+              "pattern": "^[a-f0-9]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Calibration Sha256"
+        },
+        "camera_frame_sha256": {
+          "default": [],
+          "items": {
+            "pattern": "^[a-f0-9]{64}$",
+            "type": "string"
+          },
+          "title": "Camera Frame Sha256",
+          "type": "array"
+        },
+        "guard": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/GuardPhase"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "metrics": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/MotionMetrics"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "timestamp_uncertainty_ms": {
+          "anyOf": [
+            {
+              "maximum": 1000000.0,
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Timestamp Uncertainty Ms"
+        },
+        "settled": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Settled"
+        },
+        "slip_evidence": {
+          "default": "unmeasurable",
+          "enum": [
+            "unmeasurable",
+            "post_stop_drift"
+          ],
+          "title": "Slip Evidence",
+          "type": "string"
+        }
+      },
+      "required": [
+        "outcome",
+        "motion_kind",
+        "provenance"
+      ],
+      "title": "ScoreResult",
+      "type": "object"
+    },
+    "SurfaceClass": {
+      "additionalProperties": false,
+      "description": "Measured uncertainty-inclusive intervals for a specific material/finish.",
+      "properties": {
+        "material_id": {
+          "$ref": "#/$defs/Identifier"
+        },
+        "finish_id": {
+          "$ref": "#/$defs/Identifier"
+        },
+        "slope_deg": {
+          "maxItems": 2,
+          "minItems": 2,
+          "prefixItems": [
+            {
+              "$ref": "#/$defs/Nonnegative"
+            },
+            {
+              "$ref": "#/$defs/Nonnegative"
+            }
+          ],
+          "title": "Slope Deg",
+          "type": "array"
+        },
+        "static_traction": {
+          "maxItems": 2,
+          "minItems": 2,
+          "prefixItems": [
+            {
+              "$ref": "#/$defs/Nonnegative"
+            },
+            {
+              "$ref": "#/$defs/Nonnegative"
+            }
+          ],
+          "title": "Static Traction",
+          "type": "array"
+        },
+        "traction_units": {
+          "const": "coefficient",
+          "default": "coefficient",
+          "title": "Traction Units",
+          "type": "string"
+        }
+      },
+      "required": [
+        "material_id",
+        "finish_id",
+        "slope_deg",
+        "static_traction"
+      ],
+      "title": "SurfaceClass",
+      "type": "object"
+    },
+    "Transform": {
+      "additionalProperties": false,
+      "description": "Rigid planar transform: rotate counterclockwise, then translate.",
+      "properties": {
+        "x_mm": {
+          "$ref": "#/$defs/furbomek_gateway__motion_geometry__Finite__1"
+        },
+        "y_mm": {
+          "$ref": "#/$defs/furbomek_gateway__motion_geometry__Finite__1"
+        },
+        "yaw_deg": {
+          "$ref": "#/$defs/furbomek_gateway__motion_geometry__Finite__2"
+        }
+      },
+      "required": [
+        "x_mm",
+        "y_mm",
+        "yaw_deg"
+      ],
+      "title": "Transform",
+      "type": "object"
+    },
+    "TrialEvidence": {
+      "additionalProperties": false,
+      "description": "Historical collection provenance; never rewritten on stage transfer.",
+      "properties": {
+        "schema_version": {
+          "const": 1,
+          "title": "Schema Version",
+          "type": "integer"
+        },
+        "trial_id": {
+          "$ref": "#/$defs/Identifier"
+        },
+        "calibration_id": {
+          "$ref": "#/$defs/Identifier"
+        },
+        "artifact_sha256": {
+          "$ref": "#/$defs/Digest"
+        },
+        "provenance": {
+          "enum": [
+            "synthetic",
+            "recorded_replay",
+            "measured"
+          ],
+          "title": "Provenance",
+          "type": "string"
+        },
+        "sample_count": {
+          "exclusiveMinimum": 0,
+          "title": "Sample Count",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "schema_version",
+        "trial_id",
+        "calibration_id",
+        "artifact_sha256",
+        "provenance",
+        "sample_count"
+      ],
+      "title": "TrialEvidence",
+      "type": "object"
+    },
+    "TrialOutcome": {
+      "additionalProperties": false,
+      "description": "Full denominator with machine scoring and independent protocol status.",
+      "properties": {
+        "trial_id": {
+          "maxLength": 128,
+          "minLength": 1,
+          "title": "Trial Id",
+          "type": "string"
+        },
+        "accepted": {
+          "title": "Accepted",
+          "type": "boolean"
+        },
+        "reasons": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Reasons",
+          "type": "array"
+        },
+        "evidence_sha256": {
+          "pattern": "^[a-f0-9]{64}$",
+          "title": "Evidence Sha256",
+          "type": "string"
+        },
+        "score": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ScoreResult"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "initial_heading_deg": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Initial Heading Deg"
+        }
+      },
+      "required": [
+        "trial_id",
+        "accepted",
+        "reasons",
+        "evidence_sha256",
+        "score"
+      ],
+      "title": "TrialOutcome",
+      "type": "object"
+    },
+    "furbomek_gateway__motion_geometry__Finite__1": {
+      "maximum": 1000000000.0,
+      "minimum": -1000000000.0,
+      "type": "number"
+    },
+    "furbomek_gateway__motion_geometry__Finite__2": {
+      "maximum": 180,
+      "minimum": -180,
+      "type": "number"
+    }
+  },
+  "additionalProperties": false,
+  "description": "Replay completeness is never supervised or unattended qualification.",
+  "properties": {
+    "schema_version": {
+      "const": 1,
+      "default": 1,
+      "title": "Schema Version",
+      "type": "integer"
+    },
+    "status": {
+      "enum": [
+        "HOLD",
+        "REPLAY_COMPLETE"
+      ],
+      "title": "Status",
+      "type": "string"
+    },
+    "reasons": {
+      "default": [],
+      "items": {
+        "type": "string"
+      },
+      "title": "Reasons",
+      "type": "array"
+    },
+    "physical_motion_authorized": {
+      "const": false,
+      "default": false,
+      "title": "Physical Motion Authorized",
+      "type": "boolean"
+    },
+    "supervised_status": {
+      "const": "HOLD",
+      "default": "HOLD",
+      "title": "Supervised Status",
+      "type": "string"
+    },
+    "unattended_status": {
+      "const": "HOLD",
+      "default": "HOLD",
+      "title": "Unattended Status",
+      "type": "string"
+    },
+    "profiles": {
+      "default": [],
+      "items": {
+        "$ref": "#/$defs/ProfileOutcome"
+      },
+      "title": "Profiles",
+      "type": "array"
+    },
+    "trials": {
+      "default": [],
+      "items": {
+        "$ref": "#/$defs/TrialOutcome"
+      },
+      "title": "Trials",
+      "type": "array"
+    }
+  },
+  "required": [
+    "status"
+  ],
+  "title": "CatalogReceipt",
+  "type": "object"
+}
