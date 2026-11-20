@@ -1132,6 +1132,13 @@ list retains the broader full-autonomy dependencies, not an unchecked restart.
 
 ### 9.3 Phuket motion qualification for streaming
 
+**2026-11-20 release status: HOLD.** The [production handoff](docs/operations/production-motion-and-effects.md)
+and [motion release ledger](docs/hardware/motion-profiles/RELEASE.md) separate
+synthetic calibration/catalog/stage evidence from the still-unmeasured physical
+gates. No measured portable profile, installed authenticated-link qualification,
+independent cutoff acceptance or unattended release is established. Stationary
+fixed RGB remains the default; the historical supported bench retains its scope.
+
 Start from the installed Guard and the measured two-phase tabletop advance.
 The Mac gateway now runs both forward phases in one armed session and the
 Brodex profile reaches it. A protocol acknowledgement reports controller

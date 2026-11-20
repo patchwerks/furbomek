@@ -84,6 +84,13 @@ artifact as permission to flash or reconnect actuators.
 
 ## Current-clone procedure
 
+Before enabling candidate production effects or motion, read the
+[production HOLD handoff](docs/operations/production-motion-and-effects.md) and
+[motion release ledger](docs/hardware/motion-profiles/RELEASE.md). Replay and
+owner-browser fixtures do not qualify installed effects or physical travel.
+The current release checker is diagnostic-only and always refuses release;
+keep stationary fixed RGB and the existing supported-bench limits.
+
 From the repository root:
 
 ```bash
