@@ -5,14 +5,14 @@ import os
 import signal
 import stat
 from collections.abc import Awaitable, Callable
-from contextlib import suppress
+from contextlib import ExitStack, suppress
 from pathlib import Path
-from typing import ClassVar, assert_never, final
+from typing import ClassVar, Literal, assert_never, final
 
 import anyio
 from anyio.abc import SocketStream
 from anyio.streams.buffered import BufferedByteReceiveStream
-from pydantic import BaseModel, ConfigDict, ValidationError
+from pydantic import BaseModel, ConfigDict, TypeAdapter, ValidationError
 
 from furbomek_gateway.edge_media import MacMedia, MediaSettings
 from furbomek_gateway.edge_protocol import (
@@ -27,6 +27,8 @@ from furbomek_gateway.edge_protocol import (
 from furbomek_gateway.edge_robot import RobotBench
 from furbomek_gateway.edge_ssh import LinkSettings, ReverseLink
 from furbomek_gateway.guard_models import GuardSettings
+from furbomek_gateway.production_control import ProductionReply, ProductionRequest
+from furbomek_gateway.production_lifecycle import ProductionLifetime, ProductionSettings
 
 
 class EdgeSettings(BaseModel):
@@ -36,6 +38,7 @@ class EdgeSettings(BaseModel):
     media: MediaSettings
     guard: GuardSettings
     link: LinkSettings
+    production: ProductionSettings | None = None
 
 
 async def _disconnect(stream: SocketStream, scope: anyio.CancelScope) -> None:
@@ -94,8 +97,11 @@ async def serve_request(
 class EdgeHost:
     """Route separate remote and local commands to the owned devices."""
 
-    def __init__(self, settings: EdgeSettings) -> None:
+    def __init__(
+        self, settings: EdgeSettings, production: ProductionLifetime | None = None
+    ) -> None:
         """Construct closed device owners from private settings."""
+        self.production = production
         self.media = MacMedia(settings.media)
         self.bench = RobotBench(settings.guard)
 
@@ -110,21 +116,60 @@ class EdgeHost:
             return EdgeReply(result="refused", state="stale_request")
         match request:
             case RobotRequest():
-                return await self.bench.remote(request)
+                reply = await self.bench.remote(request)
+                if request.command == "stop" and self.production is not None:
+                    with anyio.CancelScope(shield=True):
+                        await anyio.to_thread.run_sync(self.production.runtime.close)
+                return reply
             case KinectRequest():
                 return await self.media.camera(request.command)
             case ObsRequest():
                 return await self.media.obs(request.command)
-        assert_never(request)
+            case ProductionRequest():
+                return await self.production_request(request)
+            case _:
+                assert_never(request)
+
+    async def production_request(
+        self,
+        request: ProductionRequest,
+        *,
+        origin: Literal["local", "remote"] = "remote",
+    ) -> EdgeReply:
+        """Dispatch opt-in production requests on a bounded worker thread."""
+        if self.production is None:
+            return EdgeReply(result="refused", state="production_disabled")
+        reply: ProductionReply | None = None
+        try:
+            reply = await anyio.to_thread.run_sync(
+                self.production.dispatch.execute, request.operation, origin
+            )
+            await anyio.lowlevel.checkpoint()
+        except anyio.get_cancelled_exc_class():
+            if reply is not None:
+                with anyio.CancelScope(shield=True):
+                    await anyio.to_thread.run_sync(
+                        self.production.dispatch.cancel_reply, reply
+                    )
+            raise
+        return EdgeReply(
+            result="ok" if reply.accepted else "refused",
+            state="production",
+            production=reply,
+        )
 
     async def operator(self, data: bytes) -> EdgeReply:
         """Decode a local bench authorization command."""
         try:
-            request = OperatorRequest.model_validate_json(data, strict=True)
+            request = TypeAdapter(OperatorRequest | ProductionRequest).validate_json(
+                data, strict=True
+            )
         except ValidationError:
             return EdgeReply(result="invalid", state="unrecognized_operator_request")
         if not request.fresh():
             return EdgeReply(result="refused", state="stale_request")
+        if isinstance(request, ProductionRequest):
+            return await self.production_request(request, origin="local")
         return await self.bench.operator(request.command)
 
     async def run_remote(self, stream: SocketStream) -> None:
@@ -141,6 +186,14 @@ class EdgeHost:
             await self.bench.expire()
             await self.media.check_workers()
             await anyio.sleep(0.25)
+
+    async def watch_production(self) -> None:
+        """Keep bounded media work off the independent bench expiry loop."""
+        if self.production is None:
+            return
+        while True:
+            await anyio.to_thread.run_sync(self.production.runtime.tick)
+            await anyio.sleep(0.05)
 
 
 def _private_root(directory: Path) -> None:
@@ -160,13 +213,18 @@ async def run_edge(settings: EdgeSettings) -> None:
     _ = os.umask(0o077)
     runtime = settings.media.runtime
     _private_root(runtime)
-    with (runtime / "edge.lock").open("ab") as lock:
+    with ExitStack() as resources, (runtime / "edge.lock").open("ab") as lock:
         fcntl.flock(lock.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
         control = runtime / "control.sock"
         operator = runtime / "operator.sock"
         control.unlink(missing_ok=True)
         operator.unlink(missing_ok=True)
-        edge = EdgeHost(settings)
+        production = (
+            resources.enter_context(ProductionLifetime(settings.production))
+            if settings.production is not None
+            else None
+        )
+        edge = EdgeHost(settings, production)
         activity_path = edge.media.frames / "activity.json"
         activity_path.unlink(missing_ok=True)
         link = ReverseLink(settings.link, control, activity_path)
@@ -180,6 +238,8 @@ async def run_edge(settings: EdgeSettings) -> None:
                 _ = tasks.start_soon(local.serve, edge.run_operator)
                 _ = tasks.start_soon(link.run, edge.bench)
                 _ = tasks.start_soon(edge.watch)
+                if production is not None:
+                    _ = tasks.start_soon(edge.watch_production)
                 with anyio.open_signal_receiver(
                     signal.SIGTERM, signal.SIGINT
                 ) as signals:

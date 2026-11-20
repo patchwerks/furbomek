@@ -90,9 +90,9 @@ def overlay_observer_command() -> None:
 
 
 @app.command("edge-mcp")
-def edge_mcp(socket: Path) -> None:
+def edge_mcp(socket: Path, production: bool = False) -> None:
     """Serve the narrow Mac edge tools from the Brodex profile."""
-    create_edge_client(socket).run(transport="stdio")
+    create_edge_client(socket, production=production).run(transport="stdio")
 
 
 @app.command("edge-host")

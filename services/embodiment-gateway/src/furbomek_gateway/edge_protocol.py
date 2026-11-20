@@ -1,6 +1,5 @@
 """Bounded messages carried by the private Mac edge sockets."""
 
-import time
 from pathlib import Path
 from typing import Annotated, ClassVar, Final, Literal
 
@@ -8,6 +7,7 @@ import anyio
 from anyio.streams.buffered import BufferedByteReceiveStream
 from pydantic import BaseModel, ConfigDict, Field, TypeAdapter, ValidationError
 
+from furbomek_gateway import edge_time
 from furbomek_gateway.guard_models import (
     ActionName,
     GuardCapabilitiesResult,
@@ -16,6 +16,7 @@ from furbomek_gateway.guard_models import (
     GuardSupplyVoltageResult,
     PoweredActionResult,
 )
+from furbomek_gateway.production_control import ProductionReply, ProductionRequest
 
 type KinectCommand = Literal["status", "start", "stop", "rgb", "crimson", "xyz"]
 type ObsCommand = Literal[
@@ -37,13 +38,13 @@ type RobotResult = (
     | GuardStopResult
 )
 MESSAGE_LIMIT: Final = 8192
-REQUEST_AGE_MS: Final = 5000
-CLOCK_SKEW_MS: Final = 1000
+CLOCK_SKEW_MS: Final = edge_time.CLOCK_SKEW_MS
+REQUEST_AGE_MS: Final = edge_time.REQUEST_AGE_MS
 
 
 def unix_ms() -> int:
-    """Return current wall time in Unix milliseconds."""
-    return time.time_ns() // 1_000_000
+    """Preserve the public edge time helper for existing callers."""
+    return edge_time.unix_ms()
 
 
 class _Message(BaseModel):
@@ -86,9 +87,9 @@ class OperatorRequest(_Request):
     command: OperatorCommand
 
 
-type RemoteRequest = RobotRequest | KinectRequest | ObsRequest
+type RemoteRequest = RobotRequest | KinectRequest | ObsRequest | ProductionRequest
 REMOTE_REQUEST: Final[TypeAdapter[RemoteRequest]] = TypeAdapter(
-    Annotated[RobotRequest | KinectRequest | ObsRequest, Field(discriminator="target")]
+    Annotated[RemoteRequest, Field(discriminator="target")]
 )
 
 
@@ -121,6 +122,7 @@ class EdgeReply(_Message):
     robot: RobotResult | None = None
     kinect: KinectHealth | None = None
     obs: ObsHealth | None = None
+    production: ProductionReply | None = None
 
 
 async def exchange(path: Path, request: RemoteRequest | OperatorRequest) -> EdgeReply:

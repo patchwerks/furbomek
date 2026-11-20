@@ -15,9 +15,10 @@ from furbomek_gateway.edge_protocol import (
     unix_ms,
 )
 from furbomek_gateway.guard_models import ActionName
+from furbomek_gateway.production_mcp import register_production_tools
 
 
-def create_edge_client(socket_path: Path) -> FastMCP:
+def create_edge_client(socket_path: Path, *, production: bool = False) -> FastMCP:
     """Expose semantic tools over the Unix socket configured by the operator."""
     server = FastMCP(
         name="furbomek-mac-edge",
@@ -78,4 +79,6 @@ def create_edge_client(socket_path: Path) -> FastMCP:
             socket_path, ObsRequest(command=action, issued_ms=unix_ms())
         )
 
+    if production:
+        register_production_tools(server, socket_path)
     return server
