@@ -11,7 +11,7 @@
       "after": [],
       "effect": {"capability": "hud.redacted.v1", "template": "liquidation", "duration_ms": 1000},
       "condition": "capability_available",
-      "ttl_ms": 1000,
+      "ttl_ms": 2000,
       "on_unavailable": "skip",
       "on_fault": "cancel_pack"
     },
@@ -20,7 +20,7 @@
       "after": [],
       "effect": {"capability": "graphics.pulse.v1", "preset": "liquidation", "intensity_percent": 50, "duration_ms": 1000},
       "condition": "capability_available",
-      "ttl_ms": 1000,
+      "ttl_ms": 2000,
       "on_unavailable": "skip",
       "on_fault": "cancel_pack"
     },
@@ -29,7 +29,7 @@
       "after": [],
       "effect": {"capability": "sfx.preset.v1", "preset": "liquidation", "gain_percent": 30, "duration_ms": 1000},
       "condition": "capability_available",
-      "ttl_ms": 1000,
+      "ttl_ms": 2000,
       "on_unavailable": "skip",
       "on_fault": "cancel_pack"
     }

@@ -43,7 +43,9 @@ The separate [contract fixture](../fixtures/liquidation.json) exercises optional
 A future physical branch needs a reviewed typed action and individual/transition
 qualification before addition. Voice and face stay reserved and are omitted.
 
-Each cue has a finite TTL equal to its duration. Unavailable media skips;
+Each cue has a finite TTL equal to its duration plus 1000 ms of admission slack.
+The first scheduler tick must leave enough TTL for the entire effect; this margin
+permits a bounded host delay without extending playback. Unavailable media skips;
 faults cancel the pack, and cancellation cancels pending/stops active cues.
 Runtime readiness and current owner/revision receipts still gate media execution
 and restoration. A dry run predicts timing only; `planned_media` does not mean
@@ -61,3 +63,8 @@ uv run --frozen --project services/embodiment-gateway python -m furbomek_gateway
 
 Both timelines and every row report `dispatch: false`. These checks require no
 provider, device, audio output, OBS instance or persistent service.
+
+## Changelog
+
+- 2026-11-20, Task 29: allow 1000 ms of bounded scheduler admission slack;
+  effect durations, media limits and authority remain unchanged.

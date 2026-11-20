@@ -11,7 +11,7 @@
       "after": [],
       "effect": {"capability": "hud.redacted.v1", "template": "neutral", "duration_ms": 1000},
       "condition": "capability_available",
-      "ttl_ms": 1000,
+      "ttl_ms": 2000,
       "on_unavailable": "skip",
       "on_fault": "cancel_pack"
     },
@@ -20,7 +20,7 @@
       "after": [],
       "effect": {"capability": "sfx.preset.v1", "preset": "acknowledge", "gain_percent": 25, "duration_ms": 500},
       "condition": "capability_available",
-      "ttl_ms": 500,
+      "ttl_ms": 1500,
       "on_unavailable": "skip",
       "on_fault": "cancel_pack"
     }
