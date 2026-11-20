@@ -2,7 +2,8 @@
 
 import math
 import secrets
-from typing import Annotated, Final, Literal
+from dataclasses import dataclass
+from typing import Annotated, Final, Literal, override
 
 from pydantic import BaseModel, Field
 
@@ -42,8 +43,20 @@ class JointProbe(BaseModel, frozen=True, extra="forbid"):
         )
 
 
+@dataclass(frozen=True, slots=True)
 class JointProbeRejectedError(ValueError):
     """An acknowledgement did not satisfy the local probe lifecycle."""
+
+    reply: GuardReply
+    expected: GuardState
+
+    @override
+    def __str__(self) -> str:
+        return (
+            f"{self.reply.opcode.name} expected {self.expected.name}, "
+            f"got {self.reply.result.name}/{self.reply.state.name} "
+            f"(busy={self.reply.busy}, fault={self.reply.fault})"
+        )
 
 
 def _require(reply: GuardReply, status: GuardState, *, busy: bool = False) -> None:
@@ -53,7 +66,7 @@ def _require(reply: GuardReply, status: GuardState, *, busy: bool = False) -> No
         or reply.busy is not busy
         or reply.fault
     ):
-        raise JointProbeRejectedError
+        raise JointProbeRejectedError(reply, status)
 
 
 async def _run(
@@ -85,8 +98,6 @@ async def _run(
                 return False
         _require(await transport.command(GuardCommand.DISARM), GuardState.DISARMED)
         disarmed = True
-    except JointProbeRejectedError:
-        return False
     finally:
         if attempt.write_started and not disarmed:
             _ = await shielded_stop(transport)

@@ -5,12 +5,15 @@ import pytest
 from furbomek_gateway.guard_protocol import (
     GuardCommand,
     GuardProtocolError,
+    GuardReplyOpcode,
+    GuardState,
     encode_command,
 )
 from furbomek_gateway.guard_serial import GuardSerialTransport
 from furbomek_gateway.joint_bench import (
     JointAngleError,
     JointProbe,
+    JointProbeRejectedError,
     arm_only_check,
     observed_travel,
     reference_stance,
@@ -46,7 +49,10 @@ async def test_probe_latches_stop_if_disarm_ack_is_wrong() -> None:
     ) as board:
         port = await GuardSerialTransport.open(powered_settings(board.path))
         try:
-            assert not await run_probe(port, probe)
+            with pytest.raises(JointProbeRejectedError) as refusal:
+                _ = await run_probe(port, probe)
+            assert refusal.value.reply.opcode is GuardReplyOpcode.DISARM
+            assert refusal.value.expected is GuardState.DISARMED
         finally:
             await port.aclose()
     assert board.actions == [11]
