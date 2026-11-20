@@ -1,6 +1,13 @@
 {
   "schema_version": 1,
-  "updated_on": "2026-10-19",
+  "updated_on": "2026-11-21",
+  "joint_bench_2026_11_21": {
+    "status": "Temporary wired application update verified at physical POWER OFF. See the dated record for the last bench checkpoint.",
+    "physical_setup": "Center support with separate body and handheld USB for maintenance. Disconnect body USB for powered trials.",
+    "provenance": "Bootloader signatures and independent flash readbacks. Guard RF STATUS and camera preflight captured on the Mac.",
+    "hardware_change": "The existing controller pair and output mapping were used. No physical component changes were made.",
+    "evidence": "docs/operations/robot-joint-bench-2026-11-21.md"
+  },
   "maintenance": {
     "protocol": "docs/operations/robot-wired-maintenance.md",
     "latest_software_record": "docs/operations/robot-stop-ack-2026-10-18.md",

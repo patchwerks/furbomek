@@ -3,7 +3,7 @@
   "updated_on": "2026-11-21",
   "joint_bench_candidate": {
     "date": "2026-11-21",
-    "status": "Reproducible candidate. Device installation and camera travel measurements have not been verified.",
+    "status": "Reproducible candidate installed temporarily for the joint bench. Both applications verified by full device readback.",
     "mega_hex_sha256": "74a5c00a464b4358e2fb310716c2588ca0468a703b00591bad2d82488950af44",
     "mega_elf_sha256": "7954f2366ed3dd263429d62296e459f02bb5c9f3af2fef6a5115a0e5d155925b",
     "remote_hex_sha256": "8336d68ddf6275c83a53b5667d558346cd6f30d2450ffdd0d4441e548466a095",
@@ -11,7 +11,8 @@
     "verification": "Two matched builds, native guard tests and Mac pseudo-terminal tests",
     "bounds": "One joint at a time with fixed 6, 18 and 30 degree command bands, clearance checks and existing STOP/TTL behavior. Servo endpoints and physical angles are unmeasured.",
     "rollback": "Preserve and verify both installed applications before changing either. Restore both prior applications through the verified serial bootloaders.",
-    "evidence": "firmware/freenove-guard/joint-bench.md"
+    "evidence": "firmware/freenove-guard/joint-bench.md",
+    "installation_evidence": "docs/operations/robot-joint-bench-2026-11-21.md"
   },
   "pending_deployment": {
     "date": "2026-10-18",
@@ -215,6 +216,16 @@
     "rollback": "No device changes; preserve installed image and private backups. Remove prototype source if abandoned. No bootloader, EEPROM, fuse or lock writes occurred."
   },
   "history": [
+    {
+      "date": "2026-11-21",
+      "change": "Installed temporary joint diagnostic applications on both controllers.",
+      "before": "Larger expressive Mega application and expressive handheld application, verified against archived full flash images.",
+      "after": "Both bench applications matched readback, and all bytes outside the new application ranges matched the prior images.",
+      "verification": "Verified MCU signatures, both full flash readbacks, unchanged Mega EEPROM and RF BOOT/idle/fault 0 at operator-confirmed physical POWER OFF.",
+      "safety": "Local exclusive handheld session. Production Hermes motion bridge closed. Powered probes require the support, absent body USB and supervision.",
+      "rollback": "Private full flash readbacks and page-aligned pre-write application backups retained. Actual handheld EEPROM read remains unverified because of bootloader aliasing.",
+      "evidence": "docs/operations/robot-joint-bench-2026-11-21.md"
+    },
     {
       "date": "2026-10-18",
       "change": "Prepared unflashed STOP ACK route fix and mandatory wired downtime maintenance protocol",
