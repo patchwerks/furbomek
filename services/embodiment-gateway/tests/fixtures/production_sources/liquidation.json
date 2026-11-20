@@ -1,0 +1,1 @@
+{"channel":"userNonFundingLedgerUpdates","data":{"isSnapshot":false,"user":"SANITIZED_ACCOUNT","nonFundingLedgerUpdates":[{"time":1795132800000,"hash":"SANITIZED_HASH","delta":{"type":"liquidation","accountValue":10,"leverageType":"Cross","liquidatedPositions":[{"coin":"TEST","szi":1}]}}]}}
