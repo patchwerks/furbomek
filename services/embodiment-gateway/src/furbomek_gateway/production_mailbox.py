@@ -14,8 +14,18 @@ from .reaction_types import StorePrivacyError
 DIRECTORY_MODE: Final = 0o700
 FILE_MODE: Final = 0o600
 MAX_BYTES: Final = 8192
+READ_ATTEMPTS: Final = 2
 
 MailboxName = Literal["effects.json", "effects-ack.json", "sfx.json", "sfx-ack.json"]
+
+
+class ReceiptReplacedError(OSError):
+    """Bounded receipt read lost both atomic-publication races; caller must HOLD."""
+
+    def __init__(self, path: Path) -> None:
+        """Keep the unavailable path typed without freezing exception internals."""
+        self.path: Path = path
+        super().__init__(f"private receipt replaced during read: {path}")
 
 
 @final
@@ -39,7 +49,7 @@ class PrivateMailbox:
                 dir_fd=self._fd,
             )
             _ = self._stack.callback(os.close, lock)
-            self._check(lock)
+            _ = self._check(lock)
             fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
         except (OSError, StorePrivacyError):
             self._stack.close()
@@ -50,25 +60,31 @@ class PrivateMailbox:
         if info.st_uid != os.getuid() or stat.S_IMODE(info.st_mode) != DIRECTORY_MODE:
             raise StorePrivacyError(str(self.directory))
 
-    def _check(self, descriptor: int) -> None:
+    def _check(self, descriptor: int, *, allow_replaced: bool = False) -> bool:
         info = os.fstat(descriptor)
         if (
             not stat.S_ISREG(info.st_mode)
             or info.st_uid != os.getuid()
-            or info.st_nlink != 1
+            or (info.st_nlink != 1 and not (allow_replaced and info.st_nlink == 0))
             or stat.S_IMODE(info.st_mode) != FILE_MODE
         ):
             raise StorePrivacyError(str(self.directory))
 
+        return info.st_nlink == 1
+
     def read(self, name: MailboxName) -> bytes:
-        """Reject oversized, replaced or non-private receipt files."""
+        """Discard replaced descriptors and safely reopen the fixed path once."""
         flags = os.O_RDONLY | os.O_NOFOLLOW | os.O_NONBLOCK
-        with os.fdopen(os.open(name, flags, dir_fd=self._fd), "rb") as source:
-            self._check(source.fileno())
-            data = source.read(MAX_BYTES + 1)
-        if len(data) > MAX_BYTES:
-            raise StorePrivacyError(str(self.directory))
-        return data
+        for _ in range(READ_ATTEMPTS):
+            with os.fdopen(os.open(name, flags, dir_fd=self._fd), "rb") as source:
+                if not self._check(source.fileno(), allow_replaced=True):
+                    continue
+                data = source.read(MAX_BYTES + 1)
+                if len(data) > MAX_BYTES:
+                    raise StorePrivacyError(str(self.directory))
+                if self._check(source.fileno(), allow_replaced=True):
+                    return data
+        raise ReceiptReplacedError(self.directory)
 
     def write(self, name: MailboxName, data: str) -> None:
         """Atomic fixed-path publication; never follow an existing target."""
