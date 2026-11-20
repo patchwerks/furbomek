@@ -126,7 +126,11 @@ def test_immediate_obs_exit_never_publishes_ready(tmp_path: Path) -> None:
     )
     paths = RuntimePaths.from_environment(
         tmp_path,
-        {"FURBOMEK_MEDIA_ROOT": str(tmp_path / "media"), "FURBOMEK_KINECT_DIR": str(kinect)},
+        {
+            "FURBOMEK_MEDIA_ROOT": str(tmp_path / "media"),
+            "FURBOMEK_KINECT_DIR": str(kinect),
+            "FURBOMEK_ACTIVITY_SPOOL": str(tmp_path / "spool" / "events.jsonl"),
+        },
     )
     result = run_session(
         RuntimeSettings(readiness_timeout_s=2),
@@ -149,6 +153,7 @@ def test_stale_prelaunch_artifacts_do_not_ready(tmp_path: Path) -> None:
         {
             "FURBOMEK_MEDIA_ROOT": str(tmp_path / "media"),
             "FURBOMEK_KINECT_DIR": str(tmp_path / "kinect"),
+            "FURBOMEK_ACTIVITY_SPOOL": str(tmp_path / "spool" / "events.jsonl"),
         },
     )
     paths.kinect_dir.mkdir()
@@ -206,7 +211,11 @@ time.sleep(30)"""
 
     paths = RuntimePaths.from_environment(
         tmp_path,
-        {"FURBOMEK_MEDIA_ROOT": str(tmp_path / "media"), "FURBOMEK_KINECT_DIR": str(kinect)},
+        {
+            "FURBOMEK_MEDIA_ROOT": str(tmp_path / "media"),
+            "FURBOMEK_KINECT_DIR": str(kinect),
+            "FURBOMEK_ACTIVITY_SPOOL": str(tmp_path / "spool" / "events.jsonl"),
+        },
     )
     result = run_session(
         RuntimeSettings(readiness_timeout_s=2),
@@ -245,7 +254,11 @@ def test_false_record_finalizer_fails_health_but_cleans(tmp_path: Path) -> None:
     )
     paths = RuntimePaths.from_environment(
         tmp_path,
-        {"FURBOMEK_MEDIA_ROOT": str(tmp_path / "media"), "FURBOMEK_KINECT_DIR": str(kinect)},
+        {
+            "FURBOMEK_MEDIA_ROOT": str(tmp_path / "media"),
+            "FURBOMEK_KINECT_DIR": str(kinect),
+            "FURBOMEK_ACTIVITY_SPOOL": str(tmp_path / "spool" / "events.jsonl"),
+        },
     )
 
     def false_finalizer(child: ManagedProcess, env: Mapping[str, str], timeout_s: float) -> bool:
@@ -295,7 +308,11 @@ def test_stopping_health_publication_failure_still_cleans_children(
     monkeypatch.setattr(Session, "publish", failing_stopping_publish)
     paths = RuntimePaths.from_environment(
         tmp_path,
-        {"FURBOMEK_MEDIA_ROOT": str(tmp_path / "media"), "FURBOMEK_KINECT_DIR": str(kinect)},
+        {
+            "FURBOMEK_MEDIA_ROOT": str(tmp_path / "media"),
+            "FURBOMEK_KINECT_DIR": str(kinect),
+            "FURBOMEK_ACTIVITY_SPOOL": str(tmp_path / "spool" / "events.jsonl"),
+        },
     )
     result = run_session(
         RuntimeSettings(readiness_timeout_s=2),
