@@ -7,6 +7,7 @@
 #include "guard_runtime.h"
 #include "guard_state.h"
 #include "freenove_guard/metadata.h"
+#include "freenove_guard/joint_bench.h"
 
 bool deadline_margin_locked();
 void quiesce_outputs_locked(bool latch_fault);
@@ -64,6 +65,8 @@ class Motion final : public freenove_guard::MotionSink {
   }
 
   bool execute(freenove_guard::Action action) override {
+    if (freenove_guard::joint_bench_enabled() && action != freenove_guard::Action::Active &&
+        !freenove_guard::joint_probe_code(static_cast<uint8_t>(action))) return false;
     const uint8_t saved_status = SREG;
     cli();
     const bool accepted = deadline_safe_locked() && !action_pending && pending_vendor_size == 0U;
@@ -78,6 +81,7 @@ class Motion final : public freenove_guard::MotionSink {
   }
 
   bool execute_vendor(const freenove_guard::VendorAction& action) override {
+    if (freenove_guard::joint_bench_enabled()) return false;
     const uint8_t saved_status = SREG;
     cli();
     const bool accepted = deadline_safe_locked() && !action_pending && pending_vendor_size == 0U;

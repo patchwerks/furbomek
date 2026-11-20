@@ -1,4 +1,5 @@
 #include "freenove_guard/dispatcher.h"
+#include "freenove_guard/joint_bench.h"
 
 namespace freenove_guard {
 
@@ -38,6 +39,15 @@ void Dispatcher::receive_usb(uint8_t value, uint32_t now_ms) {
 }
 
 void Dispatcher::receive_guard(LinkOwner source, ReplyRoute route, const Frame& frame, uint32_t now_ms) {
+  if (joint_bench_enabled() && frame.size == 11U && frame.bytes[2] == kExecute &&
+      joint_probe_code(frame.bytes[6]) &&
+      (source != LinkOwner::Computer || route != ReplyRoute::RadioComputer)) {
+    const ReplyRoute previous_route = route_;
+    route_ = route;
+    guard_.reject(Result::Unsupported);
+    route_ = previous_route;
+    return;
+  }
   if (valid_readonly_frame(frame, kSupply)) {
     const ReplyRoute previous_route = route_;
     route_ = route;

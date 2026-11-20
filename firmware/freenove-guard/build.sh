@@ -3,6 +3,7 @@ set -euo pipefail
 
 root_dir=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
 mode=all
+joint_bench=0
 output_dir=
 avr_root=${AVR_ROOT:-}
 fnhr_dir=${FNHR_DIR:-/tmp/opencode/fnhr/FNHR}
@@ -11,7 +12,7 @@ vendor_root=${FREENOVE_ROOT:-/tmp/opencode/freenove-hermes}
 
 usage() {
   printf '%s\n' \
-    'usage: build.sh [--native|--avr|--all] [--output-dir DIR] [--avr-root DIR]' \
+    'usage: build.sh [--native|--avr|--all] [--joint-bench] [--output-dir DIR] [--avr-root DIR]' \
     'inputs default to the pinned offline paths under /tmp/opencode' \
     'the script never downloads, installs, flashes, or opens a serial device'
 }
@@ -21,6 +22,7 @@ while (($# > 0)); do
     --native) mode=native ;;
     --avr) mode=avr ;;
     --all) mode=all ;;
+    --joint-bench) joint_bench=1 ;;
     --output-dir) shift; (($# > 0)) || { usage >&2; exit 2; }; output_dir=$1 ;;
     --avr-root) shift; (($# > 0)) || { usage >&2; exit 2; }; avr_root=$1 ;;
     --help) usage; exit 0 ;;
@@ -80,6 +82,7 @@ native_cxx=${CXX:-g++}
 native_flags=(-std=c++17 -Wall -Wextra -Wpedantic -Werror -Wshadow -Wconversion
   -ffile-prefix-map="$root_dir"=. -fdebug-prefix-map="$root_dir"=.
   -I "$root_dir/include")
+if [[ "$joint_bench" == 1 ]]; then native_flags+=(-DFURBOMEK_JOINT_BENCH); fi
 
 build_native() {
   local native_dir="$output_dir/native"
@@ -180,6 +183,7 @@ build_avr() {
       "$root_dir/src/"*) flags=("${guard_flags[@]}") ;;
       "$root_dir/avr/"*) flags=("${shell_flags[@]}") ;;
     esac
+    if [[ "$joint_bench" == 1 ]]; then flags+=(-DFURBOMEK_JOINT_BENCH); fi
     case "$source" in
       *.c) "$avr_cc" "${flags[@]}" -c "$source" -o "$obj/$base.o" ;;
       *.S) "$avr_cc" "${flags[@]}" -c "$source" -o "$obj/$base.o" ;;
@@ -242,6 +246,7 @@ build_remote() {
     -fno-threadsafe-statics -fno-ident -ffunction-sections -fdata-sections -g0 -w
     -I "$core_dir/cores/arduino" -I "$core_dir/variants/standard" -I "$core_dir/libraries/SPI/src"
     -I "$deps/RF24" -I "$deps/FNHR/src" -I "$root_dir/include")
+  if [[ "$joint_bench" == 1 ]]; then flags+=(-DFURBOMEK_JOINT_BENCH); fi
   local source base
   local sources=(
     "$root_dir/src/frame.cpp" "$root_dir/src/frame_decode.cpp" "$root_dir/src/guard.cpp" "$root_dir/src/rf_link.cpp" "$root_dir/src/manual.cpp" "$root_dir/src/dispatcher.cpp" "$root_dir/src/scheduler.cpp" "$root_dir/src/esp_diag.cpp" "$root_dir/src/metadata.cpp"

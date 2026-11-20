@@ -4,6 +4,7 @@
 #include "guard_state.h"
 #include "freenove_guard/esp_diag.h"
 #include "freenove_guard/expressive_motion.h"
+#include "freenove_guard/joint_bench.h"
 #include "freenove_guard/scheduler.h"
 
 namespace {
@@ -104,6 +105,50 @@ bool run_expressive_action(freenove_guard::Action action) {
   ExpressiveRobot sink(robot);
   return freenove_guard::run_expressive(action, initial, sink);
 }
+
+#ifdef FURBOMEK_JOINT_BENCH
+bool run_joint_probe(const freenove_guard::JointProbe& probe) {
+  Robot& robot = robot_action.robot;
+  if (terminal_fault || robot.state != Robot::Action) return false;
+  RobotLeg* legs[] = {&robot.leg1, &robot.leg2, &robot.leg3,
+                      &robot.leg4, &robot.leg5, &robot.leg6};
+  for (const RobotLeg* leg : legs) {
+    const float z = leg->pointNow.z;
+    if (!(z >= -18.0F && z <= -12.0F)) return false;
+  }
+  RobotLeg& leg = *legs[probe.leg];
+  const Point initial = leg.pointNow;
+  float start[3] = {};
+  leg.CalculateAngle(initial, start[0], start[1], start[2]);
+  Point points[3];
+  for (uint8_t index = 0U; index < 3U; ++index) {
+    float angles[3] = {start[0], start[1], start[2]};
+    angles[probe.axis] += static_cast<float>(probe.offset_deg) *
+                          static_cast<float>(index + 1U) / 3.0F;
+    if (terminal_fault || !leg.CheckAngle(angles[0], angles[1], angles[2])) return false;
+    leg.CalculatePoint(angles[0], angles[1], angles[2], points[index]);
+    if (!leg.CheckPoint(points[index]) ||
+        !(Point::GetDistance(initial, points[index]) <= 45.0F)) return false;
+  }
+  robot.SetSpeed(3.0F);
+  for (const Point& point : points) {
+    if (terminal_fault) return false;
+    leg.MoveTo(point);
+    leg.WaitUntilFree();
+    if (terminal_fault) return false;
+    delay(130U);
+  }
+  for (int8_t index = 1; index >= 0; --index) {
+    if (terminal_fault) return false;
+    leg.MoveTo(points[index]);
+    leg.WaitUntilFree();
+  }
+  if (terminal_fault) return false;
+  leg.MoveTo(initial);
+  leg.WaitUntilFree();
+  return !terminal_fault;
+}
+#endif
 
 void receive_serial(uint8_t value, freenove_guard::ClockSample clock) {
   const uint8_t previous_count = serial_count;
@@ -208,6 +253,14 @@ void guard_action() {
   if (pending.kind == freenove_guard::PendingKind::None) return;
   if (vendor_size != 0U) run_vendor(vendor, vendor_size);
   else {
+#ifdef FURBOMEK_JOINT_BENCH
+    freenove_guard::JointProbe probe{};
+    if (freenove_guard::decode_joint_probe(static_cast<uint8_t>(pending.action), probe)) {
+      if (!run_joint_probe(probe)) safe_outputs();
+      if (!terminal_fault) operation_done_pending = true;
+      return;
+    }
+#endif
     switch (pending.action) {
       case freenove_guard::Action::Active: robot_action.ActiveMode(); break;
       case freenove_guard::Action::Sleep: robot_action.SleepMode(); break;

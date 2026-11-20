@@ -2,6 +2,7 @@
 #include "freenove_guard/clock.h"
 #include "freenove_guard/esp_diag.h"
 #include "freenove_guard/metadata.h"
+#include "freenove_guard/joint_bench.h"
 #include "freenove_guard/scheduler.h"
 
 #include <cassert>
@@ -132,6 +133,38 @@ void test_expressive_motion();
 int main() {
   test_stop_routes();
   test_expressive_motion();
+  for (uint8_t leg = 0; leg < 6U; ++leg) {
+    for (uint8_t axis = 0; axis < 3U; ++axis) {
+      for (uint8_t positive = 0; positive < 2U; ++positive) {
+        const int8_t offsets[] = {6, 18, 30};
+        for (uint8_t i = 0; i < 3U; ++i) {
+          const auto code = static_cast<uint8_t>(11U + (leg * 3U + axis) * 6U + positive * 3U + i);
+          JointProbe probe{};
+          assert(decode_joint_probe(code, probe));
+          assert(probe.leg == leg && probe.axis == axis);
+          assert(probe.offset_deg == (positive ? offsets[i] : -offsets[i]));
+          Command request{kExecute, 2U, code, {}};
+          Frame frame{};
+          assert(encode_command(request, frame) == joint_bench_enabled());
+        }
+      }
+    }
+  }
+  assert(!joint_probe_code(10U) && !joint_probe_code(119U));
+  if (joint_bench_enabled()) {
+    Motion fixture;
+    Replies receipts;
+    Dispatcher bench(fixture, receipts);
+    begin_and_arm(bench, receipts, kRfComputerSource);
+    send_usb(bench, command(kExecute, 2U, 11U), 2U);
+    assert(fixture.commands == 0U);
+    send_radio(bench, kRfManualSource, command(kExecute, 2U, 11U), 3U);
+    assert(fixture.commands == 0U);
+    send_radio(bench, kRfComputerSource, command(kExecute, 2U, 11U), 4U);
+    assert(fixture.commands == 1U && bench.snapshot(4U).busy);
+    bench.tick(502U);
+    assert(bench.snapshot(502U).state == State::Fault && fixture.stops == 1U);
+  }
   assert(metadata_supported(1U, 30U));
   assert(metadata_supported(1U, 31U));
   assert(metadata_supported(1U, 32U));
