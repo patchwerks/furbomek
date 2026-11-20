@@ -43,3 +43,33 @@ The Logitech's higher oblique view shows the support and overlaps the
 far-side legs. Each measured angle needs an observable hinge and
 adjacent links in an aligned or calibrated view. Powered motion and
 travel measurements were pending at this checkpoint.
+
+## Untethered 6° pass
+
+The owner confirmed POWER ON, stillness, support and presence at the
+power switch. The Mac saw only the handheld port. RF reported BOOT,
+idle, fault 0 and 7.88 V. ARM-only and the Active reference stance
+finished in DISARMED.
+
+Each leg received one 6° command in each direction on each of its
+three axes. All 36 commands completed in 0.80–1.00 s and each final
+status verified DISARMED, idle, fault 0. Frame timestamps overlapped
+all 36 command windows with 12–15 color and depth pairs per trial.
+The footage and command log remain private.
+
+The front color camera shows the first leg's knee pivot and foot tip.
+Tracking those landmarks in frames 8840/8852 and 9551/9562 gives
+approximately +4.4° and −5.3° of **projected** excursion. Samples taken
+1.5 s after the respective command starts still show approximately
++2.2° and −2.5° of projected displacement from the starting pose.
+The image-plane result suggests the foot did not fully settle at its
+starting position after DISARM. Verify the neutral return from a
+side view before using these moves for calibration.
+
+The front view lacks reliable depth at the pivot and hides several
+other joints. Physical travel in degrees remains open for all axes.
+The next measurement needs a close view across the leg plane for
+femur and knee, and a clear overhead view for hip yaw. Before
+increasing the band, check the support clearance and neutral return
+from that view. The larger bands and hardware endpoints remain
+untested.
