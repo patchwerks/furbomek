@@ -93,5 +93,5 @@ func run() -> void:
 		view._apply_snapshot(frame)
 	records.close()
 	print(JSON.stringify({"passed":true,"frames":index,"width":1920,"height":1080,"scope":"archived_sensor_fixture"}))
-	view.queue_free()
+	# Keep the scene alive for the final MovieWriter draw before SceneTree exits.
 	quit(0)
