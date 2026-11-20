@@ -19,6 +19,7 @@ Describe the bounded observable outcome and relevant PLAN references.
 - [ ] Exact revisions/artifact hashes, limitations and rollback are recorded where applicable.
 - [ ] Independent review is recorded; code written or a green build alone is not acceptance.
 - [ ] No credentials, private endpoints, transcripts, voice assets, recordings or device identifiers are exposed.
+- [ ] Any camera derivative, including attachments, was reviewed frame by frame and contains no human body parts or reflections.
 - [ ] Hardware/profile/media changes, if any, stayed within explicit ownership and safety gates.
 
 Commands and observed results:

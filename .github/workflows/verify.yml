@@ -11,6 +11,16 @@ concurrency:
   group: non-live-${{ github.ref }}
   cancel-in-progress: true
 jobs:
+  public-media:
+    name: Reviewed public media
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - name: Verify reviewed media hashes
+        run: bash tools/verify-public-media.sh
   media:
     name: Locked media fixtures
     runs-on: ubuntu-24.04

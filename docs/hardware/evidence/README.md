@@ -1,10 +1,8 @@
-# Original hardware photo evidence
+# Hardware photo evidence
 
-The operator explicitly requested that the supplied photos be committed, not
-left in temporary paste storage. The [2026-10-15 manifest](2026-10-15/manifest.json)
-maps all nine original uploaded JPEGs to descriptive filenames and SHA-256 hashes.
-The uploaded bytes are preserved without recompression. EXIF and visible content
-were reviewed before committing; no GPS EXIF fields were present.
+The [2026-10-15 manifest](2026-10-15/manifest.json) records file names, source
+hashes and observations. The chassis photograph uses an opaque mask over
+the hand and its reflection. The original is preserved in the private archive.
 
 ## Robot controller
 
@@ -44,7 +42,35 @@ earlier unreadable-revision and hidden-control notes. Do not infer ON/OFF from
 the plunger position alone. The leg image records an asymmetric position and an
 operator-reported symptom; it does not establish the mechanical/electrical cause.
 
-For later operator-designated hardware evidence, preserve the files and add
-provenance, hashes and observations in the same commit series. Never keep the only
-copy under `/tmp`. Do not automatically publish other private media or firmware
-dumps; preserve those privately and commit only permitted metadata.
+## Publishing camera evidence
+
+1. Save and retain the original outside the repository in the private archive.
+   Publish measurements and a written account when they are sufficient.
+2. Export a fresh derivative with a tight robot-only crop or opaque masks that
+   cover each person for the full affected interval. Include hands, fingers,
+   limbs, clothing and silhouettes, faces, reflections and screen images.
+   Cut any frame where you cannot reliably cover a person. Use only the
+   reviewed video stream. Remove audio, subtitles, data, source metadata
+   and chapters. Keep capture sidecars, thumbnails and original files private.
+3. Inspect the exported still or **every frame** of the exported clip at
+   full resolution, including cuts and first and last frames. If any human
+   part is visible or uncertain, re-export it or publish text only.
+   Automated detection can help locate regions to inspect.
+4. Record the final file's SHA-256 and path in
+   [reviewed-media.sha256](reviewed-media.sha256) after review. Record
+   the provenance and any masks/cuts in the evidence manifest.
+   Stage the artifact and the updated digest, then run
+   `bash tools/verify-public-media.sh` before committing. Run
+   `bash tools/verify-public-media.sh <commit>` on each outgoing
+   commit that changes media before pushing. Never stage a raw file
+   in an intermediate commit.
+
+Apply the same visual review to GitHub issue and PR attachments, release
+assets and workflow artifacts before upload. The repository check verifies the
+bytes of tracked common image and video formats. It cannot inspect the pixels
+or intercept uploads through the GitHub UI. Review media embedded in PDFs,
+SVGs and archives before publishing those containers.
+
+Git history can retain an earlier file after a replacement. The redacted
+chassis copy addresses the current tree. The earlier original may still
+be available through historical revisions or copies.

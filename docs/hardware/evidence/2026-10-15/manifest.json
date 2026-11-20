@@ -2,8 +2,8 @@
   "schema_version": 1,
   "received_on": "2026-10-15",
   "source": "Operator-supplied photographs explicitly requested to be preserved in the repository",
-  "storage": "Original uploaded JPEG bytes; no recompression or edits",
-  "privacy_review": "Visually reviewed; EXIF contains dimensions/orientation/resolution, no GPS fields; operator authorized repository storage",
+  "storage": "The repository copy of robot-usb-and-chassis.jpg is a redacted derivative. Its original is preserved privately. Other files preserve original uploaded bytes.",
+  "privacy_review": "On 2026-11-21 all repository photographs were visually reviewed again. The chassis view required an opaque mask and metadata stripping.",
   "photos": [
     {
       "file": "robot-radio-closeup.jpg",
@@ -14,7 +14,9 @@
     {
       "file": "robot-usb-and-chassis.jpg",
       "original_upload": "moshi-paste-4188587458.jpg",
-      "sha256": "16f6107306aac2118073d0f978a8e0d6dcf1993646b9b5f723172c186045aed1",
+      "sha256": "4ab29ec29994db680dd9794cfac28b3689a5b1836bf163fe166afb78bdc632bd",
+      "original_sha256": "16f6107306aac2118073d0f978a8e0d6dcf1993646b9b5f723172c186045aed1",
+      "redaction": "After applying orientation, an opaque mask covers the upper-left hand and reflection. The public JPEG was re-encoded without source metadata.",
       "observations": "USB physically connected to robot; Furby-like head, chassis, servo wiring and empty dual-cell bay visible"
     },
     {
