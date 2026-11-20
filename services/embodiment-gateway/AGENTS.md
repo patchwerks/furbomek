@@ -19,6 +19,9 @@ serial, GPIO, reset or arbitrary actuator operations as model tools.
 - Keep private endpoint settings, full Hermes configuration, credentials, live
   camera frames, logs and `.venv` outside project Git. The Chezmoi overlay owns
   only its marked `mcp_servers.furbomek` entry and preserves unrelated text.
+- When action mappings, timing or tests change a depicted movement, update its
+  [numbered plate](../../.schematics/movements/README.md) using the imagegen
+  skill and verify it against the installed firmware and camera evidence.
 
 ## Guard serial adapter
 

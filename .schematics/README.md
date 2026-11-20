@@ -1,5 +1,8 @@
 # Furb-o-Mek visual schematics
 
+The [movement schematics](movements/README.md) show the installed guarded
+gestures and gait phases as image-generated plates with exact command maps.
+
 These sheets are architecture, evidence-navigation, and planning aids. They are **not fabrication drawings, verified wiring diagrams, or proof that a proposed part fits**. Before hardware changes, measure dimensions, voltages, current, polarity, continuity, board revision, firmware, connector pinout, and failure behavior on the actual unit.
 
 ## Runtime boundary shown across the set

@@ -1,0 +1,2329 @@
+{
+  "schema_version": 1,
+  "installed_mega_hex_sha256": "07f2e7149bf6945c4b9b9015a70e536a6639e28ea768d6eb2a44dd7f13a06ca3",
+  "units": {
+    "foot_targets_mm": "body-fixed Cartesian [X,Y,Z]; positive X points left in top views, positive Y forward, positive Z upward",
+    "step_mm_per_update": "waypoint increment per nominal 20 ms controller update",
+    "hold_ms": "programmed wait at the target"
+  },
+  "leg_order": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6
+  ],
+  "tripods": {
+    "A": [
+      1,
+      3,
+      5
+    ],
+    "B": [
+      2,
+      4,
+      6
+    ]
+  },
+  "starting_targets_mm": [
+    [
+      -81,
+      99,
+      -15
+    ],
+    [
+      -115,
+      0,
+      -15
+    ],
+    [
+      -81,
+      -99,
+      -15
+    ],
+    [
+      81,
+      99,
+      -15
+    ],
+    [
+      115,
+      0,
+      -15
+    ],
+    [
+      81,
+      -99,
+      -15
+    ]
+  ],
+  "expressive_provenance": "Exact targets emitted by the installed expressive source for the nominal fixture. The measured test has separate projected values.",
+  "gait_provenance": "Nominal accepted vendor gait path at boot phase index 1. Rotated targets rounded to 0.001 mm. The actual starting pose and tripod index can change. No absolute stride is inferred.",
+  "motions": {
+    "poke": [
+      {
+        "figure": 1,
+        "phase": "start",
+        "foot_targets_mm": [
+          [
+            -81,
+            99,
+            -15
+          ],
+          [
+            -115,
+            0,
+            -15
+          ],
+          [
+            -81,
+            -99,
+            -15
+          ],
+          [
+            81,
+            99,
+            -15
+          ],
+          [
+            115,
+            0,
+            -15
+          ],
+          [
+            81,
+            -99,
+            -15
+          ]
+        ],
+        "lifted_legs": [],
+        "step_mm_per_update": null,
+        "hold_ms": 0
+      },
+      {
+        "figure": 2,
+        "phase": "lift",
+        "foot_targets_mm": [
+          [
+            -81,
+            99,
+            -15
+          ],
+          [
+            -115,
+            0,
+            -15
+          ],
+          [
+            -81,
+            -99,
+            -15
+          ],
+          [
+            81,
+            99,
+            -1
+          ],
+          [
+            115,
+            0,
+            -15
+          ],
+          [
+            81,
+            -99,
+            -15
+          ]
+        ],
+        "lifted_legs": [
+          4
+        ],
+        "step_mm_per_update": 4.75,
+        "hold_ms": 0
+      },
+      {
+        "figure": 3,
+        "phase": "reach and hold",
+        "foot_targets_mm": [
+          [
+            -81,
+            99,
+            -15
+          ],
+          [
+            -115,
+            0,
+            -15
+          ],
+          [
+            -81,
+            -99,
+            -15
+          ],
+          [
+            81,
+            116,
+            -1
+          ],
+          [
+            115,
+            0,
+            -15
+          ],
+          [
+            81,
+            -99,
+            -15
+          ]
+        ],
+        "lifted_legs": [
+          4
+        ],
+        "step_mm_per_update": 5,
+        "hold_ms": 240
+      },
+      {
+        "figure": 4,
+        "phase": "retract raised",
+        "foot_targets_mm": [
+          [
+            -81,
+            99,
+            -15
+          ],
+          [
+            -115,
+            0,
+            -15
+          ],
+          [
+            -81,
+            -99,
+            -15
+          ],
+          [
+            81,
+            99,
+            -1
+          ],
+          [
+            115,
+            0,
+            -15
+          ],
+          [
+            81,
+            -99,
+            -15
+          ]
+        ],
+        "lifted_legs": [
+          4
+        ],
+        "step_mm_per_update": 3.5,
+        "hold_ms": 0
+      },
+      {
+        "figure": 5,
+        "phase": "plant",
+        "foot_targets_mm": [
+          [
+            -81,
+            99,
+            -15
+          ],
+          [
+            -115,
+            0,
+            -15
+          ],
+          [
+            -81,
+            -99,
+            -15
+          ],
+          [
+            81,
+            99,
+            -15
+          ],
+          [
+            115,
+            0,
+            -15
+          ],
+          [
+            81,
+            -99,
+            -15
+          ]
+        ],
+        "lifted_legs": [],
+        "step_mm_per_update": 3.25,
+        "hold_ms": 0
+      }
+    ],
+    "defensive_brace": [
+      {
+        "figure": 1,
+        "phase": "start",
+        "foot_targets_mm": [
+          [
+            -81,
+            99,
+            -15
+          ],
+          [
+            -115,
+            0,
+            -15
+          ],
+          [
+            -81,
+            -99,
+            -15
+          ],
+          [
+            81,
+            99,
+            -15
+          ],
+          [
+            115,
+            0,
+            -15
+          ],
+          [
+            81,
+            -99,
+            -15
+          ]
+        ],
+        "lifted_legs": [],
+        "step_mm_per_update": null,
+        "hold_ms": 0
+      },
+      {
+        "figure": 2,
+        "phase": "lower",
+        "foot_targets_mm": [
+          [
+            -81,
+            99,
+            -5
+          ],
+          [
+            -115,
+            0,
+            -5
+          ],
+          [
+            -81,
+            -99,
+            -5
+          ],
+          [
+            81,
+            99,
+            -5
+          ],
+          [
+            115,
+            0,
+            -5
+          ],
+          [
+            81,
+            -99,
+            -5
+          ]
+        ],
+        "lifted_legs": [],
+        "step_mm_per_update": 4,
+        "hold_ms": 0
+      },
+      {
+        "figure": 3,
+        "phase": "lift A",
+        "foot_targets_mm": [
+          [
+            -81,
+            99,
+            4
+          ],
+          [
+            -115,
+            0,
+            -5
+          ],
+          [
+            -81,
+            -99,
+            4
+          ],
+          [
+            81,
+            99,
+            -5
+          ],
+          [
+            115,
+            0,
+            4
+          ],
+          [
+            81,
+            -99,
+            -5
+          ]
+        ],
+        "lifted_legs": [
+          1,
+          3,
+          5
+        ],
+        "step_mm_per_update": 4.75,
+        "hold_ms": 0
+      },
+      {
+        "figure": 4,
+        "phase": "shift A",
+        "foot_targets_mm": [
+          [
+            -90,
+            99,
+            4
+          ],
+          [
+            -115,
+            0,
+            -5
+          ],
+          [
+            -90,
+            -99,
+            4
+          ],
+          [
+            81,
+            99,
+            -5
+          ],
+          [
+            124,
+            0,
+            4
+          ],
+          [
+            81,
+            -99,
+            -5
+          ]
+        ],
+        "lifted_legs": [
+          1,
+          3,
+          5
+        ],
+        "step_mm_per_update": 4.75,
+        "hold_ms": 0
+      },
+      {
+        "figure": 5,
+        "phase": "plant A",
+        "foot_targets_mm": [
+          [
+            -90,
+            99,
+            -5
+          ],
+          [
+            -115,
+            0,
+            -5
+          ],
+          [
+            -90,
+            -99,
+            -5
+          ],
+          [
+            81,
+            99,
+            -5
+          ],
+          [
+            124,
+            0,
+            -5
+          ],
+          [
+            81,
+            -99,
+            -5
+          ]
+        ],
+        "lifted_legs": [],
+        "step_mm_per_update": 3.25,
+        "hold_ms": 0
+      },
+      {
+        "figure": 6,
+        "phase": "lift B",
+        "foot_targets_mm": [
+          [
+            -90,
+            99,
+            -5
+          ],
+          [
+            -115,
+            0,
+            4
+          ],
+          [
+            -90,
+            -99,
+            -5
+          ],
+          [
+            81,
+            99,
+            4
+          ],
+          [
+            124,
+            0,
+            -5
+          ],
+          [
+            81,
+            -99,
+            4
+          ]
+        ],
+        "lifted_legs": [
+          2,
+          4,
+          6
+        ],
+        "step_mm_per_update": 4.75,
+        "hold_ms": 0
+      },
+      {
+        "figure": 7,
+        "phase": "shift B",
+        "foot_targets_mm": [
+          [
+            -90,
+            99,
+            -5
+          ],
+          [
+            -124,
+            0,
+            4
+          ],
+          [
+            -90,
+            -99,
+            -5
+          ],
+          [
+            90,
+            99,
+            4
+          ],
+          [
+            124,
+            0,
+            -5
+          ],
+          [
+            90,
+            -99,
+            4
+          ]
+        ],
+        "lifted_legs": [
+          2,
+          4,
+          6
+        ],
+        "step_mm_per_update": 4.75,
+        "hold_ms": 0
+      },
+      {
+        "figure": 8,
+        "phase": "plant B and hold",
+        "foot_targets_mm": [
+          [
+            -90,
+            99,
+            -5
+          ],
+          [
+            -124,
+            0,
+            -5
+          ],
+          [
+            -90,
+            -99,
+            -5
+          ],
+          [
+            90,
+            99,
+            -5
+          ],
+          [
+            124,
+            0,
+            -5
+          ],
+          [
+            90,
+            -99,
+            -5
+          ]
+        ],
+        "lifted_legs": [],
+        "step_mm_per_update": 3.25,
+        "hold_ms": 300
+      },
+      {
+        "figure": 9,
+        "phase": "lift B",
+        "foot_targets_mm": [
+          [
+            -90,
+            99,
+            -5
+          ],
+          [
+            -124,
+            0,
+            4
+          ],
+          [
+            -90,
+            -99,
+            -5
+          ],
+          [
+            90,
+            99,
+            4
+          ],
+          [
+            124,
+            0,
+            -5
+          ],
+          [
+            90,
+            -99,
+            4
+          ]
+        ],
+        "lifted_legs": [
+          2,
+          4,
+          6
+        ],
+        "step_mm_per_update": 4.25,
+        "hold_ms": 0
+      },
+      {
+        "figure": 10,
+        "phase": "restore B",
+        "foot_targets_mm": [
+          [
+            -90,
+            99,
+            -5
+          ],
+          [
+            -115,
+            0,
+            4
+          ],
+          [
+            -90,
+            -99,
+            -5
+          ],
+          [
+            81,
+            99,
+            4
+          ],
+          [
+            124,
+            0,
+            -5
+          ],
+          [
+            81,
+            -99,
+            4
+          ]
+        ],
+        "lifted_legs": [
+          2,
+          4,
+          6
+        ],
+        "step_mm_per_update": 3.5,
+        "hold_ms": 0
+      },
+      {
+        "figure": 11,
+        "phase": "plant B",
+        "foot_targets_mm": [
+          [
+            -90,
+            99,
+            -5
+          ],
+          [
+            -115,
+            0,
+            -5
+          ],
+          [
+            -90,
+            -99,
+            -5
+          ],
+          [
+            81,
+            99,
+            -5
+          ],
+          [
+            124,
+            0,
+            -5
+          ],
+          [
+            81,
+            -99,
+            -5
+          ]
+        ],
+        "lifted_legs": [],
+        "step_mm_per_update": 3.25,
+        "hold_ms": 0
+      },
+      {
+        "figure": 12,
+        "phase": "lift A",
+        "foot_targets_mm": [
+          [
+            -90,
+            99,
+            4
+          ],
+          [
+            -115,
+            0,
+            -5
+          ],
+          [
+            -90,
+            -99,
+            4
+          ],
+          [
+            81,
+            99,
+            -5
+          ],
+          [
+            124,
+            0,
+            4
+          ],
+          [
+            81,
+            -99,
+            -5
+          ]
+        ],
+        "lifted_legs": [
+          1,
+          3,
+          5
+        ],
+        "step_mm_per_update": 4.25,
+        "hold_ms": 0
+      },
+      {
+        "figure": 13,
+        "phase": "restore A",
+        "foot_targets_mm": [
+          [
+            -81,
+            99,
+            4
+          ],
+          [
+            -115,
+            0,
+            -5
+          ],
+          [
+            -81,
+            -99,
+            4
+          ],
+          [
+            81,
+            99,
+            -5
+          ],
+          [
+            115,
+            0,
+            4
+          ],
+          [
+            81,
+            -99,
+            -5
+          ]
+        ],
+        "lifted_legs": [
+          1,
+          3,
+          5
+        ],
+        "step_mm_per_update": 3.5,
+        "hold_ms": 0
+      },
+      {
+        "figure": 14,
+        "phase": "plant A",
+        "foot_targets_mm": [
+          [
+            -81,
+            99,
+            -5
+          ],
+          [
+            -115,
+            0,
+            -5
+          ],
+          [
+            -81,
+            -99,
+            -5
+          ],
+          [
+            81,
+            99,
+            -5
+          ],
+          [
+            115,
+            0,
+            -5
+          ],
+          [
+            81,
+            -99,
+            -5
+          ]
+        ],
+        "lifted_legs": [],
+        "step_mm_per_update": 3.25,
+        "hold_ms": 0
+      },
+      {
+        "figure": 15,
+        "phase": "rise",
+        "foot_targets_mm": [
+          [
+            -81,
+            99,
+            -15
+          ],
+          [
+            -115,
+            0,
+            -15
+          ],
+          [
+            -81,
+            -99,
+            -15
+          ],
+          [
+            81,
+            99,
+            -15
+          ],
+          [
+            115,
+            0,
+            -15
+          ],
+          [
+            81,
+            -99,
+            -15
+          ]
+        ],
+        "lifted_legs": [],
+        "step_mm_per_update": 2.75,
+        "hold_ms": 0
+      }
+    ],
+    "tuck_preview": [
+      {
+        "figure": 1,
+        "phase": "start",
+        "foot_targets_mm": [
+          [
+            -81,
+            99,
+            -15
+          ],
+          [
+            -115,
+            0,
+            -15
+          ],
+          [
+            -81,
+            -99,
+            -15
+          ],
+          [
+            81,
+            99,
+            -15
+          ],
+          [
+            115,
+            0,
+            -15
+          ],
+          [
+            81,
+            -99,
+            -15
+          ]
+        ],
+        "lifted_legs": [],
+        "step_mm_per_update": null,
+        "hold_ms": 0
+      },
+      {
+        "figure": 2,
+        "phase": "lower",
+        "foot_targets_mm": [
+          [
+            -81,
+            99,
+            -4
+          ],
+          [
+            -115,
+            0,
+            -4
+          ],
+          [
+            -81,
+            -99,
+            -4
+          ],
+          [
+            81,
+            99,
+            -4
+          ],
+          [
+            115,
+            0,
+            -4
+          ],
+          [
+            81,
+            -99,
+            -4
+          ]
+        ],
+        "lifted_legs": [],
+        "step_mm_per_update": 4,
+        "hold_ms": 0
+      },
+      {
+        "figure": 3,
+        "phase": "lift A",
+        "foot_targets_mm": [
+          [
+            -81,
+            99,
+            4
+          ],
+          [
+            -115,
+            0,
+            -4
+          ],
+          [
+            -81,
+            -99,
+            4
+          ],
+          [
+            81,
+            99,
+            -4
+          ],
+          [
+            115,
+            0,
+            4
+          ],
+          [
+            81,
+            -99,
+            -4
+          ]
+        ],
+        "lifted_legs": [
+          1,
+          3,
+          5
+        ],
+        "step_mm_per_update": 4.75,
+        "hold_ms": 0
+      },
+      {
+        "figure": 4,
+        "phase": "shift A",
+        "foot_targets_mm": [
+          [
+            -69,
+            99,
+            4
+          ],
+          [
+            -115,
+            0,
+            -4
+          ],
+          [
+            -69,
+            -99,
+            4
+          ],
+          [
+            81,
+            99,
+            -4
+          ],
+          [
+            103,
+            0,
+            4
+          ],
+          [
+            81,
+            -99,
+            -4
+          ]
+        ],
+        "lifted_legs": [
+          1,
+          3,
+          5
+        ],
+        "step_mm_per_update": 4.75,
+        "hold_ms": 0
+      },
+      {
+        "figure": 5,
+        "phase": "plant A",
+        "foot_targets_mm": [
+          [
+            -69,
+            99,
+            -4
+          ],
+          [
+            -115,
+            0,
+            -4
+          ],
+          [
+            -69,
+            -99,
+            -4
+          ],
+          [
+            81,
+            99,
+            -4
+          ],
+          [
+            103,
+            0,
+            -4
+          ],
+          [
+            81,
+            -99,
+            -4
+          ]
+        ],
+        "lifted_legs": [],
+        "step_mm_per_update": 3.25,
+        "hold_ms": 0
+      },
+      {
+        "figure": 6,
+        "phase": "lift B",
+        "foot_targets_mm": [
+          [
+            -69,
+            99,
+            -4
+          ],
+          [
+            -115,
+            0,
+            4
+          ],
+          [
+            -69,
+            -99,
+            -4
+          ],
+          [
+            81,
+            99,
+            4
+          ],
+          [
+            103,
+            0,
+            -4
+          ],
+          [
+            81,
+            -99,
+            4
+          ]
+        ],
+        "lifted_legs": [
+          2,
+          4,
+          6
+        ],
+        "step_mm_per_update": 4.75,
+        "hold_ms": 0
+      },
+      {
+        "figure": 7,
+        "phase": "shift B",
+        "foot_targets_mm": [
+          [
+            -69,
+            99,
+            -4
+          ],
+          [
+            -103,
+            0,
+            4
+          ],
+          [
+            -69,
+            -99,
+            -4
+          ],
+          [
+            69,
+            99,
+            4
+          ],
+          [
+            103,
+            0,
+            -4
+          ],
+          [
+            69,
+            -99,
+            4
+          ]
+        ],
+        "lifted_legs": [
+          2,
+          4,
+          6
+        ],
+        "step_mm_per_update": 4.75,
+        "hold_ms": 0
+      },
+      {
+        "figure": 8,
+        "phase": "plant B and hold",
+        "foot_targets_mm": [
+          [
+            -69,
+            99,
+            -4
+          ],
+          [
+            -103,
+            0,
+            -4
+          ],
+          [
+            -69,
+            -99,
+            -4
+          ],
+          [
+            69,
+            99,
+            -4
+          ],
+          [
+            103,
+            0,
+            -4
+          ],
+          [
+            69,
+            -99,
+            -4
+          ]
+        ],
+        "lifted_legs": [],
+        "step_mm_per_update": 3.25,
+        "hold_ms": 360
+      },
+      {
+        "figure": 9,
+        "phase": "lift B",
+        "foot_targets_mm": [
+          [
+            -69,
+            99,
+            -4
+          ],
+          [
+            -103,
+            0,
+            4
+          ],
+          [
+            -69,
+            -99,
+            -4
+          ],
+          [
+            69,
+            99,
+            4
+          ],
+          [
+            103,
+            0,
+            -4
+          ],
+          [
+            69,
+            -99,
+            4
+          ]
+        ],
+        "lifted_legs": [
+          2,
+          4,
+          6
+        ],
+        "step_mm_per_update": 4.25,
+        "hold_ms": 0
+      },
+      {
+        "figure": 10,
+        "phase": "restore B",
+        "foot_targets_mm": [
+          [
+            -69,
+            99,
+            -4
+          ],
+          [
+            -115,
+            0,
+            4
+          ],
+          [
+            -69,
+            -99,
+            -4
+          ],
+          [
+            81,
+            99,
+            4
+          ],
+          [
+            103,
+            0,
+            -4
+          ],
+          [
+            81,
+            -99,
+            4
+          ]
+        ],
+        "lifted_legs": [
+          2,
+          4,
+          6
+        ],
+        "step_mm_per_update": 3.5,
+        "hold_ms": 0
+      },
+      {
+        "figure": 11,
+        "phase": "plant B",
+        "foot_targets_mm": [
+          [
+            -69,
+            99,
+            -4
+          ],
+          [
+            -115,
+            0,
+            -4
+          ],
+          [
+            -69,
+            -99,
+            -4
+          ],
+          [
+            81,
+            99,
+            -4
+          ],
+          [
+            103,
+            0,
+            -4
+          ],
+          [
+            81,
+            -99,
+            -4
+          ]
+        ],
+        "lifted_legs": [],
+        "step_mm_per_update": 3.25,
+        "hold_ms": 0
+      },
+      {
+        "figure": 12,
+        "phase": "lift A",
+        "foot_targets_mm": [
+          [
+            -69,
+            99,
+            4
+          ],
+          [
+            -115,
+            0,
+            -4
+          ],
+          [
+            -69,
+            -99,
+            4
+          ],
+          [
+            81,
+            99,
+            -4
+          ],
+          [
+            103,
+            0,
+            4
+          ],
+          [
+            81,
+            -99,
+            -4
+          ]
+        ],
+        "lifted_legs": [
+          1,
+          3,
+          5
+        ],
+        "step_mm_per_update": 4.25,
+        "hold_ms": 0
+      },
+      {
+        "figure": 13,
+        "phase": "restore A",
+        "foot_targets_mm": [
+          [
+            -81,
+            99,
+            4
+          ],
+          [
+            -115,
+            0,
+            -4
+          ],
+          [
+            -81,
+            -99,
+            4
+          ],
+          [
+            81,
+            99,
+            -4
+          ],
+          [
+            115,
+            0,
+            4
+          ],
+          [
+            81,
+            -99,
+            -4
+          ]
+        ],
+        "lifted_legs": [
+          1,
+          3,
+          5
+        ],
+        "step_mm_per_update": 3.5,
+        "hold_ms": 0
+      },
+      {
+        "figure": 14,
+        "phase": "plant A",
+        "foot_targets_mm": [
+          [
+            -81,
+            99,
+            -4
+          ],
+          [
+            -115,
+            0,
+            -4
+          ],
+          [
+            -81,
+            -99,
+            -4
+          ],
+          [
+            81,
+            99,
+            -4
+          ],
+          [
+            115,
+            0,
+            -4
+          ],
+          [
+            81,
+            -99,
+            -4
+          ]
+        ],
+        "lifted_legs": [],
+        "step_mm_per_update": 3.25,
+        "hold_ms": 0
+      },
+      {
+        "figure": 15,
+        "phase": "rise",
+        "foot_targets_mm": [
+          [
+            -81,
+            99,
+            -15
+          ],
+          [
+            -115,
+            0,
+            -15
+          ],
+          [
+            -81,
+            -99,
+            -15
+          ],
+          [
+            81,
+            99,
+            -15
+          ],
+          [
+            115,
+            0,
+            -15
+          ],
+          [
+            81,
+            -99,
+            -15
+          ]
+        ],
+        "lifted_legs": [],
+        "step_mm_per_update": 2.75,
+        "hold_ms": 0
+      }
+    ],
+    "active": [
+      {
+        "figure": 1,
+        "nominal_foot_z_mm": 0,
+        "point_type": "start"
+      },
+      {
+        "figure": 2,
+        "nominal_foot_z_mm": -7.5,
+        "point_type": "illustrative midpoint"
+      },
+      {
+        "figure": 3,
+        "nominal_foot_z_mm": -15,
+        "point_type": "target"
+      }
+    ],
+    "sleep": [
+      {
+        "figure": 4,
+        "nominal_foot_z_mm": -15,
+        "point_type": "start"
+      },
+      {
+        "figure": 5,
+        "nominal_foot_z_mm": -7.5,
+        "point_type": "illustrative midpoint"
+      },
+      {
+        "figure": 6,
+        "nominal_foot_z_mm": 0,
+        "point_type": "target"
+      }
+    ],
+    "forward": [
+      {
+        "figure": 1,
+        "phase": "nominal active start",
+        "foot_targets_mm": [
+          [
+            -81,
+            99,
+            -15
+          ],
+          [
+            -115,
+            0,
+            -15
+          ],
+          [
+            -81,
+            -99,
+            -15
+          ],
+          [
+            81,
+            99,
+            -15
+          ],
+          [
+            115,
+            0,
+            -15
+          ],
+          [
+            81,
+            -99,
+            -15
+          ]
+        ],
+        "lifted_legs": []
+      },
+      {
+        "figure": 2,
+        "phase": "B swings",
+        "foot_targets_mm": [
+          [
+            -81,
+            88.5,
+            -15
+          ],
+          [
+            -115,
+            5.25,
+            5
+          ],
+          [
+            -81,
+            -109.5,
+            -15
+          ],
+          [
+            81,
+            104.25,
+            5
+          ],
+          [
+            115,
+            -10.5,
+            -15
+          ],
+          [
+            81,
+            -93.75,
+            5
+          ]
+        ],
+        "lifted_legs": [
+          2,
+          4,
+          6
+        ]
+      },
+      {
+        "figure": 3,
+        "phase": "B plants",
+        "foot_targets_mm": [
+          [
+            -81,
+            78,
+            -15
+          ],
+          [
+            -115,
+            10.5,
+            -15
+          ],
+          [
+            -81,
+            -120,
+            -15
+          ],
+          [
+            81,
+            109.5,
+            -15
+          ],
+          [
+            115,
+            -21,
+            -15
+          ],
+          [
+            81,
+            -88.5,
+            -15
+          ]
+        ],
+        "lifted_legs": []
+      },
+      {
+        "figure": 4,
+        "phase": "A swings",
+        "foot_targets_mm": [
+          [
+            -81,
+            104.25,
+            5
+          ],
+          [
+            -115,
+            0,
+            -15
+          ],
+          [
+            -81,
+            -93.75,
+            5
+          ],
+          [
+            81,
+            99,
+            -15
+          ],
+          [
+            115,
+            5.25,
+            5
+          ],
+          [
+            81,
+            -99,
+            -15
+          ]
+        ],
+        "lifted_legs": [
+          1,
+          3,
+          5
+        ]
+      },
+      {
+        "figure": 5,
+        "phase": "A plants",
+        "foot_targets_mm": [
+          [
+            -81,
+            109.5,
+            -15
+          ],
+          [
+            -115,
+            -10.5,
+            -15
+          ],
+          [
+            -81,
+            -88.5,
+            -15
+          ],
+          [
+            81,
+            88.5,
+            -15
+          ],
+          [
+            115,
+            10.5,
+            -15
+          ],
+          [
+            81,
+            -109.5,
+            -15
+          ]
+        ],
+        "lifted_legs": []
+      }
+    ],
+    "backward": [
+      {
+        "figure": 1,
+        "phase": "nominal active start",
+        "foot_targets_mm": [
+          [
+            -81,
+            99,
+            -15
+          ],
+          [
+            -115,
+            0,
+            -15
+          ],
+          [
+            -81,
+            -99,
+            -15
+          ],
+          [
+            81,
+            99,
+            -15
+          ],
+          [
+            115,
+            0,
+            -15
+          ],
+          [
+            81,
+            -99,
+            -15
+          ]
+        ],
+        "lifted_legs": []
+      },
+      {
+        "figure": 2,
+        "phase": "B swings",
+        "foot_targets_mm": [
+          [
+            -81,
+            109.5,
+            -15
+          ],
+          [
+            -115,
+            -5.25,
+            5
+          ],
+          [
+            -81,
+            -88.5,
+            -15
+          ],
+          [
+            81,
+            93.75,
+            5
+          ],
+          [
+            115,
+            10.5,
+            -15
+          ],
+          [
+            81,
+            -104.25,
+            5
+          ]
+        ],
+        "lifted_legs": [
+          2,
+          4,
+          6
+        ]
+      },
+      {
+        "figure": 3,
+        "phase": "B plants",
+        "foot_targets_mm": [
+          [
+            -81,
+            120,
+            -15
+          ],
+          [
+            -115,
+            -10.5,
+            -15
+          ],
+          [
+            -81,
+            -78,
+            -15
+          ],
+          [
+            81,
+            88.5,
+            -15
+          ],
+          [
+            115,
+            21,
+            -15
+          ],
+          [
+            81,
+            -109.5,
+            -15
+          ]
+        ],
+        "lifted_legs": []
+      }
+    ],
+    "left": [
+      {
+        "figure": 4,
+        "phase": "nominal active start",
+        "foot_targets_mm": [
+          [
+            -81,
+            99,
+            -15
+          ],
+          [
+            -115,
+            0,
+            -15
+          ],
+          [
+            -81,
+            -99,
+            -15
+          ],
+          [
+            81,
+            99,
+            -15
+          ],
+          [
+            115,
+            0,
+            -15
+          ],
+          [
+            81,
+            -99,
+            -15
+          ]
+        ],
+        "lifted_legs": []
+      },
+      {
+        "figure": 5,
+        "phase": "B swings",
+        "foot_targets_mm": [
+          [
+            -91.5,
+            99,
+            -15
+          ],
+          [
+            -109.75,
+            0,
+            5
+          ],
+          [
+            -91.5,
+            -99,
+            -15
+          ],
+          [
+            86.25,
+            99,
+            5
+          ],
+          [
+            104.5,
+            0,
+            -15
+          ],
+          [
+            86.25,
+            -99,
+            5
+          ]
+        ],
+        "lifted_legs": [
+          2,
+          4,
+          6
+        ]
+      },
+      {
+        "figure": 6,
+        "phase": "B plants",
+        "foot_targets_mm": [
+          [
+            -102,
+            99,
+            -15
+          ],
+          [
+            -104.5,
+            0,
+            -15
+          ],
+          [
+            -102,
+            -99,
+            -15
+          ],
+          [
+            91.5,
+            99,
+            -15
+          ],
+          [
+            94,
+            0,
+            -15
+          ],
+          [
+            91.5,
+            -99,
+            -15
+          ]
+        ],
+        "lifted_legs": []
+      }
+    ],
+    "right": [
+      {
+        "figure": 7,
+        "phase": "nominal active start",
+        "foot_targets_mm": [
+          [
+            -81,
+            99,
+            -15
+          ],
+          [
+            -115,
+            0,
+            -15
+          ],
+          [
+            -81,
+            -99,
+            -15
+          ],
+          [
+            81,
+            99,
+            -15
+          ],
+          [
+            115,
+            0,
+            -15
+          ],
+          [
+            81,
+            -99,
+            -15
+          ]
+        ],
+        "lifted_legs": []
+      },
+      {
+        "figure": 8,
+        "phase": "B swings",
+        "foot_targets_mm": [
+          [
+            -70.5,
+            99,
+            -15
+          ],
+          [
+            -120.25,
+            0,
+            5
+          ],
+          [
+            -70.5,
+            -99,
+            -15
+          ],
+          [
+            75.75,
+            99,
+            5
+          ],
+          [
+            125.5,
+            0,
+            -15
+          ],
+          [
+            75.75,
+            -99,
+            5
+          ]
+        ],
+        "lifted_legs": [
+          2,
+          4,
+          6
+        ]
+      },
+      {
+        "figure": 9,
+        "phase": "B plants",
+        "foot_targets_mm": [
+          [
+            -60,
+            99,
+            -15
+          ],
+          [
+            -125.5,
+            0,
+            -15
+          ],
+          [
+            -60,
+            -99,
+            -15
+          ],
+          [
+            70.5,
+            99,
+            -15
+          ],
+          [
+            136,
+            0,
+            -15
+          ],
+          [
+            70.5,
+            -99,
+            -15
+          ]
+        ],
+        "lifted_legs": []
+      }
+    ],
+    "turn_left": [
+      {
+        "figure": 1,
+        "phase": "nominal active start",
+        "foot_targets_mm": [
+          [
+            -81,
+            99,
+            -15
+          ],
+          [
+            -115,
+            0,
+            -15
+          ],
+          [
+            -81,
+            -99,
+            -15
+          ],
+          [
+            81,
+            99,
+            -15
+          ],
+          [
+            115,
+            0,
+            -15
+          ],
+          [
+            81,
+            -99,
+            -15
+          ]
+        ],
+        "lifted_legs": []
+      },
+      {
+        "figure": 2,
+        "phase": "B swings",
+        "foot_targets_mm": [
+          [
+            -88.518,
+            92.34,
+            -15
+          ],
+          [
+            -114.911,
+            4.515,
+            5
+          ],
+          [
+            -72.983,
+            -105.05,
+            -15
+          ],
+          [
+            84.824,
+            95.744,
+            5
+          ],
+          [
+            114.645,
+            9.023,
+            -15
+          ],
+          [
+            77.051,
+            -102.104,
+            5
+          ]
+        ],
+        "lifted_legs": [
+          2,
+          4,
+          6
+        ]
+      },
+      {
+        "figure": 3,
+        "phase": "B plants",
+        "foot_targets_mm": [
+          [
+            -95.49,
+            85.11,
+            -15
+          ],
+          [
+            -114.645,
+            9.023,
+            -15
+          ],
+          [
+            -64.516,
+            -110.452,
+            -15
+          ],
+          [
+            88.518,
+            92.34,
+            -15
+          ],
+          [
+            113.584,
+            17.99,
+            -15
+          ],
+          [
+            72.983,
+            -105.05,
+            -15
+          ]
+        ],
+        "lifted_legs": []
+      }
+    ],
+    "turn_right": [
+      {
+        "figure": 4,
+        "phase": "nominal active start",
+        "foot_targets_mm": [
+          [
+            -81,
+            99,
+            -15
+          ],
+          [
+            -115,
+            0,
+            -15
+          ],
+          [
+            -81,
+            -99,
+            -15
+          ],
+          [
+            81,
+            99,
+            -15
+          ],
+          [
+            115,
+            0,
+            -15
+          ],
+          [
+            81,
+            -99,
+            -15
+          ]
+        ],
+        "lifted_legs": []
+      },
+      {
+        "figure": 5,
+        "phase": "B swings",
+        "foot_targets_mm": [
+          [
+            -72.983,
+            105.05,
+            -15
+          ],
+          [
+            -114.911,
+            -4.515,
+            5
+          ],
+          [
+            -88.518,
+            -92.34,
+            -15
+          ],
+          [
+            77.051,
+            102.104,
+            5
+          ],
+          [
+            114.645,
+            -9.023,
+            -15
+          ],
+          [
+            84.824,
+            -95.744,
+            5
+          ]
+        ],
+        "lifted_legs": [
+          2,
+          4,
+          6
+        ]
+      },
+      {
+        "figure": 6,
+        "phase": "B plants",
+        "foot_targets_mm": [
+          [
+            -64.516,
+            110.452,
+            -15
+          ],
+          [
+            -114.645,
+            -9.023,
+            -15
+          ],
+          [
+            -95.49,
+            -85.11,
+            -15
+          ],
+          [
+            72.983,
+            105.05,
+            -15
+          ],
+          [
+            113.584,
+            -17.99,
+            -15
+          ],
+          [
+            88.518,
+            -92.34,
+            -15
+          ]
+        ],
+        "lifted_legs": []
+      }
+    ]
+  },
+  "name_mappings": {
+    "heighten": "active",
+    "scuttle": "forward baseline",
+    "recoil": "backward",
+    "strafe_left": "left",
+    "strafe_right": "right",
+    "defensive_posture": "defensive_brace",
+    "curl_up": "tuck_preview illustrates the implemented pulse; sustained curl remains proposed"
+  }
+}
