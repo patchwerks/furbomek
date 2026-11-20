@@ -1,0 +1,37 @@
+{
+  "schema_version": "furbomek.kinect-inventory.v1",
+  "reviewed_at": "2026-11-20",
+  "source_revision": "53c4b290f3c0fa82f161ed6c6ffc81a068a706b3",
+  "scope": "implementation_inventory_not_live_admission",
+  "entries": [
+    {
+      "id": "crimson-samples",
+      "label": "Crimson color samples",
+      "origin": "renderer",
+      "input": {
+        "kind": "rgb",
+        "resolution": [
+          1920,
+          1080
+        ]
+      },
+      "representation": "measured_xyz",
+      "max_measured_depth_samples": 217088,
+      "mac": {
+        "state": "implemented",
+        "reason": "Source implemented; runtime health requires a fresh independent check."
+      },
+      "linux": {
+        "state": "implemented",
+        "reason": "Source implemented; runtime health requires a fresh independent check."
+      },
+      "control": "Mac edge crimson; local key 2",
+      "limits": "Fine contours and strokes from native optical RGB, labeled COLOR SAMPLES / DEPTH-PROBED; no additional measured XYZ.",
+      "evidence": [
+        "tools/kinect2/godot/main.gd",
+        "tools/kinect2/godot/color_surface.gd",
+        "tools/kinect2/godot/color_surface.gdshader"
+      ]
+    }
+  ]
+}

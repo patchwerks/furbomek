@@ -1,0 +1,11 @@
+[tool.ruff]
+extend = "../../../services/embodiment-gateway/pyproject.toml"
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*.py" = ["S101", "PLR2004", "D"]
+
+[tool.basedpyright]
+typeCheckingMode = "all"
+pythonVersion = "3.12"
+include = ["validate_inventory.py", "tests"]
+extraPaths = ["."]

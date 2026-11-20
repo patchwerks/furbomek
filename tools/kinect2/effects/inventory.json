@@ -1,0 +1,793 @@
+{
+  "schema_version": "furbomek.kinect-inventory.v1",
+  "reviewed_at": "2026-11-20",
+  "source_revision": "53c4b290f3c0fa82f161ed6c6ffc81a068a706b3",
+  "scope": "implementation_inventory_not_live_admission",
+  "entries": [
+    {
+      "id": "rgb",
+      "label": "Native optical RGB",
+      "origin": "sensor",
+      "input": {
+        "kind": "rgb",
+        "resolution": [
+          1920,
+          1080
+        ]
+      },
+      "representation": "rgb",
+      "max_measured_depth_samples": 0,
+      "mac": {
+        "state": "implemented",
+        "reason": "Source implemented; runtime health requires a fresh independent check."
+      },
+      "linux": {
+        "state": "implemented",
+        "reason": "Source implemented; runtime health requires a fresh independent check."
+      },
+      "control": "Paired native capture",
+      "limits": "1920x1080 sensor grid; published JPEG is compressed. No depth per RGB pixel.",
+      "evidence": [
+        "services/camera-capture/kinect2.cpp",
+        "https://github.com/OpenKinect/libfreenect2/blob/fd64c5d9b214df6f6a55b4419357e51083f15d93/README.md"
+      ]
+    },
+    {
+      "id": "ir",
+      "label": "Infrared intensity",
+      "origin": "sensor",
+      "input": {
+        "kind": "ir",
+        "resolution": [
+          512,
+          424
+        ]
+      },
+      "representation": "infrared",
+      "max_measured_depth_samples": 0,
+      "mac": {
+        "state": "implemented",
+        "reason": "Source implemented; runtime health requires a fresh independent check."
+      },
+      "linux": {
+        "state": "implemented",
+        "reason": "Source implemented; runtime health requires a fresh independent check."
+      },
+      "control": "Received by capture; no dedicated viewer control",
+      "limits": "512x424 IR reaches the capture listener; only ir_mean is currently published, not a reusable raw IR frame.",
+      "evidence": [
+        "services/camera-capture/kinect2.cpp",
+        "https://github.com/OpenKinect/libfreenect2/blob/fd64c5d9b214df6f6a55b4419357e51083f15d93/README.md"
+      ]
+    },
+    {
+      "id": "depth",
+      "label": "Native depth",
+      "origin": "sensor",
+      "input": {
+        "kind": "depth",
+        "resolution": [
+          512,
+          424
+        ]
+      },
+      "representation": "depth",
+      "max_measured_depth_samples": 217088,
+      "mac": {
+        "state": "implemented",
+        "reason": "Source implemented; runtime health requires a fresh independent check."
+      },
+      "linux": {
+        "state": "implemented",
+        "reason": "Source implemented; runtime health requires a fresh independent check."
+      },
+      "control": "Capture listener and registration",
+      "limits": "512x424 native samples; missing and invalid surfaces remain holes. Metric accuracy is unqualified.",
+      "evidence": [
+        "services/camera-capture/kinect2.cpp",
+        "https://github.com/OpenKinect/libfreenect2/blob/fd64c5d9b214df6f6a55b4419357e51083f15d93/README.md"
+      ]
+    },
+    {
+      "id": "registered-rgb",
+      "label": "Color registered to depth grid",
+      "origin": "capture",
+      "input": {
+        "kind": "registered_rgb",
+        "resolution": [
+          512,
+          424
+        ]
+      },
+      "representation": "registered_rgb",
+      "max_measured_depth_samples": 0,
+      "mac": {
+        "state": "implemented",
+        "reason": "Source implemented; runtime health requires a fresh independent check."
+      },
+      "linux": {
+        "state": "implemented",
+        "reason": "Source implemented; runtime health requires a fresh independent check."
+      },
+      "control": "Same-sequence JPEG wrapper",
+      "limits": "Color resampled onto 512x424; does not supply new independent depth samples.",
+      "evidence": [
+        "services/camera-capture/kinect2.cpp",
+        "https://github.com/OpenKinect/libfreenect2/blob/fd64c5d9b214df6f6a55b4419357e51083f15d93/README.md"
+      ]
+    },
+    {
+      "id": "measured-xyz",
+      "label": "Registered measured XYZ",
+      "origin": "capture",
+      "input": {
+        "kind": "registered_depth",
+        "resolution": [
+          512,
+          424
+        ]
+      },
+      "representation": "measured_xyz",
+      "max_measured_depth_samples": 217088,
+      "mac": {
+        "state": "implemented",
+        "reason": "Source implemented; runtime health requires a fresh independent check."
+      },
+      "linux": {
+        "state": "implemented",
+        "reason": "Source implemented; runtime health requires a fresh independent check."
+      },
+      "control": "Native point ABI consumed by Godot",
+      "limits": "At most 217088 slots, including invalid slots. Source admits finite z between 0.25 and 8 m; that filter is not a qualified operating range.",
+      "evidence": [
+        "services/camera-capture/kinect2.cpp"
+      ]
+    },
+    {
+      "id": "surface-basis",
+      "label": "Estimated surface shading basis",
+      "origin": "derived",
+      "input": {
+        "kind": "registered_depth",
+        "resolution": [
+          512,
+          424
+        ]
+      },
+      "representation": "inference",
+      "max_measured_depth_samples": 0,
+      "mac": {
+        "state": "implemented",
+        "reason": "Source implemented; runtime health requires a fresh independent check."
+      },
+      "linux": {
+        "state": "implemented",
+        "reason": "Source implemented; runtime health requires a fresh independent check."
+      },
+      "control": "Native neighboring sample computation",
+      "limits": "Normal/basis estimated from compatible neighbors, not another sensor channel; invalid positions remain invalid.",
+      "evidence": [
+        "services/camera-capture/kinect2.cpp"
+      ]
+    },
+    {
+      "id": "raw-export",
+      "label": "Raw depth and IR export",
+      "origin": "capture",
+      "input": {
+        "kind": "ir",
+        "resolution": [
+          512,
+          424
+        ]
+      },
+      "representation": "control",
+      "max_measured_depth_samples": 0,
+      "mac": {
+        "state": "unsupported",
+        "reason": "No exported raw image artifact in the current capture ABI."
+      },
+      "linux": {
+        "state": "unsupported",
+        "reason": "No exported raw image artifact in the current capture ABI."
+      },
+      "control": "Unavailable",
+      "limits": "The producer publishes XYZ, registered/native JPEG, map and metadata; it does not retain raw IR/depth image arrays as a consumer contract.",
+      "evidence": [
+        "services/camera-capture/kinect2.cpp"
+      ]
+    },
+    {
+      "id": "microphone",
+      "label": "Kinect microphone audio",
+      "origin": "sensor",
+      "input": {
+        "kind": "microphone",
+        "resolution": null
+      },
+      "representation": "audio",
+      "max_measured_depth_samples": 0,
+      "mac": {
+        "state": "unverified",
+        "reason": "SDK voice capability is documented; this libfreenect2 application only subscribes to Color, IR and Depth."
+      },
+      "linux": {
+        "state": "unverified",
+        "reason": "SDK voice capability is documented; this libfreenect2 application only subscribes to Color, IR and Depth."
+      },
+      "control": "Unavailable",
+      "limits": "No Kinect microphone capture or beamforming adapter is wired in this media stack; no Mac channel/rate or runtime availability claimed.",
+      "evidence": [
+        "https://www.microsoft.com/en-us/download/details.aspx?id=44561",
+        "services/camera-capture/kinect2.cpp"
+      ]
+    },
+    {
+      "id": "sdk-body",
+      "label": "Microsoft Kinect SDK body and gesture tracking",
+      "origin": "sdk",
+      "input": {
+        "kind": "sdk",
+        "resolution": null
+      },
+      "representation": "inference",
+      "max_measured_depth_samples": 0,
+      "mac": {
+        "state": "unsupported",
+        "reason": "Microsoft SDK 2.0 documents Windows x64 support; no SDK runtime is integrated here."
+      },
+      "linux": {
+        "state": "unsupported",
+        "reason": "Microsoft SDK 2.0 documents Windows x64 support; no SDK runtime is integrated here."
+      },
+      "control": "Unavailable on this Mac stack",
+      "limits": "Windows SDK capabilities are distinct from libfreenect2 transfer and the project MediaPipe tracker.",
+      "evidence": [
+        "https://www.microsoft.com/en-us/download/details.aspx?id=44561",
+        "https://blogs.microsoft.com/blog/2014/10/22/microsoft-releases-kinect-sdk-2-0-new-adapter-kit"
+      ]
+    },
+    {
+      "id": "driver-platforms",
+      "label": "libfreenect2 platform support",
+      "origin": "capture",
+      "input": {
+        "kind": "none",
+        "resolution": null
+      },
+      "representation": "control",
+      "max_measured_depth_samples": 0,
+      "mac": {
+        "state": "implemented",
+        "reason": "Source implemented; runtime health requires a fresh independent check."
+      },
+      "linux": {
+        "state": "implemented",
+        "reason": "Source implemented; runtime health requires a fresh independent check."
+      },
+      "control": "Build-time selection",
+      "limits": "Pinned upstream lists Mac, Linux and Windows. Current code chooses OpenGLPacketPipeline; optional backends are not runtime-qualified by a README.",
+      "evidence": [
+        "https://github.com/OpenKinect/libfreenect2/blob/fd64c5d9b214df6f6a55b4419357e51083f15d93/README.md",
+        "services/camera-capture/kinect2.cpp",
+        "docs/operations/macos-table-walk-and-media-2026-11-20.md",
+        "docs/operations/kinect2-host.md"
+      ]
+    },
+    {
+      "id": "body-track",
+      "label": "MediaPipe body pose",
+      "origin": "derived",
+      "input": {
+        "kind": "registered_rgb",
+        "resolution": [
+          512,
+          424
+        ]
+      },
+      "representation": "inference",
+      "max_measured_depth_samples": 0,
+      "mac": {
+        "state": "implemented",
+        "reason": "Source implemented; runtime health requires a fresh independent check."
+      },
+      "linux": {
+        "state": "implemented",
+        "reason": "Source implemented; runtime health requires a fresh independent check."
+      },
+      "control": "Advisory tracker",
+      "limits": "Model-derived person/pose result; not Microsoft skeletal SDK, robot identity or calibrated metric pose.",
+      "evidence": [
+        "services/camera-capture/detect_targets.py",
+        "services/camera-capture/track.py"
+      ]
+    },
+    {
+      "id": "face-track",
+      "label": "MediaPipe face detection",
+      "origin": "derived",
+      "input": {
+        "kind": "registered_rgb",
+        "resolution": [
+          512,
+          424
+        ]
+      },
+      "representation": "inference",
+      "max_measured_depth_samples": 0,
+      "mac": {
+        "state": "implemented",
+        "reason": "Source implemented; runtime health requires a fresh independent check."
+      },
+      "linux": {
+        "state": "implemented",
+        "reason": "Source implemented; runtime health requires a fresh independent check."
+      },
+      "control": "Advisory tracker",
+      "limits": "Model-derived face detection, not identity, depth sensor resolution or a live-human qualification.",
+      "evidence": [
+        "services/camera-capture/detect_targets.py",
+        "services/camera-capture/track.py"
+      ]
+    },
+    {
+      "id": "object-track",
+      "label": "Masked ORB object lock",
+      "origin": "derived",
+      "input": {
+        "kind": "registered_rgb",
+        "resolution": [
+          512,
+          424
+        ]
+      },
+      "representation": "inference",
+      "max_measured_depth_samples": 0,
+      "mac": {
+        "state": "implemented",
+        "reason": "Source implemented; runtime health requires a fresh independent check."
+      },
+      "linux": {
+        "state": "implemented",
+        "reason": "Source implemented; runtime health requires a fresh independent check."
+      },
+      "control": "Private template and mask",
+      "limits": "Feature/homography match with stable object-furbomek ID; inlier ratio is not a calibrated class probability. Missing template or match means no lock.",
+      "evidence": [
+        "services/camera-capture/detect_targets.py",
+        "services/camera-capture/track.py"
+      ]
+    },
+    {
+      "id": "depth-region",
+      "label": "Nearest depth region",
+      "origin": "derived",
+      "input": {
+        "kind": "registered_depth",
+        "resolution": [
+          512,
+          424
+        ]
+      },
+      "representation": "inference",
+      "max_measured_depth_samples": 0,
+      "mac": {
+        "state": "implemented",
+        "reason": "Source implemented; runtime health requires a fresh independent check."
+      },
+      "linux": {
+        "state": "implemented",
+        "reason": "Source implemented; runtime health requires a fresh independent check."
+      },
+      "control": "Advisory tracker",
+      "limits": "A component is a surface, never implicitly a person or robot identity.",
+      "evidence": [
+        "services/camera-capture/detect_targets.py"
+      ]
+    },
+    {
+      "id": "rgb-video",
+      "label": "Fixed optical video look",
+      "origin": "renderer",
+      "input": {
+        "kind": "rgb",
+        "resolution": [
+          1920,
+          1080
+        ]
+      },
+      "representation": "rgb",
+      "max_measured_depth_samples": 0,
+      "mac": {
+        "state": "implemented",
+        "reason": "Source implemented; runtime health requires a fresh independent check."
+      },
+      "linux": {
+        "state": "implemented",
+        "reason": "Source implemented; runtime health requires a fresh independent check."
+      },
+      "control": "Mac edge rgb; local key 1",
+      "limits": "Full-frame optical view; target loss does not reframe it. No parallax or metric inference from optical pixels.",
+      "evidence": [
+        "tools/kinect2/godot/main.gd",
+        "tools/kinect2/godot/color_surface.gd",
+        "docs/operations/macos-table-walk-and-media-2026-11-20.md"
+      ]
+    },
+    {
+      "id": "crimson-samples",
+      "label": "Crimson color samples",
+      "origin": "renderer",
+      "input": {
+        "kind": "rgb",
+        "resolution": [
+          1920,
+          1080
+        ]
+      },
+      "representation": "rgb_derived",
+      "max_measured_depth_samples": 0,
+      "mac": {
+        "state": "implemented",
+        "reason": "Source implemented; runtime health requires a fresh independent check."
+      },
+      "linux": {
+        "state": "implemented",
+        "reason": "Source implemented; runtime health requires a fresh independent check."
+      },
+      "control": "Mac edge crimson; local key 2",
+      "limits": "Fine contours and strokes from native optical RGB, labeled COLOR SAMPLES / DEPTH-PROBED; no additional measured XYZ.",
+      "evidence": [
+        "tools/kinect2/godot/main.gd",
+        "tools/kinect2/godot/color_surface.gd",
+        "tools/kinect2/godot/color_surface.gdshader"
+      ]
+    },
+    {
+      "id": "depth-palette",
+      "label": "Measured XYZ depth palette",
+      "origin": "renderer",
+      "input": {
+        "kind": "registered_depth",
+        "resolution": [
+          512,
+          424
+        ]
+      },
+      "representation": "measured_xyz",
+      "max_measured_depth_samples": 217088,
+      "mac": {
+        "state": "implemented",
+        "reason": "Source implemented; runtime health requires a fresh independent check."
+      },
+      "linux": {
+        "state": "implemented",
+        "reason": "Source implemented; runtime health requires a fresh independent check."
+      },
+      "control": "Mac edge xyz; local key 3",
+      "limits": "Native geometry colored by depth; current selection preserves camera angle. Holes remain absent.",
+      "evidence": [
+        "tools/kinect2/godot/main.gd",
+        "tools/kinect2/godot/point_cloud.gdshader"
+      ]
+    },
+    {
+      "id": "crimson-xyz",
+      "label": "Crimson measured XYZ",
+      "origin": "renderer",
+      "input": {
+        "kind": "registered_depth",
+        "resolution": [
+          512,
+          424
+        ]
+      },
+      "representation": "measured_xyz",
+      "max_measured_depth_samples": 217088,
+      "mac": {
+        "state": "implemented",
+        "reason": "Source implemented; runtime health requires a fresh independent check."
+      },
+      "linux": {
+        "state": "implemented",
+        "reason": "Source implemented; runtime health requires a fresh independent check."
+      },
+      "control": "Local key 4 only",
+      "limits": "Measured native grid with crimson shading; no remote named command in current edge protocol.",
+      "evidence": [
+        "tools/kinect2/godot/main.gd",
+        "tools/kinect2/godot/point_cloud.gdshader"
+      ]
+    },
+    {
+      "id": "brackets-probe",
+      "label": "Detection brackets and measured probe",
+      "origin": "renderer",
+      "input": {
+        "kind": "tracking",
+        "resolution": null
+      },
+      "representation": "presentation",
+      "max_measured_depth_samples": 0,
+      "mac": {
+        "state": "implemented",
+        "reason": "Source implemented; runtime health requires a fresh independent check."
+      },
+      "linux": {
+        "state": "implemented",
+        "reason": "Source implemented; runtime health requires a fresh independent check."
+      },
+      "control": "Automatic current track selection",
+      "limits": "Same sequence and TTL as cloud; measured probe distinct from inferred ROI. Null optical mapping hides optical graphics, while valid XYZ can remain.",
+      "evidence": [
+        "tools/kinect2/godot/broadcast_hud.gd",
+        "tools/kinect2/godot/stream_loader.gd"
+      ]
+    },
+    {
+      "id": "insets",
+      "label": "Processed magnifier and optical target inset",
+      "origin": "renderer",
+      "input": {
+        "kind": "rgb",
+        "resolution": [
+          1920,
+          1080
+        ]
+      },
+      "representation": "presentation",
+      "max_measured_depth_samples": 0,
+      "mac": {
+        "state": "implemented",
+        "reason": "Source implemented; runtime health requires a fresh independent check."
+      },
+      "linux": {
+        "state": "implemented",
+        "reason": "Source implemented; runtime health requires a fresh independent check."
+      },
+      "control": "Automatic selected target",
+      "limits": "Same-frame real crops; missing probe/mapping hides relevant inset. Processed crop is RGB-derived, not independent depth.",
+      "evidence": [
+        "tools/kinect2/godot/broadcast_hud.gd"
+      ]
+    },
+    {
+      "id": "stroke-size",
+      "label": "Point stroke width",
+      "origin": "renderer",
+      "input": {
+        "kind": "rendered_program",
+        "resolution": [
+          1920,
+          1080
+        ]
+      },
+      "representation": "presentation",
+      "max_measured_depth_samples": 0,
+      "mac": {
+        "state": "implemented",
+        "reason": "Source implemented; runtime health requires a fresh independent check."
+      },
+      "linux": {
+        "state": "implemented",
+        "reason": "Source implemented; runtime health requires a fresh independent check."
+      },
+      "control": "Local [ and ]; range 0.75 to 3.6 pixels, step 0.15",
+      "limits": "Presentation size only; cannot change native measurement resolution.",
+      "evidence": [
+        "tools/kinect2/godot/main.gd"
+      ]
+    },
+    {
+      "id": "point-density",
+      "label": "Contour occupancy and point density",
+      "origin": "renderer",
+      "input": {
+        "kind": "rgb",
+        "resolution": [
+          1920,
+          1080
+        ]
+      },
+      "representation": "rgb_derived",
+      "max_measured_depth_samples": 0,
+      "mac": {
+        "state": "implemented",
+        "reason": "Source implemented; runtime health requires a fresh independent check."
+      },
+      "linux": {
+        "state": "implemented",
+        "reason": "Source implemented; runtime health requires a fresh independent check."
+      },
+      "control": "Shader-derived occupancy; no current typed density control",
+      "limits": "RGB edge/local contrast drives occupancy. Measured cloud count remains bounded by native depth slots.",
+      "evidence": [
+        "tools/kinect2/godot/color_surface.gdshader",
+        "tools/kinect2/godot/point_cloud.gdshader"
+      ]
+    },
+    {
+      "id": "orbit-zoom",
+      "label": "Bounded virtual orbit and zoom",
+      "origin": "renderer",
+      "input": {
+        "kind": "registered_depth",
+        "resolution": [
+          512,
+          424
+        ]
+      },
+      "representation": "presentation",
+      "max_measured_depth_samples": 0,
+      "mac": {
+        "state": "implemented",
+        "reason": "Source implemented; runtime health requires a fresh independent check."
+      },
+      "linux": {
+        "state": "implemented",
+        "reason": "Source implemented; runtime health requires a fresh independent check."
+      },
+      "control": "Local arrows/wheel/O/R",
+      "limits": "Yaw +/-0.55, pitch +/-0.32 radians; camera distance 0.65-5.0 scene units. Auto orbit stops near +/-0.35; no physical camera motion.",
+      "evidence": [
+        "tools/kinect2/godot/main.gd"
+      ]
+    },
+    {
+      "id": "auto-framing",
+      "label": "Existing object-anchored color crop",
+      "origin": "renderer",
+      "input": {
+        "kind": "tracking",
+        "resolution": null
+      },
+      "representation": "presentation",
+      "max_measured_depth_samples": 0,
+      "mac": {
+        "state": "implemented",
+        "reason": "Source implemented; runtime health requires a fresh independent check."
+      },
+      "linux": {
+        "state": "implemented",
+        "reason": "Source implemented; runtime health requires a fresh independent check."
+      },
+      "control": "Automatic crimson crop; local wheel/reset",
+      "limits": "Crop anchors on object ID changes; no smoothing or saved stable reacquisition policy. RGB mode is full-frame. Issue 57 rules are still proposed.",
+      "evidence": [
+        "tools/kinect2/godot/color_surface.gd",
+        "https://github.com/patchwerks/furbomek/issues/57"
+      ]
+    },
+    {
+      "id": "framing-rules",
+      "label": "Saved framing and subject-lock rules",
+      "origin": "renderer",
+      "input": {
+        "kind": "tracking",
+        "resolution": null
+      },
+      "representation": "presentation",
+      "max_measured_depth_samples": 0,
+      "mac": {
+        "state": "proposed",
+        "reason": "No shared framing-rule controller in the current implementation."
+      },
+      "linux": {
+        "state": "proposed",
+        "reason": "No shared framing-rule controller in the current implementation."
+      },
+      "control": "Unavailable",
+      "limits": "Issue 57 requires persisted targets/predicates, priority, confidence/freshness, dwell/release, pan/zoom/transition bounds, loss fallback, manual hold/reset and target/reason reporting. Task 10 owns implementation; current object crop is not this capability.",
+      "evidence": [
+        "https://github.com/patchwerks/furbomek/issues/57",
+        "tools/kinect2/godot/color_surface.gd"
+      ]
+    },
+    {
+      "id": "scene-blend",
+      "label": "Scene and camera blend",
+      "origin": "program",
+      "input": {
+        "kind": "rendered_program",
+        "resolution": [
+          1920,
+          1080
+        ]
+      },
+      "representation": "presentation",
+      "max_measured_depth_samples": 0,
+      "mac": {
+        "state": "proposed",
+        "reason": "No revisioned blend adapter is implemented."
+      },
+      "linux": {
+        "state": "proposed",
+        "reason": "No revisioned blend adapter is implemented."
+      },
+      "control": "Unavailable",
+      "limits": "Current edge selects looks discretely; no typed timed blend/transition control.",
+      "evidence": [
+        "tools/kinect2/godot/main.gd",
+        "services/embodiment-gateway/src/furbomek_gateway/edge_protocol.py"
+      ]
+    },
+    {
+      "id": "obs-program",
+      "label": "Dedicated OBS Godot program source",
+      "origin": "program",
+      "input": {
+        "kind": "rendered_program",
+        "resolution": [
+          1920,
+          1080
+        ]
+      },
+      "representation": "presentation",
+      "max_measured_depth_samples": 0,
+      "mac": {
+        "state": "implemented",
+        "reason": "Source implemented; runtime health requires a fresh independent check."
+      },
+      "linux": {
+        "state": "implemented",
+        "reason": "Source implemented; runtime health requires a fresh independent check."
+      },
+      "control": "Typed OBS status/start_recording/stop_recording",
+      "limits": "1920x1080 encoded program target at 30 output FPS; distinct from sensor delivery FPS. No arbitrary OBS source or scene selection.",
+      "evidence": [
+        "tools/kinect2/obs-edge.lua",
+        "docs/operations/macos-table-walk-and-media-2026-11-20.md",
+        "docs/operations/kinect2-host.md"
+      ]
+    },
+    {
+      "id": "activity-hud",
+      "label": "Redacted Hermes text and timeline",
+      "origin": "program",
+      "input": {
+        "kind": "activity",
+        "resolution": null
+      },
+      "representation": "presentation",
+      "max_measured_depth_samples": 0,
+      "mac": {
+        "state": "implemented",
+        "reason": "Source implemented; runtime health requires a fresh independent check."
+      },
+      "linux": {
+        "state": "implemented",
+        "reason": "Source implemented; runtime health requires a fresh independent check."
+      },
+      "control": "Read-only activity projection",
+      "limits": "Expires on staleness. No credentials/tools/action authority or fabricated agent work.",
+      "evidence": [
+        "services/embodiment-gateway/src/furbomek_gateway/edge_ssh.py",
+        "tools/kinect2/godot/activity_ports.gd"
+      ]
+    },
+    {
+      "id": "desktop-source",
+      "label": "Desktop pixels as program source",
+      "origin": "program",
+      "input": {
+        "kind": "none",
+        "resolution": null
+      },
+      "representation": "presentation",
+      "max_measured_depth_samples": 0,
+      "mac": {
+        "state": "unsupported",
+        "reason": "Policy and current production boundary reject desktop screenshots."
+      },
+      "linux": {
+        "state": "unsupported",
+        "reason": "Policy and current production boundary reject desktop screenshots."
+      },
+      "control": "Rejected",
+      "limits": "Desktop capture remains outside the qualified public activity contract; private testing does not grant access.",
+      "evidence": [
+        "tools/kinect2/AGENTS.md"
+      ]
+    }
+  ]
+}
