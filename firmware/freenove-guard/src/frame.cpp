@@ -59,7 +59,7 @@ uint16_t crc16(const uint8_t* bytes, uint8_t length) {
   for (uint8_t index = 0; index < length; ++index) {
     crc ^= static_cast<uint16_t>(bytes[index]) << 8U;
     for (uint8_t bit = 0; bit < 8U; ++bit) {
-      crc = (crc & 0x8000U) != 0U ? static_cast<uint16_t>((crc << 1U) ^ 0x1021U)
+      crc = (crc & 0x8000U) != 0U ? static_cast<uint16_t>((static_cast<uint32_t>(crc) << 1U) ^ 0x1021U)
                                   : static_cast<uint16_t>(crc << 1U);
     }
   }
