@@ -10,7 +10,8 @@
     "remote_elf_sha256": "0e0e478804b5dc473bdf14eae7b89c610909b2a4478e8e72679919e1f939b44e",
     "verification": "Two matched builds, native guard tests and Mac pseudo-terminal tests",
     "bounds": "One joint at a time with fixed 6, 18 and 30 degree command bands, clearance checks and existing STOP/TTL behavior.",
-    "first_powered_result": "All 36 six-degree commands completed untethered with verified DISARM. Camera frames show first-knee motion in both directions, with a residual optical offset after DISARM. Larger bands, physical angles and servo endpoints remain open.",
+    "first_powered_result": "All 36 six-degree commands completed untethered with verified DISARM. Camera frames show first-knee motion in both directions, with a residual optical offset after DISARM.",
+    "larger_band_result": "An additional 62 probes completed with verified DISARM. A per-axis table and camera coverage are in the installation evidence. No application write was made during this pass.",
     "rollback": "Preserve and verify both installed applications before changing either. Restore both prior applications through the verified serial bootloaders.",
     "evidence": "firmware/freenove-guard/joint-bench.md",
     "installation_evidence": "docs/operations/robot-joint-bench-2026-11-21.md"

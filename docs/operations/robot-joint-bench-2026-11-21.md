@@ -94,3 +94,45 @@ The owner confirmed physical POWER OFF and the body remained
 untethered. The Mac reopened the handheld with the updated runner
 that preserves the original rejected guard reply. No application
 write was made during the recovery.
+
+## Untethered 18° and 30° passes
+
+The next start reported BOOT, idle, fault 0 at 7.82 V. ARM-only and
+Active each returned to DISARMED. The earlier ARM rejection did
+not recur. Sixty-two additional probe commands completed in
+0.90–1.32 s and each ended DISARMED, idle, fault 0. The body USB
+remained unplugged. The owner confirmed physical POWER OFF at
+handoff.
+
+The table lists the largest completed command in each direction
+relative to the Active reference. Each cell reports negative and
+positive command degrees.
+
+| Firmware leg | Hip yaw (− / +) | Femur (− / +) | Knee (− / +) |
+| --- | ---: | ---: | ---: |
+| 1 | −30° / +30° | −30° / +18° | −30° / +30° |
+| 2 | −30° / +30° | −30° / +6° | −30° / +30° |
+| 3 | −30° / +30° | −30° / +6° | −30° / +30° |
+| 4 | −30° / +30° | −30° / +18° | −30° / +30° |
+| 5 | −30° / +30° | −30° / +6° | −30° / +30° |
+| 6 | −30° / +30° | −30° / +6° | −30° / +30° |
+
+The Kinect recorded 13–20 matched color and depth frames for every
+larger probe. The Logitech recorded 9–14 timestamped frames for 60
+of the 62 probes. The two +18° femur runs used the Kinect's
+front view, which showed the front feet lowering with table clearance.
+The remaining +18° and all +30° femur commands need verified
+clearance beneath each foot. The command table describes this
+supported test arrangement.
+
+On leg 1, the Kinect image shows approximately +26° and −23°
+of **projected** knee travel during the two 30° commands. The
+hand-marked pivot was near (1329, 398) in the 1920×1080 image.
+The positive probe used tip positions near (1352, 581) and
+(1431, 554) in frames 1574 and 1590. The negative probe used
+(1353, 581) and (1280, 571) in frames 1600 and 1610. These
+are approximate image-plane angles measured from each trial's
+starting pose. Depth was missing at the pivot at both peaks and
+the oblique second view did not consistently resolve the same
+toe through the sweep. Calibrated physical angles for the 18
+joints and actual mechanical endpoints remain open.
