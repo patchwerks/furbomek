@@ -115,6 +115,10 @@ They provide no calibrated travel distance or continuous-gait
 qualification. The final middle step verified DISARM. Both
 recordings and the complete agent receipts remain private.
 
+At handoff the operator confirmed physical POWER OFF with the body
+USB unplugged. The Mac still held the handheld and reported
+`read_only_bench` with powered motion admission false.
+
 The local `require_kinect_lock_for_motion` option requires the owned tracker
 to report both a fresh frame and a Furbomek lock. Loss cancels motion and puts
 the bridge back in read-only state. This option defaults off for the supported
