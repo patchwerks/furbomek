@@ -231,3 +231,24 @@ Two independent builds produced Mega HEX SHA-256
 `afdf42a9e555cd7f483d7683444b1b1484049858bd1174273158551c71020a22`.
 The handheld HEX matched the installed image, qualifying a
 Mega-only maintenance update after a fresh wired readback.
+
+## Height fix installation
+
+The owner confirmed physical POWER OFF and connected body USB.
+The installed Mega full flash and EEPROM matched the
+`326da84` readbacks. The Mac retained the prior application's
+page-aligned rollback image. AVRDUDE 7.1 wrote only the corrected
+Mega application from `e6c3f1a`. Its independent full flash
+readback confirmed all 60,342 application bytes and matched
+the backup outside that range. The calibration EEPROM matched
+the backup byte for byte. The handheld port stayed held throughout.
+
+| Artifact | SHA-256 |
+| --- | --- |
+| Mega full flash before | `03732df4c1c4d0215ce53b987b203599139ffa7b32c7e0337d4fcd23d19f1065` |
+| Mega full flash after | `9d5cc2b1ac89f13938d122bcbf1de9e89f8cf675c6e33fd8e12220dd664e1123` |
+| Mega calibration EEPROM | `c7b4f2f7e8e5dae2a53aa146f64f868ec17c9744e9833d13f844c378ae4ad9b1` |
+
+With physical POWER OFF, the held handheld returned RF BOOT,
+sequence 0, idle, fault 0 and 0.0 V. The untethered return-to-middle
+and loaded tabletop tests were pending at this checkpoint.

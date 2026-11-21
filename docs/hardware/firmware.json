@@ -3,7 +3,7 @@
   "updated_on": "2026-11-21",
   "bench_height_roundoff_candidate": {
     "date": "2026-11-21",
-    "status": "Verified build candidate. Device installation and the return-to-middle rerun are pending.",
+    "status": "The Mega-only application was written and verified by full flash readback. The return-to-middle rerun is pending.",
     "mega_hex_sha256": "afdf42a9e555cd7f483d7683444b1b1484049858bd1174273158551c71020a22",
     "mega_elf_sha256": "8889592b5bde303f6c433da8fb28dcec0be7bf49278e9226113e589c65a0e11d",
     "handheld_hex_sha256": "b4c4779be710ab837ed1ad3a54df435c8441b36a591f99b3d7fe0030f61c8019",
@@ -239,6 +239,15 @@
     "rollback": "No device changes; preserve installed image and private backups. Remove prototype source if abandoned. No bootloader, EEPROM, fuse or lock writes occurred."
   },
   "history": [
+    {
+      "date": "2026-11-21",
+      "change": "Installed the fixed height endpoint preflight on the Mega.",
+      "before": "The installed wide bench application and calibration EEPROM matched their archived full readbacks.",
+      "after": "The corrected Mega application matched full readback. Bytes beyond the application and the calibration EEPROM matched the backup.",
+      "verification": "Observed Mega signature, AVRDUDE application verify, independent full flash and EEPROM checks, and read-only RF BOOT/idle/fault 0.",
+      "rollback": "Private full flash and page-aligned application backups retained. The handheld application was outside the write.",
+      "evidence": "docs/operations/robot-joint-bench-2026-11-21.md"
+    },
     {
       "date": "2026-11-21",
       "change": "Installed the paired 36-degree and height bench applications.",
