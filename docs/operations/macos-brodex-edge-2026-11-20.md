@@ -73,6 +73,14 @@ motion bench closed. Loaded motion was observed through the
 isolated bench session. The Hermes check exercised schema and
 transport with the bridge closed.
 
+At handoff the owner confirmed physical POWER OFF and the body USB
+unplugged. The private test session released the handheld. Mac
+operator preparation returned `prepared_waiting_for_robot`, and the
+Mac edge process took exclusive ownership of the handheld. A live
+`robot_get_capabilities` query through the enrolled Brodex profile
+returned `read_only_bench`, with exactly Active and all twelve
+tabletop presets in the allowlist. Powered admission was false.
+
 The local `require_kinect_lock_for_motion` option requires the owned tracker
 to report both a fresh frame and a Furbomek lock. Loss cancels motion and puts
 the bridge back in read-only state. This option defaults off for the supported
