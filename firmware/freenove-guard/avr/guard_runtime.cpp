@@ -74,7 +74,8 @@ class Motion final : public freenove_guard::MotionSink {
       pending_action = static_cast<uint8_t>(action);
       action_pending = true;
       operation_active = true;
-      operation_deadline_tick = timer4_ticks + 300U;
+      operation_deadline_tick = timer4_ticks +
+          freenove_guard::bench_exec_deadline_ms(pending_action) / 10U;
     }
     SREG = saved_status;
     return accepted;

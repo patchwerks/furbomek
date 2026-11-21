@@ -4,6 +4,7 @@
 #include "freenove_guard/metadata.h"
 #include "freenove_guard/joint_bench.h"
 #include "freenove_guard/scheduler.h"
+#include "freenove_guard/table_motion.h"
 
 #include <cassert>
 #include <vector>
@@ -40,6 +41,22 @@ struct Motion final : MotionSink {
   }
   void safe_stop() override { ++stops; }
   void command_accepted(const Command&) override { ++accepted_commands; }
+};
+
+struct TableFixture final : ExpressiveSink {
+  bool accept_targets = true;
+  std::vector<Stance> poses;
+  uint16_t hold_ms = 0;
+
+  bool reachable(uint8_t, const FootPoint&) override { return accept_targets; }
+  bool move(const Stance& pose, float) override {
+    poses.push_back(pose);
+    return true;
+  }
+  bool hold(uint16_t ms) override {
+    hold_ms = ms;
+    return true;
+  }
 };
 
 struct Replies final : RoutedReplySink {
@@ -151,7 +168,7 @@ int main() {
       }
     }
   }
-  assert(!bench_action_code(10U) && !bench_action_code(170U));
+  assert(!bench_action_code(10U) && !bench_action_code(182U));
   for (uint8_t code = 119U; code < 167U; ++code) {
     const auto ordinal = static_cast<uint8_t>(code - 119U);
     JointProbe probe{};
@@ -177,6 +194,36 @@ int main() {
   assert(normalize_bench_height_start(high_roundtrip_z) && high_roundtrip_z == -25.0F);
   assert(normalize_bench_height_start(low_roundtrip_z) && low_roundtrip_z == -7.0F);
   assert(!normalize_bench_height_start(out_of_range_z));
+  for (uint8_t code = 170U; code < 182U; ++code) {
+    TableMotion motion{};
+    assert(decode_table_motion(code, motion));
+    assert(motion.foot_z == heights[((code - 170U) % 6U) / 2U]);
+    assert(motion.step_mm == (code % 2U ? 3.75F : 3.0F));
+    assert(motion.walk == (code >= 176U));
+    assert(bench_exec_deadline_ms(code) ==
+           (joint_bench_enabled() && !motion.walk ? 6500U : 3000U));
+    TableFixture fixture;
+    Stance initial{};
+    for (auto& foot : initial.feet) foot.z = -15.0F;
+    assert(run_table_motion(motion, initial, fixture));
+    assert(fixture.hold_ms == (motion.walk ? 200U : 5000U));
+    const auto& final_pose = fixture.poses.back();
+    for (const auto& foot : final_pose.feet) {
+      assert(foot.y == 0.0F && foot.z == motion.foot_z);
+    }
+    if (motion.walk) {
+      assert(fixture.poses[4].feet[0].y == 16.0F);
+      assert(fixture.poses[4].feet[1].y == 0.0F);
+      assert(fixture.poses[6].feet[0].y == 0.0F);
+      assert(fixture.poses[6].feet[1].y == -16.0F);
+      assert(fixture.poses[7].feet[0].z == motion.foot_z);
+      assert(fixture.poses[7].feet[1].z == motion.foot_z + 6.0F);
+    }
+    TableFixture rejected;
+    rejected.accept_targets = false;
+    assert(!run_table_motion(motion, initial, rejected));
+    assert(rejected.poses.empty());
+  }
   if (joint_bench_enabled()) {
     Motion fixture;
     Replies receipts;
@@ -194,6 +241,19 @@ int main() {
     assert(static_cast<uint8_t>(fixture.last_action) == 166U);
     bench.tick(502U);
     assert(bench.snapshot(502U).state == State::Fault && fixture.stops == 1U);
+
+    Motion hold_fixture;
+    Replies hold_receipts;
+    Dispatcher hold(hold_fixture, hold_receipts);
+    begin_and_arm(hold, hold_receipts, kRfComputerSource);
+    send_radio(hold, kRfComputerSource, command(kExecute, 2U, 170U), 2U);
+    uint32_t sequence = 3U;
+    for (uint32_t now = 100U; now <= 6400U; now += 100U) {
+      send_radio(hold, kRfComputerSource, command(kKeepalive, sequence++), now);
+      assert(hold.snapshot(now).state == State::Armed && hold.snapshot(now).busy);
+    }
+    hold.tick(6502U);
+    assert(hold.snapshot(6502U).state == State::Fault && hold_fixture.stops == 1U);
   }
   assert(metadata_supported(1U, 30U));
   assert(metadata_supported(1U, 31U));

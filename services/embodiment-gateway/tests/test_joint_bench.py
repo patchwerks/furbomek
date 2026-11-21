@@ -14,11 +14,13 @@ from furbomek_gateway.joint_bench import (
     JointAngleError,
     JointProbe,
     JointProbeRejectedError,
+    TableMotion,
     arm_only_check,
     observed_travel,
     reference_stance,
     run_height,
     run_probe,
+    run_table,
 )
 from tests.guard_settings import powered_settings
 from tests.guard_support import PtyGuardBoard
@@ -41,9 +43,13 @@ async def test_probe_uses_separate_wire_family_and_verifies_disarm() -> None:
             )
             assert await run_probe(port, wide)
             assert await run_height(port, "high")
+            hold = TableMotion(action="hold", height="middle", speed="baseline")
+            assert await run_table(port, hold)
+            walk = TableMotion(action="walk", height="high", speed="fast")
+            assert await run_table(port, walk)
         finally:
             await port.aclose()
-    assert board.actions == [0, 118, 166, 169]
+    assert board.actions == [0, 118, 166, 169, 172, 181]
     assert not board.stop_received.is_set()
 
 

@@ -74,6 +74,26 @@ codes 11–118 keep their original encoding. The expanded actions
 remain on the local bench RF route. Ordinary guard builds continue
 to reject bench actions.
 
+## Loaded holds and walking
+
+The tabletop candidate adds a five-second hold and a 16 mm
+forward step for each of the three stance presets. Each test
+can select 3.0 or 3.75 mm per 20 ms update. One forward step
+lifts and advances the first tripod, plants it, shifts the
+body with all six feet down, then brings the second tripod
+back to neutral. The full path is checked before motion.
+Record both cameras throughout the motion and DISARM. Check
+body drift during the powered hold and after the rails turn
+off. For walking, compare forward travel, duration and foot
+contact at each matched height and speed.
+
+Only the five-second hold opcodes have a 6.5 s firmware
+operation deadline. The host uses a 6 s poll budget for them.
+The normal heartbeat and terminal STOP remain active throughout.
+These are guarded bench actions for a clear tabletop and an
+operator at the power switch. Qualify each named action before
+adding it to the Hermes profile's local allowlist.
+
 ## Build verification
 
 On 2026-11-21, two independent AVR builds produced matching application

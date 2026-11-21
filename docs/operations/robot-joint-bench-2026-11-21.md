@@ -301,3 +301,22 @@ After the final DISARM, the camera still showed a small offset from
 its original middle stance. This was a stationary loaded pose test
 with brief holds. Long holds and walking at the different heights
 remain unmeasured. The camera files remain in the private archive.
+
+## Tabletop gait and hold installation
+
+The owner confirmed physical POWER OFF with both USB cables
+connected. AVRDUDE identified the Mega and handheld by MCU signature.
+The fresh flash and Mega EEPROM backups matched the prior readbacks.
+Both applications were installed and passed full device readback.
+
+| Board | Verified application bytes | Full flash SHA-256 after |
+| --- | ---: | --- |
+| Mega | 62,590 | `6f83b31ae1f527c21a91dcaf5c8bcc4c877e1f7f65e961e37b7ba82e805139e5` |
+| Handheld | 15,504 | `963473f55e2d15ce890f6bb9cdda62111307e267831e451feb1f1c8b16d5d89b` |
+
+Readback outside both application ranges matched the backups.
+The Mega calibration EEPROM also matched. The held handheld
+reported BOOT, sequence 0, idle, fault 0 and 0.0 V with physical
+POWER OFF. Camera-observed holds and walking at both speeds were
+pending at this checkpoint. The running Hermes profile had no
+newly qualified action at installation time.

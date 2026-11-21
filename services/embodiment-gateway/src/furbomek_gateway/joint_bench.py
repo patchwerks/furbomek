@@ -69,6 +69,23 @@ class JointProbeBandError(ValueError):
 type BenchHeight = Literal["low", "middle", "high"]
 
 
+class TableMotion(BaseModel, frozen=True, extra="forbid"):
+    """Select one fixed table action and one of its measured step sizes."""
+
+    action: Literal["hold", "walk"]
+    height: BenchHeight
+    speed: Literal["baseline", "fast"]
+
+    @property
+    def code(self) -> int:
+        """Translate only the twelve fixed table actions."""
+        return (
+            (170 if self.action == "hold" else 176)
+            + 2 * ("low", "middle", "high").index(self.height)
+            + int(self.speed == "fast")
+        )
+
+
 @dataclass(frozen=True, slots=True)
 class JointProbeRejectedError(ValueError):
     """An acknowledgement did not satisfy the local probe lifecycle."""
@@ -96,7 +113,11 @@ def _require(reply: GuardReply, status: GuardState, *, busy: bool = False) -> No
 
 
 async def _run(
-    transport: GuardSerialTransport, code: int | None, *, arm_only: bool
+    transport: GuardSerialTransport,
+    code: int | None,
+    *,
+    arm_only: bool,
+    timeout_seconds: float = 2.5,
 ) -> bool:
     supply = await transport.supply()
     voltage = supply.supply_voltage_volts
@@ -120,7 +141,8 @@ async def _run(
             else:
                 launch = await transport.execute_bench_action(code)
             _require(launch, GuardState.ARMED, busy=True)
-            if not (await wait_for_completion(transport, 2.5, 230)).completed:
+            poll = await wait_for_completion(transport, timeout_seconds, 230)
+            if not poll.completed:
                 return False
         _require(await transport.command(GuardCommand.DISARM), GuardState.DISARMED)
         disarmed = True
@@ -149,6 +171,12 @@ async def run_height(transport: GuardSerialTransport, height: BenchHeight) -> bo
     """Apply a supported height preset through the guarded bench session."""
     code = 167 + ("low", "middle", "high").index(height)
     return await _run(transport, code, arm_only=False)
+
+
+async def run_table(transport: GuardSerialTransport, motion: TableMotion) -> bool:
+    """Run a bounded loaded hold or forward step for camera evaluation."""
+    timeout = 6.0 if motion.action == "hold" else 2.5
+    return await _run(transport, motion.code, arm_only=False, timeout_seconds=timeout)
 
 
 type Point = tuple[float, float]

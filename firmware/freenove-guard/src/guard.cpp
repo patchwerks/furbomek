@@ -1,4 +1,5 @@
 #include "freenove_guard/guard.h"
+#include "freenove_guard/joint_bench.h"
 
 #include <string.h>
 
@@ -208,7 +209,7 @@ void Guard::on_command(const Command& command) {
     else if (!motion_.execute(static_cast<Action>(command.action))) reply(command.opcode, Result::Expired);
     else {
       busy_ = true;
-      operation_deadline_ms_ = now_ms_ + kOperationLimitMs;
+      operation_deadline_ms_ = now_ms_ + bench_exec_deadline_ms(command.action);
       sequence_ = command.sequence;
       last_accepted_opcode_ = command.opcode;
       motion_.command_accepted(command);

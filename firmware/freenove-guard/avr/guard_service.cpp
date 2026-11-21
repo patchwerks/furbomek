@@ -6,6 +6,7 @@
 #include "freenove_guard/expressive_motion.h"
 #include "freenove_guard/joint_bench.h"
 #include "freenove_guard/scheduler.h"
+#include "freenove_guard/table_motion.h"
 
 namespace {
 
@@ -107,6 +108,18 @@ bool run_expressive_action(freenove_guard::Action action) {
 }
 
 #ifdef FURBOMEK_JOINT_BENCH
+bool run_guarded_table_motion(const freenove_guard::TableMotion& motion) {
+  Robot& robot = robot_action.robot;
+  if (terminal_fault || robot.state != Robot::Action) return false;
+  RobotLegsPoints points;
+  robot.GetPointsNow(points);
+  const freenove_guard::Stance initial{{foot_point(points.leg1), foot_point(points.leg2),
+      foot_point(points.leg3), foot_point(points.leg4), foot_point(points.leg5),
+      foot_point(points.leg6)}};
+  ExpressiveRobot sink(robot);
+  return freenove_guard::run_table_motion(motion, initial, sink);
+}
+
 bool run_joint_probe(const freenove_guard::JointProbe& probe) {
   Robot& robot = robot_action.robot;
   if (terminal_fault || robot.state != Robot::Action) return false;
@@ -286,12 +299,15 @@ void guard_action() {
   else {
 #ifdef FURBOMEK_JOINT_BENCH
     freenove_guard::JointProbe probe{};
+    freenove_guard::TableMotion table_motion{};
     float height = 0.0F;
     const auto code = static_cast<uint8_t>(pending.action);
     if (freenove_guard::bench_action_code(code)) {
       const bool completed = freenove_guard::decode_joint_probe(code, probe)
           ? run_joint_probe(probe)
-          : freenove_guard::decode_bench_height(code, height) && run_bench_height(height);
+          : freenove_guard::decode_table_motion(code, table_motion)
+              ? run_guarded_table_motion(table_motion)
+              : freenove_guard::decode_bench_height(code, height) && run_bench_height(height);
       if (!completed) safe_outputs();
       if (!terminal_fault) operation_done_pending = true;
       return;

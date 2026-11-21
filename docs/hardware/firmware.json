@@ -1,6 +1,17 @@
 {
   "schema_version": 1,
   "updated_on": "2026-11-21",
+  "tabletop_motion_candidate": {
+    "date": "2026-11-21",
+    "status": "Installed on both controllers and verified by independent full flash readback. Powered tests and profile qualification are pending.",
+    "mega_hex_sha256": "fdfa7b76ef2fb8170ff3c8d9f613ed932b21799c3a90f6ed7b36474e5a160a0d",
+    "mega_elf_sha256": "771556344ee1478ea1ec6f64217cf39bd345301debb81e466accb31308f82ac7",
+    "handheld_hex_sha256": "eb9467992f0e2659338019c50aba3bcdcf18d0664d678a450517e1f39589e24c",
+    "handheld_elf_sha256": "988c02137e53a64fb4b3105042ce7a7d9eb48e27f4cc771b09d3d89da5f9553a",
+    "verification": "Two matched paired builds, ordinary guard native tests and native waypoint, admission and deadline tests.",
+    "scope": "Five-second holds and one forward step at the three verified static height setpoints, with two fixed trajectory speeds.",
+    "evidence": "firmware/freenove-guard/joint-bench.md"
+  },
   "bench_height_roundoff_candidate": {
     "date": "2026-11-21",
     "status": "The Mega-only application was written and verified by full flash readback. Two supported high-to-middle cycles and the loaded tabletop height sequence passed untethered.",
@@ -239,6 +250,15 @@
     "rollback": "No device changes; preserve installed image and private backups. Remove prototype source if abandoned. No bootloader, EEPROM, fuse or lock writes occurred."
   },
   "history": [
+    {
+      "date": "2026-11-21",
+      "change": "Installed the paired five-second tabletop holds and forward-step diagnostic.",
+      "before": "The fixed-height Mega and handheld full flash matched their archived readbacks.",
+      "after": "The new applications matched both full flash readbacks. The Mega calibration EEPROM matched its backup.",
+      "verification": "Both MCU signatures, application verification, independent full flash and calibration checks and RF BOOT/idle/fault 0 at physical POWER OFF.",
+      "rollback": "Private full flash and page-aligned application backups retained for both boards.",
+      "evidence": "docs/operations/robot-joint-bench-2026-11-21.md"
+    },
     {
       "date": "2026-11-21",
       "change": "Installed the fixed height endpoint preflight on the Mega.",

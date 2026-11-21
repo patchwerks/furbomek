@@ -1,6 +1,6 @@
 #pragma once
 
-#include <stdint.h>
+#include "freenove_guard/types.h"
 
 namespace freenove_guard {
 
@@ -8,7 +8,11 @@ constexpr uint8_t kFirstJointProbe = 11U;
 constexpr uint8_t kJointProbeCount = 108U;
 constexpr uint8_t kFirstWideBenchAction = kFirstJointProbe + kJointProbeCount;
 constexpr uint8_t kFirstBenchHeight = kFirstWideBenchAction + 48U;
-constexpr uint8_t kAfterLastBenchAction = kFirstBenchHeight + 3U;
+constexpr uint8_t kFirstTableHold = kFirstBenchHeight + 3U;
+constexpr uint8_t kFirstTableWalk = kFirstTableHold + 6U;
+constexpr uint8_t kAfterLastBenchAction = kFirstTableWalk + 6U;
+constexpr uint16_t kTableHoldMs = 5000U;
+constexpr uint16_t kTableHoldDeadlineMs = 6500U;
 constexpr float kBenchHighFootZ = -25.0F;
 constexpr float kBenchLowFootZ = -7.0F;
 constexpr float kBenchHeightRoundoffMm = 0.001F;
@@ -48,7 +52,7 @@ inline bool decode_joint_probe(uint8_t code, JointProbe& out) {
 }
 
 inline bool decode_bench_height(uint8_t code, float& z) {
-  if (code < kFirstBenchHeight || code >= kAfterLastBenchAction) return false;
+  if (code < kFirstBenchHeight || code >= kFirstTableHold) return false;
   const float positions[] = {kBenchLowFootZ, -15.0F, kBenchHighFootZ};
   z = positions[code - kFirstBenchHeight];
   return true;
@@ -68,6 +72,11 @@ inline bool joint_bench_enabled() {
 #else
   return false;
 #endif
+}
+
+inline uint32_t bench_exec_deadline_ms(uint8_t code) {
+  return joint_bench_enabled() && code >= kFirstTableHold && code < kFirstTableWalk
+      ? kTableHoldDeadlineMs : kOperationLimitMs;
 }
 
 }
