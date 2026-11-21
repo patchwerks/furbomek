@@ -3,11 +3,12 @@
   "updated_on": "2026-11-21",
   "joint_bench_wide_candidate": {
     "date": "2026-11-21",
-    "status": "Installed temporarily on both controllers and verified by independent full flash readbacks. Powered measurements pending.",
+    "status": "Installed temporarily on both controllers and verified by independent full flash readbacks.",
     "mega_hex_sha256": "69abbf917eccda9d8bad4c0a392b0cd38efc604bf4e53e908824795ea736a3d1",
     "remote_hex_sha256": "b4c4779be710ab837ed1ad3a54df435c8441b36a591f99b3d7fe0030f61c8019",
     "verification": "Two matching builds and native bench and ordinary guard tests.",
     "scope": "36 degree yaw and knee probes at two trajectory speeds and three trial height targets. Local bench RF ingress only. Existing motion bounds and deadlines apply.",
+    "powered_result": "All 56 untethered wide probes and the low and middle height commands completed with verified DISARM. Both speeds passed all 24 axis and direction combinations. High and loaded tabletop acceptance remain pending.",
     "rollback": "Preserve the currently installed paired applications and Mega EEPROM before writing either board.",
     "evidence": "firmware/freenove-guard/joint-bench.md",
     "installation_evidence": "docs/operations/robot-joint-bench-2026-11-21.md"

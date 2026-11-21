@@ -162,3 +162,45 @@ With physical POWER OFF, RF STATUS from the Mac's held handheld
 session returned BOOT, sequence 0, idle, fault 0 and 0.0 V. The
 untethered motion, speed comparison and supported height tests
 were pending at this checkpoint.
+
+## Untethered 36° sweep and speed comparison
+
+The owner confirmed the body USB was unplugged, the robot stayed
+still at power-on, and the chassis was supported. The Mac saw only
+the handheld. RF reported BOOT, idle, fault 0 and 7.83 V. ARM-only
+and Active returned to DISARMED.
+
+The supported test exercised yaw and knee on every leg in both
+directions at ±36°. Each of the 24 axis and direction combinations
+completed once at each speed. The faster pass used the reverse order.
+Eight additional front-knee repeats brought the probe count to 56.
+All probes ended DISARMED, idle, fault 0. The Kinect and Logitech
+timestamps covered every command window in the 48-probe comparison.
+Footage and recordings remain in the private archive.
+
+| Trajectory step | Median time through verified DISARM | Range |
+| --- | ---: | ---: |
+| 3.0 mm per 20 ms | 1,303 ms | 1,299–1,323 ms |
+| 3.75 mm per 20 ms | 1,202 ms | 1,199–1,223 ms |
+
+Every matched direction took less time at 3.75 mm. The median
+per-direction reduction was 100 ms, with a range of 77–121 ms.
+The elapsed interval includes the session, arm, return, fixed
+camera holds and verified disarm. It measures the whole probe.
+
+For the leg 1 positive knee probe, the Kinect tracked the right
+edge of the leg silhouette in a fixed region of the image.
+The time between 10% and 90% of the outbound optical sweep was
+388 ms median at 3.0 mm from three usable clips (372–402 ms)
+and 336 ms median at 3.75 mm from four clips (298–358 ms).
+The metric uses projected displacement and includes the
+intermediate holds. The physical endpoint angle, load and
+tabletop gait speed remain unmeasured.
+
+The low and middle presets also completed with verified DISARM.
+The side view showed the feet retract and return while the chassis
+stayed fixed on the support. The high preset adds 10 mm of
+downward foot travel from middle. The views could not establish
+the required 15 mm clearance under every foot. A taller support
+was requested for the high trial. The loaded tabletop test remains
+pending.

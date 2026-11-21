@@ -7,7 +7,8 @@
     "provenance": "Independent flash readbacks, Guard RF logs and frame-matched camera evidence.",
     "first_powered_pass": "All 36 six-degree command directions completed and verified DISARM. First-knee optical displacement was visible in both directions.",
     "larger_bands": "Both 18- and 30-degree directions passed for all hip yaw and knee axes. Femur lifts passed at 18 and 30 degrees for all legs. Front legs 1 and 4 passed 18-degree femur lowering. See the dated record for projected camera angles and the remaining clearance and measurement limits.",
-    "wide_installation": "The paired 36-degree and height applications were installed and read back at physical POWER OFF. The Mega calibration EEPROM matched its backup. Optical results for the new commands are pending.",
+    "wide_installation": "The paired 36-degree and height applications were installed and read back at physical POWER OFF. The Mega calibration EEPROM matched its backup.",
+    "wide_powered_pass": "All 24 yaw and knee directions completed at both 3.0 and 3.75 mm per update. The median paired time reduction was 100 ms. Low and middle height commands completed on the support. High and loaded tabletop measurements remain pending.",
     "hardware_change": "The existing controller pair and output mapping were used. No physical component changes were made.",
     "evidence": "docs/operations/robot-joint-bench-2026-11-21.md"
   },
