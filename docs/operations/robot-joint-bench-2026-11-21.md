@@ -384,5 +384,38 @@ readback matched its new application and all other backup bytes.
 
 The Mac took the handheld in read-only mode and reported BOOT,
 idle, fault 0 with physical POWER OFF. The live Brodex profile
-already listed the six continuous actions. Powered walking and
-camera acceptance were pending at this checkpoint.
+listed the six continuous actions before the powered pass.
+
+## Powered Hermes three-cycle walks
+
+The Brodex `furbomek` profile ran all six presets through the Mac
+handheld bridge with the body USB unplugged. Each preset used
+one guarded operation for three forward cycles, including the
+gait's stance phases between advances. All six receipts returned
+`completed_and_disarmed`. The side-camera footage showed three
+forward chassis advances in each trial. Side and Kinect recordings
+covered each command from start through its receipt.
+
+| Height | 3.0 mm per update | 3.75 mm per update |
+| --- | ---: | ---: |
+| Low | 4.866 s, ~61 px forward | 4.744 s, ~33 px forward |
+| Middle | 5.247 s, ~61 px forward | 4.312 s, ~47 px forward |
+| High | 4.870 s, ~68 px forward | 4.287 s, ~50 px forward |
+
+Time spans each Hermes tool call through its DISARM receipt and
+includes the stance transition where applicable. Travel is
+approximate horizontal displacement of chassis features in the
+side image. Perspective, start pose and chassis rocking can
+affect that measurement. A calibrated physical travel or ground
+speed comparison would require a scale in the robot's plane of
+motion.
+
+The owner moved Furbomek back to the start before the fast middle
+trial because it had approached the Kinect and its feet were
+leaving the front frame. It finished at middle. The owner confirmed
+physical POWER OFF and body USB unplugged. The Mac kept the handheld
+connected and reported `read_only_bench` with powered admission
+disabled. Both camera recordings and the full Hermes receipts stay
+private. This pass qualifies supervised bursts of three forward
+cycles on this surface. Longer walking and unattended operation
+remain unqualified.
