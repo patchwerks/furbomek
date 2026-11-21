@@ -211,7 +211,7 @@ def raw_stop() -> bytes:
 
 _FIRST_JOINT_PROBE: Final = 11
 _FIRST_WIDE_BENCH_ACTION: Final = 119
-_AFTER_LAST_BENCH_ACTION: Final = 182
+_AFTER_LAST_BENCH_ACTION: Final = 188
 
 
 def encode_joint_bench(sequence: int, code: int) -> bytes:

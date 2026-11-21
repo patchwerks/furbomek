@@ -1,6 +1,17 @@
 {
   "schema_version": 1,
   "updated_on": "2026-11-21",
+  "continuous_table_walk_candidate": {
+    "date": "2026-11-21",
+    "status": "Verified paired build candidate. Device installation and Hermes camera acceptance are pending.",
+    "mega_hex_sha256": "bfadcf97dfbd62bfc2d5e81330a133ceb78c976e964d90e1f70c75ba9149bf9c",
+    "mega_elf_sha256": "9ced0370f8af6de076598b86982cddf3aa68fbd2200afb845c344b3ba1032796",
+    "handheld_hex_sha256": "a4e44332ff9fa27f28f864a164b9c607c9dd148b2bd57350902b2cb5dccdb723",
+    "handheld_elf_sha256": "b0c2bfc5f17d7865d68e9bb8b4ae8cf2becfc595da75ce16630f3db41678e0a6",
+    "verification": "Two matching AVR builds, ordinary guard tests, native three-cycle waypoint and hold-order checks and gateway PTY coverage.",
+    "scope": "A bounded three-cycle forward walk at three heights and two trajectory speeds. One guarded operation per trial and verified DISARM at the end.",
+    "evidence": "firmware/freenove-guard/joint-bench.md"
+  },
   "tabletop_motion_candidate": {
     "date": "2026-11-21",
     "status": "Installed on both controllers and verified by independent full flash readback. All twelve loaded tabletop actions passed camera-observed supervised tests.",

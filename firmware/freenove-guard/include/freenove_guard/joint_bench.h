@@ -10,9 +10,10 @@ constexpr uint8_t kFirstWideBenchAction = kFirstJointProbe + kJointProbeCount;
 constexpr uint8_t kFirstBenchHeight = kFirstWideBenchAction + 48U;
 constexpr uint8_t kFirstTableHold = kFirstBenchHeight + 3U;
 constexpr uint8_t kFirstTableWalk = kFirstTableHold + 6U;
-constexpr uint8_t kAfterLastBenchAction = kFirstTableWalk + 6U;
+constexpr uint8_t kFirstContinuousTableWalk = kFirstTableWalk + 6U;
+constexpr uint8_t kAfterLastBenchAction = kFirstContinuousTableWalk + 6U;
 constexpr uint16_t kTableHoldMs = 5000U;
-constexpr uint16_t kTableHoldDeadlineMs = 6500U;
+constexpr uint16_t kLongTableDeadlineMs = 6500U;
 constexpr float kBenchHighFootZ = -25.0F;
 constexpr float kBenchLowFootZ = -7.0F;
 constexpr float kBenchHeightRoundoffMm = 0.001F;
@@ -75,8 +76,9 @@ inline bool joint_bench_enabled() {
 }
 
 inline uint32_t bench_exec_deadline_ms(uint8_t code) {
-  return joint_bench_enabled() && code >= kFirstTableHold && code < kFirstTableWalk
-      ? kTableHoldDeadlineMs : kOperationLimitMs;
+  const bool hold = code >= kFirstTableHold && code < kFirstTableWalk;
+  const bool continuous = code >= kFirstContinuousTableWalk && code < kAfterLastBenchAction;
+  return joint_bench_enabled() && (hold || continuous) ? kLongTableDeadlineMs : kOperationLimitMs;
 }
 
 }

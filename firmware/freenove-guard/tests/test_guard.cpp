@@ -47,6 +47,8 @@ struct TableFixture final : ExpressiveSink {
   bool accept_targets = true;
   std::vector<Stance> poses;
   uint16_t hold_ms = 0;
+  unsigned holds = 0U;
+  std::size_t poses_at_hold = 0U;
 
   bool reachable(uint8_t, const FootPoint&) override { return accept_targets; }
   bool move(const Stance& pose, float) override {
@@ -54,6 +56,8 @@ struct TableFixture final : ExpressiveSink {
     return true;
   }
   bool hold(uint16_t ms) override {
+    ++holds;
+    poses_at_hold = poses.size();
     hold_ms = ms;
     return true;
   }
@@ -168,7 +172,7 @@ int main() {
       }
     }
   }
-  assert(!bench_action_code(10U) && !bench_action_code(182U));
+  assert(!bench_action_code(10U) && !bench_action_code(188U));
   for (uint8_t code = 119U; code < 167U; ++code) {
     const auto ordinal = static_cast<uint8_t>(code - 119U);
     JointProbe probe{};
@@ -194,30 +198,34 @@ int main() {
   assert(normalize_bench_height_start(high_roundtrip_z) && high_roundtrip_z == -25.0F);
   assert(normalize_bench_height_start(low_roundtrip_z) && low_roundtrip_z == -7.0F);
   assert(!normalize_bench_height_start(out_of_range_z));
-  for (uint8_t code = 170U; code < 182U; ++code) {
+  for (uint8_t code = 170U; code < 188U; ++code) {
     TableMotion motion{};
     assert(decode_table_motion(code, motion));
     assert(motion.foot_z == heights[((code - 170U) % 6U) / 2U]);
     assert(motion.step_mm == (code % 2U ? 3.75F : 3.0F));
-    assert(motion.walk == (code >= 176U));
+    const uint8_t cycles = code >= 182U ? 3U : code >= 176U ? 1U : 0U;
+    assert(motion.cycles == cycles);
     assert(bench_exec_deadline_ms(code) ==
-           (joint_bench_enabled() && !motion.walk ? 6500U : 3000U));
+           (joint_bench_enabled() && cycles != 1U ? 6500U : 3000U));
     TableFixture fixture;
     Stance initial{};
     for (auto& foot : initial.feet) foot.z = -15.0F;
     assert(run_table_motion(motion, initial, fixture));
-    assert(fixture.hold_ms == (motion.walk ? 200U : 5000U));
+    assert(fixture.hold_ms == (cycles ? 200U : 5000U));
+    assert(fixture.poses.size() == 3U + 7U * cycles);
+    assert(fixture.holds == 1U && fixture.poses_at_hold == fixture.poses.size());
     const auto& final_pose = fixture.poses.back();
     for (const auto& foot : final_pose.feet) {
       assert(foot.y == 0.0F && foot.z == motion.foot_z);
     }
-    if (motion.walk) {
-      assert(fixture.poses[4].feet[0].y == 16.0F);
-      assert(fixture.poses[4].feet[1].y == 0.0F);
-      assert(fixture.poses[6].feet[0].y == 0.0F);
-      assert(fixture.poses[6].feet[1].y == -16.0F);
-      assert(fixture.poses[7].feet[0].z == motion.foot_z);
-      assert(fixture.poses[7].feet[1].z == motion.foot_z + 6.0F);
+    for (uint8_t cycle = 0U; cycle < cycles; ++cycle) {
+      const auto offset = 7U * cycle;
+      assert(fixture.poses[offset + 4U].feet[0].y == 16.0F);
+      assert(fixture.poses[offset + 4U].feet[1].y == 0.0F);
+      assert(fixture.poses[offset + 6U].feet[0].y == 0.0F);
+      assert(fixture.poses[offset + 6U].feet[1].y == -16.0F);
+      assert(fixture.poses[offset + 7U].feet[0].z == motion.foot_z);
+      assert(fixture.poses[offset + 7U].feet[1].z == motion.foot_z + 6.0F);
     }
     TableFixture rejected;
     rejected.accept_targets = false;

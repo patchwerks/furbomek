@@ -47,9 +47,13 @@ async def test_probe_uses_separate_wire_family_and_verifies_disarm() -> None:
             assert await run_table(port, hold)
             walk = TableMotion(action="walk", height="high", speed="fast")
             assert await run_table(port, walk)
+            continuous = TableMotion(
+                action="walk_continuous", height="middle", speed="fast"
+            )
+            assert await run_table(port, continuous)
         finally:
             await port.aclose()
-    assert board.actions == [0, 118, 166, 169, 172, 181]
+    assert board.actions == [0, 118, 166, 169, 172, 181, 185]
     assert not board.stop_received.is_set()
 
 

@@ -72,7 +72,7 @@ type BenchHeight = Literal["low", "middle", "high"]
 class TableMotion(BaseModel, frozen=True, extra="forbid"):
     """Select one fixed table action and one of its measured step sizes."""
 
-    action: Literal["hold", "walk"]
+    action: Literal["hold", "walk", "walk_continuous"]
     height: BenchHeight
     speed: Literal["baseline", "fast"]
 
@@ -80,7 +80,8 @@ class TableMotion(BaseModel, frozen=True, extra="forbid"):
     def code(self) -> int:
         """Translate only the twelve fixed table actions."""
         return (
-            (170 if self.action == "hold" else 176)
+            170
+            + 6 * ("hold", "walk", "walk_continuous").index(self.action)
             + 2 * ("low", "middle", "high").index(self.height)
             + int(self.speed == "fast")
         )
@@ -175,7 +176,7 @@ async def run_height(transport: GuardSerialTransport, height: BenchHeight) -> bo
 
 async def run_table(transport: GuardSerialTransport, motion: TableMotion) -> bool:
     """Run a bounded loaded hold or forward step for camera evaluation."""
-    timeout = 6.0 if motion.action == "hold" else 2.5
+    timeout = 2.5 if motion.action == "walk" else 6.0
     return await _run(transport, motion.code, arm_only=False, timeout_seconds=timeout)
 
 

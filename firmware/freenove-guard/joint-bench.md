@@ -94,6 +94,22 @@ These are guarded bench actions for a clear tabletop and an
 operator at the power switch. Qualify each named action before
 adding it to the Hermes profile's local allowlist.
 
+## Three-cycle walking
+
+The six continuous presets reuse the same validated tripod
+waypoints. Each command moves to the requested stance, then runs
+three consecutive cycles in one guarded operation, without a hold
+or DISARM between cycles. A single 200 ms settling phase follows
+the third cycle. Directed travel is 48 mm in the planned gait
+coordinates. Actual tabletop travel, foot contact, and any pauses
+must be checked on camera.
+
+The three-cycle presets use the existing 6.5 s bounded operation
+deadline for long tabletop actions and a 6 s host poll budget.
+The usual heartbeat and STOP checks remain active. Record clear
+space along the robot's heading for the full comparison. Keep
+the body USB absent during powered tests.
+
 ## Build verification
 
 On 2026-11-21, two independent AVR builds produced matching application

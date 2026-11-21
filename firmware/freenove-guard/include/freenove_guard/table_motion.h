@@ -8,16 +8,17 @@ namespace freenove_guard {
 struct TableMotion {
   float foot_z;
   float step_mm;
-  bool walk;
+  uint8_t cycles;
 };
 
 inline bool decode_table_motion(uint8_t code, TableMotion& motion) {
   if (code < kFirstTableHold || code >= kAfterLastBenchAction) return false;
-  const bool walk = code >= kFirstTableWalk;
-  const auto index = static_cast<uint8_t>(code - (walk ? kFirstTableWalk : kFirstTableHold));
+  const auto ordinal = static_cast<uint8_t>(code - kFirstTableHold);
+  const auto index = static_cast<uint8_t>(ordinal % 6U);
+  const uint8_t cycles[] = {0U, 1U, 3U};
   float z = 0.0F;
   if (!decode_bench_height(static_cast<uint8_t>(kFirstBenchHeight + index / 2U), z)) return false;
-  motion = {z, index % 2U == 0U ? 3.0F : 3.75F, walk};
+  motion = {z, index % 2U == 0U ? 3.0F : 3.75F, cycles[ordinal / 6U]};
   return true;
 }
 
@@ -46,7 +47,7 @@ inline bool run_table_motion(const TableMotion& motion, const Stance& initial,
   for (const auto& foot : initial.feet) {
     if (!(foot.z >= center_z - 0.5F && foot.z <= center_z + 0.5F)) return false;
   }
-  const uint8_t phases = motion.walk ? 10U : 3U;
+  const uint8_t phases = motion.cycles ? 10U : 3U;
   Stance start = initial;
   for (auto& foot : start.feet) foot.z = center_z;
   Stance previous = initial;
@@ -59,10 +60,15 @@ inline bool run_table_motion(const TableMotion& motion, const Stance& initial,
     }
     previous = target;
   }
-  for (uint8_t phase = 0U; phase < phases; ++phase) {
+  for (uint8_t phase = 0U; phase < 3U; ++phase) {
     if (!sink.move(table_waypoint(start, motion.foot_z, phase), motion.step_mm)) return false;
   }
-  return sink.hold(motion.walk ? 200U : kTableHoldMs);
+  for (uint8_t cycle = 0U; cycle < motion.cycles; ++cycle) {
+    for (uint8_t phase = 3U; phase < phases; ++phase) {
+      if (!sink.move(table_waypoint(start, motion.foot_z, phase), motion.step_mm)) return false;
+    }
+  }
+  return sink.hold(motion.cycles ? 200U : kTableHoldMs);
 }
 
 }
