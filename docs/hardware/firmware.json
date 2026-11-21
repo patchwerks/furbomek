@@ -3,7 +3,7 @@
   "updated_on": "2026-11-21",
   "continuous_table_walk_candidate": {
     "date": "2026-11-21",
-    "status": "Verified paired build candidate. Device installation and Hermes camera acceptance are pending.",
+    "status": "Installed and verified by full readbacks of both controllers. Hermes camera acceptance is pending.",
     "mega_hex_sha256": "bfadcf97dfbd62bfc2d5e81330a133ceb78c976e964d90e1f70c75ba9149bf9c",
     "mega_elf_sha256": "9ced0370f8af6de076598b86982cddf3aa68fbd2200afb845c344b3ba1032796",
     "handheld_hex_sha256": "a4e44332ff9fa27f28f864a164b9c607c9dd148b2bd57350902b2cb5dccdb723",
@@ -261,6 +261,15 @@
     "rollback": "No device changes; preserve installed image and private backups. Remove prototype source if abandoned. No bootloader, EEPROM, fuse or lock writes occurred."
   },
   "history": [
+    {
+      "date": "2026-11-21",
+      "change": "Installed the paired bounded three-cycle walking applications.",
+      "before": "Both prior tabletop applications and Mega calibration EEPROM matched their archived readbacks.",
+      "after": "Both new applications matched independent full flash readback. Outside-application bytes and Mega calibration EEPROM matched their backups.",
+      "verification": "Board signatures, application verification and independent readbacks passed. An initial Mega read showed four extra discrepancies after two read timeouts. A separate read-only verification matched the expected full image exactly. The Mac then observed RF BOOT, idle and fault 0 with physical POWER OFF.",
+      "rollback": "Private complete flash and page-aligned application backups retained.",
+      "evidence": "docs/operations/robot-joint-bench-2026-11-21.md"
+    },
     {
       "date": "2026-11-21",
       "change": "Installed the paired five-second tabletop holds and forward-step diagnostic.",

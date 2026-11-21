@@ -360,3 +360,29 @@ The final middle command verified DISARM. These results cover
 short forward moves and five-second stationary holds under
 supervision. Foot loading, longer holds and continuous or
 unattended walking remain unmeasured. Camera files are private.
+
+## Three-cycle walking installation
+
+The owner confirmed physical POWER OFF, a clear tabletop path, and
+both USB connections. The Mac identified both MCUs by bootloader
+signature. Both prior applications and Mega calibration EEPROM
+matched the archived full readbacks. AVRDUDE 7.1 installed the
+paired application-only artifacts from `9edcc0c`.
+
+| Board | Matched application bytes | Verified full flash SHA-256 |
+| --- | ---: | --- |
+| Mega | 62,746 | `623fd9ccb1d3e0f51eef3beeaabdc2bac6fbf30baddbf85acc05f977e6910c06` |
+| Handheld | 15,504 | `b5e2afe50d918f149a5bff7802aaab722e4f4c65dab9f4e4c1e74ee957c4b3a1` |
+
+The first Mega full read encountered two timeouts and four
+off-range byte discrepancies at addresses 0x230ef–0x230f0 and
+0x2c3f7–0x2c3f8. Power stayed off. The independent read-only
+repeat matched every new application byte and every backup byte
+outside the programmed range. Mega calibration EEPROM matched
+both before and after. No recovery write was needed. The handheld
+readback matched its new application and all other backup bytes.
+
+The Mac took the handheld in read-only mode and reported BOOT,
+idle, fault 0 with physical POWER OFF. The live Brodex profile
+already listed the six continuous actions. Powered walking and
+camera acceptance were pending at this checkpoint.
