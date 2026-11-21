@@ -136,3 +136,29 @@ starting pose. Depth was missing at the pivot at both peaks and
 the oblique second view did not consistently resolve the same
 toe through the sweep. Calibrated physical angles for the 18
 joints and actual mechanical endpoints remain open.
+
+## Paired 36° firmware installation
+
+The owner confirmed physical POWER OFF and connected both USB
+devices. The Mac released its prior handheld session and identified
+the Mega and handheld by bootloader signature. Fresh backups of both
+applications and Mega EEPROM matched the prior verified readbacks.
+The temporary firmware pair came from source revision `326da84`.
+
+| Board | App bytes | Full flash SHA-256 before | Full flash SHA-256 after |
+| --- | ---: | --- | --- |
+| ATmega2560 body | 60,276 | `f931a90915c53523f800d91ee4126037f979edb2d57e0bbe72853af57a84ea69` | `03732df4c1c4d0215ce53b987b203599139ffa7b32c7e0337d4fcd23d19f1065` |
+| ATmega328P handheld | 15,504 | `411b28c105d9ab040d18a8095df7707a31f441ba9525cdd83723dc7e185a8b0d` | `aace026de169730108403ce82ace218f3456a7f29197f1bdc2e1a9693d20c50c` |
+
+Both applications matched independent full flash reads. All bytes
+outside the declared application ranges matched their backups. The
+Mega calibration EEPROM matched its backup byte for byte. The
+handheld EEPROM is outside readback scope because its bootloader
+aliases EEPROM reads to flash. Both writes targeted application
+flash only with AVRDUDE 7.1 and `-D`. Full backups and the prior
+application pages are available privately for wired rollback.
+
+With physical POWER OFF, RF STATUS from the Mac's held handheld
+session returned BOOT, sequence 0, idle, fault 0 and 0.0 V. The
+untethered motion, speed comparison and supported height tests
+were pending at this checkpoint.

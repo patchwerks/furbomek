@@ -3,13 +3,14 @@
   "updated_on": "2026-11-21",
   "joint_bench_wide_candidate": {
     "date": "2026-11-21",
-    "status": "Paired software candidate. Device installation and powered measurements pending.",
+    "status": "Installed temporarily on both controllers and verified by independent full flash readbacks. Powered measurements pending.",
     "mega_hex_sha256": "69abbf917eccda9d8bad4c0a392b0cd38efc604bf4e53e908824795ea736a3d1",
     "remote_hex_sha256": "b4c4779be710ab837ed1ad3a54df435c8441b36a591f99b3d7fe0030f61c8019",
     "verification": "Two matching builds and native bench and ordinary guard tests.",
     "scope": "36 degree yaw and knee probes at two trajectory speeds and three trial height targets. Local bench RF ingress only. Existing motion bounds and deadlines apply.",
     "rollback": "Preserve the currently installed paired applications and Mega EEPROM before writing either board.",
-    "evidence": "firmware/freenove-guard/joint-bench.md"
+    "evidence": "firmware/freenove-guard/joint-bench.md",
+    "installation_evidence": "docs/operations/robot-joint-bench-2026-11-21.md"
   },
   "joint_bench_candidate": {
     "date": "2026-11-21",
@@ -228,6 +229,16 @@
     "rollback": "No device changes; preserve installed image and private backups. Remove prototype source if abandoned. No bootloader, EEPROM, fuse or lock writes occurred."
   },
   "history": [
+    {
+      "date": "2026-11-21",
+      "change": "Installed the paired 36-degree and height bench applications.",
+      "before": "The first bench application's Mega and handheld full flash matched the prior installation records.",
+      "after": "Full readbacks matched both new applications and the backup bytes outside their ranges.",
+      "verification": "Both signatures, full flash readbacks, Mega EEPROM and read-only handheld RF BOOT/idle/fault 0 at physical POWER OFF.",
+      "safety": "The temporary wired update used actuator power off. Powered motion requires absent body USB, support and supervision.",
+      "rollback": "Both full flash readbacks and page-aligned application backups were preserved privately. Handheld EEPROM readback remains unverified because of bootloader aliasing.",
+      "evidence": "docs/operations/robot-joint-bench-2026-11-21.md"
+    },
     {
       "date": "2026-11-21",
       "change": "Installed temporary joint diagnostic applications on both controllers.",
