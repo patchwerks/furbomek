@@ -252,3 +252,52 @@ the backup byte for byte. The handheld port stayed held throughout.
 With physical POWER OFF, the held handheld returned RF BOOT,
 sequence 0, idle, fault 0 and 0.0 V. The untethered return-to-middle
 and loaded tabletop tests were pending at this checkpoint.
+
+## Corrected high-to-middle sequence on support
+
+The owner confirmed the body USB was unplugged and the robot
+stayed still at power-on. The handheld reported BOOT, idle, fault
+0 and 7.79 V. ARM-only and Active both verified DISARM. The
+Kinect and Logitech recorded two high-to-middle cycles on the
+taller center support. All four height commands finished and
+reported DISARMED, idle, fault 0. The two returns took 1.223 s
+and 1.102 s. The camera views showed the feet extending at high
+and retracting on return while the chassis stayed supported.
+The previously observed return fault did not recur. The owner
+was cued to move to the bare table with physical POWER OFF.
+
+## Loaded height sequence on the bare table
+
+The owner confirmed the body USB was absent, the support was
+removed, and Furbomek was still on the clear tabletop. The Mac
+verified the handheld was the sole USB serial connection. The
+guard reported DISARMED, idle, fault 0 at 7.78 V. A fresh ARM-only
+check and Active passed. Low, middle, high and the final return
+to middle all completed with verified DISARM and fault 0. The
+four height commands took about 1.00–1.12 s each. The owner
+confirmed physical POWER OFF with the body USB absent at handoff.
+
+The two cameras covered all four commands. In the Kinect image,
+three chassis patches showed the following median vertical shifts
+relative to frame 8696, the middle stance immediately before high.
+The depth column reports median camera-space Y from registered depth
+points near the tracked chassis patch at pixel (1141, 553) in that
+reference. Positive values indicate upward displacement.
+
+| Preset | Sample frames | Image displacement | Depth displacement from middle |
+| --- | --- | ---: | ---: |
+| Low | 8170, 8171, 8173 | −14 px | About −8 mm |
+| Middle | 8186, 8188, 8189, 8696 | +1 px | Reference |
+| High | 8710, 8712, 8713 | +21 px | About +10 mm |
+| Final middle | 8727, 8728, 8730 | +4 px | About +2 mm |
+
+The low-to-high span was 35 pixels and approximately 19 mm along
+the Kinect's vertical axis. The measurement uses one small registered
+depth neighborhood with six to ten returned points per frame. Sparse
+tabletop depth prevented a reliable table-plane fit, so absolute
+ground clearances remain unmeasured. The side view corroborated the
+body rising and lowering. The robot stayed upright in both views.
+After the final DISARM, the camera still showed a small offset from
+its original middle stance. This was a stationary loaded pose test
+with brief holds. Long holds and walking at the different heights
+remain unmeasured. The camera files remain in the private archive.

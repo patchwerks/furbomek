@@ -10,6 +10,8 @@
     "wide_installation": "The paired 36-degree and height applications were installed and read back at physical POWER OFF. The Mega calibration EEPROM matched its backup.",
     "wide_powered_pass": "All 24 yaw and knee directions completed at both 3.0 and 3.75 mm per update. The median paired time reduction was 100 ms. Low, middle and high each completed on support. The separate return from high to middle tripped STOP and the owner confirmed POWER OFF. Loaded measurements remain pending.",
     "height_fix_installation": "Mega-only application write confirmed at physical POWER OFF. Independent full flash and calibration EEPROM readbacks passed. The handheld retained its existing application.",
+    "height_return_retest": "Two untethered high-to-middle cycles on the taller center support completed with verified DISARM and visible foot extension and retraction.",
+    "loaded_height_result": "Low, middle, high and return to middle completed on the bare table, view-confirmed and verified DISARM. Measured low-to-high span was 35 image pixels and approximately 19 mm along Kinect camera-space Y. Owner confirmed POWER OFF at handoff. Absolute clearances, long holds and gait at alternate heights remain unmeasured.",
     "hardware_change": "The existing controller pair and output mapping were used. No physical component changes were made.",
     "evidence": "docs/operations/robot-joint-bench-2026-11-21.md"
   },

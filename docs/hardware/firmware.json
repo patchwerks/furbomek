@@ -3,7 +3,7 @@
   "updated_on": "2026-11-21",
   "bench_height_roundoff_candidate": {
     "date": "2026-11-21",
-    "status": "The Mega-only application was written and verified by full flash readback. The return-to-middle rerun is pending.",
+    "status": "The Mega-only application was written and verified by full flash readback. Two supported high-to-middle cycles and the loaded tabletop height sequence passed untethered.",
     "mega_hex_sha256": "afdf42a9e555cd7f483d7683444b1b1484049858bd1174273158551c71020a22",
     "mega_elf_sha256": "8889592b5bde303f6c433da8fb28dcec0be7bf49278e9226113e589c65a0e11d",
     "handheld_hex_sha256": "b4c4779be710ab837ed1ad3a54df435c8441b36a591f99b3d7fe0030f61c8019",
