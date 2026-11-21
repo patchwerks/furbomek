@@ -16,6 +16,18 @@ type ActionName = Literal[
     "poke",
     "defensive_brace",
     "tuck_preview",
+    "table_hold_low",
+    "table_hold_low_fast",
+    "table_hold_middle",
+    "table_hold_middle_fast",
+    "table_hold_high",
+    "table_hold_high_fast",
+    "table_walk_low",
+    "table_walk_low_fast",
+    "table_walk_middle",
+    "table_walk_middle_fast",
+    "table_walk_high",
+    "table_walk_high_fast",
 ]
 type PoweredActionDecision = Literal["completed", "refused", "unavailable"]
 type PoweredActionReason = Literal[

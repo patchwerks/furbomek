@@ -82,6 +82,18 @@ class GuardAction(IntEnum):
     POKE = 8
     DEFENSIVE_BRACE = 9
     TUCK_PREVIEW = 10
+    TABLE_HOLD_LOW = 170
+    TABLE_HOLD_LOW_FAST = 171
+    TABLE_HOLD_MIDDLE = 172
+    TABLE_HOLD_MIDDLE_FAST = 173
+    TABLE_HOLD_HIGH = 174
+    TABLE_HOLD_HIGH_FAST = 175
+    TABLE_WALK_LOW = 176
+    TABLE_WALK_LOW_FAST = 177
+    TABLE_WALK_MIDDLE = 178
+    TABLE_WALK_MIDDLE_FAST = 179
+    TABLE_WALK_HIGH = 180
+    TABLE_WALK_HIGH_FAST = 181
 
 
 class GuardProtocolErrorCode(StrEnum):
@@ -197,9 +209,12 @@ def encode_command(
                 raise GuardProtocolError(GuardProtocolErrorCode.ACTION)
             return _frame(bytes((command,)) + sequence_bytes)
         case GuardCommand.EXEC:
-            if action is None or not 0 <= action <= GuardAction.TUCK_PREVIEW:
+            if action is None or action not in GuardAction:
                 raise GuardProtocolError(GuardProtocolErrorCode.ACTION)
-            return _frame(bytes((command,)) + sequence_bytes + bytes((action,)))
+            payload = bytes((action & _MAX_DATA_BYTE,))
+            if action >= GuardAction.TABLE_HOLD_LOW:
+                payload += bytes((action >> 7,))
+            return _frame(bytes((command,)) + sequence_bytes + payload)
         case GuardCommand.BEGIN | GuardCommand.STOP:
             raise GuardProtocolError(GuardProtocolErrorCode.ACTION)
 

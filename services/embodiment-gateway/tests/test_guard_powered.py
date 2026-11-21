@@ -146,6 +146,24 @@ async def test_powered_policy_refusal_does_not_begin_or_stop() -> None:
 
 
 @pytest.mark.anyio
+async def test_table_presets_require_qualification_and_reach_the_wide_guard() -> None:
+    with PtyGuardBoard(supply_centivolts=810, strict_sequence=True) as board:
+        actions = ("table_hold_high", "table_walk_middle_fast")
+        service = GuardService(powered_settings(board.path, actions))
+        await service.open()
+        try:
+            refused = await service.perform_action("table_walk_high")
+            held = await service.perform_action("table_hold_high")
+            walked = await service.perform_action("table_walk_middle_fast")
+        finally:
+            await service.aclose()
+    assert refused.reason == "action_not_qualified"
+    assert held.disarm_acknowledged
+    assert walked.disarm_acknowledged
+    assert board.actions == [174, 179]
+
+
+@pytest.mark.anyio
 async def test_powered_voltage_refusal_does_not_begin() -> None:
     with PtyGuardBoard(supply_centivolts=600, strict_sequence=True) as board:
         service = GuardService(powered_settings(board.path))

@@ -123,7 +123,8 @@ class PtyGuardBoard(PtyLink):
                     self._write(_reply(0x2F, 4, self._state, self._sequence, 0, 0))
                     continue
                 self._sequence, self._busy = sequence, True
-                self.actions.append(frame[6])
+                action = frame[6] | (frame[7] << 7) if frame[1] == 6 else frame[6]
+                self.actions.append(action)
                 self._write(_reply(0x2F, 0, self._state, sequence, 500, 1))
                 self.executed.set()
             elif opcode == 0x32:

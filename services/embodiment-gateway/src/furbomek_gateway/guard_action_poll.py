@@ -31,6 +31,18 @@ WIRE_ACTIONS: dict[ActionName, GuardAction] = {
     "poke": GuardAction.POKE,
     "defensive_brace": GuardAction.DEFENSIVE_BRACE,
     "tuck_preview": GuardAction.TUCK_PREVIEW,
+    "table_hold_low": GuardAction.TABLE_HOLD_LOW,
+    "table_hold_low_fast": GuardAction.TABLE_HOLD_LOW_FAST,
+    "table_hold_middle": GuardAction.TABLE_HOLD_MIDDLE,
+    "table_hold_middle_fast": GuardAction.TABLE_HOLD_MIDDLE_FAST,
+    "table_hold_high": GuardAction.TABLE_HOLD_HIGH,
+    "table_hold_high_fast": GuardAction.TABLE_HOLD_HIGH_FAST,
+    "table_walk_low": GuardAction.TABLE_WALK_LOW,
+    "table_walk_low_fast": GuardAction.TABLE_WALK_LOW_FAST,
+    "table_walk_middle": GuardAction.TABLE_WALK_MIDDLE,
+    "table_walk_middle_fast": GuardAction.TABLE_WALK_MIDDLE_FAST,
+    "table_walk_high": GuardAction.TABLE_WALK_HIGH,
+    "table_walk_high_fast": GuardAction.TABLE_WALK_HIGH_FAST,
 }
 
 

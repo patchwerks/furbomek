@@ -52,6 +52,14 @@ request gate. Deadline and tunnel loss cancel in-flight motion. Normal
 completion verifies DISARM, while interrupted operations use the existing
 terminal STOP path and preserve firmware fault latching.
 
+The tabletop candidate defines named `table_hold_low`,
+`table_hold_middle`, `table_hold_high` and matching
+`table_walk_low`, `table_walk_middle`, `table_walk_high` actions.
+The `_fast` variants select 3.75 mm per trajectory update. Each name
+is subject to the same local explicit action allowlist. The five-second
+holds use a six-second host poll budget inside the existing eight-second
+edge request budget. Only enroll choices verified on the actual table.
+
 The local `require_kinect_lock_for_motion` option requires the owned tracker
 to report both a fresh frame and a Furbomek lock. Loss cancels motion and puts
 the bridge back in read-only state. This option defaults off for the supported

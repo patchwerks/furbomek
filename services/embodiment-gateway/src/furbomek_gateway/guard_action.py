@@ -17,6 +17,7 @@ from furbomek_gateway.guard_models import (
     PoweredActionResult,
 )
 from furbomek_gateway.guard_protocol import (
+    GuardAction,
     GuardCommand,
     GuardResult,
     GuardState,
@@ -213,11 +214,19 @@ class PoweredActionRunner:  # noqa: D101
         self, action: ActionName, facts: PoweredActionFacts
     ) -> PoweredActionFacts:
         phase_count = 2 if action == "forward" else 1
+        wire_action = WIRE_ACTIONS[action]
+        timeout = self.context.settings.action_timeout_ms / 1000
+        if (
+            GuardAction.TABLE_HOLD_LOW
+            <= wire_action
+            <= GuardAction.TABLE_HOLD_HIGH_FAST
+        ):
+            timeout = 6.0
         exchange_ms = ceil(self.context.settings.exchange_timeout_seconds * 1000)
         minimum_lease_ms = exchange_ms + 30
         for phase in range(phase_count):
             execute = await self.context.transport.command(
-                GuardCommand.EXEC, action=WIRE_ACTIONS[action]
+                GuardCommand.EXEC, action=wire_action
             )
             if not armed(execute) or not execute.busy:
                 return replace(facts, reason="protocol_rejected")
@@ -225,7 +234,7 @@ class PoweredActionRunner:  # noqa: D101
             self._in_flight_facts = facts
             poll = await wait_for_completion(
                 self.context.transport,
-                self.context.settings.action_timeout_ms / 1000,
+                timeout,
                 minimum_lease_ms,
             )
             facts = replace(facts, lease_lower_bound_ms=poll.lease_lower_bound_ms)
