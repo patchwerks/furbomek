@@ -204,3 +204,30 @@ downward foot travel from middle. The views could not establish
 the required 15 mm clearance under every foot. A taller support
 was requested for the high trial. The loaded tabletop test remains
 pending.
+
+## High stance and return interruption
+
+The owner confirmed the taller support, untethered body and
+stillness at power-on. ARM-only and Active each verified DISARMED.
+High completed in 1.101 s with verified DISARM. The two camera
+views showed the feet extending downward while the chassis stayed
+on the support. The separate return to middle failed after 0.198 s.
+The host sent STOP and the guard reported latched fault 4. The
+owner confirmed physical POWER OFF, with the body USB absent.
+
+The pinned Freenove inverse and forward kinematics reproduced a
+boundary failure in a single-precision harness. The −25 mm high
+target can yield a computed −25.000001907 mm foot position. The
+original return preflight rejected that value. The old gate
+rejected eight of 16 round trips at the preset bounds. The fix
+allows up to 0.001 mm of numerical roundoff at either boundary and
+clamps the input to the original range before planning the path.
+The harness accepts all 16 cases under the corrected gate. Native
+coverage also rejects an actual excursion past the tolerance.
+The high-to-middle sequence still needs a powered rerun with the
+corrected Mega image before the loaded tabletop trial.
+
+Two independent builds produced Mega HEX SHA-256
+`afdf42a9e555cd7f483d7683444b1b1484049858bd1174273158551c71020a22`.
+The handheld HEX matched the installed image, qualifying a
+Mega-only maintenance update after a fresh wired readback.

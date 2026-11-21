@@ -154,8 +154,8 @@ bool run_bench_height(float height) {
   if (terminal_fault || robot.state != Robot::Action) return false;
   RobotLegsPoints start;
   robot.GetPointsNow(start);
-  const float initial_z = start.leg1.z;
-  if (!(initial_z >= -25.0F && initial_z <= -7.0F)) return false;
+  float initial_z = start.leg1.z;
+  if (!freenove_guard::normalize_bench_height_start(initial_z)) return false;
   const Point* current[] = {&start.leg1, &start.leg2, &start.leg3,
                             &start.leg4, &start.leg5, &start.leg6};
   for (const Point* foot : current) {

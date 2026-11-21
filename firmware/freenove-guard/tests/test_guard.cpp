@@ -171,6 +171,12 @@ int main() {
     assert(!decode_joint_probe(code, probe));
     assert(decode_bench_height(code, z) && z == heights[code - 167U]);
   }
+  float high_roundtrip_z = -25.000001907F;
+  float low_roundtrip_z = -6.999994755F;
+  float out_of_range_z = -25.01F;
+  assert(normalize_bench_height_start(high_roundtrip_z) && high_roundtrip_z == -25.0F);
+  assert(normalize_bench_height_start(low_roundtrip_z) && low_roundtrip_z == -7.0F);
+  assert(!normalize_bench_height_start(out_of_range_z));
   if (joint_bench_enabled()) {
     Motion fixture;
     Replies receipts;

@@ -9,6 +9,9 @@ constexpr uint8_t kJointProbeCount = 108U;
 constexpr uint8_t kFirstWideBenchAction = kFirstJointProbe + kJointProbeCount;
 constexpr uint8_t kFirstBenchHeight = kFirstWideBenchAction + 48U;
 constexpr uint8_t kAfterLastBenchAction = kFirstBenchHeight + 3U;
+constexpr float kBenchHighFootZ = -25.0F;
+constexpr float kBenchLowFootZ = -7.0F;
+constexpr float kBenchHeightRoundoffMm = 0.001F;
 
 struct JointProbe {
   uint8_t leg;
@@ -46,8 +49,16 @@ inline bool decode_joint_probe(uint8_t code, JointProbe& out) {
 
 inline bool decode_bench_height(uint8_t code, float& z) {
   if (code < kFirstBenchHeight || code >= kAfterLastBenchAction) return false;
-  const float positions[] = {-7.0F, -15.0F, -25.0F};
+  const float positions[] = {kBenchLowFootZ, -15.0F, kBenchHighFootZ};
   z = positions[code - kFirstBenchHeight];
+  return true;
+}
+
+inline bool normalize_bench_height_start(float& z) {
+  if (!(z >= kBenchHighFootZ - kBenchHeightRoundoffMm &&
+        z <= kBenchLowFootZ + kBenchHeightRoundoffMm)) return false;
+  if (z < kBenchHighFootZ) z = kBenchHighFootZ;
+  if (z > kBenchLowFootZ) z = kBenchLowFootZ;
   return true;
 }
 
