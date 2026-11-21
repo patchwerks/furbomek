@@ -60,6 +60,19 @@ is subject to the same local explicit action allowlist. The five-second
 holds use a six-second host poll budget inside the existing eight-second
 edge request budget. Only enroll choices verified on the actual table.
 
+The bench operator verified all twelve tabletop presets under load,
+with both cameras and a verified DISARM after each command. See the
+[tabletop results](https://github.com/patchwerks/furbomek/commit/99c0ed7).
+The Mac edge now loads the twelve names and Active as the local
+allowlist for the installed tabletop application. The earlier
+allowlist was backed up with the private configuration. The Brodex
+`furbomek` stdio client loaded the same twelve names. A fresh Hermes
+MCP connection discovered all seven tools, and a read-only query
+through the registered MCP command reached the Mac with the local
+motion bench closed. Loaded motion was observed through the
+isolated bench session. The Hermes check exercised schema and
+transport with the bridge closed.
+
 The local `require_kinect_lock_for_motion` option requires the owned tracker
 to report both a fresh frame and a Furbomek lock. Loss cancels motion and puts
 the bridge back in read-only state. This option defaults off for the supported
