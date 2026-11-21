@@ -3,7 +3,7 @@
   "updated_on": "2026-11-21",
   "tabletop_motion_candidate": {
     "date": "2026-11-21",
-    "status": "Installed on both controllers and verified by independent full flash readback. Powered tests and profile qualification are pending.",
+    "status": "Installed on both controllers and verified by independent full flash readback. All twelve loaded tabletop actions passed camera-observed supervised tests.",
     "mega_hex_sha256": "fdfa7b76ef2fb8170ff3c8d9f613ed932b21799c3a90f6ed7b36474e5a160a0d",
     "mega_elf_sha256": "771556344ee1478ea1ec6f64217cf39bd345301debb81e466accb31308f82ac7",
     "handheld_hex_sha256": "eb9467992f0e2659338019c50aba3bcdcf18d0664d678a450517e1f39589e24c",

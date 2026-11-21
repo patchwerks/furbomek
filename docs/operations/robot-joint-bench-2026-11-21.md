@@ -320,3 +320,43 @@ reported BOOT, sequence 0, idle, fault 0 and 0.0 V with physical
 POWER OFF. Camera-observed holds and walking at both speeds were
 pending at this checkpoint. The running Hermes profile had no
 newly qualified action at installation time.
+
+## Five-second holds and forward steps under load
+
+The owner confirmed untethered POWER ON, stillness and presence
+at the switch. The Mac saw only the handheld USB and received
+BOOT, idle, fault 0 at 7.79 V. ARM-only and Active each returned
+to DISARMED. Both cameras recorded the tests on the bare table.
+
+Low, middle and high each completed a five-second hold at both
+trajectory speeds. Time through verified DISARM ranged from
+5.548 to 5.769 s. Tracking four chassis patches in samples
+between one and 5.1 s after command start showed typical
+vertical and horizontal drift of at most one Logitech pixel.
+One early USB/RF timeout interrupted the first high attempt.
+Fresh idle telemetry verified DISARMED and fault 0. Another ARM
+and Active preflight passed through the still-open bridge, and
+the two high holds subsequently completed.
+
+The forward comparison began from the matching height before
+each step. Each case used one 16 mm commanded step through
+the two tripod phases. A separate 3.0 mm middle pilot also
+completed. All six comparison cases showed forward chassis
+translation in the side view and ended DISARMED, idle, fault 0.
+
+| Height | 3.0 mm per update | 3.75 mm per update |
+| --- | ---: | ---: |
+| Low | 2.023 s, 16 px forward | 1.842 s, 15 px forward |
+| Middle | 2.022 s, 14 px forward | 1.922 s, 15 px forward |
+| High | 1.924 s, 16.5 px forward | 1.722 s, 16 px forward |
+
+Time measures command start through verified DISARM. Forward
+travel is the approximate median horizontal displacement of
+tracked chassis patches in the same side-camera crop before
+and after each individual move. The camera had no calibrated
+horizontal scale. The faster setting reduced total command
+time at all three heights, with comparable projected travel.
+The final middle command verified DISARM. These results cover
+short forward moves and five-second stationary holds under
+supervision. Foot loading, longer holds and continuous or
+unattended walking remain unmeasured. Camera files are private.
