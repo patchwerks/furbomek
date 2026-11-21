@@ -81,6 +81,40 @@ Mac edge process took exclusive ownership of the handheld. A live
 returned `read_only_bench`, with exactly Active and all twelve
 tabletop presets in the allowlist. Powered admission was false.
 
+### Powered Hermes tabletop verification, 2026-11-21
+
+The operator confirmed the bare tabletop, body USB absent, stillness
+at POWER ON and presence at the physical switch. The Mac continued
+to hold the handheld. A stale reverse SSH session was reconnected
+through the dedicated child process. The running Hermes gateway
+initially returned the earlier semantic schema even though a fresh
+stdio client listed the new names. Parking and restoring only the
+`furbomek` MCP registration caused the gateway to reload the schema.
+The rendered profile file was restored byte for byte.
+
+Active completed in the initial Hermes session. Two subsequent
+agent sessions called the actual enrolled `furbomek` action tool
+sequentially, at 3.0 and 3.75 mm per 20 ms update. Each session
+completed a five-second hold and one bounded forward step at low,
+high and middle. All twelve receipts reported
+`completed_and_disarmed`. Both cameras covered each complete
+tool-call interval. The admitted idle voltage was 6.74 V for
+the ordinary pass and 6.73 V for the faster pass.
+
+| Height | 3.0 mm per update | 3.75 mm per update |
+| --- | ---: | ---: |
+| Low | 20 px forward | 18 px forward |
+| Middle | 21 px forward | 18 px forward |
+| High | 19 px forward | 22 px forward |
+
+Side-view estimates use the median image-plane displacement of five
+chassis patches in frames before and after each step. Sampling
+during each hold gave zero pixels of median chassis drift on both
+image axes. These values describe this camera view and table.
+They provide no calibrated travel distance or continuous-gait
+qualification. The final middle step verified DISARM. Both
+recordings and the complete agent receipts remain private.
+
 The local `require_kinect_lock_for_motion` option requires the owned tracker
 to report both a fresh frame and a Furbomek lock. Loss cancels motion and puts
 the bridge back in read-only state. This option defaults off for the supported
