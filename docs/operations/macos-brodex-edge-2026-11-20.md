@@ -115,6 +115,19 @@ They provide no calibrated travel distance or continuous-gait
 qualification. The final middle step verified DISARM. Both
 recordings and the complete agent receipts remain private.
 
+### Continuous walking candidate
+
+The six `table_walk_*_continuous` and
+`table_walk_*_continuous_fast` semantic actions select a single
+guarded three-cycle operation at the named tabletop height. The
+last cycle ends with the normal verified DISARM. The host allows
+six seconds for completion inside the existing eight-second edge
+admission, and the existing local allowlist governs access. A
+fresh profile connection must advertise these names before the
+powered Hermes trial. Live acceptance requires camera-observed
+travel through all three cycles at both speeds and at every
+height. A completed receipt alone cannot establish that travel.
+
 At handoff the operator confirmed physical POWER OFF with the body
 USB unplugged. The Mac still held the handheld and reported
 `read_only_bench` with powered motion admission false.

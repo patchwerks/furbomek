@@ -28,6 +28,12 @@ type ActionName = Literal[
     "table_walk_middle_fast",
     "table_walk_high",
     "table_walk_high_fast",
+    "table_walk_low_continuous",
+    "table_walk_low_continuous_fast",
+    "table_walk_middle_continuous",
+    "table_walk_middle_continuous_fast",
+    "table_walk_high_continuous",
+    "table_walk_high_continuous_fast",
 ]
 type PoweredActionDecision = Literal["completed", "refused", "unavailable"]
 type PoweredActionReason = Literal[

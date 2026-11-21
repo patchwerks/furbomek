@@ -43,6 +43,12 @@ WIRE_ACTIONS: dict[ActionName, GuardAction] = {
     "table_walk_middle_fast": GuardAction.TABLE_WALK_MIDDLE_FAST,
     "table_walk_high": GuardAction.TABLE_WALK_HIGH,
     "table_walk_high_fast": GuardAction.TABLE_WALK_HIGH_FAST,
+    "table_walk_low_continuous": GuardAction.TABLE_WALK_LOW_CONTINUOUS,
+    "table_walk_low_continuous_fast": GuardAction.TABLE_WALK_LOW_CONTINUOUS_FAST,
+    "table_walk_middle_continuous": GuardAction.TABLE_WALK_MIDDLE_CONTINUOUS,
+    "table_walk_middle_continuous_fast": GuardAction.TABLE_WALK_MIDDLE_CONTINUOUS_FAST,
+    "table_walk_high_continuous": GuardAction.TABLE_WALK_HIGH_CONTINUOUS,
+    "table_walk_high_continuous_fast": GuardAction.TABLE_WALK_HIGH_CONTINUOUS_FAST,
 }
 
 

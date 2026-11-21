@@ -220,6 +220,7 @@ class PoweredActionRunner:  # noqa: D101
             GuardAction.TABLE_HOLD_LOW
             <= wire_action
             <= GuardAction.TABLE_HOLD_HIGH_FAST
+            or wire_action >= GuardAction.TABLE_WALK_LOW_CONTINUOUS
         ):
             timeout = 6.0
         exchange_ms = ceil(self.context.settings.exchange_timeout_seconds * 1000)
